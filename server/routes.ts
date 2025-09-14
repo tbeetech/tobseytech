@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertContactSchema, insertProductSchema, insertCourseSchema } from "@shared/schema";
 import { z } from "zod";
+import nodemailer from "nodemailer";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Contact routes
@@ -58,6 +59,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       res.status(500).json({ message: "Failed to update contact status" });
     }
+  });
+
+  // Simple contact endpoint that sends an email
+  app.post("/api/contact", async (req, res) => {
+    const { name, company, email, service, message } = req.body || {};
+    if (!name || !email) {
+      res.status(400).json({ error: "Missing required fields" });
+      return;
+    }
+    try {
+      const transporter = nodemailer.createTransport({
+        host: process.env.SMTP_HOST,
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS,
+        },
+      });
+      await transporter.sendMail({
+        from: process.env.EMAIL_FROM,
+        to: process.env.EMAIL_FROM,
+        subject: "New TOBSEYTECH Contact",
+        text: `Name: ${name}\nCompany: ${company}\nEmail: ${email}\nService: ${service}\nMessage: ${message}`,
+      });
+      res.status(200).json({ ok: true });
+    } catch (e) {
+      res.status(500).json({ error: "Email failed" });
+    }
+  });
+
+  // Subscribe endpoint
+  app.post("/api/subscribe", async (req, res) => {
+    const { email } = req.body || {};
+    if (!email) {
+      res.status(400).json({ error: "Email required" });
+      return;
+    }
+    // TODO: integrate with database or Mailchimp
+    res.status(200).json({ ok: true });
   });
 
   // Product routes

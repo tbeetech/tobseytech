@@ -1,12 +1,15 @@
 import { useEffect } from "react";
 import Navigation from "@/components/Navigation";
 import ParticleBackground from "@/components/ParticleBackground";
-import HeroSection from "@/components/sections/HeroSection";
+import Hero from "@/components/Hero";
 import AboutSection from "@/components/sections/AboutSection";
 import ServicesSection from "@/components/sections/ServicesSection";
 import ProductsSection from "@/components/sections/ProductsSection";
 import PatriotSection from "@/components/sections/PatriotSection";
 import SkillsSection from "@/components/sections/SkillsSection";
+import AccordionSection from "@/components/AccordionSection";
+import Testimonials from "@/components/Testimonials";
+import CTASection from "@/components/CTASection";
 import ContactSection from "@/components/sections/ContactSection";
 import { initializeAnimations } from "@/lib/animations";
 
@@ -24,12 +27,15 @@ export default function Home() {
       <Navigation />
       
       <main>
-        <HeroSection />
+        <Hero />
         <AboutSection />
         <ServicesSection />
         <ProductsSection />
         <PatriotSection />
         <SkillsSection />
+        <AccordionSection />
+        <Testimonials />
+        <CTASection />
         <ContactSection />
       </main>
       
