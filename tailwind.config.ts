@@ -67,6 +67,7 @@ export default {
         "cyber-blue": "var(--cyber-blue)",
         "space-dark": "var(--space-dark)",
         "carbon": "var(--carbon)",
+        "neon-yellow": "#FFD700",
       },
       fontFamily: {
         sans: ["var(--font-sans)"],

@@ -1,9 +1,9 @@
 import Navigation from "@/components/Navigation";
 
 const cases = [
-  { title: "Case Study 1", slug: "case-study-1" },
-  { title: "Case Study 2", slug: "case-study-2" },
-  { title: "Case Study 3", slug: "case-study-3" },
+  { title: "Glow FM Content Repurposing Pipeline", slug: "glow-fm" },
+  { title: "SME WhatsApp Auto-Responder", slug: "whatsapp-auto-responder" },
+  { title: "Lead Sorting Automation", slug: "lead-sorting" },
 ];
 
 export default function CaseStudiesPage() {
@@ -20,7 +20,7 @@ export default function CaseStudiesPage() {
               className="border border-gray-800 p-6 rounded-lg hover:bg-gray-900"
             >
               <h3 className="text-xl">{c.title}</h3>
-              <p className="mt-2 text-gray-400">Coming soon</p>
+              <p className="mt-2 text-gray-400">Impact details coming soon</p>
             </a>
           ))}
         </div>

@@ -1,82 +1,49 @@
-import ServiceCard from "@/components/ui/service-card";
-import { 
-  Palette, 
-  Code, 
-  Brain, 
-  TrendingUp, 
-  Camera, 
-  Zap 
-} from "lucide-react";
+import { Brain, Code, Bot, GraduationCap } from "lucide-react";
+
+const services = [
+  {
+    icon: Bot,
+    title: "Automation Systems",
+    description: "Reduce repetitive tasks and scale content output with custom pipelines, lead sorters and chatbots.",
+  },
+  {
+    icon: Code,
+    title: "Web & App Development",
+    description: "Dashboards, websites and portals that grow with your business.",
+  },
+  {
+    icon: Brain,
+    title: "AI Integrations",
+    description: "Make your data work for you with NLP, analytics and recommendations.",
+  },
+  {
+    icon: GraduationCap,
+    title: "Corporate Training",
+    description: "Upskill teams through practical AI workshops and business sessions.",
+  },
+];
 
 export default function ServicesSection() {
-  const services = [
-    {
-      icon: Palette,
-      title: "Branding & Identity",
-      description: "Logo systems, brand guidelines, storytelling, and complete rollout toolkits",
-      features: ["Logo Systems & Guidelines", "Social & Print Toolkits", "Campaign Launch Kits"],
-      gradient: "from-galactic-orange to-galactic-gold"
-    },
-    {
-      icon: Code,
-      title: "Web/App Development",
-      description: "Responsive websites, mobile apps, and customer portals with clean APIs",
-      features: ["Responsive Websites", "Cross-platform Mobile Apps", "Analytics & SEO Optimization"],
-      gradient: "from-galactic-gold to-galactic-green"
-    },
-    {
-      icon: Brain,
-      title: "AI Integration",
-      description: "Chat assistants, knowledge bases, and intelligent automation systems",
-      features: ["Chat Assistants & RAG", "Workflow Automation", "Analytics & Recommendations"],
-      gradient: "from-galactic-green to-galactic-orange"
-    },
-    {
-      icon: TrendingUp,
-      title: "Digital Marketing",
-      description: "Paid ads, email funnels, CRM integration with measurable outcomes",
-      features: ["Paid Ads & Email Funnels", "Content Calendars", "Reporting Dashboards"],
-      gradient: "from-galactic-orange to-galactic-red"
-    },
-    {
-      icon: Camera,
-      title: "Content Creation",
-      description: "Video editing, scripts, photography, and comprehensive storytelling",
-      features: ["Video Editing & Scripts", "Photography Direction", "Long-form & Short-form Content"],
-      gradient: "from-galactic-red to-galactic-gold"
-    },
-    {
-      icon: Zap,
-      title: "Motion Graphics",
-      description: "Explainers, intros, kinetic typography, and event visuals",
-      features: ["Explainer Videos & Intros", "Kinetic Typography", "Event & Tutorial Visuals"],
-      gradient: "from-galactic-gold to-galactic-green"
-    }
-  ];
-
   return (
-    <section id="services" className="page-section py-20 relative">
+    <section id="services" className="page-section py-20">
       <div className="container mx-auto px-6">
-        <div className="text-center mb-16">
-          <h2 className="font-orbitron font-bold text-3xl md:text-4xl lg:text-5xl mb-6 gradient-text">
-            DIGITAL SERVICES MATRIX
+        <div className="text-center mb-12">
+          <h2 className="font-orbitron font-bold text-3xl md:text-4xl mb-4 gradient-text">
+            Services
           </h2>
-          <p className="text-xl text-galactic-gold max-w-3xl mx-auto font-orbitron">
-            Comprehensive technology solutions powered by AI, delivered with precision and innovation
+          <p className="text-gray-300 max-w-2xl mx-auto">
+            Practical engineering to move your business forward.
           </p>
         </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {services.map((service, index) => (
-            <ServiceCard
-              key={service.title}
-              icon={service.icon}
-              title={service.title}
-              description={service.description}
-              features={service.features}
-              gradient={service.gradient}
-              data-testid={`service-card-${index}`}
-            />
+        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+          {services.map(({ icon: Icon, title, description }) => (
+            <div key={title} className="card text-center">
+              <div className="mx-auto mb-4 w-12 h-12 flex items-center justify-center rounded-full bg-neon-yellow text-black">
+                <Icon className="w-6 h-6" />
+              </div>
+              <h3 className="font-orbitron text-xl mb-2 text-neon-yellow">{title}</h3>
+              <p className="text-gray-300 text-sm">{description}</p>
+            </div>
           ))}
         </div>
       </div>

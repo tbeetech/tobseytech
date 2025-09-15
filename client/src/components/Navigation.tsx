@@ -24,11 +24,9 @@ export default function Navigation() {
   };
 
   const navLinks = [
-    { id: 'about', label: 'About' },
     { id: 'services', label: 'Services' },
-    { id: 'products', label: 'Products' },
-    { id: 'patriot', label: 'Patriot' },
-    { id: 'skills', label: 'Skills' },
+    { id: 'case-studies', label: 'Case Studies' },
+    { id: 'about', label: 'About' },
     { id: 'contact', label: 'Contact' },
   ];
 
