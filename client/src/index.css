@@ -150,6 +150,16 @@
     transition: all 0.3s ease;
   }
 
+  .card {
+    @apply bg-deep-space rounded-xl p-6 transition-all duration-300 border;
+    border-color: var(--galactic-orange);
+  }
+
+  .card:hover {
+    @apply -translate-y-1 shadow-lg;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+  }
+
   .galactic-button::before {
     content: '';
     position: absolute;
