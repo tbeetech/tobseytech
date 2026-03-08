@@ -14,7 +14,8 @@ export default function AuthPage() {
   const { toast } = useToast();
 
   const [loginForm, setLoginForm] = useState({ username: "", password: "" });
-  const [registerForm, setRegisterForm] = useState({ username: "", email: "", password: "" });
+  const [registerForm, setRegisterForm] = useState({ username: "", email: "", password: "", confirmPassword: "" });
+  const [passwordMismatch, setPasswordMismatch] = useState(false);
   const [loading, setLoading] = useState(false);
 
   // Redirect if already logged in
@@ -38,6 +39,12 @@ export default function AuthPage() {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (registerForm.password !== registerForm.confirmPassword) {
+      setPasswordMismatch(true);
+      toast({ title: "Passwords do not match", description: "Please make sure both password fields match.", variant: "destructive" });
+      return;
+    }
+    setPasswordMismatch(false);
     setLoading(true);
     try {
       await register(registerForm.username, registerForm.email, registerForm.password);
@@ -159,6 +166,27 @@ export default function AuthPage() {
                     className="bg-space-dark border-galactic-orange/30 text-white focus:border-galactic-orange h-11"
                     placeholder="••••••••"
                   />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="reg-confirm-password" className="text-galactic-orange font-orbitron text-sm">
+                    Confirm Password
+                  </Label>
+                  <Input
+                    id="reg-confirm-password"
+                    type="password"
+                    value={registerForm.confirmPassword}
+                    onChange={(e) => {
+                      setRegisterForm({ ...registerForm, confirmPassword: e.target.value });
+                      setPasswordMismatch(false);
+                    }}
+                    required
+                    minLength={6}
+                    className={`bg-space-dark border-galactic-orange/30 text-white focus:border-galactic-orange h-11 ${passwordMismatch ? "border-red-500" : ""}`}
+                    placeholder="••••••••"
+                  />
+                  {passwordMismatch && (
+                    <p className="text-red-400 text-xs mt-1">Passwords do not match</p>
+                  )}
                 </div>
                 <Button
                   type="submit"

@@ -726,6 +726,92 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ─── Admin dashboard routes ───────────────────────────────────────────────
+
+  // Verify admin dashboard password (secondary password gate)
+  app.post("/api/admin/verify-password", authRateLimiter, requireAdmin, (req, res) => {
+    const { password } = req.body;
+    const adminDashboardPassword = process.env.ADMIN_DASHBOARD_PASSWORD;
+    if (!adminDashboardPassword) {
+      return res.status(503).json({ message: "Admin dashboard password not configured" });
+    }
+    if (!password || password !== adminDashboardPassword) {
+      return res.status(401).json({ message: "Invalid dashboard password" });
+    }
+    res.json({ ok: true });
+  });
+
+  // Get all users (admin only)
+  app.get("/api/admin/users", authRateLimiter, requireAdmin, async (req, res) => {
+    try {
+      const users = await storage.getAllUsers();
+      const safe = users.map(({ password: _pw, ...u }) => u);
+      res.json(safe);
+    } catch {
+      res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
+
+  // Update user role (admin only)
+  app.patch("/api/admin/users/:id/role", authRateLimiter, requireAdmin, async (req, res) => {
+    try {
+      const { role } = req.body;
+      if (role !== "user" && role !== "admin") {
+        return res.status(400).json({ message: "Role must be 'user' or 'admin'" });
+      }
+      const updated = await storage.updateUserRole(req.params.id, role);
+      if (!updated) return res.status(404).json({ message: "User not found" });
+      const { password: _pw, ...safe } = updated;
+      res.json(safe);
+    } catch {
+      res.status(500).json({ message: "Failed to update user role" });
+    }
+  });
+
+  // Admin stats
+  app.get("/api/admin/stats", authRateLimiter, requireAdmin, async (req, res) => {
+    try {
+      const [users, posts, contacts] = await Promise.all([
+        storage.getAllUsers(),
+        storage.getBlogPosts(false),
+        storage.getContacts(),
+      ]);
+      res.json({
+        totalUsers: users.length,
+        totalPosts: posts.length,
+        publishedPosts: posts.filter((p) => p.published).length,
+        draftPosts: posts.filter((p) => !p.published).length,
+        totalContacts: contacts.length,
+        newContacts: contacts.filter((c) => c.status === "new").length,
+      });
+    } catch {
+      res.status(500).json({ message: "Failed to fetch stats" });
+    }
+  });
+
+  // Admin: get all contacts (add requireAdmin guard)
+  app.get("/api/admin/contacts", authRateLimiter, requireAdmin, async (req, res) => {
+    try {
+      const contacts = await storage.getContacts();
+      res.json(contacts);
+    } catch {
+      res.status(500).json({ message: "Failed to fetch contacts" });
+    }
+  });
+
+  // Admin: get all edit suggestions across all posts
+  app.get("/api/admin/suggestions", authRateLimiter, requireAdmin, async (req, res) => {
+    try {
+      const posts = await storage.getBlogPosts(false);
+      const allSuggestions = await Promise.all(
+        posts.map((p) => storage.getEditSuggestions(p.id))
+      );
+      res.json(allSuggestions.flat());
+    } catch {
+      res.status(500).json({ message: "Failed to fetch suggestions" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   // ─── WebSocket server for real-time chat ─────────────────────────────────

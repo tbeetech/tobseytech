@@ -191,6 +191,16 @@ export class MongoStorage {
     return docs.map(docToUser);
   }
 
+  async getAllUsers(): Promise<User[]> {
+    const docs = await UserModel.find().sort({ createdAt: -1 }).lean();
+    return docs.map(docToUser);
+  }
+
+  async updateUserRole(id: string, role: "user" | "admin"): Promise<User | undefined> {
+    const doc = await UserModel.findByIdAndUpdate(id, { role }, { new: true }).lean();
+    return doc ? docToUser(doc) : undefined;
+  }
+
   // ─── Contact methods ─────────────────────────────────────────────────────
 
   async createContact(insertContact: InsertContact): Promise<Contact> {
