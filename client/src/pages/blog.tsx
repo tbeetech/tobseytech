@@ -18,6 +18,7 @@ interface BlogPost {
   tags: string[];
   category: string;
   published: boolean;
+  authorId: string;
   authorName: string;
   createdAt: string;
 }
@@ -167,7 +168,10 @@ export default function BlogPage() {
                     <p className="text-gray-400 text-sm line-clamp-3 flex-1">{post.excerpt}</p>
                     <div className="mt-4 pt-4 border-t border-white/10 flex items-center justify-between text-xs text-gray-500">
                       <span className="flex items-center gap-1">
-                        <User className="w-3 h-3" /> {post.authorName}
+                        <User className="w-3 h-3" />
+                        <Link href={`/profile/${post.authorId}`} onClick={(e) => e.stopPropagation()}>
+                          <span className="hover:text-galactic-orange transition-colors">{post.authorName}</span>
+                        </Link>
                       </span>
                       <span className="flex items-center gap-1">
                         <Calendar className="w-3 h-3" />

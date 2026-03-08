@@ -99,6 +99,7 @@ export default function ProfilePage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/users", profileUserId] });
       setAvatarPreview(null);
       toast({ title: "Profile updated!" });
     },

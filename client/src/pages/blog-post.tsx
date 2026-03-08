@@ -244,7 +244,10 @@ export default function BlogPostPage() {
 
         <div className="flex flex-wrap items-center gap-6 text-sm text-gray-400 mb-6 pb-6 border-b border-white/10">
           <span className="flex items-center gap-2">
-            <User className="w-4 h-4" /> {post.authorName}
+            <User className="w-4 h-4" />
+            <Link href={`/profile/${post.authorId}`}>
+              <span className="hover:text-galactic-orange transition-colors cursor-pointer">{post.authorName}</span>
+            </Link>
           </span>
           <span className="flex items-center gap-2">
             <Calendar className="w-4 h-4" />

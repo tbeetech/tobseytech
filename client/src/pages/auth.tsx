@@ -41,6 +41,7 @@ export default function AuthPage() {
     e.preventDefault();
     if (registerForm.password !== registerForm.confirmPassword) {
       setPasswordMismatch(true);
+      toast({ title: "Passwords do not match", description: "Please make sure both password fields match.", variant: "destructive" });
       return;
     }
     setPasswordMismatch(false);
