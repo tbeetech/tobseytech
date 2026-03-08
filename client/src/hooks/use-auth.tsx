@@ -6,6 +6,9 @@ interface AuthUser {
   username: string;
   email: string;
   role: "user" | "admin";
+  displayName?: string;
+  bio?: string;
+  avatarUrl?: string | null;
   createdAt: string;
 }
 

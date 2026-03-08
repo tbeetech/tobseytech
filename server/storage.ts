@@ -1,6 +1,7 @@
 import {
   type User,
   type InsertUser,
+  type UpdateProfile,
   type Contact,
   type InsertContact,
   type Product,
@@ -10,6 +11,15 @@ import {
   type BlogPost,
   type InsertBlogPost,
   type UpdateBlogPost,
+  type Comment,
+  type InsertComment,
+  type Like,
+  type Bookmark,
+  type EditSuggestion,
+  type InsertEditSuggestion,
+  type Friendship,
+  type Message,
+  type InsertMessage,
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 
@@ -19,6 +29,8 @@ export interface IStorage {
   getUserByUsername(username: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  updateUserProfile(id: string, updates: UpdateProfile): Promise<User | undefined>;
+  searchUsers(query: string): Promise<User[]>;
 
   // Contact methods
   createContact(contact: InsertContact): Promise<Contact>;
@@ -48,6 +60,42 @@ export interface IStorage {
   createBlogPost(data: InsertBlogPost): Promise<BlogPost>;
   updateBlogPost(id: string, updates: UpdateBlogPost): Promise<BlogPost | undefined>;
   deleteBlogPost(id: string): Promise<boolean>;
+
+  // Comment methods
+  getComments(postId: string): Promise<Comment[]>;
+  createComment(data: InsertComment & { userId: string; username: string }): Promise<Comment>;
+  deleteComment(id: string, userId: string): Promise<boolean>;
+
+  // Like methods
+  getLikeCount(postId: string): Promise<number>;
+  hasLiked(postId: string, userId: string): Promise<boolean>;
+  addLike(postId: string, userId: string): Promise<void>;
+  removeLike(postId: string, userId: string): Promise<void>;
+
+  // Bookmark methods
+  getBookmarks(userId: string): Promise<BlogPost[]>;
+  hasBookmarked(postId: string, userId: string): Promise<boolean>;
+  addBookmark(postId: string, userId: string): Promise<void>;
+  removeBookmark(postId: string, userId: string): Promise<void>;
+
+  // Edit suggestion methods
+  createEditSuggestion(data: InsertEditSuggestion & { userId: string; username: string }): Promise<EditSuggestion>;
+  getEditSuggestions(postId: string): Promise<EditSuggestion[]>;
+  updateEditSuggestionStatus(id: string, status: "accepted" | "rejected"): Promise<EditSuggestion | undefined>;
+
+  // Friendship methods
+  sendFriendRequest(requesterId: string, addresseeId: string): Promise<Friendship>;
+  respondFriendRequest(id: string, addresseeId: string, status: "accepted" | "declined"): Promise<Friendship | undefined>;
+  getFriends(userId: string): Promise<User[]>;
+  getFriendRequests(userId: string): Promise<Friendship[]>;
+  getFriendshipStatus(userId1: string, userId2: string): Promise<Friendship | undefined>;
+
+  // Message methods
+  sendMessage(data: InsertMessage & { senderId: string }): Promise<Message>;
+  getConversation(userId1: string, userId2: string): Promise<Message[]>;
+  getRecentConversations(userId: string): Promise<{ user: User; lastMessage: Message }[]>;
+  markMessagesRead(senderId: string, recipientId: string): Promise<void>;
+  getUnreadCount(userId: string): Promise<number>;
 }
 
 export class MemStorage implements IStorage {
@@ -56,6 +104,12 @@ export class MemStorage implements IStorage {
   private products: Map<string, Product>;
   private courses: Map<string, Course>;
   private blogPosts: Map<string, BlogPost>;
+  private comments: Map<string, Comment>;
+  private likes: Map<string, Like>;
+  private bookmarks: Map<string, Bookmark>;
+  private editSuggestions: Map<string, EditSuggestion>;
+  private friendships: Map<string, Friendship>;
+  private messages: Map<string, Message>;
 
   constructor() {
     this.users = new Map();
@@ -63,6 +117,12 @@ export class MemStorage implements IStorage {
     this.products = new Map();
     this.courses = new Map();
     this.blogPosts = new Map();
+    this.comments = new Map();
+    this.likes = new Map();
+    this.bookmarks = new Map();
+    this.editSuggestions = new Map();
+    this.friendships = new Map();
+    this.messages = new Map();
 
     // Initialize with some sample data
     this.initializeSampleData();
@@ -188,6 +248,23 @@ export class MemStorage implements IStorage {
     };
     this.users.set(id, user);
     return user;
+  }
+
+  async updateUserProfile(id: string, updates: UpdateProfile): Promise<User | undefined> {
+    const user = this.users.get(id);
+    if (user) {
+      const updated: User = { ...user, ...updates };
+      this.users.set(id, updated);
+      return updated;
+    }
+    return undefined;
+  }
+
+  async searchUsers(query: string): Promise<User[]> {
+    const q = query.toLowerCase();
+    return Array.from(this.users.values()).filter(
+      (u) => u.username.toLowerCase().includes(q) || (u.displayName || "").toLowerCase().includes(q)
+    );
   }
 
   // Contact methods
@@ -340,6 +417,200 @@ export class MemStorage implements IStorage {
 
   async deleteBlogPost(id: string): Promise<boolean> {
     return this.blogPosts.delete(id);
+  }
+
+  // Comment methods
+  async getComments(postId: string): Promise<Comment[]> {
+    return Array.from(this.comments.values())
+      .filter((c) => c.postId === postId)
+      .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+  }
+
+  async createComment(data: InsertComment & { userId: string; username: string }): Promise<Comment> {
+    const id = randomUUID();
+    const comment: Comment = { ...data, id, createdAt: new Date() };
+    this.comments.set(id, comment);
+    return comment;
+  }
+
+  async deleteComment(id: string, userId: string): Promise<boolean> {
+    const comment = this.comments.get(id);
+    if (comment && comment.userId === userId) {
+      this.comments.delete(id);
+      return true;
+    }
+    return false;
+  }
+
+  // Like methods
+  async getLikeCount(postId: string): Promise<number> {
+    return Array.from(this.likes.values()).filter((l) => l.postId === postId).length;
+  }
+
+  async hasLiked(postId: string, userId: string): Promise<boolean> {
+    return Array.from(this.likes.values()).some((l) => l.postId === postId && l.userId === userId);
+  }
+
+  async addLike(postId: string, userId: string): Promise<void> {
+    const exists = await this.hasLiked(postId, userId);
+    if (!exists) {
+      const id = randomUUID();
+      this.likes.set(id, { id, postId, userId, createdAt: new Date() });
+    }
+  }
+
+  async removeLike(postId: string, userId: string): Promise<void> {
+    for (const [id, like] of Array.from(this.likes.entries())) {
+      if (like.postId === postId && like.userId === userId) {
+        this.likes.delete(id);
+        return;
+      }
+    }
+  }
+
+  // Bookmark methods
+  async getBookmarks(userId: string): Promise<BlogPost[]> {
+    const bms = Array.from(this.bookmarks.values()).filter((b) => b.userId === userId);
+    const posts: BlogPost[] = [];
+    for (const bm of bms) {
+      const post = this.blogPosts.get(bm.postId);
+      if (post && post.published) posts.push(post);
+    }
+    return posts;
+  }
+
+  async hasBookmarked(postId: string, userId: string): Promise<boolean> {
+    return Array.from(this.bookmarks.values()).some((b) => b.postId === postId && b.userId === userId);
+  }
+
+  async addBookmark(postId: string, userId: string): Promise<void> {
+    const exists = await this.hasBookmarked(postId, userId);
+    if (!exists) {
+      const id = randomUUID();
+      this.bookmarks.set(id, { id, postId, userId, createdAt: new Date() });
+    }
+  }
+
+  async removeBookmark(postId: string, userId: string): Promise<void> {
+    for (const [id, bm] of Array.from(this.bookmarks.entries())) {
+      if (bm.postId === postId && bm.userId === userId) {
+        this.bookmarks.delete(id);
+        return;
+      }
+    }
+  }
+
+  // Edit suggestion methods
+  async createEditSuggestion(data: InsertEditSuggestion & { userId: string; username: string }): Promise<EditSuggestion> {
+    const id = randomUUID();
+    const suggestion: EditSuggestion = { ...data, id, status: "pending", createdAt: new Date() };
+    this.editSuggestions.set(id, suggestion);
+    return suggestion;
+  }
+
+  async getEditSuggestions(postId: string): Promise<EditSuggestion[]> {
+    return Array.from(this.editSuggestions.values()).filter((s) => s.postId === postId);
+  }
+
+  async updateEditSuggestionStatus(id: string, status: "accepted" | "rejected"): Promise<EditSuggestion | undefined> {
+    const suggestion = this.editSuggestions.get(id);
+    if (suggestion) {
+      const updated = { ...suggestion, status };
+      this.editSuggestions.set(id, updated);
+      return updated;
+    }
+    return undefined;
+  }
+
+  // Friendship methods
+  async sendFriendRequest(requesterId: string, addresseeId: string): Promise<Friendship> {
+    const id = randomUUID();
+    const friendship: Friendship = { id, requesterId, addresseeId, status: "pending", createdAt: new Date() };
+    this.friendships.set(id, friendship);
+    return friendship;
+  }
+
+  async respondFriendRequest(id: string, addresseeId: string, status: "accepted" | "declined"): Promise<Friendship | undefined> {
+    const friendship = this.friendships.get(id);
+    if (friendship && friendship.addresseeId === addresseeId) {
+      const updated = { ...friendship, status };
+      this.friendships.set(id, updated);
+      return updated;
+    }
+    return undefined;
+  }
+
+  async getFriends(userId: string): Promise<User[]> {
+    const friendIds = Array.from(this.friendships.values())
+      .filter((f) => f.status === "accepted" && (f.requesterId === userId || f.addresseeId === userId))
+      .map((f) => (f.requesterId === userId ? f.addresseeId : f.requesterId));
+    return friendIds.map((id) => this.users.get(id)!).filter(Boolean);
+  }
+
+  async getFriendRequests(userId: string): Promise<Friendship[]> {
+    return Array.from(this.friendships.values()).filter(
+      (f) => f.addresseeId === userId && f.status === "pending"
+    );
+  }
+
+  async getFriendshipStatus(userId1: string, userId2: string): Promise<Friendship | undefined> {
+    return Array.from(this.friendships.values()).find(
+      (f) =>
+        (f.requesterId === userId1 && f.addresseeId === userId2) ||
+        (f.requesterId === userId2 && f.addresseeId === userId1)
+    );
+  }
+
+  // Message methods
+  async sendMessage(data: InsertMessage & { senderId: string }): Promise<Message> {
+    const id = randomUUID();
+    const message: Message = { ...data, id, read: false, createdAt: new Date() };
+    this.messages.set(id, message);
+    return message;
+  }
+
+  async getConversation(userId1: string, userId2: string): Promise<Message[]> {
+    return Array.from(this.messages.values())
+      .filter(
+        (m) =>
+          (m.senderId === userId1 && m.recipientId === userId2) ||
+          (m.senderId === userId2 && m.recipientId === userId1)
+      )
+      .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+  }
+
+  async getRecentConversations(userId: string): Promise<{ user: User; lastMessage: Message }[]> {
+    const userMessages = Array.from(this.messages.values()).filter(
+      (m) => m.senderId === userId || m.recipientId === userId
+    );
+    const partnerIds = new Set<string>();
+    for (const m of userMessages) {
+      partnerIds.add(m.senderId === userId ? m.recipientId : m.senderId);
+    }
+    const result: { user: User; lastMessage: Message }[] = [];
+    for (const partnerId of Array.from(partnerIds)) {
+      const partner = this.users.get(partnerId);
+      if (!partner) continue;
+      const conversation = userMessages
+        .filter((m) => m.senderId === partnerId || m.recipientId === partnerId)
+        .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+      if (conversation.length) {
+        result.push({ user: partner, lastMessage: conversation[0] });
+      }
+    }
+    return result.sort((a, b) => b.lastMessage.createdAt.getTime() - a.lastMessage.createdAt.getTime());
+  }
+
+  async markMessagesRead(senderId: string, recipientId: string): Promise<void> {
+    for (const [id, msg] of Array.from(this.messages.entries())) {
+      if (msg.senderId === senderId && msg.recipientId === recipientId && !msg.read) {
+        this.messages.set(id, { ...msg, read: true });
+      }
+    }
+  }
+
+  async getUnreadCount(userId: string): Promise<number> {
+    return Array.from(this.messages.values()).filter((m) => m.recipientId === userId && !m.read).length;
   }
 }
 

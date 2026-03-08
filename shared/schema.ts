@@ -14,8 +14,15 @@ export const loginSchema = z.object({
   password: z.string().min(1),
 });
 
+export const updateProfileSchema = z.object({
+  displayName: z.string().max(80).optional(),
+  bio: z.string().max(500).optional(),
+  avatarUrl: z.string().url().optional().nullable(),
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
+export type UpdateProfile = z.infer<typeof updateProfileSchema>;
 
 export interface User {
   id: string;
@@ -23,6 +30,9 @@ export interface User {
   email: string;
   password: string;
   role: "user" | "admin";
+  displayName?: string;
+  bio?: string;
+  avatarUrl?: string | null;
   createdAt: Date;
 }
 
@@ -145,4 +155,91 @@ export interface BlogPost {
   authorName: string;
   createdAt: Date;
   updatedAt: Date;
+}
+
+// ─── Comments ────────────────────────────────────────────────────────────────
+
+export const insertCommentSchema = z.object({
+  postId: z.string().min(1),
+  content: z.string().min(1).max(2000),
+});
+
+export type InsertComment = z.infer<typeof insertCommentSchema>;
+
+export interface Comment {
+  id: string;
+  postId: string;
+  userId: string;
+  username: string;
+  content: string;
+  createdAt: Date;
+}
+
+// ─── Likes ───────────────────────────────────────────────────────────────────
+
+export interface Like {
+  id: string;
+  postId: string;
+  userId: string;
+  createdAt: Date;
+}
+
+// ─── Bookmarks ───────────────────────────────────────────────────────────────
+
+export interface Bookmark {
+  id: string;
+  postId: string;
+  userId: string;
+  createdAt: Date;
+}
+
+// ─── Edit Suggestions ────────────────────────────────────────────────────────
+
+export const insertEditSuggestionSchema = z.object({
+  postId: z.string().min(1),
+  suggestedTitle: z.string().max(200).optional(),
+  suggestedContent: z.string().max(50000).optional(),
+  reason: z.string().min(1).max(1000),
+});
+
+export type InsertEditSuggestion = z.infer<typeof insertEditSuggestionSchema>;
+
+export interface EditSuggestion {
+  id: string;
+  postId: string;
+  userId: string;
+  username: string;
+  suggestedTitle?: string;
+  suggestedContent?: string;
+  reason: string;
+  status: "pending" | "accepted" | "rejected";
+  createdAt: Date;
+}
+
+// ─── Friendships ─────────────────────────────────────────────────────────────
+
+export interface Friendship {
+  id: string;
+  requesterId: string;
+  addresseeId: string;
+  status: "pending" | "accepted" | "declined";
+  createdAt: Date;
+}
+
+// ─── Messages ────────────────────────────────────────────────────────────────
+
+export const insertMessageSchema = z.object({
+  recipientId: z.string().min(1),
+  content: z.string().min(1).max(5000),
+});
+
+export type InsertMessage = z.infer<typeof insertMessageSchema>;
+
+export interface Message {
+  id: string;
+  senderId: string;
+  recipientId: string;
+  content: string;
+  read: boolean;
+  createdAt: Date;
 }
