@@ -18,6 +18,7 @@ import BlogPostPage from "@/pages/blog-post";
 import BlogEditorPage from "@/pages/blog-editor";
 import ProfilePage from "@/pages/profile";
 import ChatPage from "@/pages/chat";
+import DashboardPage from "@/pages/dashboard";
 
 function Router() {
   return (
@@ -33,7 +34,9 @@ function Router() {
       <Route path="/blog/edit/:id" component={BlogEditorPage} />
       <Route path="/blog/:slug" component={BlogPostPage} />
       <Route path="/profile" component={ProfilePage} />
+      <Route path="/profile/:userId" component={ProfilePage} />
       <Route path="/chat" component={ChatPage} />
+      <Route path="/dashboard" component={DashboardPage} />
       <Route component={NotFound} />
     </Switch>
   );

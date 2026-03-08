@@ -31,6 +31,8 @@ export interface IStorage {
   createUser(user: InsertUser): Promise<User>;
   updateUserProfile(id: string, updates: UpdateProfile): Promise<User | undefined>;
   searchUsers(query: string): Promise<User[]>;
+  getAllUsers(): Promise<User[]>;
+  updateUserRole(id: string, role: "user" | "admin"): Promise<User | undefined>;
 
   // Contact methods
   createContact(contact: InsertContact): Promise<Contact>;
@@ -265,6 +267,18 @@ export class MemStorage implements IStorage {
     return Array.from(this.users.values()).filter(
       (u) => u.username.toLowerCase().includes(q) || (u.displayName || "").toLowerCase().includes(q)
     );
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    return Array.from(this.users.values());
+  }
+
+  async updateUserRole(id: string, role: "user" | "admin"): Promise<User | undefined> {
+    const user = this.users.get(id);
+    if (!user) return undefined;
+    const updated = { ...user, role };
+    this.users.set(id, updated);
+    return updated;
   }
 
   // Contact methods
