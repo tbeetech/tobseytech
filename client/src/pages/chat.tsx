@@ -296,7 +296,7 @@ export default function ChatPage() {
             {/* Conversations / Friends list */}
             <div className="glass-effect rounded-xl p-4 flex-1 overflow-hidden flex flex-col">
               <h3 className="font-orbitron text-galactic-orange text-sm mb-3 flex items-center gap-2">
-                <MessageCircle className="w-4 h-4" /> Messages
+                <MessageCircle className="w-4 h-4" /> Talk
               </h3>
               <div className="flex-1 overflow-y-auto space-y-1">
                 {/* Show conversations first */}
@@ -362,16 +362,20 @@ export default function ChatPage() {
               <>
                 {/* Header */}
                 <div className="p-4 border-b border-white/10 flex items-center gap-3">
-                  <Avatar className="w-10 h-10">
-                    <AvatarImage src={selectedUser.avatarUrl || ""} />
-                    <AvatarFallback className="bg-galactic-orange/20 text-galactic-orange font-orbitron">
-                      {(selectedUser.displayName || selectedUser.username).slice(0, 2).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
+                  <Link href={`/profile/${selectedUser.id}`}>
+                    <Avatar className="w-10 h-10 cursor-pointer hover:ring-2 hover:ring-galactic-orange transition-all">
+                      <AvatarImage src={selectedUser.avatarUrl || ""} />
+                      <AvatarFallback className="bg-galactic-orange/20 text-galactic-orange font-orbitron">
+                        {(selectedUser.displayName || selectedUser.username).slice(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                  </Link>
                   <div>
-                    <p className="font-orbitron font-bold text-white">
-                      {selectedUser.displayName || selectedUser.username}
-                    </p>
+                    <Link href={`/profile/${selectedUser.id}`}>
+                      <p className="font-orbitron font-bold text-white hover:text-galactic-orange transition-colors cursor-pointer">
+                        {selectedUser.displayName || selectedUser.username}
+                      </p>
+                    </Link>
                     <p className="text-xs text-gray-400">@{selectedUser.username}</p>
                   </div>
                 </div>

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Menu, X, LogIn, LogOut, User, MessageCircle } from "lucide-react";
+import { Menu, X, LogIn, LogOut, User, MessageCircle, LayoutDashboard } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 
 export default function Navigation() {
@@ -75,18 +75,20 @@ export default function Navigation() {
             {user ? (
               <>
                 <Link href="/chat">
-                  <button
-                    className="w-8 h-8 rounded-lg flex items-center justify-center text-galactic-orange/70 hover:text-galactic-orange transition-colors"
-                    style={{ background: "rgba(255,165,0,0.08)" }}
-                    title="Messages"
-                  >
-                    <MessageCircle className="w-4 h-4" />
+                  <button className="hover:text-galactic-gold transition-colors duration-300 nav-link text-galactic-orange font-orbitron text-sm flex items-center gap-1">
+                    <MessageCircle className="w-4 h-4" /> Talk
                   </button>
                 </Link>
-                <Link href="/profile">
-                  <button className="nav-link flex items-center gap-1.5 text-galactic-orange/90 hover:text-galactic-gold font-orbitron text-xs tracking-wide transition-colors">
-                    <User className="w-3 h-3" />
-                    {user.username}
+                {user.role === "admin" && (
+                  <Link href="/dashboard">
+                    <button className="hover:text-galactic-gold transition-colors duration-300 nav-link text-galactic-orange font-orbitron text-sm flex items-center gap-1">
+                      <LayoutDashboard className="w-4 h-4" /> Dashboard
+                    </button>
+                  </Link>
+                )}
+                <Link href={`/profile/${user.id}`}>
+                  <button className="hover:text-galactic-gold transition-colors duration-300 nav-link text-galactic-orange font-orbitron text-sm flex items-center gap-1">
+                    <User className="w-3 h-3" /> {user.username}
                   </button>
                 </Link>
                 <Button
@@ -146,16 +148,23 @@ export default function Navigation() {
 
               {user ? (
                 <>
-                  <Link href="/profile" onClick={() => setIsOpen(false)}>
-                    <button className="text-left text-galactic-orange font-orbitron text-sm hover:text-galactic-gold flex items-center gap-2 transition-colors">
-                      <User className="w-4 h-4" /> {user.username}
+                  <Link href={`/profile/${user.id}`} onClick={() => setIsOpen(false)}>
+                    <button className="text-left text-galactic-orange font-orbitron hover:text-galactic-gold flex items-center gap-1">
+                      <User className="w-3 h-3" /> {user.username}
                     </button>
                   </Link>
                   <Link href="/chat" onClick={() => setIsOpen(false)}>
-                    <button className="text-left text-galactic-orange font-orbitron text-sm hover:text-galactic-gold flex items-center gap-2 transition-colors">
-                      <MessageCircle className="w-4 h-4" /> Messages
+                    <button className="text-left text-galactic-orange font-orbitron hover:text-galactic-gold flex items-center gap-1">
+                      <MessageCircle className="w-3 h-3" /> Talk
                     </button>
                   </Link>
+                  {user.role === "admin" && (
+                    <Link href="/dashboard" onClick={() => setIsOpen(false)}>
+                      <button className="text-left text-galactic-orange font-orbitron hover:text-galactic-gold flex items-center gap-1">
+                        <LayoutDashboard className="w-3 h-3" /> Dashboard
+                      </button>
+                    </Link>
+                  )}
                   <button
                     onClick={() => { logout(); setIsOpen(false); }}
                     className="text-left text-galactic-red/80 font-orbitron text-sm hover:text-galactic-red flex items-center gap-2 transition-colors"
