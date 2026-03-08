@@ -9,6 +9,9 @@ const userSchema = new Schema<UserDocument>(
     email: { type: String, required: true, unique: true, trim: true, lowercase: true },
     password: { type: String, required: true },
     role: { type: String, enum: ["user", "admin"], default: "user" },
+    displayName: { type: String, default: "" },
+    bio: { type: String, default: "" },
+    avatarUrl: { type: String, default: null },
   },
   { timestamps: { createdAt: "createdAt" } }
 );

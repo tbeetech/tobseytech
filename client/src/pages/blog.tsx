@@ -63,7 +63,7 @@ export default function BlogPage() {
           <p className="text-gray-400 text-lg max-w-2xl mx-auto">
             Insights, tutorials, and deep dives into the technology shaping our future.
           </p>
-          {user?.role === "admin" && (
+          {user && (
             <Link href="/blog/new">
               <Button className="mt-6 bg-galactic-orange text-space-black font-orbitron font-bold hover:bg-galactic-gold">
                 <PenLine className="w-4 h-4 mr-2" />
@@ -123,7 +123,7 @@ export default function BlogPage() {
         ) : filtered.length === 0 ? (
           <div className="text-center py-20">
             <p className="text-gray-400 text-lg">No posts found.</p>
-            {user?.role === "admin" && (
+            {user && (
               <Link href="/blog/new">
                 <Button className="mt-4 bg-galactic-orange text-space-black font-orbitron">
                   Write the first post
@@ -155,7 +155,7 @@ export default function BlogPage() {
                       <Badge className="bg-galactic-orange/20 text-galactic-orange border-galactic-orange/30 text-xs font-orbitron">
                         {post.category}
                       </Badge>
-                      {user?.role === "admin" && !post.published && (
+                      {user && !post.published && (
                         <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 text-xs">
                           Draft
                         </Badge>

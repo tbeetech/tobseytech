@@ -50,29 +50,33 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-space-black px-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center bg-space-black px-4 relative overflow-hidden">
+      {/* Background decoration */}
+      <div className="absolute inset-0 starfield opacity-40 pointer-events-none" />
+      <div className="absolute inset-0 galactic-grid opacity-10 pointer-events-none" />
+
+      <div className="w-full max-w-md relative z-10">
         <div className="text-center mb-8">
-          <div className="w-16 h-16 border-2 border-galactic-orange rounded-full flex items-center justify-center bg-gradient-to-br from-galactic-orange to-galactic-gold mx-auto mb-4">
+          <div className="w-20 h-20 border-2 border-galactic-orange rounded-full flex items-center justify-center bg-gradient-to-br from-galactic-orange to-galactic-gold mx-auto mb-4 shadow-[0_0_30px_rgba(255,165,0,0.5)]">
             <span className="text-space-black font-orbitron font-bold text-2xl">TST</span>
           </div>
-          <h1 className="text-3xl font-orbitron font-bold gradient-text">TOBSEYTECH</h1>
-          <p className="text-gray-400 mt-2">Sign in to access the blog</p>
+          <h1 className="text-4xl font-orbitron font-bold gradient-text">TOBSEYTECH</h1>
+          <p className="text-gray-400 mt-2">Join the future of tech</p>
         </div>
 
-        <div className="glass-effect rounded-xl p-8">
+        <div className="glass-effect rounded-2xl p-8">
           <Tabs defaultValue="login">
-            <TabsList className="grid w-full grid-cols-2 mb-6 bg-space-dark">
-              <TabsTrigger value="login" className="font-orbitron text-sm">
+            <TabsList className="grid w-full grid-cols-2 mb-6 bg-space-dark rounded-xl">
+              <TabsTrigger value="login" className="font-orbitron text-sm rounded-lg">
                 Sign In
               </TabsTrigger>
-              <TabsTrigger value="register" className="font-orbitron text-sm">
+              <TabsTrigger value="register" className="font-orbitron text-sm rounded-lg">
                 Register
               </TabsTrigger>
             </TabsList>
 
             <TabsContent value="login">
-              <form onSubmit={handleLogin} className="space-y-4">
+              <form onSubmit={handleLogin} className="space-y-5">
                 <div className="space-y-2">
                   <Label htmlFor="login-username" className="text-galactic-orange font-orbitron text-sm">
                     Username
@@ -83,7 +87,7 @@ export default function AuthPage() {
                     value={loginForm.username}
                     onChange={(e) => setLoginForm({ ...loginForm, username: e.target.value })}
                     required
-                    className="bg-space-dark border-galactic-orange/30 text-white focus:border-galactic-orange"
+                    className="bg-space-dark border-galactic-orange/30 text-white focus:border-galactic-orange h-11"
                     placeholder="your_username"
                   />
                 </div>
@@ -97,22 +101,22 @@ export default function AuthPage() {
                     value={loginForm.password}
                     onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
                     required
-                    className="bg-space-dark border-galactic-orange/30 text-white focus:border-galactic-orange"
+                    className="bg-space-dark border-galactic-orange/30 text-white focus:border-galactic-orange h-11"
                     placeholder="••••••••"
                   />
                 </div>
                 <Button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-galactic-orange text-space-black font-orbitron font-bold hover:bg-galactic-gold"
+                  className="w-full h-11 bg-galactic-orange text-space-black font-orbitron font-bold hover:bg-galactic-gold text-base shadow-[0_0_20px_rgba(255,165,0,0.3)] hover:shadow-[0_0_30px_rgba(255,215,0,0.5)] transition-all"
                 >
-                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Sign In"}
+                  {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Sign In"}
                 </Button>
               </form>
             </TabsContent>
 
             <TabsContent value="register">
-              <form onSubmit={handleRegister} className="space-y-4">
+              <form onSubmit={handleRegister} className="space-y-5">
                 <div className="space-y-2">
                   <Label htmlFor="reg-username" className="text-galactic-orange font-orbitron text-sm">
                     Username
@@ -123,7 +127,7 @@ export default function AuthPage() {
                     value={registerForm.username}
                     onChange={(e) => setRegisterForm({ ...registerForm, username: e.target.value })}
                     required
-                    className="bg-space-dark border-galactic-orange/30 text-white focus:border-galactic-orange"
+                    className="bg-space-dark border-galactic-orange/30 text-white focus:border-galactic-orange h-11"
                     placeholder="your_username"
                   />
                 </div>
@@ -137,7 +141,7 @@ export default function AuthPage() {
                     value={registerForm.email}
                     onChange={(e) => setRegisterForm({ ...registerForm, email: e.target.value })}
                     required
-                    className="bg-space-dark border-galactic-orange/30 text-white focus:border-galactic-orange"
+                    className="bg-space-dark border-galactic-orange/30 text-white focus:border-galactic-orange h-11"
                     placeholder="you@example.com"
                   />
                 </div>
@@ -152,21 +156,25 @@ export default function AuthPage() {
                     onChange={(e) => setRegisterForm({ ...registerForm, password: e.target.value })}
                     required
                     minLength={6}
-                    className="bg-space-dark border-galactic-orange/30 text-white focus:border-galactic-orange"
+                    className="bg-space-dark border-galactic-orange/30 text-white focus:border-galactic-orange h-11"
                     placeholder="••••••••"
                   />
                 </div>
                 <Button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-galactic-orange text-space-black font-orbitron font-bold hover:bg-galactic-gold"
+                  className="w-full h-11 bg-galactic-orange text-space-black font-orbitron font-bold hover:bg-galactic-gold text-base shadow-[0_0_20px_rgba(255,165,0,0.3)] hover:shadow-[0_0_30px_rgba(255,215,0,0.5)] transition-all"
                 >
-                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Create Account"}
+                  {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Create Account"}
                 </Button>
               </form>
             </TabsContent>
           </Tabs>
         </div>
+
+        <p className="text-center text-gray-600 text-xs mt-6">
+          TOBSEYTECH · Future Digital Solutions
+        </p>
       </div>
     </div>
   );

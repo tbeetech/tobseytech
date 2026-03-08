@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Menu, X, LogIn, LogOut, User } from "lucide-react";
+import { Menu, X, LogIn, LogOut, User, MessageCircle } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 
 export default function Navigation() {
@@ -67,9 +67,16 @@ export default function Navigation() {
             </Link>
             {user ? (
               <div className="flex items-center gap-3">
-                <span className="text-galactic-gold font-orbitron text-sm flex items-center gap-1">
-                  <User className="w-3 h-3" /> {user.username}
-                </span>
+                <Link href="/chat">
+                  <button className="hover:text-galactic-gold transition-colors duration-300 text-galactic-orange" title="Messages">
+                    <MessageCircle className="w-4 h-4" />
+                  </button>
+                </Link>
+                <Link href="/profile">
+                  <button className="hover:text-galactic-gold transition-colors duration-300 nav-link text-galactic-orange font-orbitron text-sm flex items-center gap-1">
+                    <User className="w-3 h-3" /> {user.username}
+                  </button>
+                </Link>
                 <Button
                   size="sm"
                   variant="ghost"
@@ -120,9 +127,16 @@ export default function Navigation() {
               </Link>
               {user ? (
                 <>
-                  <span className="text-galactic-gold font-orbitron text-sm flex items-center gap-1">
-                    <User className="w-3 h-3" /> {user.username}
-                  </span>
+                  <Link href="/profile" onClick={() => setIsOpen(false)}>
+                    <button className="text-left text-galactic-orange font-orbitron hover:text-galactic-gold flex items-center gap-1">
+                      <User className="w-3 h-3" /> {user.username}
+                    </button>
+                  </Link>
+                  <Link href="/chat" onClick={() => setIsOpen(false)}>
+                    <button className="text-left text-galactic-orange font-orbitron hover:text-galactic-gold flex items-center gap-1">
+                      <MessageCircle className="w-3 h-3" /> Messages
+                    </button>
+                  </Link>
                   <button
                     onClick={() => { logout(); setIsOpen(false); }}
                     className="text-left text-galactic-orange font-orbitron hover:text-galactic-gold flex items-center gap-1"

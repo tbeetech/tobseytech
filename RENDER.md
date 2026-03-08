@@ -1,0 +1,64 @@
+# Deploying TOBSEYTECH to Render.com
+
+## Prerequisites
+- A [Render.com](https://render.com) account
+- A [MongoDB Atlas](https://cloud.mongodb.com) cluster
+
+## Steps
+
+### 1. Create a new Web Service on Render
+- Connect your GitHub repository (`tbeetech/tobseytech`)
+- **Build Command:** `npm install && npm run build`
+- **Start Command:** `node dist/index.js`
+- **Environment:** Node
+
+### 2. Environment Variables (required)
+
+Set the following environment variables in your Render service's **Environment** tab:
+
+| Variable | Description | Example |
+|---|---|---|
+| `MONGODB_URI` | Your MongoDB Atlas connection string | `mongodb+srv://<user>:<password>@cluster0.xxxxx.mongodb.net/?appName=Cluster0` |
+| `SESSION_SECRET` | A long random string for session signing | `some-very-long-random-secret-string-here` |
+| `NODE_ENV` | Set to production | `production` |
+| `PORT` | Port to listen on (Render sets this automatically) | `10000` |
+
+### 3. Optional Environment Variables (for email / contact form)
+
+| Variable | Description |
+|---|---|
+| `SMTP_HOST` | SMTP server host (e.g. `smtp.gmail.com`) |
+| `SMTP_USER` | SMTP username / email |
+| `SMTP_PASS` | SMTP password or app password |
+| `EMAIL_FROM` | Sender email address |
+
+### 4. MongoDB Atlas Setup
+1. Log in to [MongoDB Atlas](https://cloud.mongodb.com)
+2. Create a free cluster (M0)
+3. Create a database user with read/write permissions
+4. Whitelist all IPs (`0.0.0.0/0`) or Render's outbound IP ranges
+5. Click **Connect** → **Connect your application** → copy the connection string
+6. Replace `<password>` in the string with your database user's password
+7. Paste the full URI as the `MONGODB_URI` environment variable in Render
+
+### 5. First Admin User
+After deployment, register a new account via `/auth`. To make it an admin, connect to your MongoDB Atlas cluster and update the user document:
+
+```
+db.users.updateOne({ username: "your_username" }, { $set: { role: "admin" } })
+```
+
+### 6. Health Check
+Render will auto-detect the running service. You can set a health check path to `/api/auth/me` (returns 401 if not authenticated, which is fine — it means the server is running).
+
+---
+
+## Features Available After Deployment
+- ✅ User sign-up and sign-in
+- ✅ Blog writing (all users — drafts; admin — publish)
+- ✅ Blog post comments
+- ✅ Like and bookmark blog posts
+- ✅ Suggest edits on posts
+- ✅ User profile management
+- ✅ Friend requests between users
+- ✅ Real-time chat (WebSocket on `/ws`)

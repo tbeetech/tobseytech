@@ -53,17 +53,17 @@ export default function BlogEditorPage() {
   });
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
 
-  // Redirect non-admins after auth check completes
+  // Redirect unauthenticated users after auth check completes
   useEffect(() => {
-    if (!authLoading && (!user || user.role !== "admin")) {
+    if (!authLoading && !user) {
       navigate("/auth");
     }
   }, [authLoading, user, navigate]);
 
-  // Load existing post for editing (only when editing and user is admin)
+  // Load existing post for editing
   const { isLoading: loadingPost } = useQuery<BlogPost>({
     queryKey: ["/api/blog", id],
-    enabled: isEditing && !!user && user.role === "admin",
+    enabled: isEditing && !!user,
     queryFn: async () => {
       const res = await fetch(`/api/blog/${id}`, { credentials: "include" });
       if (!res.ok) throw new Error("Post not found");
@@ -108,7 +108,7 @@ export default function BlogEditorPage() {
   });
 
   // Show loading while auth check is in progress
-  if (authLoading || (!user || user.role !== "admin")) {
+  if (authLoading || !user) {
     return (
       <div className="min-h-screen bg-space-black flex items-center justify-center">
         <Loader2 className="w-10 h-10 animate-spin text-galactic-orange" />
@@ -250,16 +250,23 @@ export default function BlogEditorPage() {
             />
           </div>
 
-          <div className="flex items-center gap-3">
-            <Switch
-              id="published"
-              checked={form.published}
-              onCheckedChange={(v) => setForm({ ...form, published: v })}
-            />
-            <Label htmlFor="published" className="text-white font-orbitron text-sm cursor-pointer">
-              {form.published ? "Published" : "Draft"}
-            </Label>
-          </div>
+          {user.role === "admin" && (
+            <div className="flex items-center gap-3">
+              <Switch
+                id="published"
+                checked={form.published}
+                onCheckedChange={(v) => setForm({ ...form, published: v })}
+              />
+              <Label htmlFor="published" className="text-white font-orbitron text-sm cursor-pointer">
+                {form.published ? "Published" : "Draft"}
+              </Label>
+            </div>
+          )}
+          {user.role !== "admin" && (
+            <p className="text-sm text-gray-400 font-orbitron">
+              Your post will be saved as a draft for admin review before publishing.
+            </p>
+          )}
 
           <Button
             type="submit"

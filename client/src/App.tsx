@@ -16,6 +16,8 @@ import AuthPage from "@/pages/auth";
 import BlogPage from "@/pages/blog";
 import BlogPostPage from "@/pages/blog-post";
 import BlogEditorPage from "@/pages/blog-editor";
+import ProfilePage from "@/pages/profile";
+import ChatPage from "@/pages/chat";
 
 function Router() {
   return (
@@ -30,6 +32,8 @@ function Router() {
       <Route path="/blog/new" component={BlogEditorPage} />
       <Route path="/blog/edit/:id" component={BlogEditorPage} />
       <Route path="/blog/:slug" component={BlogPostPage} />
+      <Route path="/profile" component={ProfilePage} />
+      <Route path="/chat" component={ChatPage} />
       <Route component={NotFound} />
     </Switch>
   );
