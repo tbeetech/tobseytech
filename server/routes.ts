@@ -2,6 +2,7 @@ import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import passport from "passport";
 import bcrypt from "bcryptjs";
+import rateLimit from "express-rate-limit";
 import { storage } from "./storage";
 import {
   insertContactSchema,
@@ -15,8 +16,16 @@ import {
 import { z } from "zod";
 import nodemailer from "nodemailer";
 
+const authRateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: "Too many requests, please try again later" },
+});
+
 function requireAuth(req: Request, res: Response, next: NextFunction) {
-  if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorised" });
+  if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
   next();
 }
 
@@ -31,7 +40,7 @@ function requireAdmin(req: Request, res: Response, next: NextFunction) {
 export async function registerRoutes(app: Express): Promise<Server> {
   // ─── Auth routes ────────────────────────────────────────────────────────
 
-  app.post("/api/auth/register", async (req, res) => {
+  app.post("/api/auth/register", authRateLimiter, async (req, res) => {
     try {
       const data = insertUserSchema.parse(req.body);
       const existingUser = await storage.getUserByUsername(data.username);
@@ -57,7 +66,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/auth/login", (req, res, next) => {
+  app.post("/api/auth/login", authRateLimiter, (req, res, next) => {
     try {
       loginSchema.parse(req.body);
     } catch (err) {
@@ -76,14 +85,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     })(req, res, next);
   });
 
-  app.post("/api/auth/logout", (req, res) => {
+  app.post("/api/auth/logout", authRateLimiter, (req, res) => {
     req.logout((err) => {
       if (err) return res.status(500).json({ message: "Logout failed" });
       res.json({ ok: true });
     });
   });
 
-  app.get("/api/auth/me", (req, res) => {
+  app.get("/api/auth/me", authRateLimiter, (req, res) => {
     if (!req.isAuthenticated()) return res.status(401).json({ message: "Not authenticated" });
     const { password: _pw, ...safeUser } = req.user as any;
     res.json(safeUser);
@@ -102,7 +111,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // List all posts including drafts (admin only)
-  app.get("/api/blog/all", requireAdmin, async (req, res) => {
+  app.get("/api/blog/all", authRateLimiter, requireAdmin, async (req, res) => {
     try {
       const posts = await storage.getBlogPosts(false);
       res.json(posts);
@@ -112,7 +121,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get single post by slug (public)
-  app.get("/api/blog/slug/:slug", async (req, res) => {
+  app.get("/api/blog/slug/:slug", authRateLimiter, async (req, res) => {
     try {
       const post = await storage.getBlogPostBySlug(req.params.slug);
       if (!post) return res.status(404).json({ message: "Post not found" });
@@ -129,7 +138,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get single post by id (admin only)
-  app.get("/api/blog/:id", requireAdmin, async (req, res) => {
+  app.get("/api/blog/:id", authRateLimiter, requireAdmin, async (req, res) => {
     try {
       const post = await storage.getBlogPost(req.params.id);
       if (!post) return res.status(404).json({ message: "Post not found" });
@@ -140,7 +149,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create post (admin only)
-  app.post("/api/blog", requireAdmin, async (req, res) => {
+  app.post("/api/blog", authRateLimiter, requireAdmin, async (req, res) => {
     try {
       const user = req.user as any;
       const data = insertBlogPostSchema.parse({ ...req.body, authorId: user.id, authorName: user.username });
@@ -157,7 +166,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update post (admin only)
-  app.patch("/api/blog/:id", requireAdmin, async (req, res) => {
+  app.patch("/api/blog/:id", authRateLimiter, requireAdmin, async (req, res) => {
     try {
       const updates = updateBlogPostSchema.parse(req.body);
       if (updates.slug) {
@@ -178,7 +187,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Delete post (admin only)
-  app.delete("/api/blog/:id", requireAdmin, async (req, res) => {
+  app.delete("/api/blog/:id", authRateLimiter, requireAdmin, async (req, res) => {
     try {
       const deleted = await storage.deleteBlogPost(req.params.id);
       if (!deleted) return res.status(404).json({ message: "Post not found" });

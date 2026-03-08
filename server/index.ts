@@ -18,6 +18,8 @@ app.use(
     saveUninitialized: false,
     cookie: {
       secure: process.env.NODE_ENV === "production",
+      httpOnly: true,
+      sameSite: "strict",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     },
   })
@@ -25,6 +27,26 @@ app.use(
 
 app.use(passport.initialize());
 app.use(passport.session());
+
+// CSRF protection: validate Origin header for state-mutating API requests
+app.use((req: Request, res: Response, next: NextFunction) => {
+  const mutatingMethods = ["POST", "PUT", "PATCH", "DELETE"];
+  if (req.path.startsWith("/api") && mutatingMethods.includes(req.method)) {
+    const origin = req.get("origin");
+    const host = req.get("host");
+    if (origin) {
+      try {
+        const originHost = new URL(origin).host;
+        if (originHost !== host) {
+          return res.status(403).json({ message: "Forbidden: cross-origin request" });
+        }
+      } catch {
+        return res.status(403).json({ message: "Forbidden: invalid origin" });
+      }
+    }
+  }
+  next();
+});
 
 passport.use(
   new LocalStrategy(async (username, password, done) => {

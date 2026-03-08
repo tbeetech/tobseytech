@@ -176,22 +176,48 @@ export default function BlogPostPage() {
   );
 }
 
-// Very lightweight markdown-like renderer (headings, bold, italic, code, links, line breaks)
+// Lightweight markdown-to-HTML converter
 function markdownToHtml(md: string): string {
-  return md
+  const lines = md
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
-    .replace(/^### (.+)$/gm, "<h3>$1</h3>")
-    .replace(/^## (.+)$/gm, "<h2>$1</h2>")
-    .replace(/^# (.+)$/gm, "<h1>$1</h1>")
-    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
-    .replace(/\*(.+?)\*/g, "<em>$1</em>")
-    .replace(/`(.+?)`/g, "<code>$1</code>")
-    .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2">$1</a>')
-    .replace(/^- (.+)$/gm, "<li>$1</li>")
-    .replace(/(<li>[\s\S]*?<\/li>)/g, "<ul>$1</ul>")
-    .replace(/\n\n/g, "</p><p>")
-    .replace(/\n/g, "<br>")
-    .replace(/^(?!<[hulo])(.+)$/gm, "<p>$1</p>");
+    .split("\n");
+
+  const result: string[] = [];
+  let inUl = false;
+
+  const closeLists = () => {
+    if (inUl) { result.push("</ul>"); inUl = false; }
+  };
+
+  for (const rawLine of lines) {
+    // Apply inline formatting
+    const line = rawLine
+      .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+      .replace(/\*(.+?)\*/g, "<em>$1</em>")
+      .replace(/`(.+?)`/g, "<code>$1</code>")
+      .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2">$1</a>');
+
+    if (/^### (.+)$/.test(line)) {
+      closeLists();
+      result.push(`<h3>${line.replace(/^### /, "")}</h3>`);
+    } else if (/^## (.+)$/.test(line)) {
+      closeLists();
+      result.push(`<h2>${line.replace(/^## /, "")}</h2>`);
+    } else if (/^# (.+)$/.test(line)) {
+      closeLists();
+      result.push(`<h1>${line.replace(/^# /, "")}</h1>`);
+    } else if (/^- (.+)$/.test(line)) {
+      if (!inUl) { result.push("<ul>"); inUl = true; }
+      result.push(`<li>${line.replace(/^- /, "")}</li>`);
+    } else if (line.trim() === "") {
+      closeLists();
+    } else {
+      closeLists();
+      result.push(`<p>${line}</p>`);
+    }
+  }
+  closeLists();
+  return result.join("\n");
 }

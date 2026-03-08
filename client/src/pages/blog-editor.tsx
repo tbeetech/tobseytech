@@ -36,7 +36,7 @@ function slugify(text: string): string {
 export default function BlogEditorPage() {
   const { id } = useParams<{ id?: string }>();
   const isEditing = !!id;
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
   const [, navigate] = useLocation();
   const queryClient = useQueryClient();
@@ -52,6 +52,13 @@ export default function BlogEditorPage() {
     published: false,
   });
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
+
+  // Redirect non-admins after auth check completes
+  useEffect(() => {
+    if (!authLoading && (!user || user.role !== "admin")) {
+      navigate("/auth");
+    }
+  }, [authLoading, user, navigate]);
 
   // Load existing post for editing (only when editing and user is admin)
   const { isLoading: loadingPost } = useQuery<BlogPost>({
@@ -100,10 +107,13 @@ export default function BlogEditorPage() {
     },
   });
 
-  // Redirect non-admins (after all hooks)
-  if (!user || user.role !== "admin") {
-    navigate("/auth");
-    return null;
+  // Show loading while auth check is in progress
+  if (authLoading || (!user || user.role !== "admin")) {
+    return (
+      <div className="min-h-screen bg-space-black flex items-center justify-center">
+        <Loader2 className="w-10 h-10 animate-spin text-galactic-orange" />
+      </div>
+    );
   }
 
   const handleTitleChange = (title: string) => {

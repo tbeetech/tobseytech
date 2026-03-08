@@ -359,7 +359,7 @@ let _storage: IStorage | null = null;
 
 const storageProxy = new Proxy({} as IStorage, {
   get(_target, prop: string) {
-    if (!_storage) throw new Error("Storage not initialised — await initStorage() first");
+    if (!_storage) throw new Error("Storage not initialized — await initStorage() first");
     return (_storage as any)[prop].bind(_storage);
   },
 });
