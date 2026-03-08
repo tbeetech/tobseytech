@@ -1,25 +1,38 @@
-import { type User, type InsertUser, type Contact, type InsertContact, type Product, type InsertProduct, type Course, type InsertCourse } from "@shared/schema";
+import {
+  type User,
+  type InsertUser,
+  type Contact,
+  type InsertContact,
+  type Product,
+  type InsertProduct,
+  type Course,
+  type InsertCourse,
+  type BlogPost,
+  type InsertBlogPost,
+  type UpdateBlogPost,
+} from "@shared/schema";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
   // User methods
   getUser(id: string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
-  
+
   // Contact methods
   createContact(contact: InsertContact): Promise<Contact>;
   getContacts(): Promise<Contact[]>;
   getContact(id: string): Promise<Contact | undefined>;
   updateContactStatus(id: string, status: string): Promise<Contact | undefined>;
-  
+
   // Product methods
   getProducts(): Promise<Product[]>;
   getProduct(id: string): Promise<Product | undefined>;
   createProduct(product: InsertProduct): Promise<Product>;
   updateProduct(id: string, updates: Partial<InsertProduct>): Promise<Product | undefined>;
   deleteProduct(id: string): Promise<boolean>;
-  
+
   // Course methods
   getCourses(): Promise<Course[]>;
   getCourse(id: string): Promise<Course | undefined>;
@@ -27,6 +40,14 @@ export interface IStorage {
   createCourse(course: InsertCourse): Promise<Course>;
   updateCourse(id: string, updates: Partial<InsertCourse>): Promise<Course | undefined>;
   deleteCourse(id: string): Promise<boolean>;
+
+  // Blog post methods
+  getBlogPosts(publishedOnly?: boolean): Promise<BlogPost[]>;
+  getBlogPost(id: string): Promise<BlogPost | undefined>;
+  getBlogPostBySlug(slug: string): Promise<BlogPost | undefined>;
+  createBlogPost(data: InsertBlogPost): Promise<BlogPost>;
+  updateBlogPost(id: string, updates: UpdateBlogPost): Promise<BlogPost | undefined>;
+  deleteBlogPost(id: string): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -34,13 +55,15 @@ export class MemStorage implements IStorage {
   private contacts: Map<string, Contact>;
   private products: Map<string, Product>;
   private courses: Map<string, Course>;
+  private blogPosts: Map<string, BlogPost>;
 
   constructor() {
     this.users = new Map();
     this.contacts = new Map();
     this.products = new Map();
     this.courses = new Map();
-    
+    this.blogPosts = new Map();
+
     // Initialize with some sample data
     this.initializeSampleData();
   }
@@ -150,10 +173,16 @@ export class MemStorage implements IStorage {
     );
   }
 
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find(
+      (user) => user.email === email.toLowerCase(),
+    );
+  }
+
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = randomUUID();
-    const user: User = { 
-      ...insertUser, 
+    const user: User = {
+      ...insertUser,
       id,
       createdAt: new Date(),
     };
@@ -247,7 +276,8 @@ export class MemStorage implements IStorage {
     const course: Course = {
       ...insertCourse,
       id,
-      imageUrl: insertCourse.imageUrl || null,
+      imageUrl: insertCourse.imageUrl ?? null,
+      originalPrice: insertCourse.originalPrice ?? null,
       createdAt: new Date(),
     };
     this.courses.set(id, course);
@@ -267,6 +297,75 @@ export class MemStorage implements IStorage {
   async deleteCourse(id: string): Promise<boolean> {
     return this.courses.delete(id);
   }
+
+  // Blog post methods
+  async getBlogPosts(publishedOnly = true): Promise<BlogPost[]> {
+    const posts = Array.from(this.blogPosts.values())
+      .filter(p => !publishedOnly || p.published)
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    return posts;
+  }
+
+  async getBlogPost(id: string): Promise<BlogPost | undefined> {
+    return this.blogPosts.get(id);
+  }
+
+  async getBlogPostBySlug(slug: string): Promise<BlogPost | undefined> {
+    return Array.from(this.blogPosts.values()).find(p => p.slug === slug);
+  }
+
+  async createBlogPost(data: InsertBlogPost): Promise<BlogPost> {
+    const id = randomUUID();
+    const now = new Date();
+    const post: BlogPost = {
+      ...data,
+      id,
+      coverImage: data.coverImage ?? null,
+      createdAt: now,
+      updatedAt: now,
+    };
+    this.blogPosts.set(id, post);
+    return post;
+  }
+
+  async updateBlogPost(id: string, updates: UpdateBlogPost): Promise<BlogPost | undefined> {
+    const post = this.blogPosts.get(id);
+    if (post) {
+      const updated: BlogPost = { ...post, ...updates, updatedAt: new Date() };
+      this.blogPosts.set(id, updated);
+      return updated;
+    }
+    return undefined;
+  }
+
+  async deleteBlogPost(id: string): Promise<boolean> {
+    return this.blogPosts.delete(id);
+  }
 }
 
-export const storage = new MemStorage();
+import { MongoStorage } from "./mongoStorage";
+import { connectToDatabase } from "./mongodb";
+
+async function createStorage(): Promise<IStorage> {
+  if (process.env.MONGODB_URI) {
+    await connectToDatabase();
+    return new MongoStorage();
+  }
+  return new MemStorage();
+}
+
+// Export a proxy that defers to the resolved storage instance
+let _storage: IStorage | null = null;
+
+const storageProxy = new Proxy({} as IStorage, {
+  get(_target, prop: string) {
+    if (!_storage) throw new Error("Storage not initialised — await initStorage() first");
+    return (_storage as any)[prop].bind(_storage);
+  },
+});
+
+export async function initStorage(): Promise<void> {
+  _storage = await createStorage();
+}
+
+export const storage: IStorage = storageProxy;

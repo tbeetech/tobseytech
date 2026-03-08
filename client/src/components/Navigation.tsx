@@ -1,10 +1,14 @@
 import { useState, useEffect } from "react";
+import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Menu, X } from "lucide-react";
+import { Menu, X, LogIn, LogOut, User } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const { user, logout } = useAuth();
+  const [, navigate] = useLocation();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -36,14 +40,16 @@ export default function Navigation() {
     }`}>
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4" data-testid="nav-logo">
-            <div className="w-12 h-12 border-2 border-galactic-orange rounded-full flex items-center justify-center bg-gradient-to-br from-galactic-orange to-galactic-gold">
-              <span className="text-space-black font-orbitron font-bold text-xl">TST</span>
+          <Link href="/">
+            <div className="flex items-center space-x-4 cursor-pointer" data-testid="nav-logo">
+              <div className="w-12 h-12 border-2 border-galactic-orange rounded-full flex items-center justify-center bg-gradient-to-br from-galactic-orange to-galactic-gold">
+                <span className="text-space-black font-orbitron font-bold text-xl">TST</span>
+              </div>
+              <span className="font-orbitron font-bold text-xl gradient-text">TOBSEYTECH</span>
             </div>
-            <span className="font-orbitron font-bold text-xl gradient-text">TOBSEYTECH</span>
-          </div>
-          
-          <div className="hidden md:flex space-x-8">
+          </Link>
+
+          <div className="hidden md:flex items-center space-x-6">
             {navLinks.map((link) => (
               <button
                 key={link.id}
@@ -54,8 +60,34 @@ export default function Navigation() {
                 {link.label}
               </button>
             ))}
+            <Link href="/blog">
+              <button className="hover:text-galactic-gold transition-colors duration-300 nav-link text-galactic-orange font-orbitron">
+                Blog
+              </button>
+            </Link>
+            {user ? (
+              <div className="flex items-center gap-3">
+                <span className="text-galactic-gold font-orbitron text-sm flex items-center gap-1">
+                  <User className="w-3 h-3" /> {user.username}
+                </span>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => logout()}
+                  className="text-galactic-orange hover:text-galactic-gold font-orbitron text-xs"
+                >
+                  <LogOut className="w-3 h-3 mr-1" /> Sign Out
+                </Button>
+              </div>
+            ) : (
+              <Link href="/auth">
+                <Button size="sm" className="bg-galactic-orange text-space-black font-orbitron font-bold hover:bg-galactic-gold text-xs">
+                  <LogIn className="w-3 h-3 mr-1" /> Sign In
+                </Button>
+              </Link>
+            )}
           </div>
-          
+
           <Button
             variant="ghost"
             size="icon"
@@ -81,6 +113,30 @@ export default function Navigation() {
                   {link.label}
                 </button>
               ))}
+              <Link href="/blog" onClick={() => setIsOpen(false)}>
+                <button className="text-left hover:text-galactic-gold transition-colors duration-300 nav-link text-galactic-orange font-orbitron">
+                  Blog
+                </button>
+              </Link>
+              {user ? (
+                <>
+                  <span className="text-galactic-gold font-orbitron text-sm flex items-center gap-1">
+                    <User className="w-3 h-3" /> {user.username}
+                  </span>
+                  <button
+                    onClick={() => { logout(); setIsOpen(false); }}
+                    className="text-left text-galactic-orange font-orbitron hover:text-galactic-gold flex items-center gap-1"
+                  >
+                    <LogOut className="w-3 h-3" /> Sign Out
+                  </button>
+                </>
+              ) : (
+                <Link href="/auth" onClick={() => setIsOpen(false)}>
+                  <button className="text-left text-galactic-orange font-orbitron hover:text-galactic-gold flex items-center gap-1">
+                    <LogIn className="w-3 h-3" /> Sign In
+                  </button>
+                </Link>
+              )}
             </div>
           </div>
         )}
@@ -88,3 +144,4 @@ export default function Navigation() {
     </nav>
   );
 }
+
