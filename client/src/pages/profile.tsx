@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
-import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import Navigation from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
