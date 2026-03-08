@@ -1,0 +1,173 @@
+import { useState } from "react";
+import { useLocation } from "wouter";
+import { useAuth } from "@/hooks/use-auth";
+import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Loader2 } from "lucide-react";
+
+export default function AuthPage() {
+  const { login, register, user } = useAuth();
+  const [, navigate] = useLocation();
+  const { toast } = useToast();
+
+  const [loginForm, setLoginForm] = useState({ username: "", password: "" });
+  const [registerForm, setRegisterForm] = useState({ username: "", email: "", password: "" });
+  const [loading, setLoading] = useState(false);
+
+  // Redirect if already logged in
+  if (user) {
+    navigate("/blog");
+    return null;
+  }
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      await login(loginForm.username, loginForm.password);
+      navigate("/blog");
+    } catch (err: any) {
+      toast({ title: "Login failed", description: err.message, variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      await register(registerForm.username, registerForm.email, registerForm.password);
+      navigate("/blog");
+    } catch (err: any) {
+      toast({ title: "Registration failed", description: err.message, variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-space-black px-4">
+      <div className="w-full max-w-md">
+        <div className="text-center mb-8">
+          <div className="w-16 h-16 border-2 border-galactic-orange rounded-full flex items-center justify-center bg-gradient-to-br from-galactic-orange to-galactic-gold mx-auto mb-4">
+            <span className="text-space-black font-orbitron font-bold text-2xl">TST</span>
+          </div>
+          <h1 className="text-3xl font-orbitron font-bold gradient-text">TOBSEYTECH</h1>
+          <p className="text-gray-400 mt-2">Sign in to access the blog</p>
+        </div>
+
+        <div className="glass-effect rounded-xl p-8">
+          <Tabs defaultValue="login">
+            <TabsList className="grid w-full grid-cols-2 mb-6 bg-space-dark">
+              <TabsTrigger value="login" className="font-orbitron text-sm">
+                Sign In
+              </TabsTrigger>
+              <TabsTrigger value="register" className="font-orbitron text-sm">
+                Register
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="login">
+              <form onSubmit={handleLogin} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="login-username" className="text-galactic-orange font-orbitron text-sm">
+                    Username
+                  </Label>
+                  <Input
+                    id="login-username"
+                    type="text"
+                    value={loginForm.username}
+                    onChange={(e) => setLoginForm({ ...loginForm, username: e.target.value })}
+                    required
+                    className="bg-space-dark border-galactic-orange/30 text-white focus:border-galactic-orange"
+                    placeholder="your_username"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="login-password" className="text-galactic-orange font-orbitron text-sm">
+                    Password
+                  </Label>
+                  <Input
+                    id="login-password"
+                    type="password"
+                    value={loginForm.password}
+                    onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
+                    required
+                    className="bg-space-dark border-galactic-orange/30 text-white focus:border-galactic-orange"
+                    placeholder="••••••••"
+                  />
+                </div>
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-galactic-orange text-space-black font-orbitron font-bold hover:bg-galactic-gold"
+                >
+                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Sign In"}
+                </Button>
+              </form>
+            </TabsContent>
+
+            <TabsContent value="register">
+              <form onSubmit={handleRegister} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="reg-username" className="text-galactic-orange font-orbitron text-sm">
+                    Username
+                  </Label>
+                  <Input
+                    id="reg-username"
+                    type="text"
+                    value={registerForm.username}
+                    onChange={(e) => setRegisterForm({ ...registerForm, username: e.target.value })}
+                    required
+                    className="bg-space-dark border-galactic-orange/30 text-white focus:border-galactic-orange"
+                    placeholder="your_username"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="reg-email" className="text-galactic-orange font-orbitron text-sm">
+                    Email
+                  </Label>
+                  <Input
+                    id="reg-email"
+                    type="email"
+                    value={registerForm.email}
+                    onChange={(e) => setRegisterForm({ ...registerForm, email: e.target.value })}
+                    required
+                    className="bg-space-dark border-galactic-orange/30 text-white focus:border-galactic-orange"
+                    placeholder="you@example.com"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="reg-password" className="text-galactic-orange font-orbitron text-sm">
+                    Password
+                  </Label>
+                  <Input
+                    id="reg-password"
+                    type="password"
+                    value={registerForm.password}
+                    onChange={(e) => setRegisterForm({ ...registerForm, password: e.target.value })}
+                    required
+                    minLength={6}
+                    className="bg-space-dark border-galactic-orange/30 text-white focus:border-galactic-orange"
+                    placeholder="••••••••"
+                  />
+                </div>
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-galactic-orange text-space-black font-orbitron font-bold hover:bg-galactic-gold"
+                >
+                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Create Account"}
+                </Button>
+              </form>
+            </TabsContent>
+          </Tabs>
+        </div>
+      </div>
+    </div>
+  );
+}

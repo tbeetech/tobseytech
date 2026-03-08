@@ -1,101 +1,148 @@
-import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, timestamp, integer, jsonb, boolean } from "drizzle-orm/pg-core";
-import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-export const users = pgTable("users", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  username: text("username").notNull().unique(),
-  password: text("password").notNull(),
-  createdAt: timestamp("created_at").defaultNow(),
+// ─── Users ──────────────────────────────────────────────────────────────────
+
+export const insertUserSchema = z.object({
+  username: z.string().min(3).max(50),
+  email: z.string().email(),
+  password: z.string().min(6),
+  role: z.enum(["user", "admin"]).default("user"),
 });
 
-export const contacts = pgTable("contacts", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  name: text("name").notNull(),
-  email: text("email").notNull(),
-  projectType: text("project_type").notNull(),
-  budgetRange: text("budget_range").notNull(),
-  message: text("message").notNull(),
-  status: text("status").default("new"),
-  createdAt: timestamp("created_at").defaultNow(),
+export const loginSchema = z.object({
+  username: z.string().min(1),
+  password: z.string().min(1),
 });
 
-export const products = pgTable("products", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  name: text("name").notNull(),
-  description: text("description").notNull(),
-  price: integer("price").notNull(),
-  status: text("status").notNull(),
-  imageUrl: text("image_url"),
-  features: jsonb("features").default([]),
-  category: text("category").notNull(),
-  isActive: boolean("is_active").default(true),
-  createdAt: timestamp("created_at").defaultNow(),
-});
-
-export const courses = pgTable("courses", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  title: text("title").notNull(),
-  description: text("description").notNull(),
-  price: integer("price").notNull(),
-  originalPrice: integer("original_price"),
-  duration: text("duration").notNull(),
-  level: text("level").notNull(),
-  category: text("category").notNull(),
-  imageUrl: text("image_url"),
-  features: jsonb("features").default([]),
-  isActive: boolean("is_active").default(true),
-  isFeatured: boolean("is_featured").default(false),
-  createdAt: timestamp("created_at").defaultNow(),
-});
-
-export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  password: true,
-});
-
-export const insertContactSchema = createInsertSchema(contacts).pick({
-  name: true,
-  email: true,
-  projectType: true,
-  budgetRange: true,
-  message: true,
-});
-
-export const insertProductSchema = createInsertSchema(products).pick({
-  name: true,
-  description: true,
-  price: true,
-  status: true,
-  imageUrl: true,
-  features: true,
-  category: true,
-  isActive: true,
-});
-
-export const insertCourseSchema = createInsertSchema(courses).pick({
-  title: true,
-  description: true,
-  price: true,
-  originalPrice: true,
-  duration: true,
-  level: true,
-  category: true,
-  imageUrl: true,
-  features: true,
-  isActive: true,
-  isFeatured: true,
-});
-
-export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
+export type LoginInput = z.infer<typeof loginSchema>;
 
-export type Contact = typeof contacts.$inferSelect;
+export interface User {
+  id: string;
+  username: string;
+  email: string;
+  password: string;
+  role: "user" | "admin";
+  createdAt: Date;
+}
+
+// ─── Contacts ───────────────────────────────────────────────────────────────
+
+export const insertContactSchema = z.object({
+  name: z.string().min(1),
+  email: z.string().email(),
+  projectType: z.string().min(1),
+  budgetRange: z.string().min(1),
+  message: z.string().min(1),
+});
+
 export type InsertContact = z.infer<typeof insertContactSchema>;
 
-export type Product = typeof products.$inferSelect;
+export interface Contact {
+  id: string;
+  name: string;
+  email: string;
+  projectType: string;
+  budgetRange: string;
+  message: string;
+  status: string;
+  createdAt: Date;
+}
+
+// ─── Products ───────────────────────────────────────────────────────────────
+
+export const insertProductSchema = z.object({
+  name: z.string().min(1),
+  description: z.string().min(1),
+  price: z.number().int(),
+  status: z.string().min(1),
+  imageUrl: z.string().optional().nullable(),
+  features: z.array(z.string()).default([]),
+  category: z.string().min(1),
+  isActive: z.boolean().default(true),
+});
+
 export type InsertProduct = z.infer<typeof insertProductSchema>;
 
-export type Course = typeof courses.$inferSelect;
+export interface Product {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  status: string;
+  imageUrl: string | null;
+  features: string[];
+  category: string;
+  isActive: boolean;
+  createdAt: Date;
+}
+
+// ─── Courses ────────────────────────────────────────────────────────────────
+
+export const insertCourseSchema = z.object({
+  title: z.string().min(1),
+  description: z.string().min(1),
+  price: z.number().int(),
+  originalPrice: z.number().int().optional().nullable(),
+  duration: z.string().min(1),
+  level: z.string().min(1),
+  category: z.string().min(1),
+  imageUrl: z.string().optional().nullable(),
+  features: z.array(z.string()).default([]),
+  isActive: z.boolean().default(true),
+  isFeatured: z.boolean().default(false),
+});
+
 export type InsertCourse = z.infer<typeof insertCourseSchema>;
+
+export interface Course {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  originalPrice: number | null;
+  duration: string;
+  level: string;
+  category: string;
+  imageUrl: string | null;
+  features: string[];
+  isActive: boolean;
+  isFeatured: boolean;
+  createdAt: Date;
+}
+
+// ─── Blog Posts ─────────────────────────────────────────────────────────────
+
+export const insertBlogPostSchema = z.object({
+  title: z.string().min(1),
+  slug: z.string().min(1).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Slug must be lowercase with hyphens"),
+  excerpt: z.string().min(1),
+  content: z.string().min(1),
+  coverImage: z.string().optional().nullable(),
+  tags: z.array(z.string()).default([]),
+  category: z.string().min(1),
+  published: z.boolean().default(false),
+  authorId: z.string().min(1),
+  authorName: z.string().min(1),
+});
+
+export const updateBlogPostSchema = insertBlogPostSchema.partial();
+
+export type InsertBlogPost = z.infer<typeof insertBlogPostSchema>;
+export type UpdateBlogPost = z.infer<typeof updateBlogPostSchema>;
+
+export interface BlogPost {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  coverImage: string | null;
+  tags: string[];
+  category: string;
+  published: boolean;
+  authorId: string;
+  authorName: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
