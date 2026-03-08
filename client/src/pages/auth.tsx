@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2 } from "lucide-react";
+import { Loader2, Zap, Users, BookOpen, Heart } from "lucide-react";
 
 export default function AuthPage() {
   const { login, register, user } = useAuth();
@@ -17,7 +17,6 @@ export default function AuthPage() {
   const [registerForm, setRegisterForm] = useState({ username: "", email: "", password: "" });
   const [loading, setLoading] = useState(false);
 
-  // Redirect if already logged in
   if (user) {
     navigate("/blog");
     return null;
@@ -49,132 +48,231 @@ export default function AuthPage() {
     }
   };
 
+  const features = [
+    { icon: BookOpen, text: "Write & publish tech articles" },
+    { icon: Heart, text: "Like, bookmark & save posts" },
+    { icon: Users, text: "Comment & suggest edits" },
+    { icon: Zap, text: "Real-time chat with community" },
+  ];
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-space-black px-4 relative overflow-hidden">
-      {/* Background decoration */}
-      <div className="absolute inset-0 starfield opacity-40 pointer-events-none" />
-      <div className="absolute inset-0 galactic-grid opacity-10 pointer-events-none" />
+    <div className="min-h-screen flex auth-bg relative overflow-hidden">
+      {/* Animated background orbs */}
+      <div
+        className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full blur-3xl animate-pulse-slow pointer-events-none"
+        style={{ background: "rgba(255,165,0,0.05)" }}
+      />
+      <div
+        className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full blur-3xl animate-pulse-slow pointer-events-none"
+        style={{ background: "rgba(0,212,255,0.04)", animationDelay: "1.5s" }}
+      />
+      <div className="absolute inset-0 starfield opacity-30 pointer-events-none" />
 
-      <div className="w-full max-w-md relative z-10">
-        <div className="text-center mb-8">
-          <div className="w-20 h-20 border-2 border-galactic-orange rounded-full flex items-center justify-center bg-gradient-to-br from-galactic-orange to-galactic-gold mx-auto mb-4 shadow-[0_0_30px_rgba(255,165,0,0.5)]">
-            <span className="text-space-black font-orbitron font-bold text-2xl">TST</span>
+      {/* Left panel – brand showcase */}
+      <div className="hidden lg:flex flex-1 flex-col items-center justify-center px-12 relative z-10">
+        <div className="max-w-md">
+          {/* Logo */}
+          <div className="relative mb-8 flex flex-col items-center">
+            <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-galactic-orange via-galactic-gold to-galactic-orange flex items-center justify-center shadow-[0_0_50px_rgba(255,165,0,0.4)] animate-glow">
+              <span className="text-space-black font-orbitron font-black text-3xl">TST</span>
+            </div>
+            <div className="absolute w-24 h-24 rounded-2xl border border-galactic-orange/30 scale-125 animate-pulse-slow" />
+            <div
+              className="absolute w-24 h-24 rounded-2xl border border-galactic-orange/15 scale-150 animate-pulse-slow"
+              style={{ animationDelay: "0.5s" }}
+            />
           </div>
-          <h1 className="text-4xl font-orbitron font-bold gradient-text">TOBSEYTECH</h1>
-          <p className="text-gray-400 mt-2">Join the future of tech</p>
-        </div>
 
-        <div className="glass-effect rounded-2xl p-8">
-          <Tabs defaultValue="login">
-            <TabsList className="grid w-full grid-cols-2 mb-6 bg-space-dark rounded-xl">
-              <TabsTrigger value="login" className="font-orbitron text-sm rounded-lg">
-                Sign In
-              </TabsTrigger>
-              <TabsTrigger value="register" className="font-orbitron text-sm rounded-lg">
-                Register
-              </TabsTrigger>
-            </TabsList>
+          <h1 className="text-5xl font-orbitron font-black gradient-text text-center mb-3">
+            TOBSEYTECH
+          </h1>
+          <p className="text-center text-galactic-gold/80 text-lg font-medium mb-12">
+            Future Digital Solutions
+          </p>
 
-            <TabsContent value="login">
-              <form onSubmit={handleLogin} className="space-y-5">
-                <div className="space-y-2">
-                  <Label htmlFor="login-username" className="text-galactic-orange font-orbitron text-sm">
-                    Username
-                  </Label>
-                  <Input
-                    id="login-username"
-                    type="text"
-                    value={loginForm.username}
-                    onChange={(e) => setLoginForm({ ...loginForm, username: e.target.value })}
-                    required
-                    className="bg-space-dark border-galactic-orange/30 text-white focus:border-galactic-orange h-11"
-                    placeholder="your_username"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="login-password" className="text-galactic-orange font-orbitron text-sm">
-                    Password
-                  </Label>
-                  <Input
-                    id="login-password"
-                    type="password"
-                    value={loginForm.password}
-                    onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
-                    required
-                    className="bg-space-dark border-galactic-orange/30 text-white focus:border-galactic-orange h-11"
-                    placeholder="••••••••"
-                  />
-                </div>
-                <Button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full h-11 bg-galactic-orange text-space-black font-orbitron font-bold hover:bg-galactic-gold text-base shadow-[0_0_20px_rgba(255,165,0,0.3)] hover:shadow-[0_0_30px_rgba(255,215,0,0.5)] transition-all"
+          {/* Feature list */}
+          <div className="space-y-4">
+            {features.map(({ icon: Icon, text }, i) => (
+              <div
+                key={i}
+                className="flex items-center gap-4 p-4 rounded-xl border border-galactic-orange/10 animate-slide-up"
+                style={{
+                  background: "rgba(255,165,0,0.05)",
+                  animationDelay: `${i * 0.1}s`,
+                }}
+              >
+                <div
+                  className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
+                  style={{ background: "rgba(255,165,0,0.15)" }}
                 >
-                  {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Sign In"}
-                </Button>
-              </form>
-            </TabsContent>
+                  <Icon className="w-4 h-4 text-galactic-orange" />
+                </div>
+                <span className="text-white/80 text-sm font-medium">{text}</span>
+              </div>
+            ))}
+          </div>
 
-            <TabsContent value="register">
-              <form onSubmit={handleRegister} className="space-y-5">
-                <div className="space-y-2">
-                  <Label htmlFor="reg-username" className="text-galactic-orange font-orbitron text-sm">
-                    Username
-                  </Label>
-                  <Input
-                    id="reg-username"
-                    type="text"
-                    value={registerForm.username}
-                    onChange={(e) => setRegisterForm({ ...registerForm, username: e.target.value })}
-                    required
-                    className="bg-space-dark border-galactic-orange/30 text-white focus:border-galactic-orange h-11"
-                    placeholder="your_username"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="reg-email" className="text-galactic-orange font-orbitron text-sm">
-                    Email
-                  </Label>
-                  <Input
-                    id="reg-email"
-                    type="email"
-                    value={registerForm.email}
-                    onChange={(e) => setRegisterForm({ ...registerForm, email: e.target.value })}
-                    required
-                    className="bg-space-dark border-galactic-orange/30 text-white focus:border-galactic-orange h-11"
-                    placeholder="you@example.com"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="reg-password" className="text-galactic-orange font-orbitron text-sm">
-                    Password
-                  </Label>
-                  <Input
-                    id="reg-password"
-                    type="password"
-                    value={registerForm.password}
-                    onChange={(e) => setRegisterForm({ ...registerForm, password: e.target.value })}
-                    required
-                    minLength={6}
-                    className="bg-space-dark border-galactic-orange/30 text-white focus:border-galactic-orange h-11"
-                    placeholder="••••••••"
-                  />
-                </div>
-                <Button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full h-11 bg-galactic-orange text-space-black font-orbitron font-bold hover:bg-galactic-gold text-base shadow-[0_0_20px_rgba(255,165,0,0.3)] hover:shadow-[0_0_30px_rgba(255,215,0,0.5)] transition-all"
-                >
-                  {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Create Account"}
-                </Button>
-              </form>
-            </TabsContent>
-          </Tabs>
+          <p className="text-center text-gray-600 text-xs mt-10">
+            Join thousands of tech enthusiasts shaping the future
+          </p>
         </div>
+      </div>
 
-        <p className="text-center text-gray-600 text-xs mt-6">
-          TOBSEYTECH · Future Digital Solutions
-        </p>
+      {/* Divider */}
+      <div
+        className="hidden lg:block w-px"
+        style={{ background: "linear-gradient(to bottom, transparent, rgba(255,165,0,0.2), transparent)" }}
+      />
+
+      {/* Right panel – auth form */}
+      <div className="flex-1 flex items-center justify-center px-6 relative z-10">
+        <div className="w-full max-w-sm">
+          {/* Mobile logo */}
+          <div className="lg:hidden text-center mb-8">
+            <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-galactic-orange to-galactic-gold flex items-center justify-center mx-auto mb-3 shadow-[0_0_30px_rgba(255,165,0,0.4)]">
+              <span className="text-space-black font-orbitron font-black text-xl">TST</span>
+            </div>
+            <h1 className="text-3xl font-orbitron font-black gradient-text">TOBSEYTECH</h1>
+          </div>
+
+          <div className="glass-effect-strong rounded-2xl p-7">
+            <Tabs defaultValue="login">
+              <TabsList className="grid w-full grid-cols-2 mb-6 rounded-xl p-1" style={{ background: "rgba(0,0,0,0.5)" }}>
+                <TabsTrigger
+                  value="login"
+                  className="font-orbitron text-xs rounded-lg data-[state=active]:bg-galactic-orange data-[state=active]:text-space-black"
+                >
+                  Sign In
+                </TabsTrigger>
+                <TabsTrigger
+                  value="register"
+                  className="font-orbitron text-xs rounded-lg data-[state=active]:bg-galactic-orange data-[state=active]:text-space-black"
+                >
+                  Register
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="login">
+                <form onSubmit={handleLogin} className="space-y-4">
+                  <div className="space-y-1.5 input-glow">
+                    <Label
+                      htmlFor="login-username"
+                      className="text-xs font-semibold text-galactic-orange/90 uppercase tracking-wide"
+                    >
+                      Username
+                    </Label>
+                    <Input
+                      id="login-username"
+                      type="text"
+                      value={loginForm.username}
+                      onChange={(e) => setLoginForm({ ...loginForm, username: e.target.value })}
+                      required
+                      className="h-10 border-galactic-orange/20 text-white text-sm"
+                      style={{ background: "rgba(0,0,0,0.6)" }}
+                      placeholder="your_username"
+                    />
+                  </div>
+                  <div className="space-y-1.5 input-glow">
+                    <Label
+                      htmlFor="login-password"
+                      className="text-xs font-semibold text-galactic-orange/90 uppercase tracking-wide"
+                    >
+                      Password
+                    </Label>
+                    <Input
+                      id="login-password"
+                      type="password"
+                      value={loginForm.password}
+                      onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
+                      required
+                      className="h-10 border-galactic-orange/20 text-white text-sm"
+                      style={{ background: "rgba(0,0,0,0.6)" }}
+                      placeholder="••••••••"
+                    />
+                  </div>
+                  <Button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full h-10 bg-gradient-to-r from-galactic-orange to-galactic-gold text-space-black font-orbitron font-bold text-sm transition-all mt-2 hover:shadow-[0_0_25px_rgba(255,165,0,0.4)]"
+                  >
+                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Sign In →"}
+                  </Button>
+                </form>
+              </TabsContent>
+
+              <TabsContent value="register">
+                <form onSubmit={handleRegister} className="space-y-4">
+                  <div className="space-y-1.5 input-glow">
+                    <Label
+                      htmlFor="reg-username"
+                      className="text-xs font-semibold text-galactic-orange/90 uppercase tracking-wide"
+                    >
+                      Username
+                    </Label>
+                    <Input
+                      id="reg-username"
+                      type="text"
+                      value={registerForm.username}
+                      onChange={(e) => setRegisterForm({ ...registerForm, username: e.target.value })}
+                      required
+                      className="h-10 border-galactic-orange/20 text-white text-sm"
+                      style={{ background: "rgba(0,0,0,0.6)" }}
+                      placeholder="your_username"
+                    />
+                  </div>
+                  <div className="space-y-1.5 input-glow">
+                    <Label
+                      htmlFor="reg-email"
+                      className="text-xs font-semibold text-galactic-orange/90 uppercase tracking-wide"
+                    >
+                      Email
+                    </Label>
+                    <Input
+                      id="reg-email"
+                      type="email"
+                      value={registerForm.email}
+                      onChange={(e) => setRegisterForm({ ...registerForm, email: e.target.value })}
+                      required
+                      className="h-10 border-galactic-orange/20 text-white text-sm"
+                      style={{ background: "rgba(0,0,0,0.6)" }}
+                      placeholder="you@example.com"
+                    />
+                  </div>
+                  <div className="space-y-1.5 input-glow">
+                    <Label
+                      htmlFor="reg-password"
+                      className="text-xs font-semibold text-galactic-orange/90 uppercase tracking-wide"
+                    >
+                      Password
+                    </Label>
+                    <Input
+                      id="reg-password"
+                      type="password"
+                      value={registerForm.password}
+                      onChange={(e) => setRegisterForm({ ...registerForm, password: e.target.value })}
+                      required
+                      minLength={6}
+                      className="h-10 border-galactic-orange/20 text-white text-sm"
+                      style={{ background: "rgba(0,0,0,0.6)" }}
+                      placeholder="Min 6 characters"
+                    />
+                  </div>
+                  <Button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full h-10 bg-gradient-to-r from-galactic-orange to-galactic-gold text-space-black font-orbitron font-bold text-sm transition-all mt-2 hover:shadow-[0_0_25px_rgba(255,165,0,0.4)]"
+                  >
+                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Create Account →"}
+                  </Button>
+                </form>
+              </TabsContent>
+            </Tabs>
+          </div>
+
+          <p className="text-center text-gray-600 text-xs mt-5">
+            TOBSEYTECH · Secure · Future · Innovative
+          </p>
+        </div>
       </div>
     </div>
   );
