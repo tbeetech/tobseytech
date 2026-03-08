@@ -49,7 +49,9 @@ export default function BlogPage() {
     return matchesSearch && matchesCategory;
   });
 
-  const [featured, ...rest] = filtered;
+  // featured is undefined when filtered is empty; the empty-state branch renders first
+  const featured = filtered[0] as BlogPost | undefined;
+  const rest = filtered.slice(1);
 
   return (
     <div className="min-h-screen bg-space-black text-white">
