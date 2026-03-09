@@ -11,62 +11,69 @@ export default function Navigation() {
   const [, navigate] = useLocation();
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    const handleScroll = () => setIsScrolled(window.scrollY > 50);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
+      element.scrollIntoView({ behavior: "smooth" });
       setIsOpen(false);
     }
   };
 
   const navLinks = [
-    { id: 'services', label: 'Services' },
-    { id: 'case-studies', label: 'Case Studies' },
-    { id: 'about', label: 'About' },
-    { id: 'contact', label: 'Contact' },
+    { id: "services", label: "Services" },
+    { id: "case-studies", label: "Case Studies" },
+    { id: "about", label: "About" },
+    { id: "contact", label: "Contact" },
   ];
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-      isScrolled ? 'military-nav backdrop-blur-xl' : 'military-nav'
-    }`}>
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 military-nav ${isScrolled ? "backdrop-blur-xl" : ""}`}>
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
+          {/* Logo */}
           <Link href="/">
-            <div className="flex items-center space-x-4 cursor-pointer" data-testid="nav-logo">
-              <div className="w-12 h-12 border-2 border-galactic-orange rounded-full flex items-center justify-center bg-gradient-to-br from-galactic-orange to-galactic-gold">
-                <span className="text-space-black font-orbitron font-bold text-xl">TST</span>
+            <div className="flex items-center gap-3 cursor-pointer" data-testid="nav-logo">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-galactic-orange to-galactic-gold flex items-center justify-center shadow-[0_0_16px_rgba(255,165,0,0.35)]">
+                <span className="text-space-black font-orbitron font-black text-base">T</span>
               </div>
-              <span className="font-orbitron font-bold text-xl gradient-text">TOBSEYTECH</span>
+              <span className="font-orbitron font-bold text-lg gradient-text">TOBSEYTECH</span>
             </div>
           </Link>
 
-          <div className="hidden md:flex items-center space-x-6">
+          {/* Gradient separator (desktop only) */}
+          <div
+            className="hidden md:block h-6 w-px mx-4"
+            style={{ background: "linear-gradient(to bottom, transparent, rgba(255,165,0,0.3), transparent)" }}
+          />
+
+          {/* Desktop nav links */}
+          <div className="hidden md:flex items-center gap-6 flex-1">
             {navLinks.map((link) => (
               <button
                 key={link.id}
                 onClick={() => scrollToSection(link.id)}
-                className="hover:text-galactic-gold transition-colors duration-300 nav-link text-galactic-orange font-orbitron"
+                className="nav-link text-galactic-orange/90 hover:text-galactic-gold font-orbitron text-xs tracking-wide transition-colors"
                 data-testid={`nav-link-${link.id}`}
               >
                 {link.label}
               </button>
             ))}
             <Link href="/blog">
-              <button className="hover:text-galactic-gold transition-colors duration-300 nav-link text-galactic-orange font-orbitron">
+              <button className="nav-link text-galactic-orange/90 hover:text-galactic-gold font-orbitron text-xs tracking-wide transition-colors">
                 Blog
               </button>
             </Link>
+          </div>
+
+          {/* Desktop auth actions */}
+          <div className="hidden md:flex items-center gap-3">
             {user ? (
-              <div className="flex items-center gap-3">
+              <>
                 <Link href="/chat">
                   <button className="hover:text-galactic-gold transition-colors duration-300 nav-link text-galactic-orange font-orbitron text-sm flex items-center gap-1">
                     <MessageCircle className="w-4 h-4" /> Talk
@@ -88,50 +95,57 @@ export default function Navigation() {
                   size="sm"
                   variant="ghost"
                   onClick={() => logout()}
-                  className="text-galactic-orange hover:text-galactic-gold font-orbitron text-xs"
+                  className="text-galactic-orange/70 hover:text-galactic-red font-orbitron text-xs h-8 px-3"
                 >
                   <LogOut className="w-3 h-3 mr-1" /> Sign Out
                 </Button>
-              </div>
+              </>
             ) : (
               <Link href="/auth">
-                <Button size="sm" className="bg-galactic-orange text-space-black font-orbitron font-bold hover:bg-galactic-gold text-xs">
+                <Button
+                  size="sm"
+                  className="bg-gradient-to-r from-galactic-orange to-galactic-gold text-space-black font-orbitron font-bold text-xs h-8 hover:shadow-[0_0_16px_rgba(255,165,0,0.4)] transition-all"
+                >
                   <LogIn className="w-3 h-3 mr-1" /> Sign In
                 </Button>
               </Link>
             )}
           </div>
 
+          {/* Mobile menu toggle */}
           <Button
             variant="ghost"
             size="icon"
-            className="md:hidden text-galactic-orange"
+            className="md:hidden text-galactic-orange hover:text-galactic-gold"
             onClick={() => setIsOpen(!isOpen)}
             data-testid="mobile-menu-toggle"
           >
-            {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </Button>
         </div>
 
         {/* Mobile menu */}
         {isOpen && (
-          <div className="md:hidden mt-4 glass-effect rounded-lg p-4">
-            <div className="flex flex-col space-y-4">
+          <div className="md:hidden mt-3 glass-effect-strong rounded-xl p-5 animate-slide-up">
+            <div className="flex flex-col gap-4">
               {navLinks.map((link) => (
                 <button
                   key={link.id}
                   onClick={() => scrollToSection(link.id)}
-                  className="text-left hover:text-galactic-gold transition-colors duration-300 nav-link text-galactic-orange font-orbitron"
+                  className="text-left nav-link text-galactic-orange/90 hover:text-galactic-gold font-orbitron text-sm transition-colors"
                   data-testid={`mobile-nav-link-${link.id}`}
                 >
                   {link.label}
                 </button>
               ))}
               <Link href="/blog" onClick={() => setIsOpen(false)}>
-                <button className="text-left hover:text-galactic-gold transition-colors duration-300 nav-link text-galactic-orange font-orbitron">
+                <button className="text-left nav-link text-galactic-orange/90 hover:text-galactic-gold font-orbitron text-sm transition-colors">
                   Blog
                 </button>
               </Link>
+
+              <div className="h-px my-1" style={{ background: "rgba(255,165,0,0.15)" }} />
+
               {user ? (
                 <>
                   <Link href={`/profile/${user.id}`} onClick={() => setIsOpen(false)}>
@@ -153,15 +167,15 @@ export default function Navigation() {
                   )}
                   <button
                     onClick={() => { logout(); setIsOpen(false); }}
-                    className="text-left text-galactic-orange font-orbitron hover:text-galactic-gold flex items-center gap-1"
+                    className="text-left text-galactic-red/80 font-orbitron text-sm hover:text-galactic-red flex items-center gap-2 transition-colors"
                   >
-                    <LogOut className="w-3 h-3" /> Sign Out
+                    <LogOut className="w-4 h-4" /> Sign Out
                   </button>
                 </>
               ) : (
                 <Link href="/auth" onClick={() => setIsOpen(false)}>
-                  <button className="text-left text-galactic-orange font-orbitron hover:text-galactic-gold flex items-center gap-1">
-                    <LogIn className="w-3 h-3" /> Sign In
+                  <button className="text-left text-galactic-orange font-orbitron text-sm hover:text-galactic-gold flex items-center gap-2 transition-colors">
+                    <LogIn className="w-4 h-4" /> Sign In
                   </button>
                 </Link>
               )}
@@ -172,4 +186,3 @@ export default function Navigation() {
     </nav>
   );
 }
-

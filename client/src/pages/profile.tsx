@@ -143,7 +143,9 @@ export default function ProfilePage() {
         <div className="container mx-auto px-6 pt-28 text-center">
           <p className="text-gray-400 mb-4">You need to be signed in to view profiles.</p>
           <Link href="/auth">
-            <Button className="bg-galactic-orange text-space-black font-orbitron">Sign In</Button>
+            <Button className="bg-galactic-orange text-space-black font-orbitron font-bold hover:bg-galactic-gold">
+              Sign In
+            </Button>
           </Link>
         </div>
       </div>

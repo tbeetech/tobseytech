@@ -4,7 +4,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -203,7 +202,7 @@ export default function BlogPostPage() {
         <div className="container mx-auto px-6 pt-28 text-center">
           <h1 className="text-3xl font-orbitron font-bold text-galactic-orange mb-4">Post Not Found</h1>
           <Link href="/blog">
-            <Button variant="outline" className="border-galactic-orange text-galactic-orange">
+            <Button variant="outline" className="border-galactic-orange/40 text-galactic-orange hover:bg-galactic-orange/10">
               <ArrowLeft className="w-4 h-4 mr-2" /> Back to Blog
             </Button>
           </Link>
@@ -218,29 +217,29 @@ export default function BlogPostPage() {
       <article className="container mx-auto px-6 pt-28 pb-16 max-w-3xl">
         {/* Back link */}
         <Link href="/blog">
-          <Button variant="ghost" className="text-galactic-orange hover:text-galactic-gold mb-8 -ml-2">
+          <Button variant="ghost" className="text-galactic-orange hover:text-galactic-gold mb-6 -ml-2 font-orbitron text-sm">
             <ArrowLeft className="w-4 h-4 mr-2" /> All Posts
           </Button>
         </Link>
 
         {/* Cover image */}
         {post.coverImage && (
-          <div className="rounded-xl overflow-hidden mb-8 aspect-video">
+          <div className="rounded-2xl overflow-hidden mb-8 aspect-video shadow-[0_8px_40px_rgba(0,0,0,0.5)]">
             <img src={post.coverImage} alt={post.title} className="w-full h-full object-cover" />
           </div>
         )}
 
-        {/* Meta */}
-        <div className="flex flex-wrap items-center gap-3 mb-4">
-          <Badge className="bg-galactic-orange/20 text-galactic-orange border-galactic-orange/30 font-orbitron">
-            {post.category}
-          </Badge>
+        {/* Category + status badges */}
+        <div className="flex flex-wrap items-center gap-2 mb-4">
+          <span className="badge-neon badge-orange">{post.category}</span>
           {!post.published && (
-            <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">Draft</Badge>
+            <span className="badge-neon badge-draft">Draft</span>
           )}
         </div>
 
-        <h1 className="text-3xl md:text-4xl font-orbitron font-bold text-white mb-4">{post.title}</h1>
+        <h1 className="text-3xl md:text-4xl font-orbitron font-bold text-white mb-5 leading-tight">
+          {post.title}
+        </h1>
 
         <div className="flex flex-wrap items-center gap-6 text-sm text-gray-400 mb-6 pb-6 border-b border-white/10">
           <span className="flex items-center gap-2">
@@ -249,15 +248,15 @@ export default function BlogPostPage() {
               <span className="hover:text-galactic-orange transition-colors cursor-pointer">{post.authorName}</span>
             </Link>
           </span>
-          <span className="flex items-center gap-2">
-            <Calendar className="w-4 h-4" />
+          <span className="flex items-center gap-1.5">
+            <Calendar className="w-4 h-4 text-galactic-orange/70" />
             {format(new Date(post.createdAt), "MMMM d, yyyy")}
           </span>
           {post.tags.length > 0 && (
             <div className="flex flex-wrap gap-2">
               {post.tags.map((tag) => (
-                <span key={tag} className="flex items-center gap-1 text-galactic-gold/70">
-                  <Tag className="w-3 h-3" /> {tag}
+                <span key={tag} className="badge-neon badge-cyan flex items-center gap-1">
+                  <Tag className="w-2.5 h-2.5" /> {tag}
                 </span>
               ))}
             </div>
@@ -269,11 +268,7 @@ export default function BlogPostPage() {
           <button
             onClick={() => likeMutation.mutate()}
             disabled={likeMutation.isPending}
-            className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all text-sm font-orbitron ${
-              likeData?.liked
-                ? "bg-red-500/20 border-red-500/50 text-red-400"
-                : "border-white/20 text-gray-400 hover:border-red-400/50 hover:text-red-400"
-            }`}
+            className={`action-btn action-btn-like ${likeData?.liked ? "active" : ""}`}
           >
             <Heart className={`w-4 h-4 ${likeData?.liked ? "fill-current" : ""}`} />
             {likeData?.count ?? 0}
@@ -283,18 +278,14 @@ export default function BlogPostPage() {
             <button
               onClick={() => bookmarkMutation.mutate()}
               disabled={bookmarkMutation.isPending}
-              className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all text-sm font-orbitron ${
-                bookmarkData?.bookmarked
-                  ? "bg-galactic-gold/20 border-galactic-gold/50 text-galactic-gold"
-                  : "border-white/20 text-gray-400 hover:border-galactic-gold/50 hover:text-galactic-gold"
-              }`}
+              className={`action-btn action-btn-bookmark ${bookmarkData?.bookmarked ? "active" : ""}`}
             >
               <Bookmark className={`w-4 h-4 ${bookmarkData?.bookmarked ? "fill-current" : ""}`} />
               {bookmarkData?.bookmarked ? "Saved" : "Save"}
             </button>
           )}
 
-          <div className="flex items-center gap-2 px-4 py-2 rounded-full border border-white/20 text-gray-400 text-sm font-orbitron">
+          <div className="action-btn cursor-default">
             <MessageSquare className="w-4 h-4" />
             {comments.length}
           </div>
@@ -302,7 +293,7 @@ export default function BlogPostPage() {
           {user && !isAuthorOrAdmin && (
             <button
               onClick={() => setShowSuggestForm(!showSuggestForm)}
-              className="flex items-center gap-2 px-4 py-2 rounded-full border border-white/20 text-gray-400 hover:border-galactic-orange/50 hover:text-galactic-orange transition-all text-sm font-orbitron"
+              className={`action-btn ${showSuggestForm ? "active" : ""}`}
             >
               <Lightbulb className="w-4 h-4" />
               Suggest Edit
@@ -314,7 +305,11 @@ export default function BlogPostPage() {
         {isAuthorOrAdmin && (
           <div className="flex gap-3 mb-8">
             <Link href={`/blog/edit/${post.id}`}>
-              <Button size="sm" className="bg-galactic-orange/20 text-galactic-orange border border-galactic-orange/30 hover:bg-galactic-orange hover:text-space-black">
+              <Button
+                size="sm"
+                className="border border-galactic-orange/30 text-galactic-orange hover:bg-galactic-orange hover:text-space-black font-orbitron"
+                style={{ background: "rgba(255,165,0,0.08)" }}
+              >
                 <Pencil className="w-4 h-4 mr-2" /> Edit
               </Button>
             </Link>
@@ -323,6 +318,7 @@ export default function BlogPostPage() {
               variant="destructive"
               onClick={handleDelete}
               disabled={deleteMutation.isPending}
+              className="font-orbitron"
             >
               {deleteMutation.isPending ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -336,48 +332,60 @@ export default function BlogPostPage() {
         {/* Suggest edit form */}
         {showSuggestForm && (
           <div className="glass-effect rounded-xl p-6 mb-8">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-orbitron text-galactic-orange flex items-center gap-2">
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="font-orbitron text-galactic-orange flex items-center gap-2 text-sm font-bold">
                 <Lightbulb className="w-4 h-4" /> Suggest an Edit
               </h3>
-              <button onClick={() => setShowSuggestForm(false)} className="text-gray-400 hover:text-white">
+              <button
+                onClick={() => setShowSuggestForm(false)}
+                className="text-gray-500 hover:text-white transition-colors"
+              >
                 <X className="w-4 h-4" />
               </button>
             </div>
             <div className="space-y-4">
-              <div className="space-y-1">
-                <Label className="text-galactic-orange font-orbitron text-xs">Suggested Title (optional)</Label>
+              <div className="space-y-1 input-glow">
+                <Label className="text-galactic-orange/80 font-orbitron text-xs uppercase tracking-wide">
+                  Suggested Title (optional)
+                </Label>
                 <Input
                   value={suggestTitle}
                   onChange={(e) => setSuggestTitle(e.target.value)}
                   placeholder={post.title}
-                  className="bg-space-dark border-galactic-orange/30 text-white text-sm focus:border-galactic-orange"
+                  className="border-galactic-orange/20 text-white text-sm"
+                  style={{ background: "rgba(0,0,0,0.4)" }}
                 />
               </div>
-              <div className="space-y-1">
-                <Label className="text-galactic-orange font-orbitron text-xs">Suggested Content (optional)</Label>
+              <div className="space-y-1 input-glow">
+                <Label className="text-galactic-orange/80 font-orbitron text-xs uppercase tracking-wide">
+                  Suggested Content (optional)
+                </Label>
                 <Textarea
                   value={suggestContent}
                   onChange={(e) => setSuggestContent(e.target.value)}
                   placeholder="Paste your suggested content here..."
                   rows={4}
-                  className="bg-space-dark border-galactic-orange/30 text-white text-sm focus:border-galactic-orange resize-none"
+                  className="border-galactic-orange/20 text-white text-sm resize-none"
+                  style={{ background: "rgba(0,0,0,0.4)" }}
                 />
               </div>
-              <div className="space-y-1">
-                <Label className="text-galactic-orange font-orbitron text-xs">Reason *</Label>
+              <div className="space-y-1 input-glow">
+                <Label className="text-galactic-orange/80 font-orbitron text-xs uppercase tracking-wide">
+                  Reason *
+                </Label>
                 <Textarea
                   value={suggestReason}
                   onChange={(e) => setSuggestReason(e.target.value)}
                   placeholder="Why would this edit improve the post?"
                   rows={2}
-                  className="bg-space-dark border-galactic-orange/30 text-white text-sm focus:border-galactic-orange resize-none"
+                  className="border-galactic-orange/20 text-white text-sm resize-none"
+                  style={{ background: "rgba(0,0,0,0.4)" }}
                 />
               </div>
               <Button
                 onClick={() => suggestMutation.mutate()}
                 disabled={!suggestReason.trim() || suggestMutation.isPending}
-                className="bg-galactic-orange text-space-black font-orbitron font-bold hover:bg-galactic-gold"
+                className="bg-gradient-to-r from-galactic-orange to-galactic-gold text-space-black font-orbitron font-bold hover:shadow-[0_0_20px_rgba(255,165,0,0.3)] transition-all"
               >
                 {suggestMutation.isPending ? (
                   <Loader2 className="w-4 h-4 animate-spin mr-2" />
@@ -395,7 +403,7 @@ export default function BlogPostPage() {
           className="prose prose-invert prose-orange max-w-none
             prose-headings:font-orbitron prose-headings:text-white
             prose-p:text-gray-300 prose-p:leading-relaxed
-            prose-a:text-galactic-orange prose-a:no-underline hover:prose-a:underline
+            prose-a:text-neon-cyan prose-a:no-underline hover:prose-a:underline
             prose-strong:text-galactic-gold
             prose-code:text-galactic-orange prose-code:bg-space-dark prose-code:px-1 prose-code:rounded
             prose-pre:bg-space-dark prose-pre:border prose-pre:border-white/10
@@ -406,7 +414,7 @@ export default function BlogPostPage() {
         />
 
         {/* Comments section */}
-        <div className="mt-12 pt-8 border-t border-white/10">
+        <div className="mt-14 pt-8 border-t border-white/8">
           <h2 className="text-xl font-orbitron font-bold text-galactic-orange mb-6 flex items-center gap-2">
             <MessageSquare className="w-5 h-5" /> Comments ({comments.length})
           </h2>
@@ -418,12 +426,13 @@ export default function BlogPostPage() {
                 onChange={(e) => setCommentText(e.target.value)}
                 placeholder="Share your thoughts..."
                 rows={3}
-                className="bg-space-dark border-galactic-orange/30 text-white focus:border-galactic-orange resize-none mb-3"
+                className="border-galactic-orange/20 text-white resize-none mb-3"
+                style={{ background: "rgba(255,165,0,0.03)" }}
               />
               <Button
                 onClick={() => commentMutation.mutate()}
                 disabled={!commentText.trim() || commentMutation.isPending}
-                className="bg-galactic-orange text-space-black font-orbitron font-bold hover:bg-galactic-gold"
+                className="bg-gradient-to-r from-galactic-orange to-galactic-gold text-space-black font-orbitron font-bold hover:shadow-[0_0_20px_rgba(255,165,0,0.3)] transition-all"
               >
                 {commentMutation.isPending ? (
                   <Loader2 className="w-4 h-4 animate-spin mr-2" />
@@ -437,7 +446,7 @@ export default function BlogPostPage() {
             <div className="glass-effect rounded-xl p-5 mb-8 text-center">
               <p className="text-gray-400 mb-3">Sign in to leave a comment</p>
               <Link href="/auth">
-                <Button size="sm" className="bg-galactic-orange text-space-black font-orbitron">
+                <Button size="sm" className="bg-galactic-orange text-space-black font-orbitron font-bold hover:bg-galactic-gold">
                   Sign In
                 </Button>
               </Link>
@@ -445,19 +454,19 @@ export default function BlogPostPage() {
           )}
 
           {comments.length === 0 ? (
-            <p className="text-gray-500 text-center py-8">No comments yet. Be the first!</p>
+            <p className="text-gray-600 text-center py-8 text-sm">No comments yet. Be the first!</p>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {comments.map((comment) => (
-                <div key={comment.id} className="glass-effect rounded-xl p-5 group">
+                <div key={comment.id} className="comment-card group">
                   <div className="flex items-start justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-full bg-galactic-orange/20 flex items-center justify-center text-galactic-orange text-xs font-orbitron">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full flex items-center justify-center text-galactic-orange text-xs font-orbitron font-bold" style={{ background: "rgba(255,165,0,0.15)" }}>
                         {comment.username.slice(0, 2).toUpperCase()}
                       </div>
                       <div>
                         <span className="font-orbitron text-sm text-galactic-orange">{comment.username}</span>
-                        <span className="text-gray-500 text-xs ml-2">
+                        <span className="text-gray-600 text-xs ml-2">
                           {format(new Date(comment.createdAt), "MMM d, yyyy")}
                         </span>
                       </div>
@@ -472,7 +481,7 @@ export default function BlogPostPage() {
                       </button>
                     )}
                   </div>
-                  <p className="text-gray-300 text-sm leading-relaxed pl-10">{comment.content}</p>
+                  <p className="text-gray-300 text-sm leading-relaxed pl-11">{comment.content}</p>
                 </div>
               ))}
             </div>
@@ -499,7 +508,6 @@ function markdownToHtml(md: string): string {
   };
 
   for (const rawLine of lines) {
-    // Apply inline formatting
     const line = rawLine
       .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
       .replace(/\*(.+?)\*/g, "<em>$1</em>")
