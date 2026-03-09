@@ -18,7 +18,7 @@ Set the following environment variables in your Render service's **Environment**
 
 | Variable | Description | Example |
 |---|---|---|
-| `MONGODB_URI` | Your MongoDB Atlas connection string | `mongodb+srv://<user>:<password>@cluster0.xxxxx.mongodb.net/?appName=Cluster0` |
+| `MONGODB_URI` | Your MongoDB Atlas connection string | `mongodb+srv://<user>:<password>@cluster0.xxxxx.mongodb.net/tobseytech?retryWrites=true&w=majority&appName=Cluster0` |
 | `SESSION_SECRET` | A long random string for session signing | `some-very-long-random-secret-string-here` |
 | `NODE_ENV` | Set to production | `production` |
 | `PORT` | Port to listen on (Render sets this automatically) | `10000` |
@@ -42,7 +42,16 @@ Set the following environment variables in your Render service's **Environment**
 7. Paste the full URI as the `MONGODB_URI` environment variable in Render
 
 ### 5. First Admin User
-After deployment, register a new account via `/auth`. To make it an admin, connect to your MongoDB Atlas cluster and update the user document:
+
+Set the following additional environment variables so the server creates the primary admin account automatically on first startup:
+
+| Variable | Description | Example |
+|---|---|---|
+| `ADMIN_SEED_EMAIL` | Email for the `tbeetech` admin account (username is always `tbeetech`) | `admin@example.com` |
+| `ADMIN_SEED_PASSWORD` | Password for the `tbeetech` admin account | `change-me-to-a-strong-password` |
+| `ADMIN_DASHBOARD_PASSWORD` | Secondary password required to open `/dashboard` | `change-me-to-a-strong-dashboard-password` |
+
+The `tbeetech` user is created (or promoted to `admin`) automatically when the server starts.  If you prefer to promote an account manually, connect to your MongoDB Atlas cluster and run:
 
 ```
 db.users.updateOne({ username: "your_username" }, { $set: { role: "admin" } })
