@@ -114,66 +114,10 @@ export default function AuthPage() {
                 >
                   <Icon className="w-4 h-4 text-galactic-orange" />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="reg-email" className="text-galactic-orange font-orbitron text-sm">
-                    Email
-                  </Label>
-                  <Input
-                    id="reg-email"
-                    type="email"
-                    value={registerForm.email}
-                    onChange={(e) => setRegisterForm({ ...registerForm, email: e.target.value })}
-                    required
-                    className="bg-space-dark border-galactic-orange/30 text-white focus:border-galactic-orange h-11"
-                    placeholder="you@example.com"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="reg-password" className="text-galactic-orange font-orbitron text-sm">
-                    Password
-                  </Label>
-                  <Input
-                    id="reg-password"
-                    type="password"
-                    value={registerForm.password}
-                    onChange={(e) => setRegisterForm({ ...registerForm, password: e.target.value })}
-                    required
-                    minLength={6}
-                    className="bg-space-dark border-galactic-orange/30 text-white focus:border-galactic-orange h-11"
-                    placeholder="••••••••"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="reg-confirm-password" className="text-galactic-orange font-orbitron text-sm">
-                    Confirm Password
-                  </Label>
-                  <Input
-                    id="reg-confirm-password"
-                    type="password"
-                    value={registerForm.confirmPassword}
-                    onChange={(e) => {
-                      setRegisterForm({ ...registerForm, confirmPassword: e.target.value });
-                      setPasswordMismatch(false);
-                    }}
-                    required
-                    minLength={6}
-                    className={`bg-space-dark border-galactic-orange/30 text-white focus:border-galactic-orange h-11 ${passwordMismatch ? "border-red-500" : ""}`}
-                    placeholder="••••••••"
-                  />
-                  {passwordMismatch && (
-                    <p className="text-red-400 text-xs mt-1">Passwords do not match</p>
-                  )}
-                </div>
-                <Button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full h-11 bg-galactic-orange text-space-black font-orbitron font-bold hover:bg-galactic-gold text-base shadow-[0_0_20px_rgba(255,165,0,0.3)] hover:shadow-[0_0_30px_rgba(255,215,0,0.5)] transition-all"
-                >
-                  {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Create Account"}
-                </Button>
-              </form>
-            </TabsContent>
-          </Tabs>
+                <span className="text-white/80 text-sm">{text}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -315,6 +259,31 @@ export default function AuthPage() {
                       style={{ background: "rgba(0,0,0,0.6)" }}
                       placeholder="Min 6 characters"
                     />
+                  </div>
+                  <div className="space-y-1.5 input-glow">
+                    <Label
+                      htmlFor="reg-confirm-password"
+                      className="text-xs font-semibold text-galactic-orange/90 uppercase tracking-wide"
+                    >
+                      Confirm Password
+                    </Label>
+                    <Input
+                      id="reg-confirm-password"
+                      type="password"
+                      value={registerForm.confirmPassword}
+                      onChange={(e) => {
+                        setRegisterForm({ ...registerForm, confirmPassword: e.target.value });
+                        setPasswordMismatch(false);
+                      }}
+                      required
+                      minLength={6}
+                      className={`h-10 border-galactic-orange/20 text-white text-sm ${passwordMismatch ? "border-red-500" : ""}`}
+                      style={{ background: "rgba(0,0,0,0.6)" }}
+                      placeholder="••••••••"
+                    />
+                    {passwordMismatch && (
+                      <p className="text-red-400 text-xs mt-1">Passwords do not match</p>
+                    )}
                   </div>
                   <Button
                     type="submit"
