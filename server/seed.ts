@@ -12,6 +12,7 @@ import { storage } from "./storage";
  * If the user already exists their role is promoted to "admin" and the
  * password / email are left unchanged.
  */
+
 export async function ensureAdminUser(): Promise<void> {
   const username = "tbeetech";
 
@@ -49,5 +50,30 @@ export async function ensureAdminUser(): Promise<void> {
     console.log(`[seed] Created admin user "${username}".`);
   } catch (err) {
     console.error("[seed] Failed to seed admin user:", err);
+  }
+}
+
+/**
+ * Promotes an existing user identified by email to role="admin".
+ * Called once at server startup after initStorage().
+ * If no user with that email exists yet, the function is a no-op – the
+ * promotion will happen automatically the next time the server starts
+ * after the user has registered.
+ */
+export async function promoteAdminByEmail(email: string): Promise<void> {
+  try {
+    const user = await storage.getUserByEmail(email);
+    if (!user) {
+      console.log(`[seed] No user found with email "${email}" – skipping promotion.`);
+      return;
+    }
+    if (user.role === "admin") {
+      console.log(`[seed] User "${email}" is already an admin – nothing to do.`);
+      return;
+    }
+    await storage.updateUserRole(user.id, "admin");
+    console.log(`[seed] Promoted user "${email}" to admin.`);
+  } catch (err) {
+    console.error(`[seed] Failed to promote user "${email}" to admin:`, err);
   }
 }
