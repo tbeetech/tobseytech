@@ -1,26 +1,48 @@
-import { useState } from "react";
-import { Link } from "wouter";
+import { useState, useEffect, useRef } from "react";
+import { Link, useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, ArrowLeft, Mail } from "lucide-react";
+import { Loader2, ArrowLeft, CheckCircle } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 
 export default function ForgotPasswordPage() {
   const { toast } = useToast();
+  const [, navigate] = useLocation();
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordMismatch, setPasswordMismatch] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
+  const [done, setDone] = useState(false);
+  const redirectTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (redirectTimer.current) clearTimeout(redirectTimer.current);
+    };
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (password !== confirmPassword) {
+      setPasswordMismatch(true);
+      toast({
+        title: "Passwords do not match",
+        description: "Please make sure both password fields match.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setPasswordMismatch(false);
     setLoading(true);
     try {
-      await apiRequest("POST", "/api/auth/forgot-password", { email });
-      setSubmitted(true);
+      await apiRequest("POST", "/api/auth/forgot-password", { email, password });
+      setDone(true);
+      redirectTimer.current = setTimeout(() => navigate("/auth"), 3000);
     } catch (err: any) {
-      toast({ title: "Request failed", description: err.message, variant: "destructive" });
+      toast({ title: "Reset failed", description: err.message, variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -43,26 +65,21 @@ export default function ForgotPasswordPage() {
         </div>
 
         <div className="glass-effect-strong rounded-2xl p-7">
-          {submitted ? (
+          {done ? (
             <div className="text-center space-y-4">
               <div
                 className="w-12 h-12 rounded-full flex items-center justify-center mx-auto"
                 style={{ background: "rgba(255,165,0,0.15)" }}
               >
-                <Mail className="w-6 h-6 text-galactic-orange" />
+                <CheckCircle className="w-6 h-6 text-galactic-orange" />
               </div>
-              <h2 className="text-white font-orbitron font-bold text-lg">Check your email</h2>
+              <h2 className="text-white font-orbitron font-bold text-lg">Password Updated!</h2>
               <p className="text-white/60 text-sm">
-                If that email is registered, a password reset link has been sent. Check your inbox
-                (and spam folder).
+                Your password has been reset. Redirecting to sign in…
               </p>
               <Link href="/auth">
-                <Button
-                  variant="ghost"
-                  className="text-galactic-orange hover:text-galactic-gold text-sm mt-2"
-                >
-                  <ArrowLeft className="w-4 h-4 mr-1" />
-                  Back to Sign In
+                <Button className="bg-gradient-to-r from-galactic-orange to-galactic-gold text-space-black font-orbitron font-bold text-sm mt-2">
+                  Sign In →
                 </Button>
               </Link>
             </div>
@@ -70,7 +87,7 @@ export default function ForgotPasswordPage() {
             <>
               <h2 className="text-white font-orbitron font-bold text-lg mb-1">Reset Password</h2>
               <p className="text-white/50 text-xs mb-6">
-                Enter your account email and we'll send you a reset link.
+                Enter your email and choose a new password.
               </p>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-1.5 input-glow">
@@ -91,12 +108,56 @@ export default function ForgotPasswordPage() {
                     placeholder="you@example.com"
                   />
                 </div>
+                <div className="space-y-1.5 input-glow">
+                  <Label
+                    htmlFor="new-password"
+                    className="text-xs font-semibold text-galactic-orange/90 uppercase tracking-wide"
+                  >
+                    New Password
+                  </Label>
+                  <Input
+                    id="new-password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    minLength={6}
+                    className="h-10 border-galactic-orange/20 text-white text-sm"
+                    style={{ background: "rgba(0,0,0,0.6)" }}
+                    placeholder="Min 6 characters"
+                  />
+                </div>
+                <div className="space-y-1.5 input-glow">
+                  <Label
+                    htmlFor="confirm-new-password"
+                    className="text-xs font-semibold text-galactic-orange/90 uppercase tracking-wide"
+                  >
+                    Confirm Password
+                  </Label>
+                  <Input
+                    id="confirm-new-password"
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => {
+                      setConfirmPassword(e.target.value);
+                      setPasswordMismatch(false);
+                    }}
+                    required
+                    minLength={6}
+                    className={`h-10 border-galactic-orange/20 text-white text-sm${passwordMismatch ? " border-red-500" : ""}`}
+                    style={{ background: "rgba(0,0,0,0.6)" }}
+                    placeholder="••••••••"
+                  />
+                  {passwordMismatch && (
+                    <p className="text-red-400 text-xs mt-1">Passwords do not match</p>
+                  )}
+                </div>
                 <Button
                   type="submit"
                   disabled={loading}
                   className="w-full h-10 bg-gradient-to-r from-galactic-orange to-galactic-gold text-space-black font-orbitron font-bold text-sm transition-all mt-2 hover:shadow-[0_0_25px_rgba(255,165,0,0.4)]"
                 >
-                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Send Reset Link →"}
+                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Reset Password →"}
                 </Button>
               </form>
               <div className="mt-4 text-center">
