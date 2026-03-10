@@ -23,6 +23,10 @@ Set the following environment variables in your Render service's **Environment**
 | `NODE_ENV` | Set to production | `production` |
 | `PORT` | Port to listen on (Render sets this automatically) | `10000` |
 
+> **Important:** The server automatically sets Express's `trust proxy` to `1` so that session
+> cookies and IP-based rate limiting work correctly when running behind Render's reverse proxy.
+> No additional configuration is needed for this.
+
 ### 3. Optional Environment Variables (for email / contact form)
 
 | Variable | Description |

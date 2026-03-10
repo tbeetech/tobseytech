@@ -9,6 +9,15 @@ import { initStorage, storage } from "./storage";
 import { ensureAdminUser } from "./seed";
 
 const app = express();
+
+// Trust the first proxy hop (required on Render and other PaaS platforms that
+// sit behind a reverse-proxy).  Without this:
+//  • req.secure is always false → express-session never sends the `secure` cookie
+//    in production, so sessions are lost after every request.
+//  • req.ip is undefined → express-rate-limit throws / rate-limits all users
+//    under the same "undefined" key, breaking per-IP limiting.
+app.set("trust proxy", 1);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
@@ -116,8 +125,15 @@ app.use((req, res, next) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
 
-    res.status(status).json({ message });
-    throw err;
+    // Log the error server-side for diagnostics
+    console.error(err);
+
+    // Only send a response if one hasn't been sent yet.  Re-throwing after
+    // res.json() would cause finalhandler to call req.socket.destroy(),
+    // resulting in ERR_CONNECTION_CLOSED on the client.
+    if (!res.headersSent) {
+      res.status(status).json({ message });
+    }
   });
 
   // importantly only setup vite in development and after
