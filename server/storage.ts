@@ -33,6 +33,10 @@ export interface IStorage {
   searchUsers(query: string): Promise<User[]>;
   getAllUsers(): Promise<User[]>;
   updateUserRole(id: string, role: "user" | "admin"): Promise<User | undefined>;
+  setPasswordResetToken(userId: string, token: string, expiry: Date): Promise<void>;
+  getUserByResetToken(token: string): Promise<User | undefined>;
+  clearPasswordResetToken(userId: string): Promise<void>;
+  updateUserPassword(userId: string, hashedPassword: string): Promise<void>;
 
   // Contact methods
   createContact(contact: InsertContact): Promise<Contact>;
@@ -112,6 +116,7 @@ export class MemStorage implements IStorage {
   private editSuggestions: Map<string, EditSuggestion>;
   private friendships: Map<string, Friendship>;
   private messages: Map<string, Message>;
+  private resetTokens: Map<string, { userId: string; expiry: Date }>;
 
   constructor() {
     this.users = new Map();
@@ -125,6 +130,7 @@ export class MemStorage implements IStorage {
     this.editSuggestions = new Map();
     this.friendships = new Map();
     this.messages = new Map();
+    this.resetTokens = new Map();
 
     // Initialize with some sample data
     this.initializeSampleData();
@@ -279,6 +285,35 @@ export class MemStorage implements IStorage {
     const updated = { ...user, role };
     this.users.set(id, updated);
     return updated;
+  }
+
+  async setPasswordResetToken(userId: string, token: string, expiry: Date): Promise<void> {
+    this.resetTokens.set(token, { userId, expiry });
+  }
+
+  async getUserByResetToken(token: string): Promise<User | undefined> {
+    const entry = this.resetTokens.get(token);
+    if (!entry) return undefined;
+    if (entry.expiry < new Date()) {
+      this.resetTokens.delete(token);
+      return undefined;
+    }
+    return this.users.get(entry.userId);
+  }
+
+  async clearPasswordResetToken(userId: string): Promise<void> {
+    for (const [token, entry] of Array.from(this.resetTokens.entries())) {
+      if (entry.userId === userId) {
+        this.resetTokens.delete(token);
+      }
+    }
+  }
+
+  async updateUserPassword(userId: string, hashedPassword: string): Promise<void> {
+    const user = this.users.get(userId);
+    if (user) {
+      this.users.set(userId, { ...user, password: hashedPassword });
+    }
   }
 
   // Contact methods
