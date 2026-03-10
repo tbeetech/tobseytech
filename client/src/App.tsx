@@ -13,6 +13,8 @@ import ContactPage from "@/pages/contact";
 import BookDemoPage from "@/pages/book-demo";
 import CaseStudiesPage from "@/pages/case-studies";
 import AuthPage from "@/pages/auth";
+import ForgotPasswordPage from "@/pages/forgot-password";
+import ResetPasswordPage from "@/pages/reset-password";
 import BlogPage from "@/pages/blog";
 import BlogPostPage from "@/pages/blog-post";
 import BlogEditorPage from "@/pages/blog-editor";
@@ -29,6 +31,8 @@ function Router() {
       <Route path="/book-demo" component={BookDemoPage} />
       <Route path="/case-studies" component={CaseStudiesPage} />
       <Route path="/auth" component={AuthPage} />
+      <Route path="/forgot-password" component={ForgotPasswordPage} />
+      <Route path="/reset-password/:token" component={ResetPasswordPage} />
       <Route path="/blog" component={BlogPage} />
       <Route path="/blog/new" component={BlogEditorPage} />
       <Route path="/blog/edit/:id" component={BlogEditorPage} />

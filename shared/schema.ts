@@ -9,6 +9,18 @@ export const insertUserSchema = z.object({
   role: z.enum(["user", "admin"]).default("user"),
 });
 
+export const forgotPasswordSchema = z.object({
+  email: z.string().email(),
+});
+
+export const resetPasswordSchema = z.object({
+  token: z.string().min(1),
+  password: z.string().min(6),
+});
+
+export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
+export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
+
 export const loginSchema = z.object({
   username: z.string().min(1),
   password: z.string().min(1),

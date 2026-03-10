@@ -201,6 +201,26 @@ export class MongoStorage {
     return doc ? docToUser(doc) : undefined;
   }
 
+  async setPasswordResetToken(userId: string, token: string, expiry: Date): Promise<void> {
+    await UserModel.findByIdAndUpdate(userId, { resetToken: token, resetTokenExpiry: expiry });
+  }
+
+  async getUserByResetToken(token: string): Promise<User | undefined> {
+    const doc = await UserModel.findOne({
+      resetToken: token,
+      resetTokenExpiry: { $gt: new Date() },
+    }).lean();
+    return doc ? docToUser(doc) : undefined;
+  }
+
+  async clearPasswordResetToken(userId: string): Promise<void> {
+    await UserModel.findByIdAndUpdate(userId, { resetToken: null, resetTokenExpiry: null });
+  }
+
+  async updateUserPassword(userId: string, hashedPassword: string): Promise<void> {
+    await UserModel.findByIdAndUpdate(userId, { password: hashedPassword });
+  }
+
   // ─── Contact methods ─────────────────────────────────────────────────────
 
   async createContact(insertContact: InsertContact): Promise<Contact> {

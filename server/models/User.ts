@@ -1,7 +1,10 @@
 import mongoose, { Schema, Document } from "mongoose";
 import type { User } from "@shared/schema";
 
-export interface UserDocument extends Omit<User, "id">, Document {}
+export interface UserDocument extends Omit<User, "id">, Document {
+  resetToken?: string | null;
+  resetTokenExpiry?: Date | null;
+}
 
 const userSchema = new Schema<UserDocument>(
   {
@@ -12,6 +15,8 @@ const userSchema = new Schema<UserDocument>(
     displayName: { type: String, default: "" },
     bio: { type: String, default: "" },
     avatarUrl: { type: String, default: null },
+    resetToken: { type: String, default: null },
+    resetTokenExpiry: { type: Date, default: null },
   },
   { timestamps: { createdAt: "createdAt" } }
 );
