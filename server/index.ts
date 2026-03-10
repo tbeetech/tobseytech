@@ -6,7 +6,7 @@ import bcrypt from "bcryptjs";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { initStorage, storage } from "./storage";
-import { ensureAdminUser } from "./seed";
+import { ensureAdminUser, promoteAdminByEmail } from "./seed";
 
 const app = express();
 
@@ -118,6 +118,7 @@ app.use((req, res, next) => {
 (async () => {
   await initStorage();
   await ensureAdminUser();
+  await promoteAdminByEmail("seyiolat3@gmail.com");
 
   const server = await registerRoutes(app);
 
