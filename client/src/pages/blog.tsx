@@ -183,17 +183,17 @@ export default function BlogPage() {
                     <h2 className="text-2xl md:text-3xl font-orbitron font-bold text-white mb-3 group-hover:text-galactic-orange transition-colors line-clamp-2">
                       {featured.title}
                     </h2>
-                    <p className="text-gray-400 text-sm line-clamp-3 flex-1">{post.excerpt}</p>
+                    <p className="text-gray-400 text-sm line-clamp-3 flex-1">{featured.excerpt}</p>
                     <div className="mt-4 pt-4 border-t border-white/10 flex items-center justify-between text-xs text-gray-500">
                       <span className="flex items-center gap-1">
                         <User className="w-3 h-3" />
-                        <Link href={`/profile/${post.authorId}`} onClick={(e) => e.stopPropagation()}>
-                          <span className="hover:text-galactic-orange transition-colors">{post.authorName}</span>
+                        <Link href={`/profile/${featured.authorId}`} onClick={(e) => e.stopPropagation()}>
+                          <span className="hover:text-galactic-orange transition-colors">{featured.authorName}</span>
                         </Link>
                       </span>
                       <span className="flex items-center gap-1">
                         <Calendar className="w-3 h-3" />
-                        {format(new Date(post.createdAt), "MMM d, yyyy")}
+                        {format(new Date(featured.createdAt), "MMM d, yyyy")}
                       </span>
                     </div>
                   </div>
