@@ -5,7 +5,6 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/hooks/use-auth";
 import FloatingWhatsApp from "@/components/FloatingWhatsApp";
-import LeadMagnetModal from "@/components/LeadMagnetModal";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import PricingPage from "@/pages/pricing";
@@ -51,7 +50,6 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <AuthProvider>
-          <LeadMagnetModal />
           <Toaster />
           <Router />
           <FloatingWhatsApp />

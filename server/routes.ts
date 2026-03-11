@@ -137,24 +137,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/auth/forgot-password", authRateLimiter, async (req, res) => {
     try {
-      const { email } = forgotPasswordSchema.parse(req.body);
+      const { email, password } = forgotPasswordSchema.parse(req.body);
       // Always respond 200 to prevent email enumeration
       const user = await storage.getUserByEmail(email);
       if (user) {
-        const token = randomBytes(32).toString("hex");
-        const expiry = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
-        await storage.setPasswordResetToken(user.id, token, expiry);
-
-        const appUrl = process.env.APP_URL || "http://localhost:5000";
-        const resetLink = `${appUrl}/reset-password/${token}`;
-
-        await getMailer().sendMail({
-          from: process.env.EMAIL_FROM,
-          to: user.email,
-          subject: "TOBSEYTECH – Password Reset",
-          text: `You requested a password reset.\n\nClick the link below to set a new password (valid for 1 hour):\n\n${resetLink}\n\nIf you did not request this, you can safely ignore this email.`,
-          html: `<p>You requested a password reset.</p><p><a href="${resetLink}">Reset your password</a> (link valid for 1 hour)</p><p>If you did not request this, you can safely ignore this email.</p>`,
-        });
+        const hashed = await bcrypt.hash(password, 12);
+        await storage.updateUserPassword(user.id, hashed);
       }
       res.json({ ok: true });
     } catch (error) {
