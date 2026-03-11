@@ -244,6 +244,7 @@ export interface Friendship {
 export const insertMessageSchema = z.object({
   recipientId: z.string().min(1),
   content: z.string().min(1).max(5000),
+  replyToId: z.string().optional(),
 });
 
 export type InsertMessage = z.infer<typeof insertMessageSchema>;
@@ -254,5 +255,6 @@ export interface Message {
   recipientId: string;
   content: string;
   read: boolean;
+  replyToId?: string;
   createdAt: Date;
 }

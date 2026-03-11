@@ -153,6 +153,7 @@ function docToMessage(doc: any): Message {
     recipientId: doc.recipientId,
     content: doc.content,
     read: doc.read,
+    ...(doc.replyToId ? { replyToId: doc.replyToId } : {}),
     createdAt: doc.createdAt,
   };
 }

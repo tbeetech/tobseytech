@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Send, Search, UserPlus, Check, X, MessageCircle, MessageSquare } from "lucide-react";
+import { Loader2, Send, Search, UserPlus, Check, X, MessageCircle, MessageSquare, Reply } from "lucide-react";
 import { Link } from "wouter";
 import { format } from "date-fns";
 
@@ -28,6 +28,7 @@ interface Message {
   recipientId: string;
   content: string;
   read: boolean;
+  replyToId?: string;
   createdAt: string;
 }
 
@@ -52,10 +53,16 @@ export default function ChatPage() {
   const [messageText, setMessageText] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [directChatUser, setDirectChatUser] = useState<SafeUser | null>(null);
+  const [replyingTo, setReplyingTo] = useState<Message | null>(null);
+  const [hoveredMessageId, setHoveredMessageId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const wsRef = useRef<WebSocket | null>(null);
+  const selectedUserIdRef = useRef<string | null>(null);
 
-  // WebSocket setup for real-time messages
+  // Keep ref in sync with state so WebSocket handler always sees latest value
+  selectedUserIdRef.current = selectedUserId;
+
+  // WebSocket setup for real-time messages — only reconnects when user changes
   useEffect(() => {
     if (!user) return;
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
@@ -70,16 +77,17 @@ export default function ChatPage() {
       const data = JSON.parse(event.data);
       if (data.type === "new_message") {
         queryClient.invalidateQueries({ queryKey: ["/api/messages/conversations"] });
-        if (selectedUserId === data.message.senderId) {
-          queryClient.invalidateQueries({ queryKey: ["/api/messages", selectedUserId] });
+        const currentSelectedId = selectedUserIdRef.current;
+        if (currentSelectedId === data.message.senderId) {
+          queryClient.invalidateQueries({ queryKey: ["/api/messages", currentSelectedId] });
         }
       }
     };
 
     return () => ws.close();
-  }, [user, selectedUserId, queryClient]);
+  }, [user, queryClient]);
 
-  // Auto-scroll messages
+  // Scroll to bottom when a different conversation is opened (before messages load)
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [selectedUserId]);
@@ -106,6 +114,13 @@ export default function ChatPage() {
     enabled: !!user && !!selectedUserId,
     refetchInterval: selectedUserId ? 5000 : false,
   });
+
+  // Scroll to bottom whenever the messages list updates
+  useEffect(() => {
+    if (messages.length > 0) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages]);
 
   const { data: friends = [] } = useQuery<SafeUser[]>({
     queryKey: ["/api/friends"],
@@ -141,14 +156,19 @@ export default function ChatPage() {
   const sendMessageMutation = useMutation({
     mutationFn: async () => {
       if (!selectedUserId || !messageText.trim()) return;
-      const res = await apiRequest("POST", "/api/messages", {
+      const payload: Record<string, string> = {
         recipientId: selectedUserId,
         content: messageText.trim(),
-      });
+      };
+      if (replyingTo) {
+        payload.replyToId = replyingTo.id;
+      }
+      const res = await apiRequest("POST", "/api/messages", payload);
       return res.json();
     },
     onSuccess: () => {
       setMessageText("");
+      setReplyingTo(null);
       queryClient.invalidateQueries({ queryKey: ["/api/messages", selectedUserId] });
       queryClient.invalidateQueries({ queryKey: ["/api/messages/conversations"] });
       setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
@@ -405,19 +425,64 @@ export default function ChatPage() {
                 <div className="flex-1 overflow-y-auto p-4 space-y-3">
                   {messages.map((msg) => {
                     const isMe = msg.senderId === user.id;
+                    const repliedToMsg = msg.replyToId
+                      ? messages.find((m) => m.id === msg.replyToId)
+                      : null;
                     return (
-                      <div key={msg.id} className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
-                        <div
-                          className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl text-sm ${
-                            isMe
-                              ? "bg-galactic-orange text-space-black rounded-br-sm"
-                              : "bg-white/10 text-white rounded-bl-sm"
-                          }`}
-                        >
-                          <p>{msg.content}</p>
-                          <p className={`text-xs mt-1 ${isMe ? "text-space-black/60" : "text-gray-500"}`}>
-                            {format(new Date(msg.createdAt), "HH:mm")}
-                          </p>
+                      <div
+                        key={msg.id}
+                        className={`flex ${isMe ? "justify-end" : "justify-start"}`}
+                        onMouseEnter={() => setHoveredMessageId(msg.id)}
+                        onMouseLeave={() => setHoveredMessageId(null)}
+                      >
+                        <div className="flex items-end gap-1">
+                          {/* Reply button for received messages */}
+                          {!isMe && hoveredMessageId === msg.id && (
+                            <button
+                              onClick={() => setReplyingTo(msg)}
+                              className="text-gray-500 hover:text-galactic-orange transition-colors mb-1 shrink-0"
+                              title="Reply"
+                            >
+                              <Reply className="w-4 h-4" />
+                            </button>
+                          )}
+                          <div
+                            className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl text-sm ${
+                              isMe
+                                ? "bg-galactic-orange text-space-black rounded-br-sm"
+                                : "bg-white/10 text-white rounded-bl-sm"
+                            }`}
+                          >
+                            {/* Quoted reply context */}
+                            {repliedToMsg && (
+                              <div
+                                className={`mb-2 px-2 py-1 rounded text-xs border-l-2 ${
+                                  isMe
+                                    ? "border-space-black/40 bg-space-black/20 text-space-black/70"
+                                    : "border-galactic-orange/50 bg-white/5 text-gray-400"
+                                }`}
+                              >
+                                <span className="font-semibold">
+                                  {repliedToMsg.senderId === user.id ? "You" : selectedUser?.displayName || selectedUser?.username || "Unknown"}
+                                </span>
+                                <p className="truncate">{repliedToMsg.content}</p>
+                              </div>
+                            )}
+                            <p>{msg.content}</p>
+                            <p className={`text-xs mt-1 ${isMe ? "text-space-black/60" : "text-gray-500"}`}>
+                              {format(new Date(msg.createdAt), "HH:mm")}
+                            </p>
+                          </div>
+                          {/* Reply button for sent messages */}
+                          {isMe && hoveredMessageId === msg.id && (
+                            <button
+                              onClick={() => setReplyingTo(msg)}
+                              className="text-gray-500 hover:text-galactic-orange transition-colors mb-1 shrink-0"
+                              title="Reply"
+                            >
+                              <Reply className="w-4 h-4" />
+                            </button>
+                          )}
                         </div>
                       </div>
                     );
@@ -425,13 +490,42 @@ export default function ChatPage() {
                   <div ref={messagesEndRef} />
                 </div>
 
+                {/* Reply preview bar */}
+                {replyingTo && (
+                  <div className="px-4 py-2 border-t border-white/10 bg-white/5 flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <Reply className="w-4 h-4 text-galactic-orange shrink-0" />
+                      <div className="min-w-0">
+                        <p className="text-xs text-galactic-orange font-medium">
+                          Replying to{" "}
+                          {replyingTo.senderId === user.id
+                            ? "yourself"
+                            : selectedUser?.displayName || selectedUser?.username || "Unknown"}
+                        </p>
+                        <p className="text-xs text-gray-400 truncate">{replyingTo.content}</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setReplyingTo(null)}
+                      className="text-gray-500 hover:text-white shrink-0"
+                      title="Cancel reply"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
+
                 {/* Input */}
                 <div className="p-4 border-t border-white/10 flex gap-3">
                   <Input
                     value={messageText}
                     onChange={(e) => setMessageText(e.target.value)}
                     placeholder="Type a message..."
-                    onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendMessageMutation.mutate()}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !e.shiftKey && !sendMessageMutation.isPending) {
+                        sendMessageMutation.mutate();
+                      }
+                    }}
                     className="flex-1 bg-space-dark border-galactic-orange/30 text-white focus:border-galactic-orange"
                   />
                   <Button

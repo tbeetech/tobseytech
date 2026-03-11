@@ -9,6 +9,7 @@ const messageSchema = new Schema<MessageDocument>(
     recipientId: { type: String, required: true },
     content: { type: String, required: true },
     read: { type: Boolean, default: false },
+    replyToId: { type: String, default: null },
   },
   { timestamps: { createdAt: "createdAt" } }
 );
