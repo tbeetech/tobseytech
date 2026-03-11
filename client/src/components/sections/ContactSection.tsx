@@ -5,7 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { type InsertContact } from "@shared/schema";
-import { Mail, MessageCircle, Twitter, Linkedin } from "lucide-react";
+import { Mail, MessageCircle, Linkedin } from "lucide-react";
 
 export default function ContactSection() {
   const [formData, setFormData] = useState({ name: "", email: "", message: "" });
@@ -105,10 +105,7 @@ export default function ContactSection() {
               </a>
             </div>
             <div className="flex items-center space-x-4">
-              <a href="#" className="text-neon-yellow" aria-label="Twitter">
-                <Twitter className="w-6 h-6" />
-              </a>
-              <a href="#" className="text-neon-yellow" aria-label="LinkedIn">
+              <a href="https://www.linkedin.com/in/oyebade-tobi/" target="_blank" rel="noopener noreferrer" className="text-neon-yellow" aria-label="LinkedIn">
                 <Linkedin className="w-6 h-6" />
               </a>
             </div>
