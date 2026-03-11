@@ -53,7 +53,7 @@ Set the following additional environment variables so the server creates the pri
 |---|---|---|
 | `ADMIN_SEED_EMAIL` | Email for the `tbeetech` admin account (username is always `tbeetech`) | `admin@example.com` |
 | `ADMIN_SEED_PASSWORD` | Password for the `tbeetech` admin account | `change-me-to-a-strong-password` |
-| `ADMIN_DASHBOARD_PASSWORD` | Secondary password required to open `/dashboard` | `change-me-to-a-strong-dashboard-password` |
+| `ADMIN_DASHBOARD_PASSWORD` | Secondary password required to open `/dashboard` — set this in your Render **Environment** tab, never in source code | `change-me-to-a-strong-dashboard-password` |
 
 The `tbeetech` user is created (or promoted to `admin`) automatically when the server starts.  If you prefer to promote an account manually, connect to your MongoDB Atlas cluster and run:
 
