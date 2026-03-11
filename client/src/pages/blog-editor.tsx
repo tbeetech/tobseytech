@@ -72,14 +72,14 @@ export default function BlogEditorPage() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     select: (data: any) => {
       setForm({
-        title: data.title,
-        slug: data.slug,
-        excerpt: data.excerpt,
-        content: data.content,
+        title: data.title ?? "",
+        slug: data.slug ?? "",
+        excerpt: data.excerpt ?? "",
+        content: data.content ?? "",
         coverImage: data.coverImage ?? "",
-        tags: data.tags.join(", "),
-        category: data.category,
-        published: data.published,
+        tags: Array.isArray(data.tags) ? data.tags.join(", ") : "",
+        category: data.category ?? "",
+        published: data.published ?? false,
       });
       setSlugManuallyEdited(true);
       return data;
@@ -103,7 +103,7 @@ export default function BlogEditorPage() {
       navigate(`/blog/${data.slug}`);
     },
     onError: (err: any) => {
-      toast({ title: "Save failed", description: err.message, variant: "destructive" });
+      toast({ title: "Save failed", description: err?.message || "An error occurred. Please try again.", variant: "destructive" });
     },
   });
 

@@ -1,5 +1,6 @@
 import express, { type Request, Response, NextFunction } from "express";
 import session from "express-session";
+import createMemoryStore from "memorystore";
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import bcrypt from "bcryptjs";
@@ -21,11 +22,16 @@ app.set("trust proxy", 1);
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Use memorystore to avoid the default MemoryStore memory leak in production.
+// Sessions are pruned of expired entries every 24 h.
+const MemoryStore = createMemoryStore(session);
+
 app.use(
   session({
     secret: process.env.SESSION_SECRET || "tobseytech-secret-key",
     resave: false,
     saveUninitialized: false,
+    store: new MemoryStore({ checkPeriod: 86400000 }),
     cookie: {
       secure: process.env.NODE_ENV === "production",
       httpOnly: true,
