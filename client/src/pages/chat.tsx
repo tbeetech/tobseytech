@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Send, Search, UserPlus, Check, X, MessageCircle } from "lucide-react";
+import { Loader2, Send, Search, UserPlus, Check, X, MessageCircle, MessageSquare } from "lucide-react";
 import { Link } from "wouter";
 import { format } from "date-fns";
 
@@ -51,6 +51,7 @@ export default function ChatPage() {
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [messageText, setMessageText] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [directChatUser, setDirectChatUser] = useState<SafeUser | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const wsRef = useRef<WebSocket | null>(null);
 
@@ -184,7 +185,8 @@ export default function ChatPage() {
 
   const selectedUser =
     friends.find((f) => f.id === selectedUserId) ||
-    conversations.find((c) => c.user.id === selectedUserId)?.user;
+    conversations.find((c) => c.user.id === selectedUserId)?.user ||
+    (directChatUser?.id === selectedUserId ? directChatUser : null);
 
   if (authLoading) {
     return (
@@ -218,19 +220,19 @@ export default function ChatPage() {
             {/* Search users */}
             <div className="glass-effect rounded-xl p-4">
               <h3 className="font-orbitron text-galactic-orange text-sm mb-3 flex items-center gap-2">
-                <UserPlus className="w-4 h-4" /> Find Friends
+                <Search className="w-4 h-4" /> Find People
               </h3>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <Input
-                  placeholder="Search users..."
+                  placeholder="Search users…"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-9 bg-space-dark border-galactic-orange/30 text-white text-sm focus:border-galactic-orange"
                 />
               </div>
               {searchQuery.length >= 2 && (
-                <div className="mt-2 space-y-1 max-h-40 overflow-y-auto">
+                <div className="mt-2 space-y-1 max-h-48 overflow-y-auto">
                   {searchResults
                     .filter((u) => u.id !== user.id)
                     .map((u) => (
@@ -244,17 +246,36 @@ export default function ChatPage() {
                           </Avatar>
                           <span className="text-sm text-white truncate">{u.displayName || u.username}</span>
                         </div>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => addFriendMutation.mutate(u.id)}
-                          disabled={addFriendMutation.isPending}
-                          className="text-galactic-orange hover:text-galactic-gold shrink-0 h-7 px-2"
-                        >
-                          <UserPlus className="w-3 h-3" />
-                        </Button>
+                        <div className="flex gap-1 shrink-0">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            title="Message"
+                            onClick={() => {
+                              setDirectChatUser(u);
+                              setSelectedUserId(u.id);
+                              setSearchQuery("");
+                            }}
+                            className="text-blue-400 hover:text-blue-300 h-7 px-2"
+                          >
+                            <MessageSquare className="w-3 h-3" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            title="Add Friend"
+                            onClick={() => addFriendMutation.mutate(u.id)}
+                            disabled={addFriendMutation.isPending}
+                            className="text-galactic-orange hover:text-galactic-gold h-7 px-2"
+                          >
+                            <UserPlus className="w-3 h-3" />
+                          </Button>
+                        </div>
                       </div>
                     ))}
+                  {searchResults.filter((u) => u.id !== user.id).length === 0 && (
+                    <p className="text-gray-500 text-xs text-center py-2">No users found</p>
+                  )}
                 </div>
               )}
             </div>
@@ -431,7 +452,7 @@ export default function ChatPage() {
                 <MessageCircle className="w-16 h-16 text-galactic-orange/30" />
                 <h2 className="text-xl font-orbitron text-galactic-orange/60">Select a conversation</h2>
                 <p className="text-gray-500 text-sm">
-                  Search for users to add as friends and start chatting.
+                  Search for any user and tap the Message button to chat directly, or add them as a friend first.
                 </p>
               </div>
             )}

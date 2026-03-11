@@ -24,6 +24,7 @@ import {
   Shield,
   BarChart3,
   RefreshCw,
+  Search,
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { format } from "date-fns";
@@ -86,6 +87,7 @@ export default function DashboardPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isVerified, setIsVerified] = useState(false);
   const [verifying, setVerifying] = useState(false);
+  const [userSearchQuery, setUserSearchQuery] = useState("");
 
   // Verify admin dashboard password
   const handleVerify = async (e: React.FormEvent) => {
@@ -490,72 +492,97 @@ export default function DashboardPage() {
                   <RefreshCw className="w-4 h-4" />
                 </Button>
               </div>
+              {/* User search */}
+              <div className="relative mb-4">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Input
+                  placeholder="Search by username, display name, or email…"
+                  value={userSearchQuery}
+                  onChange={(e) => setUserSearchQuery(e.target.value)}
+                  className="pl-9 bg-space-dark border-galactic-orange/30 text-white text-sm focus:border-galactic-orange"
+                />
+              </div>
               {usersLoading ? (
                 <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-galactic-orange" /></div>
               ) : allUsers.length === 0 ? (
                 <p className="text-gray-400 text-sm text-center py-8">No users found.</p>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="text-gray-400 border-b border-white/10">
-                        <th className="text-left pb-3 font-orbitron text-xs">Username</th>
-                        <th className="text-left pb-3 font-orbitron text-xs hidden md:table-cell">Display Name</th>
-                        <th className="text-left pb-3 font-orbitron text-xs hidden sm:table-cell">Joined</th>
-                        <th className="text-left pb-3 font-orbitron text-xs">Role</th>
-                        <th className="text-right pb-3 font-orbitron text-xs">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-white/5">
-                      {allUsers.map((u) => (
-                        <tr key={u.id} className="group hover:bg-white/5 transition-colors">
-                          <td className="py-3 pr-4">
-                            <Link href={`/profile/${u.id}`}>
-                              <span className="text-white hover:text-galactic-orange transition-colors cursor-pointer">
-                                @{u.username}
-                              </span>
-                            </Link>
-                          </td>
-                          <td className="py-3 pr-4 hidden md:table-cell text-gray-400">
-                            {u.displayName || "—"}
-                          </td>
-                          <td className="py-3 pr-4 hidden sm:table-cell text-gray-500 text-xs">
-                            {format(new Date(u.createdAt), "MMM d, yyyy")}
-                          </td>
-                          <td className="py-3 pr-4">
-                            <Badge
-                              className={u.role === "admin"
-                                ? "bg-galactic-orange/20 text-galactic-orange border-galactic-orange/30 text-xs"
-                                : "bg-white/10 text-gray-300 border-white/20 text-xs"}
-                            >
-                              {u.role}
-                            </Badge>
-                          </td>
-                          <td className="py-3">
-                            <div className="flex items-center gap-1 justify-end">
-                              {u.id !== user.id && (
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  onClick={() =>
-                                    updateRoleMutation.mutate({
-                                      id: u.id,
-                                      role: u.role === "admin" ? "user" : "admin",
-                                    })
-                                  }
-                                  disabled={updateRoleMutation.isPending}
-                                  className="text-galactic-orange hover:text-galactic-gold h-7 px-2 text-xs font-orbitron"
+                (() => {
+                  const q = userSearchQuery.toLowerCase().trim();
+                  const filteredUsers = q
+                    ? allUsers.filter(
+                        (u) =>
+                          u.username.toLowerCase().includes(q) ||
+                          (u.displayName && u.displayName.toLowerCase().includes(q)) ||
+                          (u.email && u.email.toLowerCase().includes(q))
+                      )
+                    : allUsers;
+                  return filteredUsers.length === 0 ? (
+                    <p className="text-gray-400 text-sm text-center py-8">No users match "{userSearchQuery}".</p>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="text-gray-400 border-b border-white/10">
+                            <th className="text-left pb-3 font-orbitron text-xs">Username</th>
+                            <th className="text-left pb-3 font-orbitron text-xs hidden md:table-cell">Display Name</th>
+                            <th className="text-left pb-3 font-orbitron text-xs hidden sm:table-cell">Joined</th>
+                            <th className="text-left pb-3 font-orbitron text-xs">Role</th>
+                            <th className="text-right pb-3 font-orbitron text-xs">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-white/5">
+                          {filteredUsers.map((u) => (
+                            <tr key={u.id} className="group hover:bg-white/5 transition-colors">
+                              <td className="py-3 pr-4">
+                                <Link href={`/profile/${u.id}`}>
+                                  <span className="text-white hover:text-galactic-orange transition-colors cursor-pointer">
+                                    @{u.username}
+                                  </span>
+                                </Link>
+                              </td>
+                              <td className="py-3 pr-4 hidden md:table-cell text-gray-400">
+                                {u.displayName || "—"}
+                              </td>
+                              <td className="py-3 pr-4 hidden sm:table-cell text-gray-500 text-xs">
+                                {format(new Date(u.createdAt), "MMM d, yyyy")}
+                              </td>
+                              <td className="py-3 pr-4">
+                                <Badge
+                                  className={u.role === "admin"
+                                    ? "bg-galactic-orange/20 text-galactic-orange border-galactic-orange/30 text-xs"
+                                    : "bg-white/10 text-gray-300 border-white/20 text-xs"}
                                 >
-                                  {u.role === "admin" ? "Demote" : "Promote"}
-                                </Button>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                                  {u.role}
+                                </Badge>
+                              </td>
+                              <td className="py-3">
+                                <div className="flex items-center gap-1 justify-end">
+                                  {u.id !== user.id && (
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() =>
+                                        updateRoleMutation.mutate({
+                                          id: u.id,
+                                          role: u.role === "admin" ? "user" : "admin",
+                                        })
+                                      }
+                                      disabled={updateRoleMutation.isPending}
+                                      className="text-galactic-orange hover:text-galactic-gold h-7 px-2 text-xs font-orbitron"
+                                    >
+                                      {u.role === "admin" ? "Demote" : "Make Admin"}
+                                    </Button>
+                                  )}
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  );
+                })()
               )}
             </div>
           </TabsContent>
