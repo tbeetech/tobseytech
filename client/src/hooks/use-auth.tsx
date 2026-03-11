@@ -37,12 +37,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (username: string, password: string) => {
     const res = await apiRequest("POST", "/api/auth/login", { username, password });
     const data = await res.json();
+    if (!data || !data.id || !data.username) {
+      throw new Error("Authentication failed: server returned an unexpected response");
+    }
     setUser(data);
   };
 
   const register = async (username: string, email: string, password: string) => {
     const res = await apiRequest("POST", "/api/auth/register", { username, email, password });
     const data = await res.json();
+    if (!data || !data.id || !data.username) {
+      throw new Error("Registration failed: server returned an unexpected response");
+    }
     setUser(data);
   };
 

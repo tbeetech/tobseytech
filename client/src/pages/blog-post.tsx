@@ -66,6 +66,7 @@ export default function BlogPostPage() {
     queryFn: async () => {
       if (!post) return { count: 0, liked: false };
       const res = await fetch(`/api/blog/${post.id}/likes`, { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to fetch likes");
       return res.json();
     },
     enabled: !!post,
@@ -76,6 +77,7 @@ export default function BlogPostPage() {
     queryFn: async () => {
       if (!post || !user) return { bookmarked: false };
       const res = await fetch(`/api/blog/${post.id}/bookmark`, { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to check bookmark");
       return res.json();
     },
     enabled: !!post && !!user,
@@ -86,6 +88,7 @@ export default function BlogPostPage() {
     queryFn: async () => {
       if (!post) return [];
       const res = await fetch(`/api/blog/${post.id}/comments`, { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to fetch comments");
       return res.json();
     },
     enabled: !!post,

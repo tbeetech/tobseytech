@@ -30,7 +30,7 @@ export default function AuthPage() {
       await login(loginForm.username, loginForm.password);
       navigate("/blog");
     } catch (err: any) {
-      toast({ title: "Login failed", description: err.message, variant: "destructive" });
+      toast({ title: "Login failed", description: err?.message || "An error occurred. Please try again.", variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -49,7 +49,7 @@ export default function AuthPage() {
       await register(registerForm.username, registerForm.email, registerForm.password);
       navigate("/blog");
     } catch (err: any) {
-      toast({ title: "Registration failed", description: err.message, variant: "destructive" });
+      toast({ title: "Registration failed", description: err?.message || "An error occurred. Please try again.", variant: "destructive" });
     } finally {
       setLoading(false);
     }
