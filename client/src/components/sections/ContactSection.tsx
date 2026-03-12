@@ -1,113 +1,154 @@
-import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
-import { type InsertContact } from "@shared/schema";
-import { Mail, MessageCircle, Linkedin } from "lucide-react";
+import { Mail, MessageCircle, Linkedin, Send } from "lucide-react";
+
+const CONTACT_EMAIL = "hello@tobseytech.com";
 
 export default function ContactSection() {
-  const [formData, setFormData] = useState({ name: "", email: "", message: "" });
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const form = e.currentTarget;
+    const name = (form.elements.namedItem("name") as HTMLInputElement).value.trim();
+    const email = (form.elements.namedItem("email") as HTMLInputElement).value.trim();
+    const message = (form.elements.namedItem("message") as HTMLTextAreaElement).value.trim();
 
-  const contactMutation = useMutation({
-    mutationFn: async (data: InsertContact) => {
-      const res = await apiRequest("POST", "/api/contacts", data);
-      return res.json();
-    },
-    onSuccess: () => {
-      toast({ title: "Message sent" });
-      setFormData({ name: "", email: "", message: "" });
-      queryClient.invalidateQueries({ queryKey: ["/api/contacts"] });
-    },
-    onError: () => {
-      toast({ title: "Transmission failed", variant: "destructive" });
-    },
-  });
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.name || !formData.email || !formData.message) {
-      toast({ title: "Please complete all fields", variant: "destructive" });
+    if (!name || !email || !message) {
+      e.preventDefault();
+      alert("Please complete all fields before sending.");
       return;
     }
-    contactMutation.mutate({
-      name: formData.name,
-      email: formData.email,
-      message: formData.message,
-      projectType: "",
-      budgetRange: "",
-    });
+    // Allow the mailto action to proceed
   };
 
   return (
-    <section id="contact" className="page-section py-20">
-      <div className="container mx-auto px-6">
-        <div className="text-center mb-12">
-          <h2 className="font-orbitron font-bold text-3xl md:text-4xl mb-4 gradient-text">
-            Contact
+    <section id="contact" className="page-section py-16 sm:py-20">
+      <div className="container mx-auto px-4 sm:px-6">
+        <div className="text-center mb-10 sm:mb-12">
+          <h2 className="font-orbitron font-bold text-2xl sm:text-3xl md:text-4xl mb-4 gradient-text">
+            Get In Touch
           </h2>
-          <p className="text-gray-300 max-w-2xl mx-auto">
-            Let's talk about your automation goals.
+          <p className="text-gray-300 max-w-2xl mx-auto text-sm sm:text-base">
+            Let's talk about your project. Send us a message directly — we'd love to hear from you.
           </p>
         </div>
-        <div className="grid md:grid-cols-2 gap-12">
-          <div className="glass-effect p-8 rounded-2xl">
-            <form onSubmit={handleSubmit} className="space-y-6">
+
+        <div className="grid md:grid-cols-2 gap-8 sm:gap-12 max-w-5xl mx-auto">
+          {/* Direct mailto form */}
+          <div className="glass-effect p-6 sm:p-8 rounded-2xl">
+            <form
+              action={`mailto:${CONTACT_EMAIL}`}
+              method="post"
+              encType="text/plain"
+              onSubmit={handleSubmit}
+              className="space-y-5"
+            >
               <div>
-                <label className="block mb-2 text-neon-yellow font-orbitron">Name</label>
-                <Input
+                <label htmlFor="contact-name" className="block mb-2 text-neon-yellow font-orbitron text-sm">
+                  Your Name
+                </label>
+                <input
+                  id="contact-name"
+                  name="name"
                   type="text"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="bg-deep-space border-galactic-orange/30 focus:border-galactic-orange text-white"
+                  required
+                  placeholder="John Doe"
+                  className="w-full px-4 py-2.5 rounded-lg bg-deep-space border border-galactic-orange/30 focus:border-galactic-orange focus:outline-none text-white placeholder-gray-500 text-sm transition-colors"
                 />
               </div>
               <div>
-                <label className="block mb-2 text-neon-yellow font-orbitron">Email</label>
-                <Input
+                <label htmlFor="contact-email" className="block mb-2 text-neon-yellow font-orbitron text-sm">
+                  Email Address
+                </label>
+                <input
+                  id="contact-email"
+                  name="email"
                   type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="bg-deep-space border-galactic-orange/30 focus:border-galactic-orange text-white"
+                  required
+                  placeholder="you@example.com"
+                  className="w-full px-4 py-2.5 rounded-lg bg-deep-space border border-galactic-orange/30 focus:border-galactic-orange focus:outline-none text-white placeholder-gray-500 text-sm transition-colors"
                 />
               </div>
               <div>
-                <label className="block mb-2 text-neon-yellow font-orbitron">Message</label>
-                <Textarea
-                  value={formData.message}
-                  onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                  className="bg-deep-space border-galactic-orange/30 focus:border-galactic-orange text-white h-32"
+                <label htmlFor="contact-message" className="block mb-2 text-neon-yellow font-orbitron text-sm">
+                  Message
+                </label>
+                <textarea
+                  id="contact-message"
+                  name="message"
+                  required
+                  rows={5}
+                  placeholder="Tell us about your project..."
+                  className="w-full px-4 py-2.5 rounded-lg bg-deep-space border border-galactic-orange/30 focus:border-galactic-orange focus:outline-none text-white placeholder-gray-500 text-sm transition-colors resize-none"
                 />
               </div>
               <button
                 type="submit"
-                className="w-full py-3 bg-neon-yellow text-black font-medium rounded-lg hover:bg-yellow-400"
-                disabled={contactMutation.isPending}
+                className="w-full flex items-center justify-center gap-2 py-3 bg-neon-yellow text-black font-semibold rounded-lg hover:bg-yellow-400 active:scale-95 transition-all font-orbitron text-sm"
               >
-                {contactMutation.isPending ? "Sending..." : "Send Message"}
+                <Send className="w-4 h-4" />
+                Send Message
               </button>
             </form>
           </div>
-          <div className="space-y-6">
-            <div className="flex items-center space-x-4">
-              <Mail className="w-6 h-6 text-neon-yellow" />
-              <a href="mailto:hello@tobseytech.com" className="text-gray-300">
-                hello@tobseytech.com
-              </a>
+
+          {/* Contact details */}
+          <div className="flex flex-col justify-center space-y-6 sm:space-y-8">
+            <div>
+              <h3 className="font-orbitron font-bold text-lg text-neon-yellow mb-4">Contact Details</h3>
+              <div className="space-y-4">
+                <a
+                  href={`mailto:${CONTACT_EMAIL}`}
+                  className="flex items-center gap-4 group"
+                >
+                  <div className="w-10 h-10 rounded-full bg-galactic-orange/20 flex items-center justify-center shrink-0 group-hover:bg-galactic-orange/40 transition-colors">
+                    <Mail className="w-5 h-5 text-neon-yellow" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 font-orbitron uppercase tracking-widest">Email</p>
+                    <p className="text-gray-200 text-sm group-hover:text-neon-yellow transition-colors break-all">
+                      {CONTACT_EMAIL}
+                    </p>
+                  </div>
+                </a>
+
+                <a
+                  href="https://wa.me/2348000000000"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-4 group"
+                >
+                  <div className="w-10 h-10 rounded-full bg-galactic-orange/20 flex items-center justify-center shrink-0 group-hover:bg-galactic-orange/40 transition-colors">
+                    <MessageCircle className="w-5 h-5 text-neon-yellow" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 font-orbitron uppercase tracking-widest">WhatsApp</p>
+                    <p className="text-gray-200 text-sm group-hover:text-neon-yellow transition-colors">
+                      Chat with us on WhatsApp
+                    </p>
+                  </div>
+                </a>
+
+                <a
+                  href="https://www.linkedin.com/in/oyebade-tobi/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-4 group"
+                >
+                  <div className="w-10 h-10 rounded-full bg-galactic-orange/20 flex items-center justify-center shrink-0 group-hover:bg-galactic-orange/40 transition-colors">
+                    <Linkedin className="w-5 h-5 text-neon-yellow" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 font-orbitron uppercase tracking-widest">LinkedIn</p>
+                    <p className="text-gray-200 text-sm group-hover:text-neon-yellow transition-colors">
+                      Connect on LinkedIn
+                    </p>
+                  </div>
+                </a>
+              </div>
             </div>
-            <div className="flex items-center space-x-4">
-              <MessageCircle className="w-6 h-6 text-neon-yellow" />
-              <a href="https://wa.me/2340000000000" className="text-gray-300" target="_blank" rel="noopener">
-                WhatsApp
-              </a>
-            </div>
-            <div className="flex items-center space-x-4">
-              <a href="https://www.linkedin.com/in/oyebade-tobi/" target="_blank" rel="noopener noreferrer" className="text-neon-yellow" aria-label="LinkedIn">
-                <Linkedin className="w-6 h-6" />
-              </a>
+
+            <div className="glass-effect p-5 rounded-xl border border-galactic-gold/20">
+              <p className="text-gray-300 text-sm leading-relaxed">
+                📍 Based in Nigeria · Available for remote projects worldwide<br />
+                ⏱ Typical response within <span className="text-neon-yellow font-semibold">24 hours</span>
+              </p>
             </div>
           </div>
         </div>

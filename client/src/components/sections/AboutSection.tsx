@@ -37,13 +37,13 @@ const kecPhases = [
 
 export default function AboutSection() {
   return (
-    <section id="about" className="page-section py-20">
-      <div className="container mx-auto px-6">
+    <section id="about" className="page-section py-16 sm:py-20">
+      <div className="container mx-auto px-4 sm:px-6">
 
         {/* Who We Are */}
-        <div className="grid md:grid-cols-2 gap-12 items-start mb-20">
+        <div className="grid md:grid-cols-2 gap-8 sm:gap-12 items-start mb-14 sm:mb-20">
           <div>
-            <h2 className="font-orbitron font-bold text-3xl md:text-4xl mb-6 gradient-text">
+            <h2 className="font-orbitron font-bold text-2xl sm:text-3xl md:text-4xl mb-6 gradient-text">
               Who We Are
             </h2>
             <p className="text-gray-300 mb-4 leading-relaxed">
