@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -57,12 +57,15 @@ export default function ChatPage() {
   const [hoveredMessageId, setHoveredMessageId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const wsRef = useRef<WebSocket | null>(null);
-  const selectedUserIdRef = useRef<string | null>(null);
+  const selectedUserIdRef = useRef<string | null>(selectedUserId);
 
-  // Keep ref in sync with state so WebSocket handler always sees latest value
-  selectedUserIdRef.current = selectedUserId;
+  // Keep the ref in sync with state so the WS handler always reads the latest value
+  useEffect(() => {
+    selectedUserIdRef.current = selectedUserId;
+  }, [selectedUserId]);
 
-  // WebSocket setup for real-time messages — only reconnects when user changes
+  // WebSocket setup for real-time messages – only reconnects when user changes,
+  // not on every conversation switch, to avoid missed notifications.
   useEffect(() => {
     if (!user) return;
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
@@ -74,29 +77,32 @@ export default function ChatPage() {
     };
 
     ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      if (data.type === "new_message") {
-        queryClient.invalidateQueries({ queryKey: ["/api/messages/conversations"] });
-        const currentSelectedId = selectedUserIdRef.current;
-        if (currentSelectedId === data.message.senderId) {
-          queryClient.invalidateQueries({ queryKey: ["/api/messages", currentSelectedId] });
+      try {
+        const data = JSON.parse(event.data);
+        if (data.type === "new_message") {
+          queryClient.invalidateQueries({ queryKey: ["/api/messages/conversations"] });
+          const currentSelectedUserId = selectedUserIdRef.current;
+          if (currentSelectedUserId === data.message.senderId) {
+            queryClient.invalidateQueries({ queryKey: ["/api/messages", currentSelectedUserId] });
+          }
         }
+      } catch (e) {
+        console.warn("Failed to parse WebSocket message:", e);
       }
+    };
+
+    ws.onerror = () => {
+      // WebSocket error — the onclose handler will fire next and clean up
     };
 
     return () => ws.close();
   }, [user, queryClient]);
 
-  // Scroll to bottom when a different conversation is opened (before messages load)
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [selectedUserId]);
-
   const { data: conversations = [] } = useQuery<Conversation[]>({
     queryKey: ["/api/messages/conversations"],
     queryFn: async () => {
       const res = await fetch("/api/messages/conversations", { credentials: "include" });
-      if (!res.ok) return [];
+      if (!res.ok) throw new Error("Failed to fetch conversations");
       return res.json();
     },
     enabled: !!user,
@@ -108,18 +114,17 @@ export default function ChatPage() {
     queryFn: async () => {
       if (!selectedUserId) return [];
       const res = await fetch(`/api/messages/${selectedUserId}`, { credentials: "include" });
-      if (!res.ok) return [];
+      if (!res.ok) throw new Error("Failed to fetch messages");
       return res.json();
     },
     enabled: !!user && !!selectedUserId,
     refetchInterval: selectedUserId ? 5000 : false,
   });
 
-  // Scroll to bottom whenever the messages list updates
+  // Auto-scroll to the latest message whenever messages update or a new
+  // conversation is selected.
   useEffect(() => {
-    if (messages.length > 0) {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   const { data: friends = [] } = useQuery<SafeUser[]>({
@@ -203,6 +208,13 @@ export default function ChatPage() {
     },
   });
 
+  // Select a conversation and cache the user object so selectedUser stays
+  // resolved even during conversations-query refetches.
+  const selectConversation = useCallback((u: SafeUser) => {
+    setSelectedUserId(u.id);
+    setDirectChatUser(u);
+  }, []);
+
   const selectedUser =
     friends.find((f) => f.id === selectedUserId) ||
     conversations.find((c) => c.user.id === selectedUserId)?.user ||
@@ -272,8 +284,7 @@ export default function ChatPage() {
                             variant="ghost"
                             title="Message"
                             onClick={() => {
-                              setDirectChatUser(u);
-                              setSelectedUserId(u.id);
+                              selectConversation(u);
                               setSearchQuery("");
                             }}
                             className="text-blue-400 hover:text-blue-300 h-7 px-2"
@@ -344,7 +355,7 @@ export default function ChatPage() {
                 {conversations.map(({ user: u, lastMessage }) => (
                   <button
                     key={u.id}
-                    onClick={() => setSelectedUserId(u.id)}
+                    onClick={() => selectConversation(u)}
                     className={`w-full flex items-center gap-3 p-2 rounded-lg transition-colors text-left ${
                       selectedUserId === u.id
                         ? "bg-galactic-orange/20 border border-galactic-orange/40"
@@ -369,7 +380,7 @@ export default function ChatPage() {
                   .map((f) => (
                     <button
                       key={f.id}
-                      onClick={() => setSelectedUserId(f.id)}
+                      onClick={() => selectConversation(f)}
                       className={`w-full flex items-center gap-3 p-2 rounded-lg transition-colors text-left ${
                         selectedUserId === f.id
                           ? "bg-galactic-orange/20 border border-galactic-orange/40"
