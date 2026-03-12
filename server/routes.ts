@@ -20,6 +20,7 @@ import {
   insertCommentSchema,
   insertEditSuggestionSchema,
   insertMessageSchema,
+  type InsertNotification,
 } from "@shared/schema";
 import { z } from "zod";
 import nodemailer from "nodemailer";
@@ -71,6 +72,15 @@ function broadcastToUser(userId: string, data: any) {
         ws.send(payload);
       }
     });
+  }
+}
+
+async function notify(data: InsertNotification) {
+  try {
+    const notification = await storage.createNotification(data);
+    broadcastToUser(data.userId, { type: "notification", notification });
+  } catch {
+    // Non-critical — don't let notification failures break the main action
   }
 }
 
@@ -279,6 +289,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
         data.published = false;
       }
       const post = await storage.createBlogPost(data);
+      // Notify the author about the post status
+      if (post.published) {
+        await notify({
+          userId: user.id,
+          type: "post_published",
+          title: "Post Published",
+          message: `Your post "${post.title}" has been published.`,
+          link: `/blog/slug/${post.slug}`,
+          entityId: post.id,
+        });
+        // Notify all friends about the new post
+        const friends = await storage.getFriends(user.id);
+        const actorName = user.displayName || user.username;
+        for (const friend of friends) {
+          await notify({
+            userId: friend.id,
+            type: "post_new",
+            title: "New Post",
+            message: `${actorName} published a new post: "${post.title}".`,
+            link: `/blog/slug/${post.slug}`,
+            actorId: user.id,
+            actorName,
+            entityId: post.id,
+          });
+        }
+      } else {
+        await notify({
+          userId: user.id,
+          type: "post_saved_draft",
+          title: "Post Saved as Draft",
+          message: `Your post "${post.title}" has been saved as a draft.`,
+          link: `/blog/${post.id}`,
+          entityId: post.id,
+        });
+      }
       res.status(201).json(post);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -298,6 +343,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Forbidden" });
       }
       const updates = updateBlogPostSchema.parse(req.body);
+      const wasPublished = post.published;
       if (user.role !== "admin") {
         delete (updates as any).published;
       }
@@ -308,6 +354,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       const updated = await storage.updateBlogPost(req.params.id, updates);
+      if (updated) {
+        const nowPublished = updated.published;
+        if (!wasPublished && nowPublished) {
+          // Post just got published
+          await notify({
+            userId: updated.authorId,
+            type: "post_published",
+            title: "Post Published",
+            message: `Your post "${updated.title}" has been published.`,
+            link: `/blog/slug/${updated.slug}`,
+            entityId: updated.id,
+          });
+          // Notify friends
+          const friends = await storage.getFriends(updated.authorId);
+          const authorUser = await storage.getUser(updated.authorId);
+          const actorName = authorUser?.displayName || authorUser?.username || updated.authorName;
+          for (const friend of friends) {
+            await notify({
+              userId: friend.id,
+              type: "post_new",
+              title: "New Post",
+              message: `${actorName} published a new post: "${updated.title}".`,
+              link: `/blog/slug/${updated.slug}`,
+              actorId: updated.authorId,
+              actorName,
+              entityId: updated.id,
+            });
+          }
+        } else {
+          // Regular update
+          await notify({
+            userId: updated.authorId,
+            type: "post_updated",
+            title: "Post Updated",
+            message: `Your post "${updated.title}" has been updated.`,
+            link: updated.published ? `/blog/slug/${updated.slug}` : `/blog/${updated.id}`,
+            entityId: updated.id,
+          });
+        }
+      }
       res.json(updated);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -453,6 +539,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = req.user as any;
       const data = insertEditSuggestionSchema.parse({ ...req.body, postId: req.params.id });
       const suggestion = await storage.createEditSuggestion({ ...data, userId: user.id, username: user.displayName || user.username });
+      // Notify the post author about the edit suggestion
+      const post = await storage.getBlogPost(req.params.id);
+      if (post && post.authorId !== user.id) {
+        const actorName = user.displayName || user.username;
+        await notify({
+          userId: post.authorId,
+          type: "edit_suggestion_received",
+          title: "Edit Suggestion Received",
+          message: `${actorName} suggested an edit on your post "${post.title}".`,
+          link: `/blog/${post.id}`,
+          actorId: user.id,
+          actorName,
+          entityId: suggestion.id,
+        });
+      }
       res.status(201).json(suggestion);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -479,6 +580,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       const updated = await storage.updateEditSuggestionStatus(req.params.id, status);
       if (!updated) return res.status(404).json({ message: "Suggestion not found" });
+      // Notify the suggester about the review outcome
+      const post = await storage.getBlogPost(updated.postId);
+      const postTitle = post?.title ?? "your post";
+      await notify({
+        userId: updated.userId,
+        type: "edit_suggestion_reviewed",
+        title: status === "accepted" ? "Edit Suggestion Accepted" : "Edit Suggestion Rejected",
+        message:
+          status === "accepted"
+            ? `Your edit suggestion on "${postTitle}" was accepted.`
+            : `Your edit suggestion on "${postTitle}" was rejected.`,
+        link: post ? (post.published ? `/blog/slug/${post.slug}` : `/blog/${post.id}`) : undefined,
+        entityId: updated.id,
+      });
       res.json(updated);
     } catch {
       res.status(500).json({ message: "Failed to update suggestion" });
@@ -496,6 +611,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const existing = await storage.getFriendshipStatus(user.id, addresseeId);
       if (existing) return res.status(409).json({ message: "Friendship already exists" });
       const friendship = await storage.sendFriendRequest(user.id, addresseeId);
+      // Notify addressee of incoming friend request
+      const actorName = user.displayName || user.username;
+      await notify({
+        userId: addresseeId,
+        type: "friend_request_received",
+        title: "New Friend Request",
+        message: `${actorName} sent you a friend request.`,
+        link: `/profile/${user.id}`,
+        actorId: user.id,
+        actorName,
+        entityId: friendship.id,
+      });
       res.status(201).json(friendship);
     } catch {
       res.status(500).json({ message: "Failed to send friend request" });
@@ -511,6 +638,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       const updated = await storage.respondFriendRequest(req.params.id, user.id, status);
       if (!updated) return res.status(404).json({ message: "Request not found" });
+      // Notify the original requester about acceptance/declination
+      const actorName = user.displayName || user.username;
+      if (status === "accepted") {
+        await notify({
+          userId: updated.requesterId,
+          type: "friend_request_accepted",
+          title: "Friend Request Accepted",
+          message: `${actorName} accepted your friend request.`,
+          link: `/profile/${user.id}`,
+          actorId: user.id,
+          actorName,
+          entityId: updated.id,
+        });
+      } else {
+        await notify({
+          userId: updated.requesterId,
+          type: "friend_request_declined",
+          title: "Friend Request Declined",
+          message: `${actorName} declined your friend request.`,
+          link: `/profile/${user.id}`,
+          actorId: user.id,
+          actorName,
+          entityId: updated.id,
+        });
+      }
       res.json(updated);
     } catch {
       res.status(500).json({ message: "Failed to respond to friend request" });
@@ -582,6 +734,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const message = await storage.sendMessage({ ...data, senderId: user.id });
       // Broadcast to recipient via WebSocket if connected
       broadcastToUser(data.recipientId, { type: "new_message", message });
+      // Persist notification for the recipient
+      const actorName = user.displayName || user.username;
+      const isReply = !!data.replyToId;
+      await notify({
+        userId: data.recipientId,
+        type: isReply ? "chat_reply" : "chat_message",
+        title: isReply ? "New Reply" : "New Message",
+        message: isReply
+          ? `${actorName} replied to your message.`
+          : `${actorName} sent you a message.`,
+        link: `/chat`,
+        actorId: user.id,
+        actorName,
+        entityId: message.id,
+      });
       res.status(201).json(message);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -598,6 +765,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ count });
     } catch {
       res.status(500).json({ message: "Failed to get unread count" });
+    }
+  });
+
+  // ─── Notification routes ──────────────────────────────────────────────────
+
+  app.get("/api/notifications", authRateLimiter, requireAuth, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const notifications = await storage.getNotifications(user.id);
+      res.json(notifications);
+    } catch {
+      res.status(500).json({ message: "Failed to fetch notifications" });
+    }
+  });
+
+  app.get("/api/notifications/unread/count", authRateLimiter, requireAuth, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const count = await storage.getUnreadNotificationCount(user.id);
+      res.json({ count });
+    } catch {
+      res.status(500).json({ message: "Failed to get notification count" });
+    }
+  });
+
+  app.patch("/api/notifications/:id/read", authRateLimiter, requireAuth, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const notification = await storage.markNotificationRead(req.params.id, user.id);
+      if (!notification) return res.status(404).json({ message: "Notification not found" });
+      res.json(notification);
+    } catch {
+      res.status(500).json({ message: "Failed to mark notification as read" });
+    }
+  });
+
+  app.patch("/api/notifications/read-all", authRateLimiter, requireAuth, async (req, res) => {
+    try {
+      const user = req.user as any;
+      await storage.markAllNotificationsRead(user.id);
+      res.json({ ok: true });
+    } catch {
+      res.status(500).json({ message: "Failed to mark all notifications as read" });
+    }
+  });
+
+  app.delete("/api/notifications/:id", authRateLimiter, requireAuth, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const deleted = await storage.deleteNotification(req.params.id, user.id);
+      if (!deleted) return res.status(404).json({ message: "Notification not found" });
+      res.json({ ok: true });
+    } catch {
+      res.status(500).json({ message: "Failed to delete notification" });
     }
   });
 
