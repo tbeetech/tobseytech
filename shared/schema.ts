@@ -258,3 +258,49 @@ export interface Message {
   replyToId?: string;
   createdAt: Date;
 }
+
+// ─── Notifications ───────────────────────────────────────────────────────────
+
+export const NOTIFICATION_TYPES = [
+  "friend_request_received",
+  "friend_request_accepted",
+  "friend_request_declined",
+  "post_saved_draft",
+  "post_published",
+  "post_updated",
+  "post_new",
+  "chat_message",
+  "chat_reply",
+  "post_comment",
+  "edit_suggestion_received",
+  "edit_suggestion_reviewed",
+] as const;
+
+export type NotificationType = (typeof NOTIFICATION_TYPES)[number];
+
+export interface Notification {
+  id: string;
+  userId: string;
+  type: NotificationType;
+  title: string;
+  message: string;
+  link?: string;
+  read: boolean;
+  actorId?: string;
+  actorName?: string;
+  entityId?: string;
+  createdAt: Date;
+}
+
+export const insertNotificationSchema = z.object({
+  userId: z.string().min(1),
+  type: z.enum(NOTIFICATION_TYPES),
+  title: z.string().min(1),
+  message: z.string().min(1),
+  link: z.string().optional(),
+  actorId: z.string().optional(),
+  actorName: z.string().optional(),
+  entityId: z.string().optional(),
+});
+
+export type InsertNotification = z.infer<typeof insertNotificationSchema>;

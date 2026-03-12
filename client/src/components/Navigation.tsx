@@ -3,6 +3,7 @@ import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Menu, X, LogIn, LogOut, User, MessageCircle, LayoutDashboard } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import NotificationBell from "@/components/NotificationBell";
 
 export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
@@ -79,6 +80,7 @@ export default function Navigation() {
                     <MessageCircle className="w-4 h-4" /> Talk
                   </button>
                 </Link>
+                <NotificationBell />
                 {user.role === "admin" && (
                   <Link href="/dashboard">
                     <button className="hover:text-galactic-gold transition-colors duration-300 nav-link text-galactic-orange font-orbitron text-sm flex items-center gap-1">
@@ -158,6 +160,9 @@ export default function Navigation() {
                       <MessageCircle className="w-3 h-3" /> Talk
                     </button>
                   </Link>
+                  <div onClick={() => setIsOpen(false)}>
+                    <NotificationBell />
+                  </div>
                   {user.role === "admin" && (
                     <Link href="/dashboard" onClick={() => setIsOpen(false)}>
                       <button className="text-left text-galactic-orange font-orbitron hover:text-galactic-gold flex items-center gap-1">

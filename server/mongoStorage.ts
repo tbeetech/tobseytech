@@ -20,6 +20,8 @@ import type {
   Friendship,
   Message,
   InsertMessage,
+  Notification,
+  InsertNotification,
 } from "@shared/schema";
 import { UserModel } from "./models/User";
 import { ContactModel } from "./models/Contact";
@@ -32,6 +34,7 @@ import { BookmarkModel } from "./models/Bookmark";
 import { EditSuggestionModel } from "./models/EditSuggestion";
 import { FriendshipModel } from "./models/Friendship";
 import { MessageModel } from "./models/Message";
+import { NotificationModel } from "./models/Notification";
 
 function docToUser(doc: any): User {
   return {
@@ -154,6 +157,22 @@ function docToMessage(doc: any): Message {
     content: doc.content,
     read: doc.read,
     ...(doc.replyToId ? { replyToId: doc.replyToId } : {}),
+    createdAt: doc.createdAt,
+  };
+}
+
+function docToNotification(doc: any): Notification {
+  return {
+    id: doc._id.toString(),
+    userId: doc.userId,
+    type: doc.type,
+    title: doc.title,
+    message: doc.message,
+    link: doc.link ?? undefined,
+    read: doc.read,
+    actorId: doc.actorId ?? undefined,
+    actorName: doc.actorName ?? undefined,
+    entityId: doc.entityId ?? undefined,
     createdAt: doc.createdAt,
   };
 }
@@ -500,5 +519,35 @@ export class MongoStorage {
 
   async getUnreadCount(userId: string): Promise<number> {
     return MessageModel.countDocuments({ recipientId: userId, read: false });
+  }
+
+  // ─── Notification methods ─────────────────────────────────────────────────
+
+  async createNotification(data: InsertNotification): Promise<Notification> {
+    const doc = await NotificationModel.create({ ...data, read: false });
+    return docToNotification(doc.toObject());
+  }
+
+  async getNotifications(userId: string): Promise<Notification[]> {
+    const docs = await NotificationModel.find({ userId }).sort({ createdAt: -1 }).limit(50).lean();
+    return docs.map(docToNotification);
+  }
+
+  async getUnreadNotificationCount(userId: string): Promise<number> {
+    return NotificationModel.countDocuments({ userId, read: false });
+  }
+
+  async markNotificationRead(id: string, userId: string): Promise<Notification | undefined> {
+    const doc = await NotificationModel.findOneAndUpdate({ _id: id, userId }, { read: true }, { new: true }).lean();
+    return doc ? docToNotification(doc) : undefined;
+  }
+
+  async markAllNotificationsRead(userId: string): Promise<void> {
+    await NotificationModel.updateMany({ userId, read: false }, { read: true });
+  }
+
+  async deleteNotification(id: string, userId: string): Promise<boolean> {
+    const result = await NotificationModel.deleteOne({ _id: id, userId });
+    return result.deletedCount > 0;
   }
 }
