@@ -53,17 +53,17 @@ const services = [
 
 export default function ServicesSection() {
   return (
-    <section id="services" className="page-section py-20">
-      <div className="container mx-auto px-6">
-        <div className="text-center mb-12">
-          <h2 className="font-orbitron font-bold text-3xl md:text-4xl mb-4 gradient-text">
+    <section id="services" className="page-section py-16 sm:py-20">
+      <div className="container mx-auto px-4 sm:px-6">
+        <div className="text-center mb-10 sm:mb-12">
+          <h2 className="font-orbitron font-bold text-2xl sm:text-3xl md:text-4xl mb-4 gradient-text">
             Services
           </h2>
-          <p className="text-gray-300 max-w-2xl mx-auto">
+          <p className="text-gray-300 max-w-2xl mx-auto text-sm sm:text-base">
             Strategy, design, and engineering under one roof — practical solutions that move your business forward.
           </p>
         </div>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-5 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           {services.map(({ icon: Icon, title, description, tag }) => (
             <div key={title} className="card text-center relative hover:border-galactic-orange/50 transition-colors">
               {tag && (

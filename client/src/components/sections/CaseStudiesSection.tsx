@@ -2,71 +2,70 @@ import { ArrowRight } from "lucide-react";
 
 const cases = [
   {
-    title: "Glow FM Content Repurposing Pipeline",
-    category: "Media Automation",
-    impact: "1 script → 10 posts in 30 seconds",
-    detail: "Built a custom automation pipeline for a radio station that converts a single broadcast script into 10 formatted social-media posts across platforms — cutting content production time by 95%.",
-    metric: "95% time saved",
-    slug: "glow-fm",
+    title: "FebLuxury for Fashion Sales",
+    category: "E-Commerce & Fashion",
+    impact: "Full online store for luxury fashion brand",
+    detail: "Designed and built an elegant, conversion-optimised e-commerce website for FebLuxury, enabling seamless product browsing, order management, and online sales for a premium fashion brand.",
+    metric: "Sales-ready online store",
+    slug: "febluxury-fashion-sales",
   },
   {
-    title: "SME WhatsApp Auto-Responder",
-    category: "Customer Service AI",
-    impact: "80% of customer queries answered instantly",
-    detail: "Deployed an AI-powered WhatsApp bot for a small business that handles FAQs, order status, and appointment booking — freeing the owner from repetitive conversations 24/7.",
-    metric: "80% query automation",
-    slug: "whatsapp-auto-responder",
+    title: "Glow FM Radio Station Interactive Website",
+    category: "Media & Broadcasting",
+    impact: "Live streaming + listener engagement platform",
+    detail: "Built a fully interactive website for Glow FM radio station featuring live stream integration, show schedules, presenters' profiles, and audience engagement tools — bringing the station online.",
+    metric: "Full broadcast platform",
+    slug: "glow-fm-website",
   },
   {
-    title: "Lead Sorting Automation",
-    category: "CRM & Sales Ops",
-    impact: "500+ leads organized monthly without manual effort",
-    detail: "Created a Zapier-powered lead pipeline that captures, scores, and routes 500+ monthly leads from multiple sources directly into a CRM, eliminating manual data entry.",
-    metric: "500+ leads/month",
-    slug: "lead-sorting",
+    title: "Cryptocurrency Simulation Profit & Trading Training Growth Website",
+    category: "FinTech & Education",
+    impact: "Real-time trading simulation for trainees",
+    detail: "Developed an immersive crypto trading simulation and training website that lets users practise buying, selling, and portfolio management in a safe environment — tracking growth and profit metrics over time.",
+    metric: "Hands-on trading training",
+    slug: "crypto-trading-training",
   },
   {
-    title: "E-Commerce Product Feed Sync",
-    category: "Web Automation",
-    impact: "Real-time inventory sync across 3 platforms",
-    detail: "Automated product catalog updates across WooCommerce, Jumia, and Konga for a retail client — eliminating overselling and reducing update time from 4 hours to under 5 minutes.",
-    metric: "99% sync accuracy",
-    slug: "product-feed-sync",
+    title: "Glow FM Mobile Application",
+    category: "Mobile Development",
+    impact: "On-the-go listening for loyal audience",
+    detail: "Created a dedicated mobile application for Glow FM, delivering live radio streaming, episode replays, news updates, and push notifications to thousands of listeners on Android and iOS.",
+    metric: "Live mobile radio app",
+    slug: "glow-fm-mobile-app",
   },
   {
-    title: "Digital Skills Training Cohort",
-    category: "Corporate Training",
-    impact: "30+ participants upskilled in AI tools",
-    detail: "Designed and delivered a 4-week cohort program on AI tools and no-code automation for a corporate team, resulting in measurable productivity improvements within 30 days.",
-    metric: "30+ professionals trained",
-    slug: "skills-cohort",
+    title: "Social Media Management & Growth of Glow 99.1 FM",
+    category: "Social Media & Growth",
+    impact: "Consistent audience growth across platforms",
+    detail: "Managed and grew Glow 99.1 FM's social media presence across Facebook, Instagram, and Twitter — developing content calendars, running engagement campaigns, and growing the station's digital audience significantly.",
+    metric: "Multi-platform audience growth",
+    slug: "glow-fm-social-media",
   },
 ];
 
 export default function CaseStudiesSection() {
   return (
-    <section id="case-studies" className="page-section py-20 bg-deep-space">
-      <div className="container mx-auto px-6">
-        <div className="text-center mb-12">
-          <h2 className="font-orbitron font-bold text-3xl md:text-4xl mb-4 gradient-text">
+    <section id="case-studies" className="page-section py-16 sm:py-20 bg-deep-space">
+      <div className="container mx-auto px-4 sm:px-6">
+        <div className="text-center mb-10 sm:mb-12">
+          <h2 className="font-orbitron font-bold text-2xl sm:text-3xl md:text-4xl mb-4 gradient-text">
             Proof of Impact
           </h2>
-          <p className="text-gray-300 max-w-2xl mx-auto">
-            Real systems delivering measurable results across industries.
+          <p className="text-gray-300 max-w-2xl mx-auto text-sm sm:text-base">
+            Real projects delivering measurable results across industries.
           </p>
         </div>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {cases.map(({ title, category, impact, detail, metric, slug }) => (
-            <a
+        <div className="grid gap-5 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+          {cases.map(({ title, category, detail, metric, slug }) => (
+            <div
               key={slug}
-              href={`/case-studies/${slug}`}
-              className="card block group hover:border-galactic-orange/50 transition-colors"
+              className="card"
               data-testid={`case-study-${slug}`}
             >
               <span className="text-xs text-galactic-orange font-orbitron uppercase tracking-widest mb-2 block">
                 {category}
               </span>
-              <h3 className="font-orbitron text-lg mb-2 text-neon-yellow group-hover:text-galactic-gold transition-colors">
+              <h3 className="font-orbitron text-base sm:text-lg mb-2 text-neon-yellow">
                 {title}
               </h3>
               <p className="text-gray-400 text-sm mb-4 leading-relaxed">{detail}</p>
@@ -74,9 +73,8 @@ export default function CaseStudiesSection() {
                 <span className="px-3 py-1 bg-galactic-green/10 border border-galactic-green/30 rounded-full text-galactic-green text-xs font-orbitron">
                   {metric}
                 </span>
-                <ArrowRight className="w-4 h-4 text-galactic-orange group-hover:translate-x-1 transition-transform" />
               </div>
-            </a>
+            </div>
           ))}
         </div>
 
