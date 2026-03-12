@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Link } from "wouter";
+import { useLocation } from "wouter";
 import { Bell, BellOff, Check, CheckCheck, Trash2, X } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/use-auth";
 import type { Notification } from "@shared/schema";
 import { cn } from "@/lib/utils";
+
+const MAX_NOTIFICATIONS = 50;
 
 const TYPE_ICONS: Record<string, string> = {
   friend_request_received: "👤",
@@ -36,6 +38,7 @@ function timeAgo(date: string | Date): string {
 export default function NotificationBell() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const [, navigate] = useLocation();
   const [open, setOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
   const wsRef = useRef<WebSocket | null>(null);
@@ -124,8 +127,11 @@ export default function NotificationBell() {
         markReadMutation.mutate(notification.id);
       }
       setOpen(false);
+      if (notification.link) {
+        navigate(notification.link);
+      }
     },
-    [markReadMutation]
+    [markReadMutation, navigate]
   );
 
   if (!user) return null;
@@ -214,7 +220,7 @@ interface NotificationItemProps {
 function NotificationItem({ notification, onRead, onDelete }: NotificationItemProps) {
   const icon = TYPE_ICONS[notification.type] ?? "🔔";
 
-  const content = (
+  return (
     <div
       className={cn(
         "group flex items-start gap-3 px-4 py-3 transition-colors cursor-pointer",
@@ -272,14 +278,4 @@ function NotificationItem({ notification, onRead, onDelete }: NotificationItemPr
       </div>
     </div>
   );
-
-  if (notification.link) {
-    return (
-      <Link href={notification.link}>
-        {content}
-      </Link>
-    );
-  }
-
-  return content;
 }

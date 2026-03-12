@@ -177,6 +177,8 @@ function docToNotification(doc: any): Notification {
   };
 }
 
+const MAX_NOTIFICATIONS_PER_USER = 50;
+
 export class MongoStorage {
   // ─── User methods ────────────────────────────────────────────────────────
 
@@ -529,10 +531,9 @@ export class MongoStorage {
   }
 
   async getNotifications(userId: string): Promise<Notification[]> {
-    const docs = await NotificationModel.find({ userId }).sort({ createdAt: -1 }).limit(50).lean();
+    const docs = await NotificationModel.find({ userId }).sort({ createdAt: -1 }).limit(MAX_NOTIFICATIONS_PER_USER).lean();
     return docs.map(docToNotification);
   }
-
   async getUnreadNotificationCount(userId: string): Promise<number> {
     return NotificationModel.countDocuments({ userId, read: false });
   }
