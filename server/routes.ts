@@ -721,6 +721,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = req.user as any;
       await storage.markMessagesRead(req.params.userId, user.id);
       const messages = await storage.getConversation(user.id, req.params.userId);
+      // Notify the other user that their messages have been read (after successful fetch)
+      broadcastToUser(req.params.userId, {
+        type: "messages_read",
+        byUserId: user.id,
+      });
       res.json(messages);
     } catch {
       res.status(500).json({ message: "Failed to fetch messages" });
@@ -1104,6 +1109,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           if (!wsClients.has(userId)) wsClients.set(userId, new Set());
           wsClients.get(userId)!.add(ws);
           ws.send(JSON.stringify({ type: "auth_ok" }));
+        } else if (msg.type === "typing" && userId && msg.recipientId) {
+          // Forward typing indicator to the recipient
+          broadcastToUser(String(msg.recipientId), {
+            type: "typing_indicator",
+            fromUserId: userId,
+            isTyping: !!msg.isTyping,
+          });
         }
       } catch {
         // ignore parse errors
