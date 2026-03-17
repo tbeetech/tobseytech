@@ -4,6 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import Navigation from "@/components/Navigation";
+import AchievementBadges from "@/components/AchievementBadges";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -351,6 +352,11 @@ export default function ProfilePage() {
             )}
           </div>
         )}
+
+        {/* Achievement Badges (Feature 11) */}
+        <div className="glass-effect rounded-xl p-8 mb-8">
+          <AchievementBadges />
+        </div>
 
         {/* Quick links (own profile) */}
         {isOwnProfile && (

@@ -69,6 +69,11 @@ export default function Navigation() {
                 Blog
               </button>
             </Link>
+            <Link href="/features">
+              <button className="nav-link text-galactic-orange/90 hover:text-galactic-gold font-orbitron text-xs tracking-wide transition-colors">
+                Features
+              </button>
+            </Link>
           </div>
 
           {/* Desktop auth actions */}
@@ -143,6 +148,11 @@ export default function Navigation() {
               <Link href="/blog" onClick={() => setIsOpen(false)}>
                 <button className="text-left nav-link text-galactic-orange/90 hover:text-galactic-gold font-orbitron text-sm transition-colors">
                   Blog
+                </button>
+              </Link>
+              <Link href="/features" onClick={() => setIsOpen(false)}>
+                <button className="text-left nav-link text-galactic-orange/90 hover:text-galactic-gold font-orbitron text-sm transition-colors">
+                  Features
                 </button>
               </Link>
 
