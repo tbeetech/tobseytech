@@ -27,6 +27,11 @@ Set the following environment variables in your Render service's **Environment**
 > cookies and IP-based rate limiting work correctly when running behind Render's reverse proxy.
 > No additional configuration is needed for this.
 
+> **Session persistence:** When `MONGODB_URI` is set the server stores sessions in MongoDB
+> (collection `sessions`) so that user logins **survive server restarts and re-deploys**.
+> Without `MONGODB_URI` the server falls back to an in-memory store, which means all users
+> are logged out on every restart — set `MONGODB_URI` in production to avoid this.
+
 ### 3. Optional Environment Variables (for email / contact form)
 
 | Variable | Description |
