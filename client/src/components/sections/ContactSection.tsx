@@ -4,17 +4,20 @@ const CONTACT_EMAIL = "hello@tobseytech.com";
 
 export default function ContactSection() {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     const form = e.currentTarget;
     const name = (form.elements.namedItem("name") as HTMLInputElement).value.trim();
     const email = (form.elements.namedItem("email") as HTMLInputElement).value.trim();
     const message = (form.elements.namedItem("message") as HTMLTextAreaElement).value.trim();
 
     if (!name || !email || !message) {
-      e.preventDefault();
       alert("Please complete all fields before sending.");
       return;
     }
-    // Allow the mailto action to proceed
+
+    const subject = encodeURIComponent(`Message from ${name}`);
+    const body = encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`);
+    window.location.href = `mailto:${CONTACT_EMAIL}?subject=${subject}&body=${body}`;
   };
 
   return (
@@ -33,9 +36,6 @@ export default function ContactSection() {
           {/* Direct mailto form */}
           <div className="glass-effect p-6 sm:p-8 rounded-2xl">
             <form
-              action={`mailto:${CONTACT_EMAIL}`}
-              method="post"
-              encType="text/plain"
               onSubmit={handleSubmit}
               className="space-y-5"
             >
