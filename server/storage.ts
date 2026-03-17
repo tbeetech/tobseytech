@@ -23,7 +23,13 @@ import {
   type Notification,
   type InsertNotification,
 } from "@shared/schema";
-import { randomUUID } from "crypto";
+import { randomUUID, randomBytes } from "crypto";
+
+export interface ShortUrl {
+  code: string;
+  url: string;
+  createdAt: Date;
+}
 
 export interface IStorage {
   // User methods
@@ -112,6 +118,10 @@ export interface IStorage {
   markNotificationRead(id: string, userId: string): Promise<Notification | undefined>;
   markAllNotificationsRead(userId: string): Promise<void>;
   deleteNotification(id: string, userId: string): Promise<boolean>;
+
+  // Short URL methods
+  createShortUrl(url: string): Promise<ShortUrl>;
+  getShortUrl(code: string): Promise<ShortUrl | undefined>;
 }
 
 export class MemStorage implements IStorage {
@@ -128,6 +138,7 @@ export class MemStorage implements IStorage {
   private messages: Map<string, Message>;
   private notifications: Map<string, Notification>;
   private resetTokens: Map<string, { userId: string; expiry: Date }>;
+  private shortUrls: Map<string, ShortUrl>;
 
   constructor() {
     this.users = new Map();
@@ -143,6 +154,7 @@ export class MemStorage implements IStorage {
     this.messages = new Map();
     this.notifications = new Map();
     this.resetTokens = new Map();
+    this.shortUrls = new Map();
 
     // Initialize with some sample data
     this.initializeSampleData();
@@ -725,6 +737,20 @@ export class MemStorage implements IStorage {
     if (!notification || notification.userId !== userId) return false;
     this.notifications.delete(id);
     return true;
+  }
+
+  async createShortUrl(url: string): Promise<ShortUrl> {
+    let code: string;
+    do {
+      code = randomBytes(4).toString("hex");
+    } while (this.shortUrls.has(code));
+    const entry: ShortUrl = { code, url, createdAt: new Date() };
+    this.shortUrls.set(code, entry);
+    return entry;
+  }
+
+  async getShortUrl(code: string): Promise<ShortUrl | undefined> {
+    return this.shortUrls.get(code);
   }
 }
 

@@ -1092,6 +1092,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ─── URL Shortener routes ─────────────────────────────────────────────────
+
+  app.post("/api/shorten", authRateLimiter, requireAuth, async (req, res) => {
+    try {
+      const { url } = req.body;
+      if (!url || typeof url !== "string") {
+        return res.status(400).json({ message: "URL is required" });
+      }
+      const short = await storage.createShortUrl(url);
+      const base = process.env.BASE_URL ?? `${req.protocol}://${req.get("host")}`;
+      res.json({ code: short.code, shortUrl: `${base}/s/${short.code}` });
+    } catch {
+      res.status(500).json({ message: "Failed to shorten URL" });
+    }
+  });
+
+  app.get("/s/:code", async (req, res) => {
+    try {
+      const entry = await storage.getShortUrl(req.params.code);
+      if (!entry) return res.status(404).send("Short URL not found");
+      res.redirect(302, entry.url);
+    } catch {
+      res.status(500).send("Internal server error");
+    }
+  });
+
   const httpServer = createServer(app);
 
   // ─── WebSocket server for real-time chat ─────────────────────────────────
