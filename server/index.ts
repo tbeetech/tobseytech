@@ -20,8 +20,9 @@ const app = express();
 //    under the same "undefined" key, breaking per-IP limiting.
 app.set("trust proxy", 1);
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+// Increase body size limit to 10 MB to accommodate base64-encoded cover images
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: false, limit: "10mb" }));
 
 // Use MongoDB-backed session storage when MONGODB_URI is available so that
 // sessions survive server restarts (important on Render.com and other PaaS
