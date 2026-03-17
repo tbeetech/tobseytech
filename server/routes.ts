@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import passport from "passport";
 import bcrypt from "bcryptjs";
-import { randomBytes } from "crypto";
+import { randomBytes, timingSafeEqual } from "crypto";
 import rateLimit from "express-rate-limit";
 import { storage } from "./storage";
 import {
@@ -1015,7 +1015,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!adminDashboardPassword) {
       return res.status(503).json({ message: "Admin dashboard password not configured" });
     }
-    if (!password || password !== adminDashboardPassword) {
+    if (!password) {
+      return res.status(401).json({ message: "Invalid dashboard password" });
+    }
+    // Use timing-safe comparison to prevent timing-based attacks
+    const supplied = Buffer.from(String(password));
+    const expected = Buffer.from(adminDashboardPassword);
+    const match =
+      supplied.length === expected.length &&
+      timingSafeEqual(supplied, expected);
+    if (!match) {
       return res.status(401).json({ message: "Invalid dashboard password" });
     }
     res.json({ ok: true });
