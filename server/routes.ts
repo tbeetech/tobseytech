@@ -1101,6 +1101,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ─── Career Intelligence Hub routes ──────────────────────────────────────
+
+  const CAREER_API_TIMEOUT_MS = 8000;
+
+  interface HNApiResponse { hits: { objectID: string; title: string; url: string; author: string; points: number; num_comments: number; created_at: string }[] }
+
+  // Proxy Remotive.com public API for remote job listings
+  app.get("/api/career/jobs", async (req, res) => {
+    try {
+      const { category, search } = req.query as Record<string, string>;
+      const params = new URLSearchParams();
+      if (category) params.set("category", category);
+      if (search) params.set("search", search);
+      const url = `https://remotive.com/api/remote-jobs${params.toString() ? `?${params}` : ""}`;
+      const response = await fetch(url, { signal: AbortSignal.timeout(CAREER_API_TIMEOUT_MS) });
+      if (!response.ok) throw new Error(`Remotive responded ${response.status}`);
+      const data = await response.json() as { jobs: unknown[] };
+      // Return only the first 20 to keep payload light
+      res.json({ jobs: (data.jobs ?? []).slice(0, 20) });
+    } catch (err) {
+      res.status(502).json({ jobs: [], message: "Could not fetch live jobs right now." });
+    }
+  });
+
+  // Proxy Dev.to public API for articles
+  app.get("/api/career/articles", async (req, res) => {
+    try {
+      const { tag } = req.query as Record<string, string>;
+      const safeTag = (tag ?? "career").replace(/[^a-z0-9-]/gi, "").slice(0, 50);
+      const url = `https://dev.to/api/articles?tag=${encodeURIComponent(safeTag)}&per_page=10&top=7`;
+      const response = await fetch(url, { signal: AbortSignal.timeout(CAREER_API_TIMEOUT_MS) });
+      if (!response.ok) throw new Error(`Dev.to responded ${response.status}`);
+      const articles = await response.json();
+      res.json({ articles });
+    } catch {
+      res.status(502).json({ articles: [], message: "Could not fetch articles right now." });
+    }
+  });
+
+  // Proxy HN Algolia for discussions/resources
+  app.get("/api/career/discussions", async (req, res) => {
+    try {
+      const { query } = req.query as Record<string, string>;
+      const safeQuery = (query ?? "remote work tips").replace(/[^a-z0-9 _-]/gi, "").slice(0, 100);
+      const url = `https://hn.algolia.com/api/v1/search?query=${encodeURIComponent(safeQuery)}&tags=story&hitsPerPage=8`;
+      const response = await fetch(url, { signal: AbortSignal.timeout(CAREER_API_TIMEOUT_MS) });
+      if (!response.ok) throw new Error(`HN responded ${response.status}`);
+      const data = await response.json() as HNApiResponse;
+      res.json({ hits: data.hits ?? [] });
+    } catch {
+      res.status(502).json({ hits: [], message: "Could not fetch discussions right now." });
+    }
+  });
+
   // ─── URL Shortener routes ─────────────────────────────────────────────────
 
   app.post("/api/shorten", authRateLimiter, requireAuth, async (req, res) => {
