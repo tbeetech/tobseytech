@@ -1,6 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
 import session from "express-session";
 import createMemoryStore from "memorystore";
+import MongoStore from "connect-mongo";
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import bcrypt from "bcryptjs";
@@ -22,16 +23,41 @@ app.set("trust proxy", 1);
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Use memorystore to avoid the default MemoryStore memory leak in production.
-// Sessions are pruned of expired entries every 24 h.
+// Use MongoDB-backed session storage when MONGODB_URI is available so that
+// sessions survive server restarts (important on Render.com and other PaaS
+// platforms that restart the process on every deploy or spin-up).
+// Fall back to memorystore in development / when no MongoDB URI is configured.
 const MemoryStore = createMemoryStore(session);
+
+function buildSessionStore() {
+  if (process.env.MONGODB_URI) {
+    try {
+      const store = MongoStore.create({
+        mongoUrl: process.env.MONGODB_URI,
+        collectionName: "sessions",
+        ttl: 7 * 24 * 60 * 60, // 7 days (in seconds)
+        autoRemove: "native", // rely on MongoDB TTL index for clean-up
+      });
+      // Log connection errors without crashing – the store will automatically
+      // retry; sessions already in-flight will fail gracefully.
+      store.on("error", (err: Error) => {
+        console.error("[session] MongoStore error:", err.message);
+      });
+      return store;
+    } catch (err) {
+      console.error("[session] Failed to create MongoStore, falling back to MemoryStore:", err);
+    }
+  }
+  // Development fallback – prune expired entries every 24 h.
+  return new MemoryStore({ checkPeriod: 86400000 });
+}
 
 app.use(
   session({
     secret: process.env.SESSION_SECRET || "tobseytech-secret-key",
     resave: false,
     saveUninitialized: false,
-    store: new MemoryStore({ checkPeriod: 86400000 }),
+    store: buildSessionStore(),
     cookie: {
       secure: process.env.NODE_ENV === "production",
       httpOnly: true,
