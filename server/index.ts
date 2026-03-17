@@ -45,7 +45,7 @@ function buildSessionStore() {
       });
       return store;
     } catch (err) {
-      console.error("[session] Failed to create MongoStore, falling back to MemoryStore:", err);
+      console.error("[session] Failed to create MongoStore, falling back to MemoryStore:", (err as Error).message ?? err);
     }
   }
   // Development fallback – prune expired entries every 24 h.

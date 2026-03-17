@@ -61,7 +61,7 @@ export default function BlogEditorPage() {
   }, [authLoading, user, navigate]);
 
   // Load existing post for editing
-  const { isLoading: loadingPost } = useQuery<BlogPost>({
+  const { isLoading: loadingPost, data: postData } = useQuery<BlogPost>({
     queryKey: ["/api/blog", id],
     enabled: isEditing && !!user,
     queryFn: async () => {
@@ -69,22 +69,26 @@ export default function BlogEditorPage() {
       if (!res.ok) throw new Error("Post not found");
       return res.json();
     },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    select: (data: any) => {
-      setForm({
-        title: data.title ?? "",
-        slug: data.slug ?? "",
-        excerpt: data.excerpt ?? "",
-        content: data.content ?? "",
-        coverImage: data.coverImage ?? "",
-        tags: Array.isArray(data.tags) ? data.tags.join(", ") : "",
-        category: data.category ?? "",
-        published: data.published ?? false,
-      });
-      setSlugManuallyEdited(true);
-      return data;
-    },
   });
+
+  // Populate the form once the fetched post data is available.
+  // This must be a useEffect (not a select side-effect) because calling
+  // setState inside React Query's select runs during the render phase,
+  // which React 18 forbids and throws minified error #301.
+  useEffect(() => {
+    if (!postData) return;
+    setForm({
+      title: postData.title ?? "",
+      slug: postData.slug ?? "",
+      excerpt: postData.excerpt ?? "",
+      content: postData.content ?? "",
+      coverImage: postData.coverImage ?? "",
+      tags: Array.isArray(postData.tags) ? postData.tags.join(", ") : "",
+      category: postData.category ?? "",
+      published: postData.published ?? false,
+    });
+    setSlugManuallyEdited(true);
+  }, [postData]);
 
   const mutation = useMutation({
     mutationFn: async (payload: object) => {
