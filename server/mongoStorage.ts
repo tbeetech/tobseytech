@@ -35,6 +35,8 @@ import { EditSuggestionModel } from "./models/EditSuggestion";
 import { FriendshipModel } from "./models/Friendship";
 import { MessageModel } from "./models/Message";
 import { NotificationModel } from "./models/Notification";
+import { ShortUrlModel } from "./models/ShortUrl";
+import { randomBytes } from "crypto";
 
 function docToUser(doc: any): User {
   return {
@@ -550,5 +552,29 @@ export class MongoStorage {
   async deleteNotification(id: string, userId: string): Promise<boolean> {
     const result = await NotificationModel.deleteOne({ _id: id, userId });
     return result.deletedCount > 0;
+  }
+
+  async createShortUrl(url: string): Promise<{ code: string; url: string; createdAt: Date }> {
+    let code: string;
+    let attempts = 0;
+    while (true) {
+      code = randomBytes(4).toString("hex");
+      try {
+        const doc = await ShortUrlModel.create({ code, url });
+        return { code: doc.code, url: doc.url, createdAt: doc.createdAt as Date };
+      } catch (err: any) {
+        if (err?.code === 11000 && attempts < 5) {
+          attempts++;
+          continue;
+        }
+        throw err;
+      }
+    }
+  }
+
+  async getShortUrl(code: string): Promise<{ code: string; url: string; createdAt: Date } | undefined> {
+    const doc = await ShortUrlModel.findOne({ code }).lean();
+    if (!doc) return undefined;
+    return { code: doc.code, url: doc.url, createdAt: doc.createdAt as Date };
   }
 }

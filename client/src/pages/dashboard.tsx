@@ -25,9 +25,11 @@ import {
   BarChart3,
   RefreshCw,
   Search,
+  Share2,
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { format } from "date-fns";
+import { SharePostDialog } from "@/components/share-post-dialog";
 
 interface SafeUser {
   id: string;
@@ -433,6 +435,22 @@ export default function DashboardPage() {
                           </td>
                           <td className="py-3">
                             <div className="flex items-center gap-1 justify-end">
+                              {post.published && (
+                                <SharePostDialog
+                                  postSlug={post.slug}
+                                  postTitle={post.title}
+                                  trigger={
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      className="text-galactic-orange hover:text-galactic-gold h-7 px-2 text-xs"
+                                      title="Share"
+                                    >
+                                      <Share2 className="w-3 h-3" />
+                                    </Button>
+                                  }
+                                />
+                              )}
                               <Button
                                 size="sm"
                                 variant="ghost"

@@ -9,11 +9,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Loader2, ArrowLeft, Pencil, Trash2, Calendar, User, Tag,
-  Heart, Bookmark, MessageSquare, Send, Lightbulb, X, Check,
+  Heart, Bookmark, MessageSquare, Send, Lightbulb, X, Check, Share2,
 } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import { format } from "date-fns";
 import { apiRequest } from "@/lib/queryClient";
+import { SharePostDialog } from "@/components/share-post-dialog";
 
 interface BlogPost {
   id: string;
@@ -301,6 +302,10 @@ export default function BlogPostPage() {
               <Lightbulb className="w-4 h-4" />
               Suggest Edit
             </button>
+          )}
+
+          {post.published && (
+            <SharePostDialog postSlug={post.slug} postTitle={post.title} />
           )}
         </div>
 
