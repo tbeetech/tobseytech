@@ -74,6 +74,11 @@ export default function Navigation() {
                 Features
               </button>
             </Link>
+            <Link href="/career-hub">
+              <button className="nav-link text-neon-cyan/90 hover:text-neon-cyan font-orbitron text-xs tracking-wide transition-colors">
+                Career Hub
+              </button>
+            </Link>
           </div>
 
           {/* Desktop auth actions */}
@@ -153,6 +158,11 @@ export default function Navigation() {
               <Link href="/features" onClick={() => setIsOpen(false)}>
                 <button className="text-left nav-link text-galactic-orange/90 hover:text-galactic-gold font-orbitron text-sm transition-colors">
                   Features
+                </button>
+              </Link>
+              <Link href="/career-hub" onClick={() => setIsOpen(false)}>
+                <button className="text-left nav-link text-neon-cyan/90 hover:text-neon-cyan font-orbitron text-sm transition-colors">
+                  Career Hub
                 </button>
               </Link>
 

@@ -177,11 +177,22 @@ const features = [
     number: "16",
     icon: Layers,
     title: "Features Hub",
-    description: "This page — a unified, filterable showcase of all 16 platform features for investors and prospects.",
+    description: "This page — a unified, filterable showcase of all platform features for investors and prospects.",
     tags: ["Showcase", "Overview", "Investor"],
     color: "text-galactic-gold",
     border: "border-galactic-gold",
     anchor: "/features",
+    isPage: true,
+  },
+  {
+    number: "17",
+    icon: GraduationCap,
+    title: "Career Intelligence Hub",
+    description: "Live job listings, curated courses, industry expert recommender, job site guide, and career strategy cheat codes — all in one place.",
+    tags: ["Career", "Jobs", "Education", "AI"],
+    color: "text-neon-cyan",
+    border: "border-neon-cyan",
+    anchor: "/career-hub",
     isPage: true,
   },
 ];
@@ -191,7 +202,7 @@ const allTags = ["All", ...Array.from(new Set(features.flatMap(f => f.tags)))];
 export default function FeaturesPage() {
   return (
     <div className="min-h-screen bg-space-black text-white">
-      <title>16 Interactive Features – TOBSEYTECH</title>
+      <title>17 Interactive Features – TOBSEYTECH</title>
       <Navigation />
 
       <main className="pt-24 pb-20">
@@ -201,15 +212,15 @@ export default function FeaturesPage() {
             <Layers className="w-4 h-4" /> Platform Features
           </div>
           <h1 className="font-orbitron font-bold text-4xl md:text-6xl gradient-text mb-6">
-            16 Investor-Ready Features
+            17 Investor-Ready Features
           </h1>
           <p className="text-gray-300 max-w-3xl mx-auto text-lg leading-relaxed mb-8">
             TOBSEYTECH isn't just a service agency — it's an interactive digital ecosystem. Every feature below is live, built, and designed to attract users, retain community, and demonstrate platform value to investors.
           </p>
           <div className="flex flex-wrap justify-center gap-4 mb-6">
             {[
-              { label: "Interactive Features", value: "16" },
-              { label: "Live Today", value: "16/16" },
+              { label: "Interactive Features", value: "17" },
+              { label: "Live Today", value: "17/17" },
               { label: "User-Facing", value: "✓" },
               { label: "Investor-Ready", value: "✓" },
             ].map(({ label, value }) => (

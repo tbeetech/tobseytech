@@ -22,6 +22,7 @@ import ChatPage from "@/pages/chat";
 import DashboardPage from "@/pages/dashboard";
 import FeaturesPage from "@/pages/features";
 import LearningPathPage from "@/pages/learning-path";
+import CareerHubPage from "@/pages/career-hub";
 
 function Router() {
   return (
@@ -44,6 +45,7 @@ function Router() {
       <Route path="/dashboard" component={DashboardPage} />
       <Route path="/features" component={FeaturesPage} />
       <Route path="/learning-path" component={LearningPathPage} />
+      <Route path="/career-hub" component={CareerHubPage} />
       <Route component={NotFound} />
     </Switch>
   );
