@@ -1,9 +1,44 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Menu, X, LogIn, LogOut, User, MessageCircle, LayoutDashboard } from "lucide-react";
+import { Menu, X, LogIn, LogOut, User, MessageCircle, LayoutDashboard, ChevronDown } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import NotificationBell from "@/components/NotificationBell";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+function MobilePowerHill({ features, onSelect }: { features: { id: string; label: string }[]; onSelect: (id: string) => void }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div>
+      <button
+        className="text-left nav-link text-galactic-orange/90 hover:text-galactic-gold font-orbitron text-sm transition-colors flex items-center gap-1"
+        onClick={() => setOpen((v) => !v)}
+        data-testid="mobile-nav-powerhill-trigger"
+      >
+        Power-Hill <ChevronDown className={`w-3 h-3 transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+      {open && (
+        <div className="ml-3 mt-2 flex flex-col gap-2 border-l border-galactic-orange/20 pl-3">
+          {features.map((feature) => (
+            <button
+              key={feature.id}
+              onClick={() => onSelect(feature.id)}
+              className="text-left text-galactic-orange/80 hover:text-galactic-gold font-orbitron text-xs transition-colors"
+              data-testid={`mobile-nav-powerhill-${feature.id}`}
+            >
+              {feature.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
@@ -28,6 +63,28 @@ export default function Navigation() {
   const navLinks = [
     { id: "services", label: "Services" },
     { id: "case-studies", label: "Case Studies" },
+    { id: "about", label: "About" },
+    { id: "contact", label: "Contact" },
+  ];
+
+  const powerHillFeatures = [
+    { id: "stats", label: "Stats & Metrics" },
+    { id: "services", label: "Services" },
+    { id: "roi-calculator", label: "ROI Calculator" },
+    { id: "skills-quiz", label: "Digital Skills Assessment" },
+    { id: "tech-trends", label: "Tech Trends Radar" },
+    { id: "roadmap", label: "Innovation Roadmap" },
+    { id: "investor-metrics", label: "Investor KPI Dashboard" },
+    { id: "challenges", label: "Community Challenges" },
+    { id: "startup-toolkit", label: "Startup Digital Toolkit" },
+    { id: "resources", label: "Resource Library" },
+    { id: "service-comparison", label: "Service Comparison" },
+    { id: "case-studies", label: "Case Studies" },
+    { id: "partners", label: "Partner Showcase" },
+    { id: "mentorship", label: "Mentorship Network" },
+    { id: "live-demo", label: "Live Platform Demo" },
+    { id: "global-impact", label: "Global Impact Map" },
+    { id: "team", label: "Founder & Team" },
     { id: "about", label: "About" },
     { id: "contact", label: "Contact" },
   ];
@@ -79,6 +136,28 @@ export default function Navigation() {
                 Career Hub
               </button>
             </Link>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="nav-link text-galactic-orange/90 hover:text-galactic-gold font-orbitron text-xs tracking-wide transition-colors flex items-center gap-1" data-testid="nav-powerhill-trigger">
+                  Power-Hill <ChevronDown className="w-3 h-3" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                className="bg-space-black border border-galactic-orange/30 max-h-96 overflow-y-auto z-50"
+                align="start"
+              >
+                {powerHillFeatures.map((feature) => (
+                  <DropdownMenuItem
+                    key={feature.id}
+                    onClick={() => scrollToSection(feature.id)}
+                    className="text-galactic-orange/90 hover:text-galactic-gold hover:bg-galactic-orange/10 font-orbitron text-xs cursor-pointer"
+                    data-testid={`nav-powerhill-${feature.id}`}
+                  >
+                    {feature.label}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           {/* Desktop auth actions */}
@@ -165,6 +244,9 @@ export default function Navigation() {
                   Career Hub
                 </button>
               </Link>
+
+              {/* Power-Hill dropdown (mobile) */}
+              <MobilePowerHill features={powerHillFeatures} onSelect={(id) => { scrollToSection(id); setIsOpen(false); }} />
 
               <div className="h-px my-1" style={{ background: "rgba(255,165,0,0.15)" }} />
 
