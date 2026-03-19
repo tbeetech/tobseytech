@@ -1101,6 +1101,86 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ─── Post Fetcher (admin only) ────────────────────────────────────────────
+
+  interface DevToArticle {
+    id: number;
+    title: string;
+    description: string;
+    url: string;
+    cover_image: string | null;
+    social_image: string | null;
+    tag_list: string[];
+    user: { name: string };
+    body_markdown?: string;
+    published_at: string;
+  }
+
+  const POST_FETCHER_TIMEOUT_MS = 12000;
+
+  // Admin: fetch tech blog post suggestions from public sources (Dev.to)
+  app.post("/api/admin/fetch-posts", authRateLimiter, requireAdmin, async (req, res) => {
+    try {
+      const { topics = [], count = 30 } = req.body as { topics?: string[]; count?: number };
+      const safeCount = Math.min(Math.max(Number(count) || 30, 1), 30);
+      const safeTopics: string[] = (Array.isArray(topics) && topics.length > 0)
+        ? topics.map((t) => String(t).replace(/[^a-z0-9-]/gi, "").slice(0, 50)).filter(Boolean)
+        : ["javascript", "webdev", "ai", "technology", "programming"];
+
+      // Spread the count across topics, fetching at least some from each
+      const perTopic = Math.ceil(safeCount / safeTopics.length);
+
+      const fetchTag = async (tag: string): Promise<DevToArticle[]> => {
+        const url = `https://dev.to/api/articles?tag=${encodeURIComponent(tag)}&per_page=${perTopic}&top=7`;
+        const response = await fetch(url, { signal: AbortSignal.timeout(POST_FETCHER_TIMEOUT_MS) });
+        if (!response.ok) return [];
+        return response.json() as Promise<DevToArticle[]>;
+      };
+
+      const results = await Promise.allSettled(safeTopics.map(fetchTag));
+      const allArticles: DevToArticle[] = [];
+      const seenIds = new Set<number>();
+
+      for (const result of results) {
+        if (result.status === "fulfilled") {
+          for (const article of result.value) {
+            if (!seenIds.has(article.id)) {
+              seenIds.add(article.id);
+              allArticles.push(article);
+            }
+          }
+        }
+      }
+
+      // Trim to requested count and map to our suggestion format
+      const suggestions = allArticles.slice(0, safeCount).map((a) => ({
+        externalId: String(a.id),
+        title: a.title,
+        excerpt: a.description || a.title,
+        coverImage: a.cover_image || a.social_image || null,
+        tags: Array.isArray(a.tag_list) ? a.tag_list.slice(0, 5) : [],
+        category: (Array.isArray(a.tag_list) && a.tag_list[0]) ? a.tag_list[0] : "technology",
+        sourceUrl: a.url,
+        author: a.user?.name || "Unknown",
+        source: "dev.to",
+        publishedAt: a.published_at,
+        // Provide a content scaffold the admin can edit before posting
+        content: [
+          `> *Originally published on [Dev.to](${a.url}) by ${a.user?.name || "Unknown"}*`,
+          "",
+          a.description || "",
+          "",
+          `[Read the full article on Dev.to →](${a.url})`,
+        ].join("\n"),
+      }));
+
+      res.json({ suggestions });
+    } catch (err) {
+      console.error("[fetch-posts] Failed to fetch post suggestions:", err);
+      res.status(502).json({ suggestions: [], message: "Could not fetch post suggestions right now." });
+    }
+  });
+
   // ─── Career Intelligence Hub routes ──────────────────────────────────────
 
   const CAREER_API_TIMEOUT_MS = 8000;
