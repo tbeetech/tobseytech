@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import Navigation from "@/components/Navigation";
 import Hero from "@/components/Hero";
 import AboutSection from "@/components/sections/AboutSection";
@@ -8,30 +7,11 @@ import CTASection from "@/components/CTASection";
 import ContactSection from "@/components/sections/ContactSection";
 import FounderSection from "@/components/sections/FounderSection";
 import StatsSection from "@/components/sections/StatsSection";
-import ROICalculatorSection from "@/components/sections/ROICalculatorSection";
-import InnovationRoadmapSection from "@/components/sections/InnovationRoadmapSection";
-import SkillsQuizSection from "@/components/sections/SkillsQuizSection";
-import TechTrendsSection from "@/components/sections/TechTrendsSection";
-import ChallengesSection from "@/components/sections/ChallengesSection";
-import ResourceLibrarySection from "@/components/sections/ResourceLibrarySection";
-import InvestorMetricsSection from "@/components/sections/InvestorMetricsSection";
-import ServiceComparisonSection from "@/components/sections/ServiceComparisonSection";
-import StartupToolkitSection from "@/components/sections/StartupToolkitSection";
-import PartnerShowcaseSection from "@/components/sections/PartnerShowcaseSection";
-import MentorshipSection from "@/components/sections/MentorshipSection";
-import LiveDemoSection from "@/components/sections/LiveDemoSection";
-import GlobalImpactSection from "@/components/sections/GlobalImpactSection";
-import { initializeAnimations } from "@/lib/animations";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Layers } from "lucide-react";
 
 export default function Home() {
-  useEffect(() => {
-    // Initialize GSAP animations and scroll triggers
-    initializeAnimations();
-  }, []);
-
   return (
     <div className="min-h-screen bg-space-black text-white overflow-x-hidden">
       <title>TOBSEYTECH - Future Digital Solutions</title>
@@ -40,39 +20,10 @@ export default function Home() {
 
       <main>
         <Hero />
-        <CTASection />
         <StatsSection />
         <ServicesSection />
-        {/* Feature 1: ROI Calculator */}
-        <ROICalculatorSection />
-        {/* Feature 3: Digital Skills Assessment */}
-        <SkillsQuizSection />
         <CTASection />
-        {/* Feature 4: Tech Trends Radar */}
-        <TechTrendsSection />
-        {/* Feature 2: Innovation Roadmap */}
-        <InnovationRoadmapSection />
-        {/* Feature 8: Investor KPI Dashboard */}
-        <InvestorMetricsSection />
-        <CTASection />
-        {/* Feature 6: Community Challenges */}
-        <ChallengesSection />
-        {/* Feature 10: Startup Digital Toolkit */}
-        <StartupToolkitSection />
-        {/* Feature 7: Free Resource Library */}
-        <ResourceLibrarySection />
-        {/* Feature 9: Service Comparison */}
-        <ServiceComparisonSection />
         <CaseStudiesSection />
-        {/* Feature 12: Partner Showcase */}
-        <PartnerShowcaseSection />
-        {/* Feature 13: Mentorship Network */}
-        <MentorshipSection />
-        {/* Feature 14: Live Platform Demo */}
-        <LiveDemoSection />
-        {/* Feature 15: Global Impact Map */}
-        <GlobalImpactSection />
-        <CTASection />
         <FounderSection />
         <AboutSection />
         <ContactSection />
