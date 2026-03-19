@@ -78,7 +78,7 @@ export default function SkillsQuizSection() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ feature: "skills-quiz", score: totalScore, level: level.title }),
-        }).catch(() => {});
+        }).catch((err) => console.warn("[SkillsQuiz] Could not save result to profile:", err));
       }
     }
   };
