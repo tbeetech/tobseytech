@@ -26,10 +26,12 @@ import {
   RefreshCw,
   Search,
   Share2,
+  Rss,
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { format } from "date-fns";
 import { SharePostDialog } from "@/components/share-post-dialog";
+import PostFetcherTab from "@/components/PostFetcherTab";
 
 interface SafeUser {
   id: string;
@@ -367,6 +369,9 @@ export default function DashboardPage() {
             </TabsTrigger>
             <TabsTrigger value="suggestions" className="font-orbitron text-sm rounded-lg">
               <FileText className="w-4 h-4 mr-1" /> Suggestions
+            </TabsTrigger>
+            <TabsTrigger value="fetcher" className="font-orbitron text-sm rounded-lg">
+              <Rss className="w-4 h-4 mr-1" /> Post Fetcher
             </TabsTrigger>
           </TabsList>
 
@@ -766,6 +771,11 @@ export default function DashboardPage() {
                 </div>
               )}
             </div>
+          </TabsContent>
+
+          {/* ── Post Fetcher Tab ── */}
+          <TabsContent value="fetcher">
+            <PostFetcherTab />
           </TabsContent>
         </Tabs>
       </div>
