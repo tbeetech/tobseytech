@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Brain, CheckCircle, ChevronRight, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/use-auth";
 
 const questions = [
   {
@@ -56,6 +57,7 @@ export default function SkillsQuizSection() {
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [submitted, setSubmitted] = useState(false);
   const [current, setCurrent] = useState(0);
+  const { user } = useAuth();
 
   const totalScore = Object.values(answers).reduce((a, b) => a + b, 0);
   const level = levels.find(l => totalScore >= l.min && totalScore <= l.max) || levels[0];
@@ -69,7 +71,16 @@ export default function SkillsQuizSection() {
   };
 
   const handleSubmit = () => {
-    if (Object.keys(answers).length === questions.length) setSubmitted(true);
+    if (Object.keys(answers).length === questions.length) {
+      setSubmitted(true);
+      if (user) {
+        fetch("/api/profile/feature-result", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ feature: "skills-quiz", score: totalScore, level: level.title }),
+        }).catch(() => {});
+      }
+    }
   };
 
   const handleReset = () => {

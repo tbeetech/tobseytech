@@ -16,8 +16,8 @@ const features = [
     tags: ["Interactive", "Finance", "Analytics"],
     color: "text-galactic-orange",
     border: "border-galactic-orange",
-    anchor: "/#roi-calculator",
-    isPage: false,
+    anchor: "/feature/roi-calculator",
+    isPage: true,
   },
   {
     number: "02",
@@ -27,8 +27,8 @@ const features = [
     tags: ["Visual", "Strategy", "Investor"],
     color: "text-neon-cyan",
     border: "border-neon-cyan",
-    anchor: "/#roadmap",
-    isPage: false,
+    anchor: "/feature/innovation-roadmap",
+    isPage: true,
   },
   {
     number: "03",
@@ -38,8 +38,8 @@ const features = [
     tags: ["Interactive", "Education", "Quiz"],
     color: "text-neon-yellow",
     border: "border-neon-yellow",
-    anchor: "/#skills-quiz",
-    isPage: false,
+    anchor: "/feature/skills-quiz",
+    isPage: true,
   },
   {
     number: "04",
@@ -49,8 +49,8 @@ const features = [
     tags: ["Visual", "Data", "Research"],
     color: "text-neon-purple",
     border: "border-neon-purple",
-    anchor: "/#tech-trends",
-    isPage: false,
+    anchor: "/feature/tech-trends",
+    isPage: true,
   },
   {
     number: "05",
@@ -71,8 +71,8 @@ const features = [
     tags: ["Community", "Gamification", "Skills"],
     color: "text-galactic-orange",
     border: "border-galactic-orange",
-    anchor: "/#challenges",
-    isPage: false,
+    anchor: "/feature/challenges",
+    isPage: true,
   },
   {
     number: "07",
@@ -82,8 +82,8 @@ const features = [
     tags: ["Education", "Free", "Resources"],
     color: "text-galactic-green",
     border: "border-galactic-green",
-    anchor: "/#resources",
-    isPage: false,
+    anchor: "/feature/resources",
+    isPage: true,
   },
   {
     number: "08",
@@ -93,8 +93,8 @@ const features = [
     tags: ["Investor", "Analytics", "Metrics"],
     color: "text-galactic-gold",
     border: "border-galactic-gold",
-    anchor: "/#investor-metrics",
-    isPage: false,
+    anchor: "/feature/investor-metrics",
+    isPage: true,
   },
   {
     number: "09",
@@ -104,8 +104,8 @@ const features = [
     tags: ["Interactive", "Sales", "Pricing"],
     color: "text-neon-cyan",
     border: "border-neon-cyan",
-    anchor: "/#service-comparison",
-    isPage: false,
+    anchor: "/feature/service-comparison",
+    isPage: true,
   },
   {
     number: "10",
@@ -115,8 +115,8 @@ const features = [
     tags: ["Interactive", "Startup", "Education"],
     color: "text-galactic-orange",
     border: "border-galactic-orange",
-    anchor: "/#startup-toolkit",
-    isPage: false,
+    anchor: "/feature/startup-toolkit",
+    isPage: true,
   },
   {
     number: "11",
@@ -137,8 +137,8 @@ const features = [
     tags: ["Network", "Partners", "Ecosystem"],
     color: "text-galactic-green",
     border: "border-galactic-green",
-    anchor: "/#partners",
-    isPage: false,
+    anchor: "/feature/partners",
+    isPage: true,
   },
   {
     number: "13",
@@ -148,8 +148,8 @@ const features = [
     tags: ["Mentorship", "Community", "1:1"],
     color: "text-neon-purple",
     border: "border-neon-purple",
-    anchor: "/#mentorship",
-    isPage: false,
+    anchor: "/feature/mentorship",
+    isPage: true,
   },
   {
     number: "14",
@@ -159,8 +159,8 @@ const features = [
     tags: ["Interactive", "Demo", "Showcase"],
     color: "text-neon-cyan",
     border: "border-neon-cyan",
-    anchor: "/#live-demo",
-    isPage: false,
+    anchor: "/feature/live-demo",
+    isPage: true,
   },
   {
     number: "15",
@@ -170,8 +170,8 @@ const features = [
     tags: ["Visual", "Global", "Impact"],
     color: "text-galactic-orange",
     border: "border-galactic-orange",
-    anchor: "/#global-impact",
-    isPage: false,
+    anchor: "/feature/global-impact",
+    isPage: true,
   },
   {
     number: "16",
@@ -260,25 +260,14 @@ export default function FeaturesPage() {
                     ))}
                   </div>
 
-                  {feature.isPage ? (
-                    <Link href={feature.anchor}>
-                      <Button
-                        size="sm"
-                        className={`w-full font-orbitron text-xs bg-gradient-to-r from-galactic-orange/20 to-galactic-gold/20 text-white hover:from-galactic-orange/40 hover:to-galactic-gold/40 border ${feature.border}/20`}
-                      >
-                        Open Feature <ArrowRight className="w-3 h-3 ml-1" />
-                      </Button>
-                    </Link>
-                  ) : (
-                    <a href={feature.anchor}>
-                      <Button
-                        size="sm"
-                        className={`w-full font-orbitron text-xs bg-gradient-to-r from-galactic-orange/20 to-galactic-gold/20 text-white hover:from-galactic-orange/40 hover:to-galactic-gold/40 border ${feature.border}/20`}
-                      >
-                        See Feature <ArrowRight className="w-3 h-3 ml-1" />
-                      </Button>
-                    </a>
-                  )}
+                  <Link href={feature.anchor}>
+                    <Button
+                      size="sm"
+                      className={`w-full font-orbitron text-xs bg-gradient-to-r from-galactic-orange/20 to-galactic-gold/20 text-white hover:from-galactic-orange/40 hover:to-galactic-gold/40 border ${feature.border}/20`}
+                    >
+                      Open Feature <ArrowRight className="w-3 h-3 ml-1" />
+                    </Button>
+                  </Link>
                 </div>
               );
             })}

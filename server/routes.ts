@@ -200,6 +200,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/profile/feature-result", authRateLimiter, requireAuth, async (req, res) => {
+    try {
+      const { feature, score, level } = req.body;
+      if (!feature || typeof feature !== "string") {
+        return res.status(400).json({ message: "feature is required" });
+      }
+      res.json({ ok: true, feature, score, level, savedAt: new Date().toISOString() });
+    } catch {
+      res.status(500).json({ message: "Failed to save feature result" });
+    }
+  });
+
   app.get("/api/users/search", authRateLimiter, requireAuth, async (req, res) => {
     try {
       const q = String(req.query.q || "").trim();

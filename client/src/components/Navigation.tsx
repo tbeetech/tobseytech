@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-function MobilePowerHill({ features, onSelect }: { features: { id: string; label: string }[]; onSelect: (id: string) => void }) {
+function MobilePowerHill({ features, onSelect }: { features: { id: string; label: string; href: string }[]; onSelect: (href: string) => void }) {
   const [open, setOpen] = useState(false);
   return (
     <div>
@@ -27,7 +27,7 @@ function MobilePowerHill({ features, onSelect }: { features: { id: string; label
           {features.map((feature) => (
             <button
               key={feature.id}
-              onClick={() => onSelect(feature.id)}
+              onClick={() => onSelect(feature.href)}
               className="text-left text-galactic-orange/80 hover:text-galactic-gold font-orbitron text-xs transition-colors"
               data-testid={`mobile-nav-powerhill-${feature.id}`}
             >
@@ -68,25 +68,22 @@ export default function Navigation() {
   ];
 
   const powerHillFeatures = [
-    { id: "stats", label: "Stats & Metrics" },
-    { id: "services", label: "Services" },
-    { id: "roi-calculator", label: "ROI Calculator" },
-    { id: "skills-quiz", label: "Digital Skills Assessment" },
-    { id: "tech-trends", label: "Tech Trends Radar" },
-    { id: "roadmap", label: "Innovation Roadmap" },
-    { id: "investor-metrics", label: "Investor KPI Dashboard" },
-    { id: "challenges", label: "Community Challenges" },
-    { id: "startup-toolkit", label: "Startup Digital Toolkit" },
-    { id: "resources", label: "Resource Library" },
-    { id: "service-comparison", label: "Service Comparison" },
-    { id: "case-studies", label: "Case Studies" },
-    { id: "partners", label: "Partner Showcase" },
-    { id: "mentorship", label: "Mentorship Network" },
-    { id: "live-demo", label: "Live Platform Demo" },
-    { id: "global-impact", label: "Global Impact Map" },
-    { id: "team", label: "Founder & Team" },
-    { id: "about", label: "About" },
-    { id: "contact", label: "Contact" },
+    { id: "roi-calculator", label: "01 · ROI Calculator", href: "/feature/roi-calculator" },
+    { id: "innovation-roadmap", label: "02 · Innovation Roadmap", href: "/feature/innovation-roadmap" },
+    { id: "skills-quiz", label: "03 · Digital Skills Assessment", href: "/feature/skills-quiz" },
+    { id: "tech-trends", label: "04 · Tech Trends Radar", href: "/feature/tech-trends" },
+    { id: "learning-path", label: "05 · Learning Path", href: "/learning-path" },
+    { id: "challenges", label: "06 · Community Challenges", href: "/feature/challenges" },
+    { id: "resources", label: "07 · Resource Library", href: "/feature/resources" },
+    { id: "investor-metrics", label: "08 · Investor KPI Dashboard", href: "/feature/investor-metrics" },
+    { id: "service-comparison", label: "09 · Service Comparison", href: "/feature/service-comparison" },
+    { id: "startup-toolkit", label: "10 · Startup Digital Toolkit", href: "/feature/startup-toolkit" },
+    { id: "badges", label: "11 · Achievement Badges", href: "/profile" },
+    { id: "partners", label: "12 · Partner Network", href: "/feature/partners" },
+    { id: "mentorship", label: "13 · Mentorship Network", href: "/feature/mentorship" },
+    { id: "live-demo", label: "14 · Live Platform Demo", href: "/feature/live-demo" },
+    { id: "global-impact", label: "15 · Global Impact Map", href: "/feature/global-impact" },
+    { id: "features-hub", label: "16 · Features Hub", href: "/features" },
   ];
 
   return (
@@ -147,13 +144,10 @@ export default function Navigation() {
                 align="start"
               >
                 {powerHillFeatures.map((feature) => (
-                  <DropdownMenuItem
-                    key={feature.id}
-                    onClick={() => scrollToSection(feature.id)}
-                    className="text-galactic-orange/90 hover:text-galactic-gold hover:bg-galactic-orange/10 font-orbitron text-xs cursor-pointer"
-                    data-testid={`nav-powerhill-${feature.id}`}
-                  >
-                    {feature.label}
+                  <DropdownMenuItem key={feature.id} asChild className="text-galactic-orange/90 hover:text-galactic-gold hover:bg-galactic-orange/10 font-orbitron text-xs cursor-pointer">
+                    <Link href={feature.href} onClick={() => setIsOpen(false)}>
+                      {feature.label}
+                    </Link>
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuContent>
@@ -246,7 +240,7 @@ export default function Navigation() {
               </Link>
 
               {/* Power-Hill dropdown (mobile) */}
-              <MobilePowerHill features={powerHillFeatures} onSelect={(id) => { scrollToSection(id); setIsOpen(false); }} />
+              <MobilePowerHill features={powerHillFeatures} onSelect={(href) => { navigate(href); setIsOpen(false); }} />
 
               <div className="h-px my-1" style={{ background: "rgba(255,165,0,0.15)" }} />
 
