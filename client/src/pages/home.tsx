@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import Navigation from "@/components/Navigation";
 import Hero from "@/components/Hero";
 import AboutSection from "@/components/sections/AboutSection";
@@ -13,8 +12,6 @@ import { Button } from "@/components/ui/button";
 import { Layers } from "lucide-react";
 
 export default function Home() {
-  useEffect(() => {}, []);
-
   return (
     <div className="min-h-screen bg-space-black text-white overflow-x-hidden">
       <title>TOBSEYTECH - Future Digital Solutions</title>

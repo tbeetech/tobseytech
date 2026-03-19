@@ -206,7 +206,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!feature || typeof feature !== "string") {
         return res.status(400).json({ message: "feature is required" });
       }
-      res.json({ ok: true, feature, score, level, savedAt: new Date().toISOString() });
+      // Acknowledges receipt; persist to user metadata when schema supports featureResults
+      res.json({ ok: true, feature, score, level });
     } catch {
       res.status(500).json({ message: "Failed to save feature result" });
     }
