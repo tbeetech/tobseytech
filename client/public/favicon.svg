@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#0d0528"/>
+      <stop offset="100%" stop-color="#000000"/>
+    </radialGradient>
+    <filter id="glow" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="2.5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glowBig" x="-150%" y="-150%" width="400%" height="400%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="100" height="100" rx="12" fill="url(#bg)"/>
+
+  <!-- Tiny background stars -->
+  <g fill="#aaddff" opacity="0.5">
+    <circle cx="18"  cy="18"  r="1"/>
+    <circle cx="82"  cy="14"  r="1"/>
+    <circle cx="90"  cy="72"  r="1"/>
+    <circle cx="12"  cy="80"  r="1"/>
+    <circle cx="55"  cy="88"  r="1"/>
+    <circle cx="28"  cy="92"  r="0.8"/>
+    <circle cx="75"  cy="90"  r="0.8"/>
+  </g>
+
+  <!-- Orion's Belt — three diagonal stars -->
+  <circle cx="34" cy="57" r="5" fill="#ffffff" filter="url(#glow)"/>
+  <circle cx="50" cy="51" r="5" fill="#ffffff" filter="url(#glow)"/>
+  <circle cx="66" cy="45" r="5" fill="#ffffff" filter="url(#glow)"/>
+
+  <!-- Faint connector line between belt stars -->
+  <line x1="34" y1="57" x2="66" y2="45"
+        stroke="#3366ff" stroke-width="1" stroke-opacity="0.35"/>
+
+  <!-- Static bolt base (always-on faint) -->
+  <path d="M66,45 L59,48 L63,54 L53,50 L57,56 L47,52 L51,58 L34,57"
+        stroke="#FFD700" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"
+        fill="none" opacity="0.3" filter="url(#glow)"/>
+
+  <!-- Rolling comet ball (outer halo) -->
+  <circle r="11" fill="#FFD700" fill-opacity="0" filter="url(#glowBig)">
+    <animate attributeName="fill-opacity" values="0;0.35;0" dur="2.4s" repeatCount="indefinite"/>
+    <animateMotion
+      path="M66,45 L59,48 L63,54 L53,50 L57,56 L47,52 L51,58 L34,57"
+      dur="2.4s" repeatCount="indefinite" calcMode="linear"/>
+  </circle>
+
+  <!-- Rolling comet ball (core) -->
+  <circle r="5" fill="#ffffff" fill-opacity="0">
+    <animate attributeName="fill-opacity" values="0;0.95;0" dur="2.4s" repeatCount="indefinite"/>
+    <animateMotion
+      path="M66,45 L59,48 L63,54 L53,50 L57,56 L47,52 L51,58 L34,57"
+      dur="2.4s" repeatCount="indefinite" calcMode="linear"/>
+  </circle>
+
+  <!-- Trail dot -->
+  <circle r="3" fill="#FFE040" fill-opacity="0" filter="url(#glow)">
+    <animate attributeName="fill-opacity" values="0;0.5;0" dur="2.4s" begin="0.12s" repeatCount="indefinite"/>
+    <animateMotion
+      path="M66,45 L59,48 L63,54 L53,50 L57,56 L47,52 L51,58 L34,57"
+      dur="2.4s" begin="0.12s" repeatCount="indefinite" calcMode="linear"/>
+  </circle>
+
+  <!-- Belt flash when comet arrives -->
+  <circle cx="34" cy="57" r="10" fill="#FFD700" fill-opacity="0" filter="url(#glow)">
+    <animate attributeName="fill-opacity" values="0;0;0.5;0" dur="2.4s" repeatCount="indefinite"
+             keyTimes="0;0.85;0.95;1"/>
+  </circle>
+</svg>
