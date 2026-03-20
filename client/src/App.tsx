@@ -36,6 +36,7 @@ import FeatureMentorshipPage from "@/pages/feature-mentorship";
 import FeatureLiveDemoPage from "@/pages/feature-live-demo";
 import FeatureGlobalImpactPage from "@/pages/feature-global-impact";
 import ProphetChat from "@/components/ProphetChat";
+import CosmoResearchPanel from "@/components/CosmoResearchPanel";
 
 function Router() {
   return (
@@ -88,6 +89,7 @@ function App() {
           <Toaster />
           <Router />
           <ProphetChat />
+          <CosmoResearchPanel />
         </AuthProvider>
       </TooltipProvider>
     </QueryClientProvider>
