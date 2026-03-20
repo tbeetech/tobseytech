@@ -1,0 +1,336 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <!-- Deep space background -->
+    <radialGradient id="spaceBg" cx="62%" cy="45%" r="70%">
+      <stop offset="0%"   stop-color="#0d0528"/>
+      <stop offset="55%"  stop-color="#060210"/>
+      <stop offset="100%" stop-color="#000000"/>
+    </radialGradient>
+
+    <!-- Nebula gradients -->
+    <radialGradient id="neb1" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#4a1880" stop-opacity="0.38"/>
+      <stop offset="100%" stop-color="#4a1880" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="neb2" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#0a3080" stop-opacity="0.26"/>
+      <stop offset="100%" stop-color="#0a3080" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="neb3" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#8a2010" stop-opacity="0.14"/>
+      <stop offset="100%" stop-color="#8a2010" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Star radials -->
+    <radialGradient id="whiteStar">
+      <stop offset="0%"   stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#aaddff"/>
+    </radialGradient>
+    <radialGradient id="redStar">
+      <stop offset="0%"   stop-color="#ffddcc"/>
+      <stop offset="100%" stop-color="#ff4010"/>
+    </radialGradient>
+    <radialGradient id="blueStar">
+      <stop offset="0%"   stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#88aaff"/>
+    </radialGradient>
+
+    <!-- Title gradient -->
+    <linearGradient id="titleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#FFD700"/>
+      <stop offset="45%"  stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#00AAFF"/>
+    </linearGradient>
+
+    <!-- Glow filters -->
+    <filter id="g2"  x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="2"  result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="g5"  x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="5"  result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="g10" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="g18" x="-150%" y="-150%" width="400%" height="400%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="18" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- ══ BACKGROUND ══════════════════════════════════════════════════════ -->
+  <rect width="1200" height="630" fill="url(#spaceBg)"/>
+
+  <!-- Nebula clouds -->
+  <ellipse cx="880"  cy="340" rx="390" ry="228" fill="url(#neb1)"/>
+  <ellipse cx="785"  cy="248" rx="270" ry="196" fill="url(#neb2)"/>
+  <ellipse cx="970"  cy="428" rx="188" ry="142" fill="url(#neb3)"/>
+
+  <!-- Dust lanes -->
+  <path d="M640,195 Q800,272 930,245 Q1060,218 1160,295"
+        stroke="#6620a0" stroke-width="42" stroke-opacity="0.07" fill="none"/>
+  <path d="M660,385 Q810,344 958,382 Q1055,402 1160,374"
+        stroke="#1030a0" stroke-width="32" stroke-opacity="0.05" fill="none"/>
+
+  <!-- ══ STARFIELD ══════════════════════════════════════════════════════ -->
+  <g fill="#ffffff">
+    <!-- Tiny bg stars (r=1) -->
+    <circle cx="618"  cy="78"  r="1"  opacity=".5"/>
+    <circle cx="694"  cy="55"  r="1"  opacity=".6"/>
+    <circle cx="738"  cy="98"  r="1"  opacity=".4"/>
+    <circle cx="802"  cy="64"  r="1"  opacity=".7"/>
+    <circle cx="853"  cy="82"  r="1"  opacity=".5"/>
+    <circle cx="902"  cy="58"  r="1"  opacity=".6"/>
+    <circle cx="944"  cy="92"  r="1"  opacity=".4"/>
+    <circle cx="988"  cy="67"  r="1"  opacity=".5"/>
+    <circle cx="1038" cy="50"  r="1"  opacity=".7"/>
+    <circle cx="1078" cy="82"  r="1"  opacity=".4"/>
+    <circle cx="1118" cy="62"  r="1"  opacity=".5"/>
+    <circle cx="1158" cy="98"  r="1"  opacity=".6"/>
+    <circle cx="638"  cy="178" r="1"  opacity=".5"/>
+    <circle cx="664"  cy="224" r="1"  opacity=".4"/>
+    <circle cx="718"  cy="162" r="1"  opacity=".6"/>
+    <circle cx="958"  cy="138" r="1"  opacity=".5"/>
+    <circle cx="998"  cy="172" r="1"  opacity=".4"/>
+    <circle cx="1042" cy="142" r="1"  opacity=".6"/>
+    <circle cx="1082" cy="182" r="1"  opacity=".5"/>
+    <circle cx="1122" cy="152" r="1"  opacity=".4"/>
+    <circle cx="1162" cy="198" r="1"  opacity=".6"/>
+    <circle cx="644"  cy="402" r="1"  opacity=".4"/>
+    <circle cx="712"  cy="452" r="1"  opacity=".5"/>
+    <circle cx="754"  cy="398" r="1"  opacity=".6"/>
+    <circle cx="872"  cy="392" r="1"  opacity=".4"/>
+    <circle cx="928"  cy="412" r="1"  opacity=".5"/>
+    <circle cx="1004" cy="432" r="1"  opacity=".4"/>
+    <circle cx="1052" cy="402" r="1"  opacity=".6"/>
+    <circle cx="1102" cy="442" r="1"  opacity=".5"/>
+    <circle cx="1144" cy="412" r="1"  opacity=".4"/>
+    <circle cx="648"  cy="502" r="1"  opacity=".5"/>
+    <circle cx="702"  cy="544" r="1"  opacity=".4"/>
+    <circle cx="760"  cy="512" r="1"  opacity=".6"/>
+    <circle cx="820"  cy="532" r="1"  opacity=".5"/>
+    <circle cx="868"  cy="502" r="1"  opacity=".4"/>
+    <circle cx="952"  cy="522" r="1"  opacity=".6"/>
+    <circle cx="1018" cy="562" r="1"  opacity=".5"/>
+    <circle cx="1098" cy="532" r="1"  opacity=".4"/>
+    <circle cx="1162" cy="558" r="1"  opacity=".5"/>
+    <!-- Medium stars (r=1.5) -->
+    <circle cx="672"  cy="138" r="1.5" opacity=".7"/>
+    <circle cx="776"  cy="72"  r="1.5" opacity=".8"/>
+    <circle cx="904"  cy="62"  r="1.5" opacity=".7"/>
+    <circle cx="1132" cy="238" r="1.5" opacity=".6"/>
+    <circle cx="658"  cy="362" r="1.5" opacity=".7"/>
+    <circle cx="1132" cy="492" r="1.5" opacity=".6"/>
+    <circle cx="652"  cy="572" r="1.5" opacity=".7"/>
+    <circle cx="1048" cy="574" r="1.5" opacity=".6"/>
+  </g>
+  <!-- A few brighter random stars -->
+  <g fill="#ccddff" filter="url(#g2)">
+    <circle cx="630"  cy="118" r="2"/>
+    <circle cx="882"  cy="122" r="2"/>
+    <circle cx="1048" cy="118" r="2"/>
+    <circle cx="1138" cy="348" r="2"/>
+    <circle cx="1138" cy="488" r="2"/>
+  </g>
+
+  <!-- ══ ORION CONSTELLATION LINES ═══════════════════════════════════════ -->
+  <!-- Stars used:
+       Meissa   (head)          : 845, 112
+       Betelgeuse (L shoulder)  : 762, 186
+       Bellatrix  (R shoulder)  : 928, 176
+       Alnitak    (L belt)      : 793, 298
+       Alnilam    (C belt)      : 848, 290
+       Mintaka    (R belt)      : 906, 290
+       Saiph      (L foot)      : 780, 468
+       Rigel      (R foot)      : 963, 458
+  -->
+  <g stroke="#3366ff" stroke-opacity="0.36" fill="none">
+    <line x1="845" y1="112" x2="762" y2="186" stroke-width="1.2"/>
+    <line x1="845" y1="112" x2="928" y2="176" stroke-width="1.2"/>
+    <line x1="762" y1="186" x2="793" y2="298" stroke-width="1.5"/>
+    <line x1="928" y1="176" x2="906" y2="290" stroke-width="1.5"/>
+    <line x1="793" y1="298" x2="848" y2="290" stroke-width="2"/>
+    <line x1="848" y1="290" x2="906" y2="290" stroke-width="2"/>
+    <line x1="793" y1="298" x2="780" y2="468" stroke-width="1.2"/>
+    <line x1="906" y1="290" x2="963" y2="458" stroke-width="1.2"/>
+    <!-- Sword hint -->
+    <line x1="848" y1="290" x2="852" y2="362" stroke-width="1" stroke-opacity="0.18"/>
+  </g>
+
+  <!-- ══ ORION STARS ════════════════════════════════════════════════════ -->
+  <!-- Meissa -->
+  <circle cx="845" cy="112" r="4.5" fill="url(#whiteStar)" filter="url(#g5)"/>
+
+  <!-- Betelgeuse – red supergiant -->
+  <circle cx="762" cy="186" r="20" fill="#ff3808" fill-opacity="0.12" filter="url(#g18)"/>
+  <circle cx="762" cy="186" r="11"  fill="url(#redStar)"   filter="url(#g5)"/>
+  <circle cx="762" cy="186" r="11"  fill="none" stroke="#ff6030" stroke-width="2.5" stroke-opacity="0.5">
+    <animate attributeName="r"              values="11;14;11;13;11" dur="5s" repeatCount="indefinite"/>
+    <animate attributeName="stroke-opacity" values=".5;.9;.3;.7;.5"  dur="5s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- Bellatrix -->
+  <circle cx="928" cy="176" r="7" fill="url(#whiteStar)" filter="url(#g5)"/>
+
+  <!-- Belt: Alnitak, Alnilam, Mintaka -->
+  <circle cx="793" cy="298" r="6" fill="url(#whiteStar)" filter="url(#g5)"/>
+  <circle cx="848" cy="290" r="6" fill="url(#whiteStar)" filter="url(#g5)"/>
+  <circle cx="906" cy="290" r="6" fill="url(#whiteStar)" filter="url(#g5)"/>
+
+  <!-- Belt star pulse rings -->
+  <circle cx="793" cy="298" r="9" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-opacity="0">
+    <animate attributeName="r"              values="9;16;9"  dur="3s" begin="0s"    repeatCount="indefinite"/>
+    <animate attributeName="stroke-opacity" values="0;.4;0"  dur="3s" begin="0s"    repeatCount="indefinite"/>
+  </circle>
+  <circle cx="848" cy="290" r="9" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-opacity="0">
+    <animate attributeName="r"              values="9;16;9"  dur="3s" begin="0.6s"  repeatCount="indefinite"/>
+    <animate attributeName="stroke-opacity" values="0;.4;0"  dur="3s" begin="0.6s"  repeatCount="indefinite"/>
+  </circle>
+  <circle cx="906" cy="290" r="9" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-opacity="0">
+    <animate attributeName="r"              values="9;16;9"  dur="3s" begin="1.2s"  repeatCount="indefinite"/>
+    <animate attributeName="stroke-opacity" values="0;.4;0"  dur="3s" begin="1.2s"  repeatCount="indefinite"/>
+  </circle>
+
+  <!-- Saiph -->
+  <circle cx="780" cy="468" r="5.5" fill="url(#whiteStar)" filter="url(#g5)"/>
+
+  <!-- Rigel – bright blue supergiant -->
+  <circle cx="963" cy="458" r="20"  fill="#3355ff" fill-opacity="0.12" filter="url(#g18)"/>
+  <circle cx="963" cy="458" r="10"  fill="url(#blueStar)"  filter="url(#g5)"/>
+  <circle cx="963" cy="458" r="10"  fill="none" stroke="#88aaff" stroke-width="2" stroke-opacity="0.45">
+    <animate attributeName="r"              values="10;14;10" dur="4s" repeatCount="indefinite"/>
+    <animate attributeName="stroke-opacity" values=".45;.8;.45" dur="4s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- ══ ROLLING LIGHTNING BOLT — ORION'S BELT ══════════════════════════
+       The bolt path traces from Mintaka → Alnilam → Alnitak with jagged zigzags.
+       A comet-like glowing ball rolls along it via animateMotion.
+  ═══════════════════════════════════════════════════════════════════════ -->
+
+  <!-- The bolt path definition (belt of Orion, right-to-left) -->
+  <!-- Static base glow (always visible) -->
+  <path d="M906,290 L894,282 L884,294 L872,284 L860,296 L848,284 L836,297 L824,287 L812,299 L793,298"
+        stroke="#FFD700" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"
+        fill="none" opacity="0.08" filter="url(#g18)"/>
+  <path d="M906,290 L894,282 L884,294 L872,284 L860,296 L848,284 L836,297 L824,287 L812,299 L793,298"
+        stroke="#FFD700" stroke-width="4"  stroke-linecap="round" stroke-linejoin="round"
+        fill="none" opacity="0.35" filter="url(#g5)"/>
+  <!-- Core white bolt (thin, crisp) -->
+  <path d="M906,290 L894,282 L884,294 L872,284 L860,296 L848,284 L836,297 L824,287 L812,299 L793,298"
+        stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+        fill="none" opacity="0.5"/>
+
+  <!-- ── Rolling energy comet (main ball + trail) ── -->
+  <!-- The animateMotion path is the SAME jagged bolt path -->
+
+  <!-- Outer comet halo -->
+  <circle r="30" fill="#FFD700" fill-opacity="0" filter="url(#g18)">
+    <animate attributeName="fill-opacity" values="0;0.25;0" dur="2.8s" repeatCount="indefinite"/>
+    <animateMotion
+      path="M906,290 L894,282 L884,294 L872,284 L860,296 L848,284 L836,297 L824,287 L812,299 L793,298"
+      dur="2.8s" repeatCount="indefinite" calcMode="linear"/>
+  </circle>
+
+  <!-- Middle glow ring -->
+  <circle r="16" fill="#FFD700" fill-opacity="0" filter="url(#g10)">
+    <animate attributeName="fill-opacity" values="0;0.55;0" dur="2.8s" repeatCount="indefinite"/>
+    <animateMotion
+      path="M906,290 L894,282 L884,294 L872,284 L860,296 L848,284 L836,297 L824,287 L812,299 L793,298"
+      dur="2.8s" repeatCount="indefinite" calcMode="linear"/>
+  </circle>
+
+  <!-- Core bolt ball -->
+  <circle r="8" fill="#ffffff" fill-opacity="0">
+    <animate attributeName="fill-opacity" values="0;0.95;0" dur="2.8s" repeatCount="indefinite"/>
+    <animateMotion
+      path="M906,290 L894,282 L884,294 L872,284 L860,296 L848,284 L836,297 L824,287 L812,299 L793,298"
+      dur="2.8s" repeatCount="indefinite" calcMode="linear"/>
+  </circle>
+
+  <!-- Trail dot 1 (slight delay) -->
+  <circle r="5" fill="#FFE040" fill-opacity="0" filter="url(#g5)">
+    <animate attributeName="fill-opacity" values="0;0.6;0" dur="2.8s" begin="0.12s" repeatCount="indefinite"/>
+    <animateMotion
+      path="M906,290 L894,282 L884,294 L872,284 L860,296 L848,284 L836,297 L824,287 L812,299 L793,298"
+      dur="2.8s" begin="0.12s" repeatCount="indefinite" calcMode="linear"/>
+  </circle>
+
+  <!-- Trail dot 2 -->
+  <circle r="3" fill="#FFD700" fill-opacity="0">
+    <animate attributeName="fill-opacity" values="0;0.35;0" dur="2.8s" begin="0.26s" repeatCount="indefinite"/>
+    <animateMotion
+      path="M906,290 L894,282 L884,294 L872,284 L860,296 L848,284 L836,297 L824,287 L812,299 L793,298"
+      dur="2.8s" begin="0.26s" repeatCount="indefinite" calcMode="linear"/>
+  </circle>
+
+  <!-- ── Belt flash when comet completes the run ── -->
+  <g opacity="0">
+    <animate attributeName="opacity" values="0;0;0;0.7;0" dur="2.8s" repeatCount="indefinite"
+             keyTimes="0;0.85;0.9;0.95;1"/>
+    <circle cx="793" cy="298" r="28" fill="#FFD700" fill-opacity="0.22" filter="url(#g10)"/>
+    <circle cx="848" cy="290" r="28" fill="#FFD700" fill-opacity="0.22" filter="url(#g10)"/>
+    <circle cx="906" cy="290" r="28" fill="#FFD700" fill-opacity="0.22" filter="url(#g10)"/>
+  </g>
+
+  <!-- Orion's Belt label -->
+  <text x="808" y="338" font-family="'Share Tech Mono','Courier New',monospace"
+        font-size="11" fill="#4466bb" letter-spacing="2" opacity="0.8">ORION'S BELT</text>
+  <text x="762" y="208" font-family="'Share Tech Mono','Courier New',monospace"
+        font-size="9"  fill="#ff7040" opacity="0.65">Betelgeuse</text>
+  <text x="974" y="474" font-family="'Share Tech Mono','Courier New',monospace"
+        font-size="9"  fill="#88aaff" opacity="0.65">Rigel</text>
+
+  <!-- ══ BRAND TEXT ═══════════════════════════════════════════════════════ -->
+  <!-- Main title -->
+  <text x="60" y="208"
+        font-family="'Orbitron','Courier New','Lucida Console',monospace"
+        font-size="72" font-weight="900"
+        fill="url(#titleGrad)" letter-spacing="3">TOBSEYTECH</text>
+
+  <!-- Accent line -->
+  <rect x="60" y="220" width="560" height="2.5" fill="url(#titleGrad)" opacity="0.45"/>
+
+  <!-- Subtitle -->
+  <text x="62" y="268"
+        font-family="'Orbitron','Courier New',monospace"
+        font-size="20" font-weight="400"
+        fill="#22aaff" letter-spacing="8">FUTURE DIGITAL SOLUTIONS</text>
+
+  <!-- Tagline -->
+  <text x="62" y="308"
+        font-family="'Exo 2','Arial Narrow',Arial,sans-serif"
+        font-size="15" fill="#9966dd" letter-spacing="3">WHERE STARS ALIGN WITH TECHNOLOGY ✦</text>
+
+  <!-- Divider -->
+  <path d="M60,330 L560,330" stroke="#FFD700" stroke-width="1"   stroke-opacity="0.4"/>
+  <path d="M60,332 L560,332" stroke="#00aaff" stroke-width="0.5" stroke-opacity="0.3"/>
+
+  <!-- Feature list row 1 -->
+  <text x="62" y="378"
+        font-family="'Share Tech Mono','Courier New',monospace"
+        font-size="13.5" fill="#66aaff" letter-spacing="2">
+    ⚡ AI-POWERED  ◈ WEB DEVELOPMENT  ✦ DIGITAL MARKETING
+  </text>
+  <!-- Feature list row 2 -->
+  <text x="62" y="412"
+        font-family="'Share Tech Mono','Courier New',monospace"
+        font-size="13.5" fill="#6644aa" letter-spacing="2">
+    ⬡ CLOUD SOLUTIONS  ⟁ API INTEGRATION  ◉ KINGDOM TECH
+  </text>
+
+  <!-- Large bolt icon -->
+  <text x="60" y="505" font-size="62" fill="#FFD700" filter="url(#g10)" opacity="0.92">⚡</text>
+  <!-- Flicker on the bolt icon -->
+  <text x="60" y="505" font-size="62" fill="#ffffff" opacity="0">⚡
+    <animate attributeName="opacity" values="0;0;0.45;0;0.3;0" dur="2.8s" repeatCount="indefinite"/>
+  </text>
+
+  <!-- Domain -->
+  <text x="62" y="590"
+        font-family="'Share Tech Mono','Courier New',monospace"
+        font-size="16" fill="#446688" letter-spacing="4">tobseytech.com</text>
+</svg>
