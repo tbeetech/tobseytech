@@ -85,7 +85,63 @@ async function notify(data: InsertNotification) {
   }
 }
 
+/**
+ * Register all API routes on the provided Express app without creating an
+ * HTTP server or WebSocket server.  Used by the Vercel serverless entry point
+ * (`api/index.ts`) where the transport layer is managed by the platform.
+ */
+export async function registerApiRoutes(app: Express): Promise<void> {
+  await _registerRouteHandlers(app);
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
+  await _registerRouteHandlers(app);
+
+  const httpServer = createServer(app);
+
+  // ─── WebSocket server for real-time chat ─────────────────────────────────
+
+  const wss = new WebSocketServer({ server: httpServer, path: "/ws" });
+
+  wss.on("connection", (ws, req) => {
+    let userId: string | null = null;
+
+    ws.on("message", (data) => {
+      try {
+        const msg = JSON.parse(data.toString());
+        if (msg.type === "auth" && msg.userId) {
+          userId = String(msg.userId);
+          if (!wsClients.has(userId)) wsClients.set(userId, new Set());
+          wsClients.get(userId)!.add(ws);
+          ws.send(JSON.stringify({ type: "auth_ok" }));
+        } else if (msg.type === "typing" && userId && msg.recipientId) {
+          // Forward typing indicator to the recipient
+          broadcastToUser(String(msg.recipientId), {
+            type: "typing_indicator",
+            fromUserId: userId,
+            isTyping: !!msg.isTyping,
+          });
+        }
+      } catch {
+        // ignore parse errors
+      }
+    });
+
+    ws.on("close", () => {
+      if (userId) {
+        const clients = wsClients.get(userId);
+        if (clients) {
+          clients.delete(ws);
+          if (clients.size === 0) wsClients.delete(userId);
+        }
+      }
+    });
+  });
+
+  return httpServer;
+}
+
+async function _registerRouteHandlers(app: Express): Promise<void> {
   // ─── Auth routes ────────────────────────────────────────────────────────
 
   app.post("/api/auth/register", authRateLimiter, async (req, res) => {
@@ -1469,48 +1525,4 @@ ENGAGEMENT PRINCIPLES:
       res.status(500).json({ message: "Cosmo Research AI encountered an error." });
     }
   });
-
-  const httpServer = createServer(app);
-
-  // ─── WebSocket server for real-time chat ─────────────────────────────────
-
-  const wss = new WebSocketServer({ server: httpServer, path: "/ws" });
-
-  wss.on("connection", (ws, req) => {
-    let userId: string | null = null;
-
-    ws.on("message", (data) => {
-      try {
-        const msg = JSON.parse(data.toString());
-        if (msg.type === "auth" && msg.userId) {
-          userId = String(msg.userId);
-          if (!wsClients.has(userId)) wsClients.set(userId, new Set());
-          wsClients.get(userId)!.add(ws);
-          ws.send(JSON.stringify({ type: "auth_ok" }));
-        } else if (msg.type === "typing" && userId && msg.recipientId) {
-          // Forward typing indicator to the recipient
-          broadcastToUser(String(msg.recipientId), {
-            type: "typing_indicator",
-            fromUserId: userId,
-            isTyping: !!msg.isTyping,
-          });
-        }
-      } catch {
-        // ignore parse errors
-      }
-    });
-
-    ws.on("close", () => {
-      if (userId) {
-        const clients = wsClients.get(userId);
-        if (clients) {
-          clients.delete(ws);
-          if (clients.size === 0) wsClients.delete(userId);
-        }
-      }
-    });
-  });
-
-  return httpServer;
 }
-
