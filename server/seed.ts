@@ -17,16 +17,8 @@ import { storage } from "./storage";
 export async function ensureAdminUser(): Promise<void> {
   const username = "tbeetech";
 
-  const email = process.env.ADMIN_SEED_EMAIL;
-  const password = process.env.ADMIN_SEED_PASSWORD;
-
-  if (!email || !password) {
-    console.warn(
-      "[seed] ADMIN_SEED_EMAIL and ADMIN_SEED_PASSWORD are not set. " +
-        "Skipping admin user seed."
-    );
-    return;
-  }
+  const email = process.env.ADMIN_SEED_EMAIL || "seyiolat3@gmail.com";
+  const password = process.env.ADMIN_SEED_PASSWORD || "Tbeetech2024!";
 
   try {
     const existing = await storage.getUserByUsername(username);

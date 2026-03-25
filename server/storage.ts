@@ -758,11 +758,17 @@ import { MongoStorage } from "./mongoStorage";
 import { connectToDatabase } from "./mongodb";
 
 async function createStorage(): Promise<IStorage> {
-  if (process.env.MONGODB_URI) {
+  try {
     await connectToDatabase();
     return new MongoStorage();
+  } catch (err) {
+    console.error(
+      "[storage] MongoDB connection failed — falling back to in-memory storage. " +
+        "Data will not persist across restarts.",
+      (err as Error).message
+    );
+    return new MemStorage();
   }
-  return new MemStorage();
 }
 
 // Export a proxy that defers to the resolved storage instance

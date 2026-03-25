@@ -9,6 +9,7 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { initStorage, storage } from "./storage";
 import { ensureAdminUser, promoteAdminByEmail } from "./seed";
+import { MONGODB_URI } from "./mongodb";
 
 const app = express();
 
@@ -24,32 +25,29 @@ app.set("trust proxy", 1);
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: false, limit: "10mb" }));
 
-// Use MongoDB-backed session storage when MONGODB_URI is available so that
-// sessions survive server restarts (important on Render.com and other PaaS
-// platforms that restart the process on every deploy or spin-up).
-// Fall back to memorystore in development / when no MongoDB URI is configured.
+// Use MongoDB-backed session storage so that sessions survive server restarts
+// (important on Render.com and other PaaS platforms).  Falls back to
+// memorystore only when the connection cannot be established.
 const MemoryStore = createMemoryStore(session);
 
 function buildSessionStore() {
-  if (process.env.MONGODB_URI) {
-    try {
-      const store = MongoStore.create({
-        mongoUrl: process.env.MONGODB_URI,
-        collectionName: "sessions",
-        ttl: 7 * 24 * 60 * 60, // 7 days (in seconds)
-        autoRemove: "native", // rely on MongoDB TTL index for clean-up
-      });
-      // Log connection errors without crashing – the store will automatically
-      // retry; sessions already in-flight will fail gracefully.
-      store.on("error", (err: Error) => {
-        console.error("[session] MongoStore error:", err.message);
-      });
-      return store;
-    } catch (err) {
-      console.error("[session] Failed to create MongoStore, falling back to MemoryStore:", (err as Error).message ?? err);
-    }
+  try {
+    const store = MongoStore.create({
+      mongoUrl: MONGODB_URI,
+      collectionName: "sessions",
+      ttl: 7 * 24 * 60 * 60, // 7 days (in seconds)
+      autoRemove: "native", // rely on MongoDB TTL index for clean-up
+    });
+    // Log connection errors without crashing – the store will automatically
+    // retry; sessions already in-flight will fail gracefully.
+    store.on("error", (err: Error) => {
+      console.error("[session] MongoStore error:", err.message);
+    });
+    return store;
+  } catch (err) {
+    console.error("[session] Failed to create MongoStore, falling back to MemoryStore:", (err as Error).message ?? err);
   }
-  // Development fallback – prune expired entries every 24 h.
+  // Fallback – prune expired entries every 24 h.
   return new MemoryStore({ checkPeriod: 86400000 });
 }
 
