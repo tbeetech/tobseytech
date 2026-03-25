@@ -1,15 +1,6 @@
 import mongoose from "mongoose";
 
-// Hard-coded fallback MongoDB URI – used when the MONGODB_URI environment
-// variable is not set.  Replace the placeholder credentials below with your
-// actual Atlas username and password if you are not using an env file.
-const FALLBACK_MONGODB_URI =
-  "mongodb+srv://tobseytech:tobseytech2024@cluster0.mpmy7ir.mongodb.net/tobseytech?retryWrites=true&w=majority&appName=Cluster0";
-
-// Resolve the URI: prefer the environment variable so that production
-// deployments (Render, Vercel) can override the hard-coded default.
-export const MONGODB_URI: string =
-  process.env.MONGODB_URI || FALLBACK_MONGODB_URI;
+export const MONGODB_URI = process.env.MONGODB_URI?.trim();
 
 const MAX_RETRIES = 5;
 const RETRY_BASE_DELAY_MS = 2_000;
@@ -38,6 +29,9 @@ export async function connectToDatabase(): Promise<void> {
   if (isConnected) return;
 
   const uri = MONGODB_URI;
+  if (!uri) {
+    throw new Error("MONGODB_URI is not configured");
+  }
 
   if (!listenersRegistered) {
     registerConnectionListeners();

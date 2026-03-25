@@ -31,6 +31,10 @@ app.use(express.urlencoded({ extended: false, limit: "10mb" }));
 const MemoryStore = createMemoryStore(session);
 
 function buildSessionStore() {
+  if (!MONGODB_URI) {
+    return new MemoryStore({ checkPeriod: 86400000 });
+  }
+
   try {
     const store = MongoStore.create({
       mongoUrl: MONGODB_URI,
@@ -112,7 +116,9 @@ passport.deserializeUser(async (id: string, done) => {
     const user = await storage.getUser(id);
     done(null, user || false);
   } catch (err) {
-    done(err);
+    const message = err instanceof Error ? err.message : "Unknown error";
+    console.error("[auth] Failed to deserialize session user:", message);
+    done(null, false);
   }
 });
 

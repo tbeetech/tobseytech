@@ -197,7 +197,9 @@ async function _registerRouteHandlers(app: Express): Promise<void> {
   });
 
   app.get("/api/auth/me", authRateLimiter, (req, res) => {
-    if (!req.isAuthenticated()) return res.status(401).json({ message: "Not authenticated" });
+    if (!req.isAuthenticated() || !req.user) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
     const { password: _pw, ...safeUser } = req.user as any;
     res.json(safeUser);
   });
