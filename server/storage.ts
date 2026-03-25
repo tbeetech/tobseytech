@@ -755,9 +755,13 @@ export class MemStorage implements IStorage {
 }
 
 import { MongoStorage } from "./mongoStorage";
-import { connectToDatabase } from "./mongodb";
+import { connectToDatabase, MONGODB_URI } from "./mongodb";
 
 async function createStorage(): Promise<IStorage> {
+  if (!MONGODB_URI) {
+    return new MemStorage();
+  }
+
   try {
     await connectToDatabase();
     return new MongoStorage();
