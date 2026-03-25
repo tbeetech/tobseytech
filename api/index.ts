@@ -112,7 +112,9 @@ passport.deserializeUser(async (id: string, done) => {
     const user = await storage.getUser(id);
     done(null, user || false);
   } catch (err) {
-    done(err);
+    const message = err instanceof Error ? err.message : "Unknown error";
+    console.error("[auth] Failed to deserialize session user:", message);
+    done(null, false);
   }
 });
 

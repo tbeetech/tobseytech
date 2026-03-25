@@ -37,6 +37,7 @@ import { MessageModel } from "./models/Message";
 import { NotificationModel } from "./models/Notification";
 import { ShortUrlModel } from "./models/ShortUrl";
 import { randomBytes } from "crypto";
+import mongoose from "mongoose";
 
 function docToUser(doc: any): User {
   return {
@@ -185,6 +186,10 @@ export class MongoStorage {
   // ─── User methods ────────────────────────────────────────────────────────
 
   async getUser(id: string): Promise<User | undefined> {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return undefined;
+    }
+
     const doc = await UserModel.findById(id).lean();
     return doc ? docToUser(doc) : undefined;
   }
