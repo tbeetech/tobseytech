@@ -19,6 +19,12 @@ import bcrypt from "bcryptjs";
 import { storage, initStorage } from "../server/storage";
 import { ensureAdminUser, promoteAdminByEmail } from "../server/seed";
 import { registerApiRoutes } from "../server/routes";
+import {
+  ADMIN_SEED_EMAIL,
+  MONGODB_URI,
+  SESSION_SECRET,
+  validateRuntimeEnv,
+} from "../server/env";
 
 const app = express();
 
@@ -32,10 +38,10 @@ app.use(express.urlencoded({ extended: false, limit: "10mb" }));
 const MemoryStore = createMemoryStore(session);
 
 function buildSessionStore() {
-  if (process.env.MONGODB_URI) {
+  if (MONGODB_URI) {
     try {
       const store = MongoStore.create({
-        mongoUrl: process.env.MONGODB_URI,
+        mongoUrl: MONGODB_URI,
         collectionName: "sessions",
         ttl: 7 * 24 * 60 * 60, // 7 days (in seconds)
         autoRemove: "native",
@@ -53,7 +59,7 @@ function buildSessionStore() {
 
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || "tobseytech-secret-key",
+    secret: SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     store: buildSessionStore(),
@@ -121,10 +127,11 @@ passport.deserializeUser(async (id: string, done) => {
 // Initialize storage and register routes once on cold start.
 // Subsequent warm invocations resolve the already-settled promise instantly.
 const ready = (async () => {
+  validateRuntimeEnv();
   await initStorage();
   await ensureAdminUser();
-  if (process.env.ADMIN_SEED_EMAIL) {
-    await promoteAdminByEmail(process.env.ADMIN_SEED_EMAIL);
+  if (ADMIN_SEED_EMAIL) {
+    await promoteAdminByEmail(ADMIN_SEED_EMAIL);
   }
   await registerApiRoutes(app);
 

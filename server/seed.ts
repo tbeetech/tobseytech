@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 import { storage } from "./storage";
+import { ADMIN_SEED_EMAIL, ADMIN_SEED_PASSWORD } from "./env";
 
 /**
  * Ensures the primary admin user "tbeetech" exists in the database with
@@ -16,9 +17,15 @@ import { storage } from "./storage";
 
 export async function ensureAdminUser(): Promise<void> {
   const username = "tbeetech";
+  const email = ADMIN_SEED_EMAIL;
+  const password = ADMIN_SEED_PASSWORD;
 
-  const email = process.env.ADMIN_SEED_EMAIL || "seyiolat3@gmail.com";
-  const password = process.env.ADMIN_SEED_PASSWORD || "Tbeetech2024!";
+  if (!email || !password) {
+    console.warn(
+      '[seed] Skipping admin seed: set both ADMIN_SEED_EMAIL and ADMIN_SEED_PASSWORD to create or sync the "tbeetech" admin user.'
+    );
+    return;
+  }
 
   try {
     const existing = await storage.getUserByUsername(username);

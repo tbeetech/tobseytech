@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
-
-export const MONGODB_URI = process.env.MONGODB_URI?.trim();
+import { MONGODB_URI } from "./env";
 
 const MAX_RETRIES = 5;
 const RETRY_BASE_DELAY_MS = 2_000;

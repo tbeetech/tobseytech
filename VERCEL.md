@@ -21,10 +21,25 @@ Set the following environment variables in your Vercel project's **Settings → 
 | `SESSION_SECRET` | A long random string for session signing | `some-very-long-random-secret-string-here` |
 | `NODE_ENV` | Set to production | `production` |
 
+> **Do not commit real credentials to the repository or `vercel.json`.** Vercel environment
+> variables must be set in the Vercel dashboard (or with Vercel's CLI in your own terminal).
+> This repository intentionally keeps only placeholder values in `.env.example`.
+>
+> For the environment values you listed, add them in **Vercel → Project Settings → Environment Variables**:
+> - `MONGODB_URI`
+> - `SESSION_SECRET`
+> - `ADMIN_SEED_PASSWORD`
+> - `ADMIN_DASHBOARD_PASSWORD`
+> - `ADMIN_SEED_EMAIL`
+
 > **Session persistence:** When `MONGODB_URI` is set the server stores sessions in MongoDB
 > (collection `sessions`) so that user logins survive cold-start restarts between serverless
 > invocations.  Without `MONGODB_URI` the server falls back to an in-memory store — every cold
 > start logs all users out, so `MONGODB_URI` is strongly recommended in production.
+>
+> **Fail-fast protection:** Production startup now rejects missing `MONGODB_URI`,
+> `SESSION_SECRET`, or `ADMIN_DASHBOARD_PASSWORD` instead of silently running with
+> unsafe defaults or in-memory fallbacks.
 
 ### 3. Optional Environment Variables
 

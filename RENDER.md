@@ -31,6 +31,10 @@ Set the following environment variables in your Render service's **Environment**
 > (collection `sessions`) so that user logins **survive server restarts and re-deploys**.
 > Without `MONGODB_URI` the server falls back to an in-memory store, which means all users
 > are logged out on every restart — set `MONGODB_URI` in production to avoid this.
+>
+> **Fail-fast protection:** Production startup now rejects missing `MONGODB_URI`,
+> `SESSION_SECRET`, or `ADMIN_DASHBOARD_PASSWORD` instead of silently running with
+> unsafe defaults or in-memory fallbacks.
 
 ### 3. Optional Environment Variables (for email / contact form)
 
@@ -59,6 +63,9 @@ Set the following additional environment variables so the server creates the pri
 | `ADMIN_SEED_EMAIL` | Email for the `tbeetech` admin account (username is always `tbeetech`) | `admin@example.com` |
 | `ADMIN_SEED_PASSWORD` | Password for the `tbeetech` admin account | `change-me-to-a-strong-password` |
 | `ADMIN_DASHBOARD_PASSWORD` | Secondary password required to open `/dashboard` — set this in your Render **Environment** tab, never in source code | `onebroonecode` |
+
+Set these values in Render's **Environment** tab. Do not commit your real MongoDB URI,
+session secret, or admin passwords to the repository.
 
 The `tbeetech` user is created (or promoted to `admin`) automatically when the server starts.  If you prefer to promote an account manually, connect to your MongoDB Atlas cluster and run:
 

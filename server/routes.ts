@@ -7,6 +7,7 @@ import { randomBytes, timingSafeEqual } from "crypto";
 import rateLimit from "express-rate-limit";
 import OpenAI from "openai";
 import { storage } from "./storage";
+import { ADMIN_DASHBOARD_PASSWORD } from "./env";
 import {
   insertContactSchema,
   insertProductSchema,
@@ -1083,7 +1084,10 @@ async function _registerRouteHandlers(app: Express): Promise<void> {
   // Verify admin dashboard password (secondary password gate)
   app.post("/api/admin/verify-password", authRateLimiter, requireAdmin, (req, res) => {
     const { password } = req.body;
-    const adminDashboardPassword = process.env.ADMIN_DASHBOARD_PASSWORD || "onebroonecode";
+    const adminDashboardPassword = ADMIN_DASHBOARD_PASSWORD;
+    if (!adminDashboardPassword) {
+      return res.status(503).json({ message: "Admin dashboard password is not configured" });
+    }
     if (!password) {
       return res.status(401).json({ message: "Invalid dashboard password" });
     }
