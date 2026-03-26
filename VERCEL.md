@@ -25,7 +25,8 @@ Set the following environment variables in your Vercel project's **Settings → 
 > variables must be set in the Vercel dashboard (or with Vercel's CLI in your own terminal).
 > This repository intentionally keeps only placeholder values in `.env.example`.
 >
-> For the environment values you listed, add them in **Vercel → Project Settings → Environment Variables**:
+> For the required environment variables shown in the table above, add them in
+> **Vercel → Project Settings → Environment Variables**:
 > - `MONGODB_URI`
 > - `SESSION_SECRET`
 > - `ADMIN_SEED_PASSWORD`
