@@ -21,8 +21,8 @@ import { ensureAdminUser, promoteAdminByEmail } from "../server/seed";
 import { registerApiRoutes } from "../server/routes";
 import {
   ADMIN_SEED_EMAIL,
+  getSessionSecret,
   MONGODB_URI,
-  SESSION_SECRET,
   validateRuntimeEnv,
 } from "../server/env";
 
@@ -59,7 +59,7 @@ function buildSessionStore() {
 
 app.use(
   session({
-    secret: SESSION_SECRET,
+    secret: getSessionSecret(),
     resave: false,
     saveUninitialized: false,
     store: buildSessionStore(),

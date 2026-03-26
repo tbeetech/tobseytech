@@ -1,10 +1,7 @@
 import { randomBytes } from "crypto";
 
-const GENERATED_SESSION_SECRET = randomBytes(32).toString("hex");
-
 export const isProduction = process.env.NODE_ENV === "production";
 export const MONGODB_URI = process.env.MONGODB_URI?.trim();
-export const SESSION_SECRET = process.env.SESSION_SECRET?.trim() || GENERATED_SESSION_SECRET;
 export const ADMIN_SEED_EMAIL = process.env.ADMIN_SEED_EMAIL?.trim();
 export const ADMIN_SEED_PASSWORD = process.env.ADMIN_SEED_PASSWORD?.trim();
 export const ADMIN_DASHBOARD_PASSWORD = process.env.ADMIN_DASHBOARD_PASSWORD?.trim();
@@ -69,4 +66,17 @@ export function validateRuntimeEnv(): void {
       `Invalid runtime environment configuration:\n- ${errors.join("\n- ")}`
     );
   }
+}
+
+export function getSessionSecret(): string {
+  const configuredSecret = process.env.SESSION_SECRET?.trim();
+  if (configuredSecret) {
+    return configuredSecret;
+  }
+
+  if (isProduction) {
+    throw new Error("SESSION_SECRET is required in production");
+  }
+
+  return randomBytes(32).toString("hex");
 }
