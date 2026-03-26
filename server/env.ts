@@ -49,13 +49,12 @@ export function validateRuntimeEnv(): void {
   }
 
   if (!ADMIN_DASHBOARD_PASSWORD) {
-    const message =
-      "ADMIN_DASHBOARD_PASSWORD is not configured. Admin dashboard password verification will be unavailable until it is set.";
-    if (isProduction) {
-      errors.push(message);
-    } else {
-      warnings.push(message);
-    }
+    // Warn but do not block startup — the /api/admin/verify-password route
+    // already returns 503 when this env var is absent, so missing it should
+    // not prevent the auth and other API endpoints from working.
+    warnings.push(
+      "ADMIN_DASHBOARD_PASSWORD is not configured. Admin dashboard password verification will be unavailable until it is set."
+    );
   }
 
   logConfigIssues("warn", warnings);
