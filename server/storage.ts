@@ -755,10 +755,14 @@ export class MemStorage implements IStorage {
 }
 
 import { MongoStorage } from "./mongoStorage";
-import { connectToDatabase, MONGODB_URI } from "./mongodb";
+import { connectToDatabase } from "./mongodb";
+import { isProduction, MONGODB_URI } from "./env";
 
 async function createStorage(): Promise<IStorage> {
   if (!MONGODB_URI) {
+    if (isProduction) {
+      throw new Error("MONGODB_URI is required in production");
+    }
     return new MemStorage();
   }
 
@@ -766,6 +770,9 @@ async function createStorage(): Promise<IStorage> {
     await connectToDatabase();
     return new MongoStorage();
   } catch (err) {
+    if (isProduction) {
+      throw err;
+    }
     console.error(
       "[storage] MongoDB connection failed — falling back to in-memory storage. " +
         "Data will not persist across restarts.",

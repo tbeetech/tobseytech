@@ -9,7 +9,12 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { initStorage, storage } from "./storage";
 import { ensureAdminUser, promoteAdminByEmail } from "./seed";
-import { MONGODB_URI } from "./mongodb";
+import {
+  ADMIN_SEED_EMAIL,
+  getSessionSecret,
+  MONGODB_URI,
+  validateRuntimeEnv,
+} from "./env";
 
 const app = express();
 
@@ -57,7 +62,7 @@ function buildSessionStore() {
 
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || "tobseytech-secret-key",
+    secret: getSessionSecret(),
     resave: false,
     saveUninitialized: false,
     store: buildSessionStore(),
@@ -153,9 +158,12 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  validateRuntimeEnv();
   await initStorage();
   await ensureAdminUser();
-  await promoteAdminByEmail("seyiolat3@gmail.com");
+  if (ADMIN_SEED_EMAIL) {
+    await promoteAdminByEmail(ADMIN_SEED_EMAIL);
+  }
 
   const server = await registerRoutes(app);
 
