@@ -147,7 +147,15 @@ const ready = (async () => {
 })();
 
 // Export a handler that waits for initialization then delegates to the Express app.
+// If initialization failed (e.g. missing required env vars), return a clear 503
+// instead of leaking an unhandled rejection that Vercel turns into a generic 500.
 export default async function handler(req: Request, res: Response) {
-  await ready;
+  try {
+    await ready;
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Server initialization failed";
+    console.error("[handler] Initialization error:", message);
+    return res.status(503).json({ message: "Service unavailable: server failed to initialize. Check environment variable configuration." });
+  }
   return app(req, res);
 }

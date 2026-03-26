@@ -38,9 +38,9 @@ Set the following environment variables in your Vercel project's **Settings → 
 > invocations.  Without `MONGODB_URI` the server falls back to an in-memory store — every cold
 > start logs all users out, so `MONGODB_URI` is strongly recommended in production.
 >
-> **Fail-fast protection:** Production startup now rejects missing `MONGODB_URI`,
-> `SESSION_SECRET`, or `ADMIN_DASHBOARD_PASSWORD` instead of silently running with
-> unsafe defaults or in-memory fallbacks.
+> **Fail-fast protection:** Production startup rejects missing `MONGODB_URI` or
+> `SESSION_SECRET` to prevent silent data/session loss. `ADMIN_DASHBOARD_PASSWORD`
+> is optional for startup but required to access `/dashboard`.
 
 ### 3. Optional Environment Variables
 
