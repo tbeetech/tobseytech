@@ -6,6 +6,7 @@ import bcrypt from "bcryptjs";
 import { randomBytes, timingSafeEqual } from "crypto";
 import rateLimit from "express-rate-limit";
 import OpenAI from "openai";
+import mongoose from "mongoose";
 import { storage } from "./storage";
 import { ADMIN_DASHBOARD_PASSWORD } from "./env";
 import {
@@ -34,6 +35,16 @@ const authRateLimiter = rateLimit({
   legacyHeaders: false,
   message: { message: "Too many requests, please try again later" },
 });
+
+/** Type guard for MongoDB duplicate-key errors (E11000). */
+function isMongoDBDuplicateKeyError(err: unknown): err is { code: number; keyPattern: Record<string, unknown> } {
+  return (
+    typeof err === "object" &&
+    err !== null &&
+    "code" in err &&
+    (err as { code: unknown }).code === 11000
+  );
+}
 
 let _mailer: ReturnType<typeof nodemailer.createTransport> | null = null;
 function getMailer() {
@@ -143,30 +154,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
 }
 
 async function _registerRouteHandlers(app: Express): Promise<void> {
+  // ─── Health check ────────────────────────────────────────────────────────
+
+  app.get("/api/health", async (_req, res) => {
+    try {
+      await mongoose.connection.db?.command({ ping: 1 });
+      res.json({ ok: true, db: "connected" });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error("[health] DB ping failed:", message);
+      res.status(503).json({ ok: false, db: "disconnected", error: message });
+    }
+  });
+
   // ─── Auth routes ────────────────────────────────────────────────────────
 
   app.post("/api/auth/register", authRateLimiter, async (req, res) => {
     try {
       const data = insertUserSchema.parse(req.body);
+      // Normalize email to lowercase so duplicate checks and storage are consistent.
+      const normalizedEmail = data.email.toLowerCase();
+
       const existingUser = await storage.getUserByUsername(data.username);
       if (existingUser) {
         return res.status(409).json({ message: "Username already taken" });
       }
-      const existingEmail = await storage.getUserByEmail(data.email);
+      const existingEmail = await storage.getUserByEmail(normalizedEmail);
       if (existingEmail) {
         return res.status(409).json({ message: "Email already registered" });
       }
       const hashed = await bcrypt.hash(data.password, 12);
-      const user = await storage.createUser({ ...data, password: hashed });
+      const user = await storage.createUser({ ...data, email: normalizedEmail, password: hashed });
       const { password: _pw, ...safeUser } = user;
       req.login(user, (err) => {
-        if (err) return res.status(500).json({ message: "Login after register failed" });
+        if (err) {
+          console.error("[auth] Session save failed after registration:", err);
+          return res.status(500).json({ message: "Registration succeeded but session could not be established. Please log in." });
+        }
         res.status(201).json(safeUser);
       });
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid data", errors: error.errors });
       }
+      // MongoDB duplicate-key error (E11000) – race condition between the
+      // existence check above and the actual insert.  Return 409 instead of 500.
+      if (isMongoDBDuplicateKeyError(error)) {
+        const keyPattern = error.keyPattern;
+        if (keyPattern.email) {
+          return res.status(409).json({ message: "Email already registered" });
+        }
+        if (keyPattern.username) {
+          return res.status(409).json({ message: "Username already taken" });
+        }
+        return res.status(409).json({ message: "Account already exists" });
+      }
+      console.error("[auth] Registration error:", error);
       res.status(500).json({ message: "Registration failed" });
     }
   });

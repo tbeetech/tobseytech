@@ -7,6 +7,30 @@ const RETRY_BASE_DELAY_MS = 2_000;
 let isConnected = false;
 let listenersRegistered = false;
 
+// A single shared promise for the underlying MongoClient.
+// Reusing the same client for both mongoose and connect-mongo avoids a second
+// connection to Atlas (important on the free M0 tier with its 500-connection
+// limit) and ensures that if mongoose can reach the DB the session store can too.
+let _clientPromise: Promise<mongoose.mongo.MongoClient> | null = null;
+
+/**
+ * Returns a promise that resolves to the underlying MongoClient once the
+ * mongoose connection is established.  Used by connect-mongo so that the
+ * session store shares the same connection pool as the application storage.
+ */
+export function getClientPromise(): Promise<mongoose.mongo.MongoClient> {
+  if (!_clientPromise) {
+    _clientPromise = connectToDatabase()
+      .then(() => mongoose.connection.getClient())
+      .catch((err) => {
+        // Reset so the next call will retry.
+        _clientPromise = null;
+        throw err;
+      });
+  }
+  return _clientPromise;
+}
+
 function registerConnectionListeners() {
   mongoose.connection.on("error", (err) => {
     console.error("MongoDB connection error:", err);

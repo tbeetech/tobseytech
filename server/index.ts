@@ -9,6 +9,7 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { initStorage, storage } from "./storage";
 import { ensureAdminUser, promoteAdminByEmail } from "./seed";
+import { getClientPromise } from "./mongodb";
 import {
   ADMIN_SEED_EMAIL,
   getSessionSecret,
@@ -42,7 +43,10 @@ function buildSessionStore() {
 
   try {
     const store = MongoStore.create({
-      mongoUrl: MONGODB_URI,
+      // Reuse the same MongoClient that mongoose uses instead of opening a
+      // second connection.  This prevents Atlas free-tier connection exhaustion
+      // and guarantees the session store is available whenever the DB is.
+      clientPromise: getClientPromise(),
       collectionName: "sessions",
       ttl: 7 * 24 * 60 * 60, // 7 days (in seconds)
       autoRemove: "native", // rely on MongoDB TTL index for clean-up
