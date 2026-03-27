@@ -7,8 +7,8 @@ import { randomBytes, timingSafeEqual } from "crypto";
 import rateLimit from "express-rate-limit";
 import OpenAI from "openai";
 import mongoose from "mongoose";
-import { storage } from "./storage";
-import { ADMIN_DASHBOARD_PASSWORD } from "./env";
+import { storage } from "./storage.js";
+import { ADMIN_DASHBOARD_PASSWORD } from "./env.js";
 import {
   insertContactSchema,
   insertProductSchema,
