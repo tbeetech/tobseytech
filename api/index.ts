@@ -16,16 +16,16 @@ import MongoStore from "connect-mongo";
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import bcrypt from "bcryptjs";
-import { storage, initStorage } from "../server/storage";
-import { ensureAdminUser, promoteAdminByEmail } from "../server/seed";
-import { registerApiRoutes } from "../server/routes";
-import { getClientPromise } from "../server/mongodb";
+import { storage, initStorage } from "../server/storage.js";
+import { ensureAdminUser, promoteAdminByEmail } from "../server/seed.js";
+import { registerApiRoutes } from "../server/routes.js";
+import { getClientPromise } from "../server/mongodb.js";
 import {
   ADMIN_SEED_EMAIL,
   getSessionSecret,
   MONGODB_URI,
   validateRuntimeEnv,
-} from "../server/env";
+} from "../server/env.js";
 
 const app = express();
 

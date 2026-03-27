@@ -23,19 +23,19 @@ import type {
   Notification,
   InsertNotification,
 } from "@shared/schema";
-import { UserModel } from "./models/User";
-import { ContactModel } from "./models/Contact";
-import { ProductModel } from "./models/Product";
-import { CourseModel } from "./models/Course";
-import { BlogPostModel } from "./models/BlogPost";
-import { CommentModel } from "./models/Comment";
-import { LikeModel } from "./models/Like";
-import { BookmarkModel } from "./models/Bookmark";
-import { EditSuggestionModel } from "./models/EditSuggestion";
-import { FriendshipModel } from "./models/Friendship";
-import { MessageModel } from "./models/Message";
-import { NotificationModel } from "./models/Notification";
-import { ShortUrlModel } from "./models/ShortUrl";
+import { UserModel } from "./models/User.js";
+import { ContactModel } from "./models/Contact.js";
+import { ProductModel } from "./models/Product.js";
+import { CourseModel } from "./models/Course.js";
+import { BlogPostModel } from "./models/BlogPost.js";
+import { CommentModel } from "./models/Comment.js";
+import { LikeModel } from "./models/Like.js";
+import { BookmarkModel } from "./models/Bookmark.js";
+import { EditSuggestionModel } from "./models/EditSuggestion.js";
+import { FriendshipModel } from "./models/Friendship.js";
+import { MessageModel } from "./models/Message.js";
+import { NotificationModel } from "./models/Notification.js";
+import { ShortUrlModel } from "./models/ShortUrl.js";
 import { randomBytes } from "crypto";
 import mongoose from "mongoose";
 

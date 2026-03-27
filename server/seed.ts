@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
-import { storage } from "./storage";
-import { ADMIN_SEED_EMAIL, ADMIN_SEED_PASSWORD } from "./env";
+import { storage } from "./storage.js";
+import { ADMIN_SEED_EMAIL, ADMIN_SEED_PASSWORD } from "./env.js";
 
 /**
  * Ensures the primary admin user "tbeetech" exists in the database with

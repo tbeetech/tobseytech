@@ -754,9 +754,9 @@ export class MemStorage implements IStorage {
   }
 }
 
-import { MongoStorage } from "./mongoStorage";
-import { connectToDatabase } from "./mongodb";
-import { isProduction, MONGODB_URI } from "./env";
+import { MongoStorage } from "./mongoStorage.js";
+import { connectToDatabase } from "./mongodb.js";
+import { isProduction, MONGODB_URI } from "./env.js";
 
 async function createStorage(): Promise<IStorage> {
   if (!MONGODB_URI) {

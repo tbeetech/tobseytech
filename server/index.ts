@@ -5,17 +5,17 @@ import MongoStore from "connect-mongo";
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import bcrypt from "bcryptjs";
-import { registerRoutes } from "./routes";
-import { setupVite, serveStatic, log } from "./vite";
-import { initStorage, storage } from "./storage";
-import { ensureAdminUser, promoteAdminByEmail } from "./seed";
-import { getClientPromise } from "./mongodb";
+import { registerRoutes } from "./routes.js";
+import { setupVite, serveStatic, log } from "./vite.js";
+import { initStorage, storage } from "./storage.js";
+import { ensureAdminUser, promoteAdminByEmail } from "./seed.js";
+import { getClientPromise } from "./mongodb.js";
 import {
   ADMIN_SEED_EMAIL,
   getSessionSecret,
   MONGODB_URI,
   validateRuntimeEnv,
-} from "./env";
+} from "./env.js";
 
 const app = express();
 

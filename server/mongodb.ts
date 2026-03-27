@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { MONGODB_URI } from "./env";
+import { MONGODB_URI } from "./env.js";
 
 const MAX_RETRIES = 5;
 const RETRY_BASE_DELAY_MS = 2_000;
