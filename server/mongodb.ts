@@ -1,119 +1,146 @@
+/**
+ * MongoDB connection module — written from scratch.
+ *
+ * Provides a single shared mongoose connection for both the application storage
+ * layer and the connect-mongo session store.  Using one connection pool avoids
+ * exhausting Atlas free-tier connection limits.
+ */
+
 import mongoose from "mongoose";
-import { MONGODB_URI } from "./env.js";
 
-const MAX_RETRIES = 5;
-const RETRY_BASE_DELAY_MS = 2_000;
+// ─── Connection state ────────────────────────────────────────────────────────
 
-let isConnected = false;
-let listenersRegistered = false;
-
-// A single shared promise for the underlying MongoClient.
-// Reusing the same client for both mongoose and connect-mongo avoids a second
-// connection to Atlas (important on the free M0 tier with its 500-connection
-// limit) and ensures that if mongoose can reach the DB the session store can too.
-let _clientPromise: Promise<mongoose.mongo.MongoClient> | null = null;
+/** True once mongoose.connect() has resolved successfully. */
+let connected = false;
 
 /**
- * Returns a promise that resolves to the underlying MongoClient once the
- * mongoose connection is established.  Used by connect-mongo so that the
- * session store shares the same connection pool as the application storage.
+ * Cached promise that resolves to the underlying MongoClient.
+ * Shared between the session store and application storage so they reuse
+ * the same connection pool.
  */
-export function getClientPromise(): Promise<mongoose.mongo.MongoClient> {
-  if (!_clientPromise) {
-    _clientPromise = connectToDatabase()
-      .then(() => mongoose.connection.getClient())
-      .catch((err) => {
-        // Reset so the next call will retry.
-        _clientPromise = null;
-        throw err;
-      });
-  }
-  return _clientPromise;
-}
+let clientPromiseCache: Promise<mongoose.mongo.MongoClient> | null = null;
 
-function registerConnectionListeners() {
-  mongoose.connection.on("error", (err) => {
-    console.error("MongoDB connection error:", err);
-    isConnected = false;
+// ─── Event listeners ─────────────────────────────────────────────────────────
+
+// Register listeners exactly once.
+let listenersAdded = false;
+function ensureListeners() {
+  if (listenersAdded) return;
+  listenersAdded = true;
+
+  mongoose.connection.on("error", (err: Error) => {
+    console.error("[db] MongoDB error:", err.message);
   });
 
   mongoose.connection.on("disconnected", () => {
-    console.warn("MongoDB disconnected — waiting for automatic reconnect…");
-    isConnected = false;
+    console.warn("[db] MongoDB disconnected — automatic reconnect in progress…");
+    connected = false;
+    // Reset clientPromiseCache so the next call to getClientPromise() re-derives
+    // a fresh MongoClient from the re-established connection.
+    clientPromiseCache = null;
   });
 
   mongoose.connection.on("reconnected", () => {
-    console.log("MongoDB reconnected");
-    isConnected = true;
+    console.log("[db] MongoDB reconnected");
+    connected = true;
   });
 }
 
+// ─── Public API ───────────────────────────────────────────────────────────────
+
+/**
+ * Connect to MongoDB.  If already connected this is a no-op.
+ * Retries up to 5 times with exponential back-off before throwing.
+ */
 export async function connectToDatabase(): Promise<void> {
-  if (isConnected) return;
+  if (connected && mongoose.connection.readyState === 1) return;
 
-  const uri = MONGODB_URI;
+  const uri = process.env.MONGODB_URI?.trim();
   if (!uri) {
-    throw new Error("MONGODB_URI is not configured");
+    throw new Error(
+      "[db] MONGODB_URI environment variable is not set. " +
+        "Please configure it in your hosting dashboard."
+    );
   }
 
-  if (!listenersRegistered) {
-    registerConnectionListeners();
-    listenersRegistered = true;
-  }
+  ensureListeners();
 
-  let lastError: unknown;
-  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+  const MAX_ATTEMPTS = 5;
+  const BASE_DELAY_MS = 2_000;
+
+  let lastErr: unknown;
+
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
     try {
+      // If mongoose already has an active connection (e.g. after a
+      // disconnect/reconnect cycle), re-use it without calling connect() again.
+      if (mongoose.connection.readyState === 1) {
+        connected = true;
+        return;
+      }
+
       await mongoose.connect(uri, {
-        // Give the cluster up to 30 s to respond during cold-start / scale-up
         serverSelectionTimeoutMS: 30_000,
-        // Abort a socket operation after this many ms of inactivity
-        socketTimeoutMS: 45_000,
-        // Time limit for the initial TCP handshake
-        connectTimeoutMS: 30_000,
+        socketTimeoutMS:          45_000,
+        connectTimeoutMS:         30_000,
       });
-      isConnected = true;
-      console.log(`Connected to MongoDB (attempt ${attempt})`);
+
+      connected = true;
+      console.log(`[db] Connected to MongoDB (attempt ${attempt}/${MAX_ATTEMPTS})`);
       return;
     } catch (err) {
-      lastError = err;
-      if (attempt < MAX_RETRIES) {
-        const delay = RETRY_BASE_DELAY_MS * Math.pow(2, attempt - 1);
+      lastErr = err;
+      const msg = err instanceof Error ? err.message : String(err);
+      if (attempt < MAX_ATTEMPTS) {
+        const delay = BASE_DELAY_MS * Math.pow(2, attempt - 1);
         console.warn(
-          `MongoDB connection attempt ${attempt}/${MAX_RETRIES} failed – retrying in ${delay}ms…`,
-          (err as Error).message
+          `[db] Connection attempt ${attempt}/${MAX_ATTEMPTS} failed — ` +
+            `retrying in ${delay}ms… (${msg})`
         );
-        await new Promise((resolve) => setTimeout(resolve, delay));
+        await new Promise((r) => setTimeout(r, delay));
       }
     }
   }
 
-  throw new Error(
-    `Failed to connect to MongoDB after ${MAX_RETRIES} attempts: ${(lastError as Error).message}`
-  );
+  const msg = lastErr instanceof Error ? lastErr.message : String(lastErr);
+  throw new Error(`[db] Failed to connect to MongoDB after ${MAX_ATTEMPTS} attempts: ${msg}`);
 }
 
-// Close the connection gracefully when the process exits
-let isShuttingDown = false;
+/**
+ * Returns a Promise that resolves to the underlying MongoClient once the
+ * connection is established.  Used by connect-mongo so that the session store
+ * shares the same connection pool as application storage.
+ */
+export function getClientPromise(): Promise<mongoose.mongo.MongoClient> {
+  if (!clientPromiseCache) {
+    clientPromiseCache = connectToDatabase()
+      .then(() => mongoose.connection.getClient())
+      .catch((err) => {
+        clientPromiseCache = null; // allow retry on next call
+        throw err;
+      });
+  }
+  return clientPromiseCache;
+}
 
-async function disconnectGracefully() {
-  if (isShuttingDown) return;
-  isShuttingDown = true;
-  if (isConnected) {
-    await mongoose.disconnect();
-    isConnected = false;
-    console.log("MongoDB connection closed gracefully");
+// ─── Graceful shutdown ────────────────────────────────────────────────────────
+
+let shuttingDown = false;
+
+async function shutdown() {
+  if (shuttingDown) return;
+  shuttingDown = true;
+  try {
+    if (mongoose.connection.readyState !== 0) {
+      await mongoose.disconnect();
+      console.log("[db] MongoDB connection closed gracefully");
+    }
+  } catch (err) {
+    console.error("[db] Error during graceful shutdown:", err instanceof Error ? err.message : err);
   }
 }
 
-process.on("SIGINT", async () => {
-  await disconnectGracefully();
-  process.exit(0);
-});
-
-process.on("SIGTERM", async () => {
-  await disconnectGracefully();
-  process.exit(0);
-});
+process.once("SIGINT",  () => shutdown().then(() => process.exit(0)));
+process.once("SIGTERM", () => shutdown().then(() => process.exit(0)));
 
 export default mongoose;

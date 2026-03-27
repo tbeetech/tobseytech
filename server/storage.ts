@@ -756,43 +756,63 @@ export class MemStorage implements IStorage {
 
 import { MongoStorage } from "./mongoStorage.js";
 import { connectToDatabase } from "./mongodb.js";
-import { isProduction, MONGODB_URI } from "./env.js";
+
+// ─── Storage factory ──────────────────────────────────────────────────────────
 
 async function createStorage(): Promise<IStorage> {
-  if (!MONGODB_URI) {
-    if (isProduction) {
-      throw new Error("MONGODB_URI is required in production");
+  const uri = process.env.MONGODB_URI?.trim();
+  const isProd = process.env.NODE_ENV === "production";
+
+  if (!uri) {
+    if (isProd) {
+      throw new Error(
+        "[storage] MONGODB_URI is required in production. " +
+          "Set it in your hosting dashboard and restart."
+      );
     }
+    console.warn(
+      "[storage] MONGODB_URI not set — using in-memory storage. " +
+        "Data will NOT persist across restarts."
+    );
     return new MemStorage();
   }
 
   try {
     await connectToDatabase();
+    console.log("[storage] Using MongoDB storage");
     return new MongoStorage();
   } catch (err) {
-    if (isProduction) {
-      throw err;
+    const msg = err instanceof Error ? err.message : String(err);
+    if (isProd) {
+      // Hard-fail in production so the error is visible in deployment logs.
+      throw new Error(`[storage] Cannot connect to MongoDB in production: ${msg}`);
     }
     console.error(
       "[storage] MongoDB connection failed — falling back to in-memory storage. " +
-        "Data will not persist across restarts.",
-      (err as Error).message
+        "Data will NOT persist across restarts.\n" +
+        `  Reason: ${msg}`
     );
     return new MemStorage();
   }
 }
 
-// Export a proxy that defers to the resolved storage instance
+// ─── Storage proxy (defers to the resolved instance) ─────────────────────────
+
 let _storage: IStorage | null = null;
 
 const storageProxy = new Proxy({} as IStorage, {
   get(_target, prop: string) {
-    if (!_storage) throw new Error("Storage not initialized — await initStorage() first");
+    if (!_storage) {
+      throw new Error(
+        "[storage] Storage not initialized — call await initStorage() at server startup."
+      );
+    }
     return (_storage as any)[prop].bind(_storage);
   },
 });
 
 export async function initStorage(): Promise<void> {
+  if (_storage) return; // idempotent
   _storage = await createStorage();
 }
 

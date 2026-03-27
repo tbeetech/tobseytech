@@ -170,48 +170,79 @@ async function _registerRouteHandlers(app: Express): Promise<void> {
   // ─── Auth routes ────────────────────────────────────────────────────────
 
   app.post("/api/auth/register", authRateLimiter, async (req, res) => {
+    // ── 1. Validate request body ────────────────────────────────────────────
+    let data: ReturnType<typeof insertUserSchema.parse>;
     try {
-      const data = insertUserSchema.parse(req.body);
-      // Normalize email to lowercase so duplicate checks and storage are consistent.
-      const normalizedEmail = data.email.toLowerCase();
+      data = insertUserSchema.parse(req.body);
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid data", errors: err.errors });
+      }
+      return res.status(400).json({ message: "Invalid request body" });
+    }
 
-      const existingUser = await storage.getUserByUsername(data.username);
+    const normalizedEmail = data.email.toLowerCase();
+
+    // ── 2. Check for duplicate username / email ─────────────────────────────
+    try {
+      const [existingUser, existingEmail] = await Promise.all([
+        storage.getUserByUsername(data.username),
+        storage.getUserByEmail(normalizedEmail),
+      ]);
+
       if (existingUser) {
         return res.status(409).json({ message: "Username already taken" });
       }
-      const existingEmail = await storage.getUserByEmail(normalizedEmail);
       if (existingEmail) {
         return res.status(409).json({ message: "Email already registered" });
       }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error("[auth] Registration — DB lookup failed:", msg);
+      return res.status(503).json({ message: "Database temporarily unavailable. Please try again." });
+    }
+
+    // ── 3. Create the account ───────────────────────────────────────────────
+    let user;
+    try {
       const hashed = await bcrypt.hash(data.password, 12);
-      const user = await storage.createUser({ ...data, email: normalizedEmail, password: hashed });
-      const { password: _pw, ...safeUser } = user;
-      req.login(user, (err) => {
-        if (err) {
-          console.error("[auth] Session save failed after registration:", err);
-          return res.status(500).json({ message: "Registration succeeded but session could not be established. Please log in." });
-        }
-        res.status(201).json(safeUser);
+      user = await storage.createUser({
+        username: data.username,
+        email:    normalizedEmail,
+        password: hashed,
+        role:     "user",
       });
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid data", errors: error.errors });
-      }
-      // MongoDB duplicate-key error (E11000) – race condition between the
-      // existence check above and the actual insert.  Return 409 instead of 500.
-      if (isMongoDBDuplicateKeyError(error)) {
-        const keyPattern = error.keyPattern;
-        if (keyPattern.email) {
-          return res.status(409).json({ message: "Email already registered" });
-        }
-        if (keyPattern.username) {
-          return res.status(409).json({ message: "Username already taken" });
-        }
+    } catch (err) {
+      // Race-condition duplicate key (E11000) — two simultaneous registrations
+      if (isMongoDBDuplicateKeyError(err)) {
+        const kp = (err as any).keyPattern ?? {};
+        if (kp.email)    return res.status(409).json({ message: "Email already registered" });
+        if (kp.username) return res.status(409).json({ message: "Username already taken" });
         return res.status(409).json({ message: "Account already exists" });
       }
-      console.error("[auth] Registration error:", error);
-      res.status(500).json({ message: "Registration failed" });
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error("[auth] Registration — user creation failed:", msg);
+      return res.status(503).json({ message: "Account creation failed. Please try again." });
     }
+
+    // ── 4. Establish the session (best-effort) ──────────────────────────────
+    // User was created successfully — we must return 201 regardless of whether
+    // the session can be established.  A session failure used to return 500,
+    // which gave the false impression that registration failed when the account
+    // already existed in the database.
+    const { password: _pw, ...safeUser } = user;
+
+    req.login(user, (sessionErr) => {
+      if (sessionErr) {
+        // Log the issue but still tell the client the account was created (201).
+        console.error("[auth] Session save failed after registration — user can log in manually:", sessionErr);
+        return res.status(201).json({
+          ...safeUser,
+          sessionWarning: "Account created. Please log in to start your session.",
+        });
+      }
+      res.status(201).json(safeUser);
+    });
   });
 
   app.post("/api/auth/login", authRateLimiter, (req, res, next) => {
