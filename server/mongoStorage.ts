@@ -1,3 +1,11 @@
+/**
+ * MongoDB-backed implementation of IStorage — written from scratch.
+ *
+ * Every public method maps directly to a Mongoose model operation.  Document
+ * to plain-object conversion is handled by small, dedicated helper functions
+ * so that the model layer and the storage interface remain decoupled.
+ */
+
 import type {
   User,
   InsertUser,
@@ -23,275 +31,305 @@ import type {
   Notification,
   InsertNotification,
 } from "@shared/schema";
-import { UserModel } from "./models/User.js";
-import { ContactModel } from "./models/Contact.js";
-import { ProductModel } from "./models/Product.js";
-import { CourseModel } from "./models/Course.js";
-import { BlogPostModel } from "./models/BlogPost.js";
-import { CommentModel } from "./models/Comment.js";
-import { LikeModel } from "./models/Like.js";
-import { BookmarkModel } from "./models/Bookmark.js";
-import { EditSuggestionModel } from "./models/EditSuggestion.js";
-import { FriendshipModel } from "./models/Friendship.js";
-import { MessageModel } from "./models/Message.js";
-import { NotificationModel } from "./models/Notification.js";
-import { ShortUrlModel } from "./models/ShortUrl.js";
-import { randomBytes } from "crypto";
-import mongoose from "mongoose";
 
-function docToUser(doc: any): User {
+import mongoose from "mongoose";
+import { randomBytes } from "crypto";
+
+import { UserModel }           from "./models/User.js";
+import { ContactModel }        from "./models/Contact.js";
+import { ProductModel }        from "./models/Product.js";
+import { CourseModel }         from "./models/Course.js";
+import { BlogPostModel }       from "./models/BlogPost.js";
+import { CommentModel }        from "./models/Comment.js";
+import { LikeModel }           from "./models/Like.js";
+import { BookmarkModel }       from "./models/Bookmark.js";
+import { EditSuggestionModel } from "./models/EditSuggestion.js";
+import { FriendshipModel }     from "./models/Friendship.js";
+import { MessageModel }        from "./models/Message.js";
+import { NotificationModel }   from "./models/Notification.js";
+import { ShortUrlModel }       from "./models/ShortUrl.js";
+
+// ─── Document → plain-object converters ──────────────────────────────────────
+
+function toUser(doc: any): User {
   return {
-    id: doc._id.toString(),
-    username: doc.username,
-    email: doc.email,
-    password: doc.password,
-    role: doc.role,
-    displayName: doc.displayName,
-    bio: doc.bio,
-    avatarUrl: doc.avatarUrl ?? null,
-    createdAt: doc.createdAt,
+    id:          doc._id.toString(),
+    username:    doc.username,
+    email:       doc.email,
+    password:    doc.password,
+    role:        doc.role as "user" | "admin",
+    displayName: doc.displayName ?? "",
+    bio:         doc.bio         ?? "",
+    avatarUrl:   doc.avatarUrl   ?? null,
+    createdAt:   doc.createdAt,
   };
 }
 
-function docToContact(doc: any): Contact {
+function toContact(doc: any): Contact {
   return {
-    id: doc._id.toString(),
-    name: doc.name,
-    email: doc.email,
+    id:          doc._id.toString(),
+    name:        doc.name,
+    email:       doc.email,
     projectType: doc.projectType,
     budgetRange: doc.budgetRange,
-    message: doc.message,
-    status: doc.status,
-    createdAt: doc.createdAt,
+    message:     doc.message,
+    status:      doc.status,
+    createdAt:   doc.createdAt,
   };
 }
 
-function docToProduct(doc: any): Product {
+function toProduct(doc: any): Product {
   return {
-    id: doc._id.toString(),
-    name: doc.name,
+    id:          doc._id.toString(),
+    name:        doc.name,
     description: doc.description,
-    price: doc.price,
-    status: doc.status,
-    imageUrl: doc.imageUrl ?? null,
-    features: doc.features ?? [],
-    category: doc.category,
-    isActive: doc.isActive,
-    createdAt: doc.createdAt,
+    price:       doc.price,
+    status:      doc.status,
+    imageUrl:    doc.imageUrl ?? null,
+    features:    doc.features ?? [],
+    category:    doc.category,
+    isActive:    doc.isActive,
+    createdAt:   doc.createdAt,
   };
 }
 
-function docToCourse(doc: any): Course {
+function toCourse(doc: any): Course {
   return {
-    id: doc._id.toString(),
-    title: doc.title,
-    description: doc.description,
-    price: doc.price,
+    id:            doc._id.toString(),
+    title:         doc.title,
+    description:   doc.description,
+    price:         doc.price,
     originalPrice: doc.originalPrice ?? null,
-    duration: doc.duration,
-    level: doc.level,
-    category: doc.category,
-    imageUrl: doc.imageUrl ?? null,
-    features: doc.features ?? [],
-    isActive: doc.isActive,
-    isFeatured: doc.isFeatured,
+    duration:      doc.duration,
+    level:         doc.level,
+    category:      doc.category,
+    imageUrl:      doc.imageUrl ?? null,
+    features:      doc.features ?? [],
+    isActive:      doc.isActive,
+    isFeatured:    doc.isFeatured,
+    createdAt:     doc.createdAt,
+  };
+}
+
+function toBlogPost(doc: any): BlogPost {
+  return {
+    id:          doc._id.toString(),
+    title:       doc.title,
+    slug:        doc.slug,
+    excerpt:     doc.excerpt,
+    content:     doc.content,
+    coverImage:  doc.coverImage ?? null,
+    tags:        doc.tags       ?? [],
+    category:    doc.category,
+    published:   doc.published,
+    authorId:    doc.authorId,
+    authorName:  doc.authorName,
+    createdAt:   doc.createdAt,
+    updatedAt:   doc.updatedAt,
+  };
+}
+
+function toComment(doc: any): Comment {
+  return {
+    id:        doc._id.toString(),
+    postId:    doc.postId,
+    userId:    doc.userId,
+    username:  doc.username,
+    content:   doc.content,
     createdAt: doc.createdAt,
   };
 }
 
-function docToBlogPost(doc: any): BlogPost {
+function toEditSuggestion(doc: any): EditSuggestion {
   return {
-    id: doc._id.toString(),
-    title: doc.title,
-    slug: doc.slug,
-    excerpt: doc.excerpt,
-    content: doc.content,
-    coverImage: doc.coverImage ?? null,
-    tags: doc.tags ?? [],
-    category: doc.category,
-    published: doc.published,
-    authorId: doc.authorId,
-    authorName: doc.authorName,
-    createdAt: doc.createdAt,
-    updatedAt: doc.updatedAt,
-  };
-}
-
-function docToComment(doc: any): Comment {
-  return {
-    id: doc._id.toString(),
-    postId: doc.postId,
-    userId: doc.userId,
-    username: doc.username,
-    content: doc.content,
-    createdAt: doc.createdAt,
-  };
-}
-
-function docToEditSuggestion(doc: any): EditSuggestion {
-  return {
-    id: doc._id.toString(),
-    postId: doc.postId,
-    userId: doc.userId,
-    username: doc.username,
-    suggestedTitle: doc.suggestedTitle,
+    id:               doc._id.toString(),
+    postId:           doc.postId,
+    userId:           doc.userId,
+    username:         doc.username,
+    suggestedTitle:   doc.suggestedTitle,
     suggestedContent: doc.suggestedContent,
-    reason: doc.reason,
-    status: doc.status,
-    createdAt: doc.createdAt,
+    reason:           doc.reason,
+    status:           doc.status,
+    createdAt:        doc.createdAt,
   };
 }
 
-function docToFriendship(doc: any): Friendship {
+function toFriendship(doc: any): Friendship {
   return {
-    id: doc._id.toString(),
+    id:          doc._id.toString(),
     requesterId: doc.requesterId,
     addresseeId: doc.addresseeId,
-    status: doc.status,
-    createdAt: doc.createdAt,
+    status:      doc.status,
+    createdAt:   doc.createdAt,
   };
 }
 
-function docToMessage(doc: any): Message {
+function toMessage(doc: any): Message {
   return {
-    id: doc._id.toString(),
-    senderId: doc.senderId,
+    id:          doc._id.toString(),
+    senderId:    doc.senderId,
     recipientId: doc.recipientId,
-    content: doc.content,
-    read: doc.read,
+    content:     doc.content,
+    read:        doc.read,
     ...(doc.replyToId ? { replyToId: doc.replyToId } : {}),
-    createdAt: doc.createdAt,
+    createdAt:   doc.createdAt,
   };
 }
 
-function docToNotification(doc: any): Notification {
+function toNotification(doc: any): Notification {
   return {
-    id: doc._id.toString(),
-    userId: doc.userId,
-    type: doc.type,
-    title: doc.title,
-    message: doc.message,
-    link: doc.link ?? undefined,
-    read: doc.read,
-    actorId: doc.actorId ?? undefined,
+    id:        doc._id.toString(),
+    userId:    doc.userId,
+    type:      doc.type,
+    title:     doc.title,
+    message:   doc.message,
+    link:      doc.link      ?? undefined,
+    read:      doc.read,
+    actorId:   doc.actorId   ?? undefined,
     actorName: doc.actorName ?? undefined,
-    entityId: doc.entityId ?? undefined,
+    entityId:  doc.entityId  ?? undefined,
     createdAt: doc.createdAt,
   };
 }
 
-const MAX_NOTIFICATIONS_PER_USER = 50;
+// ─── Maximum notifications kept per user ─────────────────────────────────────
+const MAX_NOTIFICATIONS = 50;
+
+// ─── Maximum retry attempts for short URL code generation ────────────────────
+const MAX_SHORT_URL_RETRIES = 10;
+
+// ─── MongoStorage ─────────────────────────────────────────────────────────────
 
 export class MongoStorage {
-  // ─── User methods ────────────────────────────────────────────────────────
+
+  // ── User methods ────────────────────────────────────────────────────────────
 
   async getUser(id: string): Promise<User | undefined> {
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return undefined;
-    }
-
+    if (!mongoose.Types.ObjectId.isValid(id)) return undefined;
     const doc = await UserModel.findById(id).lean();
-    return doc ? docToUser(doc) : undefined;
+    return doc ? toUser(doc) : undefined;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
     const doc = await UserModel.findOne({ username }).lean();
-    return doc ? docToUser(doc) : undefined;
+    return doc ? toUser(doc) : undefined;
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
     const doc = await UserModel.findOne({ email: email.toLowerCase() }).lean();
-    return doc ? docToUser(doc) : undefined;
+    return doc ? toUser(doc) : undefined;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const doc = await UserModel.create(insertUser);
-    return docToUser(doc.toObject());
+    const doc = await UserModel.create({
+      username:    insertUser.username,
+      email:       insertUser.email.toLowerCase(),
+      password:    insertUser.password,
+      role:        insertUser.role ?? "user",
+      displayName: "",
+      bio:         "",
+      avatarUrl:   null,
+    });
+    return toUser(doc.toObject());
   }
 
   async updateUserProfile(id: string, updates: UpdateProfile): Promise<User | undefined> {
-    const doc = await UserModel.findByIdAndUpdate(id, updates, { new: true }).lean();
-    return doc ? docToUser(doc) : undefined;
+    if (!mongoose.Types.ObjectId.isValid(id)) return undefined;
+    const doc = await UserModel.findByIdAndUpdate(id, { $set: updates }, { new: true }).lean();
+    return doc ? toUser(doc) : undefined;
   }
 
   async searchUsers(query: string): Promise<User[]> {
-    const regex = new RegExp(query, "i");
-    const docs = await UserModel.find({ $or: [{ username: regex }, { displayName: regex }] }).lean();
-    return docs.map(docToUser);
+    const regex = new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
+    const docs = await UserModel
+      .find({ $or: [{ username: regex }, { displayName: regex }] })
+      .lean();
+    return docs.map(toUser);
   }
 
   async getAllUsers(): Promise<User[]> {
     const docs = await UserModel.find().sort({ createdAt: -1 }).lean();
-    return docs.map(docToUser);
+    return docs.map(toUser);
   }
 
   async updateUserRole(id: string, role: "user" | "admin"): Promise<User | undefined> {
-    const doc = await UserModel.findByIdAndUpdate(id, { role }, { new: true }).lean();
-    return doc ? docToUser(doc) : undefined;
+    if (!mongoose.Types.ObjectId.isValid(id)) return undefined;
+    const doc = await UserModel.findByIdAndUpdate(id, { $set: { role } }, { new: true }).lean();
+    return doc ? toUser(doc) : undefined;
   }
 
   async setPasswordResetToken(userId: string, token: string, expiry: Date): Promise<void> {
-    await UserModel.findByIdAndUpdate(userId, { resetToken: token, resetTokenExpiry: expiry });
+    if (!mongoose.Types.ObjectId.isValid(userId)) return;
+    await UserModel.findByIdAndUpdate(userId, {
+      $set: { resetToken: token, resetTokenExpiry: expiry },
+    });
   }
 
   async getUserByResetToken(token: string): Promise<User | undefined> {
-    const doc = await UserModel.findOne({
-      resetToken: token,
-      resetTokenExpiry: { $gt: new Date() },
-    }).lean();
-    return doc ? docToUser(doc) : undefined;
+    const doc = await UserModel
+      .findOne({ resetToken: token, resetTokenExpiry: { $gt: new Date() } })
+      .lean();
+    return doc ? toUser(doc) : undefined;
   }
 
   async clearPasswordResetToken(userId: string): Promise<void> {
-    await UserModel.findByIdAndUpdate(userId, { resetToken: null, resetTokenExpiry: null });
+    if (!mongoose.Types.ObjectId.isValid(userId)) return;
+    await UserModel.findByIdAndUpdate(userId, {
+      $set: { resetToken: null, resetTokenExpiry: null },
+    });
   }
 
   async updateUserPassword(userId: string, hashedPassword: string): Promise<void> {
-    await UserModel.findByIdAndUpdate(userId, { password: hashedPassword });
+    if (!mongoose.Types.ObjectId.isValid(userId)) return;
+    await UserModel.findByIdAndUpdate(userId, { $set: { password: hashedPassword } });
   }
 
-  // ─── Contact methods ─────────────────────────────────────────────────────
+  // ── Contact methods ──────────────────────────────────────────────────────────
 
   async createContact(insertContact: InsertContact): Promise<Contact> {
     const doc = await ContactModel.create({ ...insertContact, status: "new" });
-    return docToContact(doc.toObject());
+    return toContact(doc.toObject());
   }
 
   async getContacts(): Promise<Contact[]> {
     const docs = await ContactModel.find().sort({ createdAt: -1 }).lean();
-    return docs.map(docToContact);
+    return docs.map(toContact);
   }
 
   async getContact(id: string): Promise<Contact | undefined> {
     const doc = await ContactModel.findById(id).lean();
-    return doc ? docToContact(doc) : undefined;
+    return doc ? toContact(doc) : undefined;
   }
 
   async updateContactStatus(id: string, status: string): Promise<Contact | undefined> {
-    const doc = await ContactModel.findByIdAndUpdate(id, { status }, { new: true }).lean();
-    return doc ? docToContact(doc) : undefined;
+    const doc = await ContactModel
+      .findByIdAndUpdate(id, { $set: { status } }, { new: true })
+      .lean();
+    return doc ? toContact(doc) : undefined;
   }
 
-  // ─── Product methods ──────────────────────────────────────────────────────
+  // ── Product methods ──────────────────────────────────────────────────────────
 
   async getProducts(): Promise<Product[]> {
     const docs = await ProductModel.find({ isActive: true }).lean();
-    return docs.map(docToProduct);
+    return docs.map(toProduct);
   }
 
   async getProduct(id: string): Promise<Product | undefined> {
     const doc = await ProductModel.findById(id).lean();
-    return doc ? docToProduct(doc) : undefined;
+    return doc ? toProduct(doc) : undefined;
   }
 
   async createProduct(insertProduct: InsertProduct): Promise<Product> {
     const doc = await ProductModel.create(insertProduct);
-    return docToProduct(doc.toObject());
+    return toProduct(doc.toObject());
   }
 
   async updateProduct(id: string, updates: Partial<InsertProduct>): Promise<Product | undefined> {
-    const doc = await ProductModel.findByIdAndUpdate(id, updates, { new: true }).lean();
-    return doc ? docToProduct(doc) : undefined;
+    const doc = await ProductModel
+      .findByIdAndUpdate(id, { $set: updates }, { new: true })
+      .lean();
+    return doc ? toProduct(doc) : undefined;
   }
 
   async deleteProduct(id: string): Promise<boolean> {
@@ -299,31 +337,33 @@ export class MongoStorage {
     return !!result;
   }
 
-  // ─── Course methods ───────────────────────────────────────────────────────
+  // ── Course methods ───────────────────────────────────────────────────────────
 
   async getCourses(): Promise<Course[]> {
     const docs = await CourseModel.find({ isActive: true }).lean();
-    return docs.map(docToCourse);
+    return docs.map(toCourse);
   }
 
   async getCourse(id: string): Promise<Course | undefined> {
     const doc = await CourseModel.findById(id).lean();
-    return doc ? docToCourse(doc) : undefined;
+    return doc ? toCourse(doc) : undefined;
   }
 
   async getFeaturedCourses(): Promise<Course[]> {
     const docs = await CourseModel.find({ isActive: true, isFeatured: true }).lean();
-    return docs.map(docToCourse);
+    return docs.map(toCourse);
   }
 
   async createCourse(insertCourse: InsertCourse): Promise<Course> {
     const doc = await CourseModel.create(insertCourse);
-    return docToCourse(doc.toObject());
+    return toCourse(doc.toObject());
   }
 
   async updateCourse(id: string, updates: Partial<InsertCourse>): Promise<Course | undefined> {
-    const doc = await CourseModel.findByIdAndUpdate(id, updates, { new: true }).lean();
-    return doc ? docToCourse(doc) : undefined;
+    const doc = await CourseModel
+      .findByIdAndUpdate(id, { $set: updates }, { new: true })
+      .lean();
+    return doc ? toCourse(doc) : undefined;
   }
 
   async deleteCourse(id: string): Promise<boolean> {
@@ -331,32 +371,34 @@ export class MongoStorage {
     return !!result;
   }
 
-  // ─── Blog post methods ────────────────────────────────────────────────────
+  // ── Blog post methods ────────────────────────────────────────────────────────
 
   async getBlogPosts(publishedOnly = true): Promise<BlogPost[]> {
     const filter = publishedOnly ? { published: true } : {};
     const docs = await BlogPostModel.find(filter).sort({ createdAt: -1 }).lean();
-    return docs.map(docToBlogPost);
+    return docs.map(toBlogPost);
   }
 
   async getBlogPost(id: string): Promise<BlogPost | undefined> {
     const doc = await BlogPostModel.findById(id).lean();
-    return doc ? docToBlogPost(doc) : undefined;
+    return doc ? toBlogPost(doc) : undefined;
   }
 
   async getBlogPostBySlug(slug: string): Promise<BlogPost | undefined> {
     const doc = await BlogPostModel.findOne({ slug }).lean();
-    return doc ? docToBlogPost(doc) : undefined;
+    return doc ? toBlogPost(doc) : undefined;
   }
 
   async createBlogPost(data: InsertBlogPost): Promise<BlogPost> {
     const doc = await BlogPostModel.create(data);
-    return docToBlogPost(doc.toObject());
+    return toBlogPost(doc.toObject());
   }
 
   async updateBlogPost(id: string, updates: UpdateBlogPost): Promise<BlogPost | undefined> {
-    const doc = await BlogPostModel.findByIdAndUpdate(id, updates, { new: true }).lean();
-    return doc ? docToBlogPost(doc) : undefined;
+    const doc = await BlogPostModel
+      .findByIdAndUpdate(id, { $set: updates }, { new: true })
+      .lean();
+    return doc ? toBlogPost(doc) : undefined;
   }
 
   async deleteBlogPost(id: string): Promise<boolean> {
@@ -364,16 +406,18 @@ export class MongoStorage {
     return !!result;
   }
 
-  // ─── Comment methods ──────────────────────────────────────────────────────
+  // ── Comment methods ──────────────────────────────────────────────────────────
 
   async getComments(postId: string): Promise<Comment[]> {
     const docs = await CommentModel.find({ postId }).sort({ createdAt: 1 }).lean();
-    return docs.map(docToComment);
+    return docs.map(toComment);
   }
 
-  async createComment(data: InsertComment & { userId: string; username: string }): Promise<Comment> {
+  async createComment(
+    data: InsertComment & { userId: string; username: string }
+  ): Promise<Comment> {
     const doc = await CommentModel.create(data);
-    return docToComment(doc.toObject());
+    return toComment(doc.toObject());
   }
 
   async deleteComment(id: string, userId: string): Promise<boolean> {
@@ -381,7 +425,7 @@ export class MongoStorage {
     return !!result;
   }
 
-  // ─── Like methods ─────────────────────────────────────────────────────────
+  // ── Like methods ─────────────────────────────────────────────────────────────
 
   async getLikeCount(postId: string): Promise<number> {
     return LikeModel.countDocuments({ postId });
@@ -392,20 +436,26 @@ export class MongoStorage {
   }
 
   async addLike(postId: string, userId: string): Promise<void> {
-    await LikeModel.findOneAndUpdate({ postId, userId }, { postId, userId }, { upsert: true });
+    await LikeModel.findOneAndUpdate(
+      { postId, userId },
+      { postId, userId },
+      { upsert: true }
+    );
   }
 
   async removeLike(postId: string, userId: string): Promise<void> {
     await LikeModel.findOneAndDelete({ postId, userId });
   }
 
-  // ─── Bookmark methods ─────────────────────────────────────────────────────
+  // ── Bookmark methods ─────────────────────────────────────────────────────────
 
   async getBookmarks(userId: string): Promise<BlogPost[]> {
-    const bms = await BookmarkModel.find({ userId }).lean();
+    const bms    = await BookmarkModel.find({ userId }).lean();
     const postIds = bms.map((b: any) => b.postId);
-    const docs = await BlogPostModel.find({ _id: { $in: postIds }, published: true }).lean();
-    return docs.map(docToBlogPost);
+    const docs   = await BlogPostModel
+      .find({ _id: { $in: postIds }, published: true })
+      .lean();
+    return docs.map(toBlogPost);
   }
 
   async hasBookmarked(postId: string, userId: string): Promise<boolean> {
@@ -413,145 +463,196 @@ export class MongoStorage {
   }
 
   async addBookmark(postId: string, userId: string): Promise<void> {
-    await BookmarkModel.findOneAndUpdate({ postId, userId }, { postId, userId }, { upsert: true });
+    await BookmarkModel.findOneAndUpdate(
+      { postId, userId },
+      { postId, userId },
+      { upsert: true }
+    );
   }
 
   async removeBookmark(postId: string, userId: string): Promise<void> {
     await BookmarkModel.findOneAndDelete({ postId, userId });
   }
 
-  // ─── Edit suggestion methods ──────────────────────────────────────────────
+  // ── Edit suggestion methods ──────────────────────────────────────────────────
 
-  async createEditSuggestion(data: InsertEditSuggestion & { userId: string; username: string }): Promise<EditSuggestion> {
+  async createEditSuggestion(
+    data: InsertEditSuggestion & { userId: string; username: string }
+  ): Promise<EditSuggestion> {
     const doc = await EditSuggestionModel.create(data);
-    return docToEditSuggestion(doc.toObject());
+    return toEditSuggestion(doc.toObject());
   }
 
   async getEditSuggestions(postId: string): Promise<EditSuggestion[]> {
     const docs = await EditSuggestionModel.find({ postId }).sort({ createdAt: -1 }).lean();
-    return docs.map(docToEditSuggestion);
+    return docs.map(toEditSuggestion);
   }
 
-  async updateEditSuggestionStatus(id: string, status: "accepted" | "rejected"): Promise<EditSuggestion | undefined> {
-    const doc = await EditSuggestionModel.findByIdAndUpdate(id, { status }, { new: true }).lean();
-    return doc ? docToEditSuggestion(doc) : undefined;
+  async updateEditSuggestionStatus(
+    id: string,
+    status: "accepted" | "rejected"
+  ): Promise<EditSuggestion | undefined> {
+    const doc = await EditSuggestionModel
+      .findByIdAndUpdate(id, { $set: { status } }, { new: true })
+      .lean();
+    return doc ? toEditSuggestion(doc) : undefined;
   }
 
-  // ─── Friendship methods ───────────────────────────────────────────────────
+  // ── Friendship methods ───────────────────────────────────────────────────────
 
   async sendFriendRequest(requesterId: string, addresseeId: string): Promise<Friendship> {
     const doc = await FriendshipModel.create({ requesterId, addresseeId, status: "pending" });
-    return docToFriendship(doc.toObject());
+    return toFriendship(doc.toObject());
   }
 
-  async respondFriendRequest(id: string, addresseeId: string, status: "accepted" | "declined"): Promise<Friendship | undefined> {
-    const doc = await FriendshipModel.findOneAndUpdate(
-      { _id: id, addresseeId, status: "pending" },
-      { status },
-      { new: true }
-    ).lean();
-    return doc ? docToFriendship(doc) : undefined;
+  async respondFriendRequest(
+    id: string,
+    addresseeId: string,
+    status: "accepted" | "declined"
+  ): Promise<Friendship | undefined> {
+    const doc = await FriendshipModel
+      .findOneAndUpdate(
+        { _id: id, addresseeId, status: "pending" },
+        { $set: { status } },
+        { new: true }
+      )
+      .lean();
+    return doc ? toFriendship(doc) : undefined;
   }
 
   async getFriends(userId: string): Promise<User[]> {
-    const friendships = await FriendshipModel.find({
+    const fs = await FriendshipModel.find({
       $or: [{ requesterId: userId }, { addresseeId: userId }],
       status: "accepted",
     }).lean();
-    const friendIds = friendships.map((f: any) =>
-      f.requesterId.toString() === userId ? f.addresseeId.toString() : f.requesterId.toString()
+
+    const friendIds = fs.map((f: any) =>
+      f.requesterId.toString() === userId
+        ? f.addresseeId.toString()
+        : f.requesterId.toString()
     );
+
     const docs = await UserModel.find({ _id: { $in: friendIds } }).lean();
-    return docs.map(docToUser);
+    return docs.map(toUser);
   }
 
   async getFriendRequests(userId: string): Promise<Friendship[]> {
-    const docs = await FriendshipModel.find({ addresseeId: userId, status: "pending" }).lean();
-    return docs.map(docToFriendship);
+    const docs = await FriendshipModel
+      .find({ addresseeId: userId, status: "pending" })
+      .lean();
+    return docs.map(toFriendship);
   }
 
-  async getFriendshipStatus(userId1: string, userId2: string): Promise<Friendship | undefined> {
+  async getFriendshipStatus(
+    userId1: string,
+    userId2: string
+  ): Promise<Friendship | undefined> {
     const doc = await FriendshipModel.findOne({
       $or: [
         { requesterId: userId1, addresseeId: userId2 },
         { requesterId: userId2, addresseeId: userId1 },
       ],
     }).lean();
-    return doc ? docToFriendship(doc) : undefined;
+    return doc ? toFriendship(doc) : undefined;
   }
 
-  // ─── Message methods ──────────────────────────────────────────────────────
+  // ── Message methods ──────────────────────────────────────────────────────────
 
-  async sendMessage(data: InsertMessage & { senderId: string }): Promise<Message> {
+  async sendMessage(
+    data: InsertMessage & { senderId: string }
+  ): Promise<Message> {
     const doc = await MessageModel.create({ ...data, read: false });
-    return docToMessage(doc.toObject());
+    return toMessage(doc.toObject());
   }
 
   async getConversation(userId1: string, userId2: string): Promise<Message[]> {
-    const docs = await MessageModel.find({
-      $or: [
-        { senderId: userId1, recipientId: userId2 },
-        { senderId: userId2, recipientId: userId1 },
-      ],
-    })
+    const docs = await MessageModel
+      .find({
+        $or: [
+          { senderId: userId1, recipientId: userId2 },
+          { senderId: userId2, recipientId: userId1 },
+        ],
+      })
       .sort({ createdAt: 1 })
       .lean();
-    return docs.map(docToMessage);
+    return docs.map(toMessage);
   }
 
-  async getRecentConversations(userId: string): Promise<{ user: User; lastMessage: Message }[]> {
-    const messages = await MessageModel.find({
-      $or: [{ senderId: userId }, { recipientId: userId }],
-    })
+  async getRecentConversations(
+    userId: string
+  ): Promise<{ user: User; lastMessage: Message }[]> {
+    const messages = await MessageModel
+      .find({ $or: [{ senderId: userId }, { recipientId: userId }] })
       .sort({ createdAt: -1 })
       .lean();
 
     const partnerMap = new Map<string, Message>();
     for (const m of messages) {
-      const partnerId = m.senderId.toString() === userId ? m.recipientId.toString() : m.senderId.toString();
-      if (!partnerMap.has(partnerId)) {
-        partnerMap.set(partnerId, docToMessage(m));
-      }
+      const partnerId =
+        m.senderId.toString() === userId
+          ? m.recipientId.toString()
+          : m.senderId.toString();
+      if (!partnerMap.has(partnerId)) partnerMap.set(partnerId, toMessage(m));
     }
 
     const result: { user: User; lastMessage: Message }[] = [];
     for (const [partnerId, lastMessage] of Array.from(partnerMap)) {
       const userDoc = await UserModel.findById(partnerId).lean();
-      if (userDoc) result.push({ user: docToUser(userDoc), lastMessage });
+      if (userDoc) result.push({ user: toUser(userDoc), lastMessage });
     }
     return result;
   }
 
   async markMessagesRead(senderId: string, recipientId: string): Promise<void> {
-    await MessageModel.updateMany({ senderId, recipientId, read: false }, { read: true });
+    await MessageModel.updateMany(
+      { senderId, recipientId, read: false },
+      { $set: { read: true } }
+    );
   }
 
   async getUnreadCount(userId: string): Promise<number> {
     return MessageModel.countDocuments({ recipientId: userId, read: false });
   }
 
-  // ─── Notification methods ─────────────────────────────────────────────────
+  // ── Notification methods ─────────────────────────────────────────────────────
 
   async createNotification(data: InsertNotification): Promise<Notification> {
     const doc = await NotificationModel.create({ ...data, read: false });
-    return docToNotification(doc.toObject());
+    return toNotification(doc.toObject());
   }
 
   async getNotifications(userId: string): Promise<Notification[]> {
-    const docs = await NotificationModel.find({ userId }).sort({ createdAt: -1 }).limit(MAX_NOTIFICATIONS_PER_USER).lean();
-    return docs.map(docToNotification);
+    const docs = await NotificationModel
+      .find({ userId })
+      .sort({ createdAt: -1 })
+      .limit(MAX_NOTIFICATIONS)
+      .lean();
+    return docs.map(toNotification);
   }
+
   async getUnreadNotificationCount(userId: string): Promise<number> {
     return NotificationModel.countDocuments({ userId, read: false });
   }
 
-  async markNotificationRead(id: string, userId: string): Promise<Notification | undefined> {
-    const doc = await NotificationModel.findOneAndUpdate({ _id: id, userId }, { read: true }, { new: true }).lean();
-    return doc ? docToNotification(doc) : undefined;
+  async markNotificationRead(
+    id: string,
+    userId: string
+  ): Promise<Notification | undefined> {
+    const doc = await NotificationModel
+      .findOneAndUpdate(
+        { _id: id, userId },
+        { $set: { read: true } },
+        { new: true }
+      )
+      .lean();
+    return doc ? toNotification(doc) : undefined;
   }
 
   async markAllNotificationsRead(userId: string): Promise<void> {
-    await NotificationModel.updateMany({ userId, read: false }, { read: true });
+    await NotificationModel.updateMany(
+      { userId, read: false },
+      { $set: { read: true } }
+    );
   }
 
   async deleteNotification(id: string, userId: string): Promise<boolean> {
@@ -559,25 +660,28 @@ export class MongoStorage {
     return result.deletedCount > 0;
   }
 
-  async createShortUrl(url: string): Promise<{ code: string; url: string; createdAt: Date }> {
-    let code: string;
-    let attempts = 0;
-    while (true) {
-      code = randomBytes(4).toString("hex");
+  // ── Short URL methods ────────────────────────────────────────────────────────
+
+  async createShortUrl(
+    url: string
+  ): Promise<{ code: string; url: string; createdAt: Date }> {
+    for (let attempt = 0; attempt < MAX_SHORT_URL_RETRIES; attempt++) {
+      const code = randomBytes(4).toString("hex");
       try {
         const doc = await ShortUrlModel.create({ code, url });
         return { code: doc.code, url: doc.url, createdAt: doc.createdAt as Date };
       } catch (err: any) {
-        if (err?.code === 11000 && attempts < 5) {
-          attempts++;
-          continue;
-        }
+        // Retry only on duplicate-key collisions (E11000); otherwise re-throw.
+        if (err?.code === 11000) continue;
         throw err;
       }
     }
+    throw new Error(`[db] Failed to generate a unique short URL code after ${MAX_SHORT_URL_RETRIES} attempts`);
   }
 
-  async getShortUrl(code: string): Promise<{ code: string; url: string; createdAt: Date } | undefined> {
+  async getShortUrl(
+    code: string
+  ): Promise<{ code: string; url: string; createdAt: Date } | undefined> {
     const doc = await ShortUrlModel.findOne({ code }).lean();
     if (!doc) return undefined;
     return { code: doc.code, url: doc.url, createdAt: doc.createdAt as Date };
