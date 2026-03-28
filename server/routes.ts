@@ -257,7 +257,10 @@ async function _registerRouteHandlers(app: Express): Promise<void> {
       if (err) return next(err);
       if (!user) return res.status(401).json({ message: info?.message || "Invalid credentials" });
       req.login(user, (loginErr) => {
-        if (loginErr) return next(loginErr);
+        if (loginErr) {
+          console.error("[auth] Session save failed during login:", loginErr);
+          return res.status(500).json({ message: "Login succeeded but session could not be saved. Please try again." });
+        }
         const { password: _pw, ...safeUser } = user;
         res.json(safeUser);
       });
@@ -990,7 +993,7 @@ async function _registerRouteHandlers(app: Express): Promise<void> {
     }
   });
 
-  app.get("/api/contacts", async (req, res) => {
+  app.get("/api/contacts", authRateLimiter, requireAdmin, async (req, res) => {
     try {
       const contacts = await storage.getContacts();
       res.json(contacts);
@@ -999,7 +1002,7 @@ async function _registerRouteHandlers(app: Express): Promise<void> {
     }
   });
 
-  app.get("/api/contacts/:id", async (req, res) => {
+  app.get("/api/contacts/:id", authRateLimiter, requireAdmin, async (req, res) => {
     try {
       const contact = await storage.getContact(req.params.id);
       if (!contact) {
@@ -1012,7 +1015,7 @@ async function _registerRouteHandlers(app: Express): Promise<void> {
     }
   });
 
-  app.patch("/api/contacts/:id/status", async (req, res) => {
+  app.patch("/api/contacts/:id/status", authRateLimiter, requireAdmin, async (req, res) => {
     try {
       const { status } = req.body;
       if (!status) {
@@ -1070,6 +1073,7 @@ async function _registerRouteHandlers(app: Express): Promise<void> {
 
   // ─── Product routes ───────────────────────────────────────────────────────
 
+  // Public read
   app.get("/api/products", async (req, res) => {
     try {
       const products = await storage.getProducts();
@@ -1092,11 +1096,12 @@ async function _registerRouteHandlers(app: Express): Promise<void> {
     }
   });
 
-  app.post("/api/products", async (req, res) => {
+  // Admin-only mutations
+  app.post("/api/products", authRateLimiter, requireAdmin, async (req, res) => {
     try {
       const productData = insertProductSchema.parse(req.body);
       const product = await storage.createProduct(productData);
-      res.json(product);
+      res.status(201).json(product);
     } catch (error) {
       if (error instanceof z.ZodError) {
         res.status(400).json({ message: "Invalid product data", errors: error.errors });
@@ -1106,8 +1111,35 @@ async function _registerRouteHandlers(app: Express): Promise<void> {
     }
   });
 
+  app.patch("/api/products/:id", authRateLimiter, requireAdmin, async (req, res) => {
+    try {
+      const updates = insertProductSchema.partial().parse(req.body);
+      const product = await storage.updateProduct(req.params.id, updates);
+      if (!product) return res.status(404).json({ message: "Product not found" });
+      res.json(product);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: "Invalid product data", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Failed to update product" });
+      }
+    }
+  });
+
+  app.delete("/api/products/:id", authRateLimiter, requireAdmin, async (req, res) => {
+    try {
+      const deleted = await storage.deleteProduct(req.params.id);
+      if (!deleted) return res.status(404).json({ message: "Product not found" });
+      res.json({ ok: true });
+    } catch (err) {
+      console.error("[admin] Failed to delete product:", err instanceof Error ? err.message : err);
+      res.status(500).json({ message: "Failed to delete product" });
+    }
+  });
+
   // ─── Course routes ────────────────────────────────────────────────────────
 
+  // Public read
   app.get("/api/courses", async (req, res) => {
     try {
       const courses = await storage.getCourses();
@@ -1139,17 +1171,44 @@ async function _registerRouteHandlers(app: Express): Promise<void> {
     }
   });
 
-  app.post("/api/courses", async (req, res) => {
+  // Admin-only mutations
+  app.post("/api/courses", authRateLimiter, requireAdmin, async (req, res) => {
     try {
       const courseData = insertCourseSchema.parse(req.body);
       const course = await storage.createCourse(courseData);
-      res.json(course);
+      res.status(201).json(course);
     } catch (error) {
       if (error instanceof z.ZodError) {
         res.status(400).json({ message: "Invalid course data", errors: error.errors });
       } else {
         res.status(500).json({ message: "Failed to create course" });
       }
+    }
+  });
+
+  app.patch("/api/courses/:id", authRateLimiter, requireAdmin, async (req, res) => {
+    try {
+      const updates = insertCourseSchema.partial().parse(req.body);
+      const course = await storage.updateCourse(req.params.id, updates);
+      if (!course) return res.status(404).json({ message: "Course not found" });
+      res.json(course);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: "Invalid course data", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Failed to update course" });
+      }
+    }
+  });
+
+  app.delete("/api/courses/:id", authRateLimiter, requireAdmin, async (req, res) => {
+    try {
+      const deleted = await storage.deleteCourse(req.params.id);
+      if (!deleted) return res.status(404).json({ message: "Course not found" });
+      res.json({ ok: true });
+    } catch (err) {
+      console.error("[admin] Failed to delete course:", err instanceof Error ? err.message : err);
+      res.status(500).json({ message: "Failed to delete course" });
     }
   });
 
