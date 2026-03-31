@@ -25,7 +25,7 @@ export function initializeAnimations() {
   });
 
   // Section animations
-  gsap.utils.toArray('.page-section').forEach((section: any, i) => {
+  gsap.utils.toArray('.page-section').forEach((section: any, _i: number) => {
     if (window.ScrollTrigger) {
       window.ScrollTrigger.create({
         trigger: section,

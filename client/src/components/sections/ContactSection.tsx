@@ -1,9 +1,13 @@
+import { useState } from "react";
 import { Mail, MessageCircle, Linkedin, Send } from "lucide-react";
 
 const CONTACT_EMAIL = "hello@tobseytech.com";
 
 export default function ContactSection() {
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitState, setSubmitState] = useState<"idle" | "success" | "error">("idle");
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const form = e.currentTarget;
     const name = (form.elements.namedItem("name") as HTMLInputElement).value.trim();
@@ -15,9 +19,27 @@ export default function ContactSection() {
       return;
     }
 
-    const subject = encodeURIComponent(`Message from ${name}`);
-    const body = encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`);
-    window.location.href = `mailto:${CONTACT_EMAIL}?subject=${subject}&body=${body}`;
+    setIsSubmitting(true);
+    setSubmitState("idle");
+
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, message, service: "Website contact form" }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Request failed");
+      }
+
+      form.reset();
+      setSubmitState("success");
+    } catch {
+      setSubmitState("error");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -80,11 +102,18 @@ export default function ContactSection() {
               </div>
               <button
                 type="submit"
+                disabled={isSubmitting}
                 className="w-full flex items-center justify-center gap-2 py-3 bg-neon-yellow text-black font-semibold rounded-lg hover:bg-yellow-400 active:scale-95 transition-all font-orbitron text-sm"
               >
                 <Send className="w-4 h-4" />
-                Send Message
+                {isSubmitting ? "Sending..." : "Send Message"}
               </button>
+              {submitState === "success" && (
+                <p className="text-sm text-green-400">Message received. We will get back to you shortly.</p>
+              )}
+              {submitState === "error" && (
+                <p className="text-sm text-red-400">Message could not be sent right now. Please try again.</p>
+              )}
             </form>
           </div>
 

@@ -48,13 +48,23 @@ function isMongoDBDuplicateKeyError(err: unknown): err is { code: number; keyPat
 
 let _mailer: ReturnType<typeof nodemailer.createTransport> | null = null;
 function getMailer() {
+  if (!process.env.SMTP_HOST || !process.env.EMAIL_FROM) {
+    return null;
+  }
+
   if (!_mailer) {
     _mailer = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
+      port: process.env.SMTP_PORT ? Number(process.env.SMTP_PORT) : undefined,
+      secure: process.env.SMTP_SECURE === "true",
+      ...(process.env.SMTP_USER || process.env.SMTP_PASS
+        ? {
+            auth: {
+              user: process.env.SMTP_USER,
+              pass: process.env.SMTP_PASS,
+            },
+          }
+        : {}),
     });
   }
   return _mailer;
@@ -71,6 +81,19 @@ function requireAdmin(req: Request, res: Response, next: NextFunction) {
     return res.status(403).json({ message: "Forbidden" });
   }
   next();
+}
+
+function sendAuthenticatedUser(req: Request, res: Response, user: any, statusCode = 200) {
+  const { password: _pw, ...safeUser } = user;
+  req.session.save((sessionErr) => {
+    if (sessionErr) {
+      console.error("[auth] Session save failed:", sessionErr);
+      return res.status(500).json({
+        message: "Authentication succeeded but the session could not be established. Please try again.",
+      });
+    }
+    res.status(statusCode).json(safeUser);
+  });
 }
 
 // WebSocket client registry: userId -> Set of active WebSocket connections
@@ -185,13 +208,12 @@ async function _registerRouteHandlers(app: Express): Promise<void> {
       }
       const hashed = await bcrypt.hash(data.password, 12);
       const user = await storage.createUser({ ...data, email: normalizedEmail, password: hashed });
-      const { password: _pw, ...safeUser } = user;
       req.login(user, (err) => {
         if (err) {
           console.error("[auth] Session save failed after registration:", err);
           return res.status(500).json({ message: "Registration succeeded but session could not be established. Please log in." });
         }
-        res.status(201).json(safeUser);
+        sendAuthenticatedUser(req, res, user, 201);
       });
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -227,8 +249,7 @@ async function _registerRouteHandlers(app: Express): Promise<void> {
       if (!user) return res.status(401).json({ message: info?.message || "Invalid credentials" });
       req.login(user, (loginErr) => {
         if (loginErr) return next(loginErr);
-        const { password: _pw, ...safeUser } = user;
-        res.json(safeUser);
+        sendAuthenticatedUser(req, res, user);
       });
     })(req, res, next);
   });
@@ -236,7 +257,15 @@ async function _registerRouteHandlers(app: Express): Promise<void> {
   app.post("/api/auth/logout", authRateLimiter, (req, res) => {
     req.logout((err) => {
       if (err) return res.status(500).json({ message: "Logout failed" });
-      res.json({ ok: true });
+      req.session.destroy((destroyErr) => {
+        if (destroyErr) {
+          console.error("[auth] Session destroy failed during logout:", destroyErr);
+          return res.status(500).json({ message: "Logout failed" });
+        }
+        res.clearCookie("tobseytech.sid");
+        res.clearCookie("connect.sid");
+        res.json({ ok: true });
+      });
     });
   });
 
@@ -945,21 +974,68 @@ async function _registerRouteHandlers(app: Express): Promise<void> {
 
   // ─── Contact routes ───────────────────────────────────────────────────────
 
-  app.post("/api/contacts", async (req, res) => {
+  const contactFeedbackSchema = z.object({
+    name: z.string().trim().min(1),
+    email: z.string().trim().email(),
+    message: z.string().trim().min(1).max(5_000),
+    company: z.string().trim().optional(),
+    service: z.string().trim().optional(),
+    projectType: z.string().trim().optional(),
+    budgetRange: z.string().trim().optional(),
+  });
+
+  async function createContactFeedback(body: unknown) {
+    const parsed = contactFeedbackSchema.parse(body);
+    const contactData = insertContactSchema.parse({
+      name: parsed.name,
+      email: parsed.email,
+      projectType: parsed.projectType || parsed.service || parsed.company || "General inquiry",
+      budgetRange: parsed.budgetRange || "Not specified",
+      message: parsed.message,
+    });
+
+    const contact = await storage.createContact(contactData);
+    const mailer = getMailer();
+
+    if (mailer) {
+      await mailer.sendMail({
+        from: process.env.EMAIL_FROM,
+        to: process.env.EMAIL_FROM,
+        replyTo: parsed.email,
+        subject: "New TOBSEYTECH Contact",
+        text: [
+          `Name: ${parsed.name}`,
+          `Email: ${parsed.email}`,
+          `Company: ${parsed.company || "Not provided"}`,
+          `Service: ${parsed.service || parsed.projectType || "General inquiry"}`,
+          `Budget: ${parsed.budgetRange || "Not specified"}`,
+          "",
+          "Message:",
+          parsed.message,
+        ].join("\n"),
+      });
+    } else {
+      console.warn("[contact] SMTP_HOST/EMAIL_FROM not configured; contact saved without email notification.");
+    }
+
+    return contact;
+  }
+
+  app.post("/api/contacts", authRateLimiter, async (req, res) => {
     try {
-      const contactData = insertContactSchema.parse(req.body);
-      const contact = await storage.createContact(contactData);
-      res.json(contact);
+      const contact = await createContactFeedback(req.body);
+      res.status(201).json(contact);
     } catch (error) {
       if (error instanceof z.ZodError) {
         res.status(400).json({ message: "Invalid contact data", errors: error.errors });
       } else {
+        console.error("[contact] Failed to create contact:", error);
         res.status(500).json({ message: "Failed to create contact" });
       }
     }
   });
 
-  app.get("/api/contacts", async (req, res) => {
+  app.get("/api/contacts", authRateLimiter, requireAdmin, async (req, res) => {
     try {
       const contacts = await storage.getContacts();
       res.json(contacts);
@@ -968,7 +1044,7 @@ async function _registerRouteHandlers(app: Express): Promise<void> {
     }
   });
 
-  app.get("/api/contacts/:id", async (req, res) => {
+  app.get("/api/contacts/:id", authRateLimiter, requireAdmin, async (req, res) => {
     try {
       const contact = await storage.getContact(req.params.id);
       if (!contact) {
@@ -981,7 +1057,7 @@ async function _registerRouteHandlers(app: Express): Promise<void> {
     }
   });
 
-  app.patch("/api/contacts/:id/status", async (req, res) => {
+  app.patch("/api/contacts/:id/status", authRateLimiter, requireAdmin, async (req, res) => {
     try {
       const { status } = req.body;
       if (!status) {
@@ -999,30 +1075,17 @@ async function _registerRouteHandlers(app: Express): Promise<void> {
     }
   });
 
-  // Simple contact endpoint that sends an email
-  app.post("/api/contact", async (req, res) => {
-    const { name, company, email, service, message } = req.body || {};
-    if (!name || !email) {
-      res.status(400).json({ error: "Missing required fields" });
-      return;
-    }
+  app.post("/api/contact", authRateLimiter, async (req, res) => {
     try {
-      const transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST,
-        auth: {
-          user: process.env.SMTP_USER,
-          pass: process.env.SMTP_PASS,
-        },
-      });
-      await transporter.sendMail({
-        from: process.env.EMAIL_FROM,
-        to: process.env.EMAIL_FROM,
-        subject: "New TOBSEYTECH Contact",
-        text: `Name: ${name}\nCompany: ${company}\nEmail: ${email}\nService: ${service}\nMessage: ${message}`,
-      });
+      await createContactFeedback(req.body);
       res.status(200).json({ ok: true });
-    } catch (e) {
-      res.status(500).json({ error: "Email failed" });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: "Invalid contact data", errors: error.errors });
+      } else {
+        console.error("[contact] Failed to submit contact form:", error);
+        res.status(500).json({ message: "Failed to submit contact form" });
+      }
     }
   });
 

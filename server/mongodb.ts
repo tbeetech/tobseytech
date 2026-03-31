@@ -1,29 +1,28 @@
 import mongoose from "mongoose";
-import { MONGODB_URI } from "./env.js";
+import { isProduction, MONGODB_URI } from "./env.js";
 
-const MAX_RETRIES = 5;
-const RETRY_BASE_DELAY_MS = 2_000;
+const MAX_RETRIES = isProduction ? 3 : 5;
+const RETRY_BASE_DELAY_MS = 1_000;
+const SERVER_SELECTION_TIMEOUT_MS = isProduction ? 10_000 : 30_000;
+const CONNECT_TIMEOUT_MS = isProduction ? 10_000 : 30_000;
+const SOCKET_TIMEOUT_MS = 45_000;
+const MAX_POOL_SIZE = 10;
+const MAX_IDLE_TIME_MS = 30_000;
 
 let isConnected = false;
 let listenersRegistered = false;
+let connectionPromise: Promise<void> | null = null;
 
 // A single shared promise for the underlying MongoClient.
 // Reusing the same client for both mongoose and connect-mongo avoids a second
-// connection to Atlas (important on the free M0 tier with its 500-connection
-// limit) and ensures that if mongoose can reach the DB the session store can too.
+// connection to Atlas and keeps session storage on the same pool.
 let _clientPromise: Promise<mongoose.mongo.MongoClient> | null = null;
 
-/**
- * Returns a promise that resolves to the underlying MongoClient once the
- * mongoose connection is established.  Used by connect-mongo so that the
- * session store shares the same connection pool as the application storage.
- */
 export function getClientPromise(): Promise<mongoose.mongo.MongoClient> {
   if (!_clientPromise) {
     _clientPromise = connectToDatabase()
       .then(() => mongoose.connection.getClient())
       .catch((err) => {
-        // Reset so the next call will retry.
         _clientPromise = null;
         throw err;
       });
@@ -38,7 +37,7 @@ function registerConnectionListeners() {
   });
 
   mongoose.connection.on("disconnected", () => {
-    console.warn("MongoDB disconnected — waiting for automatic reconnect…");
+    console.warn("MongoDB disconnected; waiting for automatic reconnect...");
     isConnected = false;
   });
 
@@ -50,6 +49,10 @@ function registerConnectionListeners() {
 
 export async function connectToDatabase(): Promise<void> {
   if (isConnected) return;
+  if (connectionPromise) {
+    await connectionPromise;
+    return;
+  }
 
   const uri = MONGODB_URI;
   if (!uri) {
@@ -61,39 +64,47 @@ export async function connectToDatabase(): Promise<void> {
     listenersRegistered = true;
   }
 
-  let lastError: unknown;
-  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
-    try {
-      await mongoose.connect(uri, {
-        // Give the cluster up to 30 s to respond during cold-start / scale-up
-        serverSelectionTimeoutMS: 30_000,
-        // Abort a socket operation after this many ms of inactivity
-        socketTimeoutMS: 45_000,
-        // Time limit for the initial TCP handshake
-        connectTimeoutMS: 30_000,
-      });
-      isConnected = true;
-      console.log(`Connected to MongoDB (attempt ${attempt})`);
-      return;
-    } catch (err) {
-      lastError = err;
-      if (attempt < MAX_RETRIES) {
-        const delay = RETRY_BASE_DELAY_MS * Math.pow(2, attempt - 1);
-        console.warn(
-          `MongoDB connection attempt ${attempt}/${MAX_RETRIES} failed – retrying in ${delay}ms…`,
-          (err as Error).message
-        );
-        await new Promise((resolve) => setTimeout(resolve, delay));
+  connectionPromise = (async () => {
+    let lastError: unknown;
+
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+      try {
+        await mongoose.connect(uri, {
+          serverSelectionTimeoutMS: SERVER_SELECTION_TIMEOUT_MS,
+          socketTimeoutMS: SOCKET_TIMEOUT_MS,
+          connectTimeoutMS: CONNECT_TIMEOUT_MS,
+          maxPoolSize: MAX_POOL_SIZE,
+          minPoolSize: 0,
+          maxIdleTimeMS: MAX_IDLE_TIME_MS,
+        });
+        isConnected = true;
+        console.log(`Connected to MongoDB (attempt ${attempt})`);
+        return;
+      } catch (err) {
+        lastError = err;
+        if (attempt < MAX_RETRIES) {
+          const delay = RETRY_BASE_DELAY_MS * Math.pow(2, attempt - 1);
+          console.warn(
+            `MongoDB connection attempt ${attempt}/${MAX_RETRIES} failed; retrying in ${delay}ms...`,
+            (err as Error).message
+          );
+          await new Promise((resolve) => setTimeout(resolve, delay));
+        }
       }
     }
-  }
 
-  throw new Error(
-    `Failed to connect to MongoDB after ${MAX_RETRIES} attempts: ${(lastError as Error).message}`
-  );
+    throw new Error(
+      `Failed to connect to MongoDB after ${MAX_RETRIES} attempts: ${(lastError as Error).message}`
+    );
+  })();
+
+  try {
+    await connectionPromise;
+  } finally {
+    connectionPromise = null;
+  }
 }
 
-// Close the connection gracefully when the process exits
 let isShuttingDown = false;
 
 async function disconnectGracefully() {
