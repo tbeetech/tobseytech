@@ -37,6 +37,7 @@ app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: false, limit: "10mb" }));
 
 const MemoryStore = createMemoryStore(session);
+let sessionMiddleware: ReturnType<typeof session> | null = null;
 
 function buildSessionStore() {
   if (MONGODB_URI) {
@@ -61,22 +62,27 @@ function buildSessionStore() {
   return new MemoryStore({ checkPeriod: 86400000 });
 }
 
-app.use(
-  session({
-    name: "tobseytech.sid",
-    secret: getSessionSecret(),
-    proxy: true,
-    resave: false,
-    saveUninitialized: false,
-    store: buildSessionStore(),
-    cookie: {
-      secure: process.env.NODE_ENV === "production",
-      httpOnly: true,
-      sameSite: "lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    },
-  })
-);
+function getSessionMiddleware() {
+  if (!sessionMiddleware) {
+    sessionMiddleware = session({
+      name: "tobseytech.sid",
+      secret: getSessionSecret(),
+      proxy: true,
+      resave: false,
+      saveUninitialized: false,
+      store: buildSessionStore(),
+      cookie: {
+        secure: process.env.NODE_ENV === "production",
+        httpOnly: true,
+        sameSite: "lax",
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      },
+    });
+  }
+  return sessionMiddleware;
+}
+
+app.use((req, res, next) => getSessionMiddleware()(req, res, next));
 
 app.use(passport.initialize());
 app.use(passport.session());
@@ -163,5 +169,14 @@ export default async function handler(req: Request, res: Response) {
     console.error("[handler] Initialization error:", message);
     return res.status(503).json({ message: "Service unavailable: server failed to initialize. Check environment variable configuration." });
   }
+  const rewrittenPath = req.query?.path;
+  if (typeof rewrittenPath === "string" && rewrittenPath.length > 0) {
+    const url = new URL(req.url, `https://${req.headers.host || "localhost"}`);
+    const params = new URLSearchParams(url.search);
+    params.delete("path");
+    const suffix = params.toString();
+    req.url = `/api/${rewrittenPath}${suffix ? `?${suffix}` : ""}`;
+  }
+
   return app(req, res);
 }

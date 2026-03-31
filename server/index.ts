@@ -35,6 +35,7 @@ app.use(express.urlencoded({ extended: false, limit: "10mb" }));
 // (important on Render.com and other PaaS platforms).  Falls back to
 // memorystore only when the connection cannot be established.
 const MemoryStore = createMemoryStore(session);
+let sessionMiddleware: ReturnType<typeof session> | null = null;
 
 function buildSessionStore() {
   if (!MONGODB_URI) {
@@ -64,22 +65,27 @@ function buildSessionStore() {
   return new MemoryStore({ checkPeriod: 86400000 });
 }
 
-app.use(
-  session({
-    name: "tobseytech.sid",
-    secret: getSessionSecret(),
-    proxy: true,
-    resave: false,
-    saveUninitialized: false,
-    store: buildSessionStore(),
-    cookie: {
-      secure: process.env.NODE_ENV === "production",
-      httpOnly: true,
-      sameSite: "lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    },
-  })
-);
+function getSessionMiddleware() {
+  if (!sessionMiddleware) {
+    sessionMiddleware = session({
+      name: "tobseytech.sid",
+      secret: getSessionSecret(),
+      proxy: true,
+      resave: false,
+      saveUninitialized: false,
+      store: buildSessionStore(),
+      cookie: {
+        secure: process.env.NODE_ENV === "production",
+        httpOnly: true,
+        sameSite: "lax",
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      },
+    });
+  }
+  return sessionMiddleware;
+}
+
+app.use((req, res, next) => getSessionMiddleware()(req, res, next));
 
 app.use(passport.initialize());
 app.use(passport.session());
