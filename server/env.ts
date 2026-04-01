@@ -27,25 +27,17 @@ export function validateRuntimeEnv(): void {
   }
 
   if (!process.env.SESSION_SECRET?.trim()) {
-    const message =
-      "SESSION_SECRET is not configured. Development will use a generated per-process secret; production must set a long random secret.";
-    if (isProduction) {
-      errors.push(message);
-    } else {
-      warnings.push(message);
-    }
+    warnings.push(
+      "SESSION_SECRET is not configured. A random per-process secret will be used — all sessions will be invalidated on every server restart. Set a long random secret in your host's environment variables for persistent sessions."
+    );
   }
 
   const hasAdminSeedEmail = Boolean(ADMIN_SEED_EMAIL);
   const hasAdminSeedPassword = Boolean(ADMIN_SEED_PASSWORD);
   if (hasAdminSeedEmail !== hasAdminSeedPassword) {
-    const message =
-      "ADMIN_SEED_EMAIL and ADMIN_SEED_PASSWORD must either both be set or both be omitted.";
-    if (isProduction) {
-      errors.push(message);
-    } else {
-      warnings.push(message);
-    }
+    warnings.push(
+      "ADMIN_SEED_EMAIL and ADMIN_SEED_PASSWORD should either both be set or both be omitted. Admin account seeding will be skipped until both are configured."
+    );
   }
 
   if (!ADMIN_DASHBOARD_PASSWORD) {
@@ -73,9 +65,7 @@ export function getSessionSecret(): string {
     return configuredSecret;
   }
 
-  if (isProduction) {
-    throw new Error("SESSION_SECRET is required in production");
-  }
-
+  // No secret configured — generate a random one.
+  // validateRuntimeEnv() already warned about this at startup.
   return randomBytes(32).toString("hex");
 }

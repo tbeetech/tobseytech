@@ -1,12 +1,26 @@
 import mongoose from "mongoose";
 import { isProduction, MONGODB_URI } from "./env.js";
 
-const MAX_RETRIES = isProduction ? 3 : 5;
+// Vercel automatically sets VERCEL=1 in all serverless environments.
+// Serverless functions have strict execution-time budgets (10 s on Hobby,
+// up to 60 s on Pro), so we use shorter timeouts and fewer retries to
+// ensure the function responds — even on a slow cold-start — rather than
+// being killed by Vercel before our error handler can fire.
+const isVercel = !!process.env.VERCEL;
+
+// Connection deadline shared by both serverSelection and connect phases.
+// Hobby: 5 s × 1 attempt ≈ 5 s (leaves room for route execution).
+// Pro (maxDuration=60): same setting; connection is cached on warm starts.
+// Traditional Node.js (Render / local): keep the original generous value.
+const CONNECTION_TIMEOUT_MS = isVercel ? 5_000 : isProduction ? 10_000 : 30_000;
+
+const MAX_RETRIES = isVercel ? 1 : isProduction ? 3 : 5;
 const RETRY_BASE_DELAY_MS = 1_000;
-const SERVER_SELECTION_TIMEOUT_MS = isProduction ? 10_000 : 30_000;
-const CONNECT_TIMEOUT_MS = isProduction ? 10_000 : 30_000;
-const SOCKET_TIMEOUT_MS = 45_000;
-const MAX_POOL_SIZE = 10;
+const SOCKET_TIMEOUT_MS = isVercel ? 20_000 : 45_000;
+// Smaller pool for serverless: each concurrent function instance creates its
+// own pool; 5 per instance is plenty and avoids exhausting Atlas free-tier
+// connection limits (M0 cap: 500 connections).
+const MAX_POOL_SIZE = isVercel ? 5 : 10;
 const MAX_IDLE_TIME_MS = 30_000;
 
 let isConnected = false;
@@ -70,9 +84,9 @@ export async function connectToDatabase(): Promise<void> {
     for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
       try {
         await mongoose.connect(uri, {
-          serverSelectionTimeoutMS: SERVER_SELECTION_TIMEOUT_MS,
+          serverSelectionTimeoutMS: CONNECTION_TIMEOUT_MS,
           socketTimeoutMS: SOCKET_TIMEOUT_MS,
-          connectTimeoutMS: CONNECT_TIMEOUT_MS,
+          connectTimeoutMS: CONNECTION_TIMEOUT_MS,
           maxPoolSize: MAX_POOL_SIZE,
           minPoolSize: 0,
           maxIdleTimeMS: MAX_IDLE_TIME_MS,

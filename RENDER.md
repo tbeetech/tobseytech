@@ -18,8 +18,8 @@ Set the following environment variables in your Render service's **Environment**
 
 | Variable | Description | Example |
 |---|---|---|
-| `MONGODB_URI` | Your MongoDB Atlas connection string | `mongodb+srv://<user>:<password>@cluster0.xxxxx.mongodb.net/tobseytech?retryWrites=true&w=majority&appName=Cluster0` |
-| `SESSION_SECRET` | A long random string for session signing | `some-very-long-random-secret-string-here` |
+| `MONGODB_URI` | Your MongoDB Atlas connection string | `mongodb+srv://<user>:<password>@cluster0.mpmy7ir.mongodb.net/?appName=Cluster0` |
+| `SESSION_SECRET` | A long random string for session signing — **strongly recommended** so sessions survive restarts; omitting it means every restart logs all users out | `some-very-long-random-secret-string-here` |
 | `NODE_ENV` | Set to production | `production` |
 | `PORT` | Port to listen on (Render sets this automatically) | `10000` |
 
@@ -32,8 +32,10 @@ Set the following environment variables in your Render service's **Environment**
 > Without `MONGODB_URI` the server falls back to an in-memory store, which means all users
 > are logged out on every restart — set `MONGODB_URI` in production to avoid this.
 >
-> **Fail-fast protection:** Production startup rejects missing `MONGODB_URI` or
-> `SESSION_SECRET` to prevent silent data/session loss. `ADMIN_DASHBOARD_PASSWORD`
+> **Fail-fast protection:** Production startup rejects a missing `MONGODB_URI`
+> to prevent silent data loss. `SESSION_SECRET` is strongly recommended — without
+> it every server restart will log all users out — but the server will start
+> with a per-process random secret if it is omitted. `ADMIN_DASHBOARD_PASSWORD`
 > is optional for startup but required to access `/dashboard`.
 
 ### 3. Optional Environment Variables (for email / contact form)
