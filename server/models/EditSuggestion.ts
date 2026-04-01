@@ -1,5 +1,5 @@
 import mongoose, { Schema, Document } from "mongoose";
-import type { EditSuggestion } from "@shared/schema";
+import type { EditSuggestion } from "../../shared/schema.js";
 
 export interface EditSuggestionDocument extends Omit<EditSuggestion, "id">, Document {}
 

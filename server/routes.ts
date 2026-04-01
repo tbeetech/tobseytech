@@ -24,7 +24,7 @@ import {
   insertEditSuggestionSchema,
   insertMessageSchema,
   type InsertNotification,
-} from "@shared/schema";
+} from "../shared/schema.js";
 import { z } from "zod";
 import nodemailer from "nodemailer";
 

@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document } from "mongoose";
-import type { Notification, NotificationType } from "@shared/schema";
-import { NOTIFICATION_TYPES } from "@shared/schema";
+import type { Notification, NotificationType } from "../../shared/schema.js";
+import { NOTIFICATION_TYPES } from "../../shared/schema.js";
 
 export interface NotificationDocument extends Omit<Notification, "id">, Document {}
 

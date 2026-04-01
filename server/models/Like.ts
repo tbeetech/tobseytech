@@ -1,5 +1,5 @@
 import mongoose, { Schema, Document } from "mongoose";
-import type { Like } from "@shared/schema";
+import type { Like } from "../../shared/schema.js";
 
 export interface LikeDocument extends Omit<Like, "id">, Document {}
 
