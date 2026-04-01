@@ -1,5 +1,5 @@
 import mongoose, { Schema, Document } from "mongoose";
-import type { Bookmark } from "@shared/schema";
+import type { Bookmark } from "../../shared/schema.js";
 
 export interface BookmarkDocument extends Omit<Bookmark, "id">, Document {}
 

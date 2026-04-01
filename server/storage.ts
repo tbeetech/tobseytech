@@ -22,7 +22,7 @@ import {
   type InsertMessage,
   type Notification,
   type InsertNotification,
-} from "@shared/schema";
+} from "../shared/schema.js";
 import { randomUUID, randomBytes } from "crypto";
 
 export interface ShortUrl {

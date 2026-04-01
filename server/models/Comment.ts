@@ -1,5 +1,5 @@
 import mongoose, { Schema, Document } from "mongoose";
-import type { Comment } from "@shared/schema";
+import type { Comment } from "../../shared/schema.js";
 
 export interface CommentDocument extends Omit<Comment, "id">, Document {}
 

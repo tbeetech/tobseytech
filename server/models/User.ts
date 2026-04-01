@@ -1,5 +1,5 @@
 import mongoose, { Schema, Document } from "mongoose";
-import type { User } from "@shared/schema";
+import type { User } from "../../shared/schema.js";
 
 export interface UserDocument extends Omit<User, "id">, Document {
   resetToken?: string | null;

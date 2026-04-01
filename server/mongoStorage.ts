@@ -22,7 +22,7 @@ import type {
   InsertMessage,
   Notification,
   InsertNotification,
-} from "@shared/schema";
+} from "../shared/schema.js";
 import { UserModel } from "./models/User.js";
 import { ContactModel } from "./models/Contact.js";
 import { ProductModel } from "./models/Product.js";

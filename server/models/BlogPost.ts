@@ -1,5 +1,5 @@
 import mongoose, { Schema, Document } from "mongoose";
-import type { BlogPost } from "@shared/schema";
+import type { BlogPost } from "../../shared/schema.js";
 
 export interface BlogPostDocument extends Omit<BlogPost, "id">, Document {}
 

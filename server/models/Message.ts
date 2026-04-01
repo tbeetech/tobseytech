@@ -1,5 +1,5 @@
 import mongoose, { Schema, Document } from "mongoose";
-import type { Message } from "@shared/schema";
+import type { Message } from "../../shared/schema.js";
 
 export interface MessageDocument extends Omit<Message, "id">, Document {}
 
