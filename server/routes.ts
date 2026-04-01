@@ -1583,7 +1583,7 @@ ENGAGEMENT RULES:
       }
       const gemini = getGemini();
       const model = gemini.getGenerativeModel({
-        model: "gemini-1.5-flash",
+        model: "gemini-2.0-flash",
         systemInstruction: PROPHET_SYSTEM_PROMPT,
       });
 
@@ -1702,7 +1702,7 @@ ENGAGEMENT PRINCIPLES:
       } else if (hasGemini) {
         const gemini = getGemini();
         const model = gemini.getGenerativeModel({
-          model: "gemini-1.5-flash",
+          model: "gemini-2.0-flash",
           systemInstruction: COSMO_SYSTEM_PROMPT,
         });
         const raw = messages.slice(0, -1).map((m) => ({
