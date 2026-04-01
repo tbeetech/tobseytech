@@ -1583,15 +1583,19 @@ ENGAGEMENT RULES:
       }
       const gemini = getGemini();
       const model = gemini.getGenerativeModel({
-        model: "gemini-2.0-flash",
+        model: "gemini-1.5-flash",
         systemInstruction: PROPHET_SYSTEM_PROMPT,
       });
 
-      // Build Gemini chat history from previous messages (all except the last user message)
-      const history = messages.slice(0, -1).map((m) => ({
-        role: m.role === "assistant" ? "model" : "user",
+      // Build Gemini chat history from previous messages (all except the last user message).
+      // Gemini requires history to start with a "user" role, so drop any leading "model" entries
+      // (e.g. the assistant's canned opening line sent by the client).
+      const raw = messages.slice(0, -1).map((m) => ({
+        role: m.role === "assistant" ? ("model" as const) : ("user" as const),
         parts: [{ text: m.content }],
       }));
+      const firstUserIdx = raw.findIndex((m) => m.role === "user");
+      const history = firstUserIdx === -1 ? [] : raw.slice(firstUserIdx);
 
       const chat = model.startChat({
         history,
@@ -1698,13 +1702,15 @@ ENGAGEMENT PRINCIPLES:
       } else if (hasGemini) {
         const gemini = getGemini();
         const model = gemini.getGenerativeModel({
-          model: "gemini-2.0-flash",
+          model: "gemini-1.5-flash",
           systemInstruction: COSMO_SYSTEM_PROMPT,
         });
-        const history = messages.slice(0, -1).map((m) => ({
-          role: m.role === "assistant" ? "model" : "user",
+        const rawCosmo = messages.slice(0, -1).map((m) => ({
+          role: m.role === "assistant" ? ("model" as const) : ("user" as const),
           parts: [{ text: m.content }],
         }));
+        const firstCosmoUser = rawCosmo.findIndex((m) => m.role === "user");
+        const history = firstCosmoUser === -1 ? [] : rawCosmo.slice(firstCosmoUser);
         const chat = model.startChat({
           history,
           generationConfig: { maxOutputTokens: 600, temperature: 0.6 },
