@@ -190,6 +190,68 @@ async function _registerRouteHandlers(app: Express): Promise<void> {
     }
   });
 
+  // ─── Database connectivity test ──────────────────────────────────────────
+
+  app.get("/api/testdata", async (_req, res) => {
+    const readyStateLabels: Record<number, string> = {
+      0: "disconnected",
+      1: "connected",
+      2: "connecting",
+      3: "disconnecting",
+    };
+
+    const readyState = mongoose.connection.readyState;
+    const stateLabel = readyStateLabels[readyState] ?? "unknown";
+
+    // Collect basic connection info without exposing credentials
+    const host = mongoose.connection.host ?? null;
+    const dbName = mongoose.connection.name ?? null;
+    const mongoUriConfigured = !!process.env.MONGODB_URI;
+
+    let pingOk = false;
+    let pingLatencyMs: number | null = null;
+    let pingError: string | null = null;
+    let collectionCount: number | null = null;
+
+    try {
+      const t0 = Date.now();
+      await mongoose.connection.db?.command({ ping: 1 });
+      pingLatencyMs = Date.now() - t0;
+      pingOk = true;
+
+      try {
+        const cols = await mongoose.connection.db?.listCollections().toArray();
+        collectionCount = cols?.length ?? 0;
+      } catch {
+        // non-fatal – collection listing may be restricted
+      }
+    } catch (err) {
+      pingError = err instanceof Error ? err.message : String(err);
+      console.error("[testdata] DB ping failed:", pingError);
+    }
+
+    const ok = pingOk;
+    const status = ok ? 200 : 503;
+
+    res.status(status).json({
+      ok,
+      timestamp: new Date().toISOString(),
+      database: {
+        mongoUriConfigured,
+        readyState,
+        state: stateLabel,
+        host,
+        name: dbName,
+      },
+      ping: {
+        ok: pingOk,
+        latencyMs: pingLatencyMs,
+        error: pingError,
+      },
+      collections: collectionCount,
+    });
+  });
+
   // ─── Auth routes ────────────────────────────────────────────────────────
 
   app.post("/api/auth/register", authRateLimiter, async (req, res) => {
