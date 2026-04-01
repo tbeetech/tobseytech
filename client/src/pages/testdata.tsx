@@ -46,7 +46,16 @@ export default function TestDataPage() {
     setFetchError(null);
     try {
       const res = await fetch("/api/testdata");
-      const data: TestDataResult = await res.json();
+      let data: TestDataResult;
+      try {
+        data = await res.json();
+      } catch (parseErr) {
+        // Server returned non-JSON (e.g. Vercel HTML error page)
+        const detail = parseErr instanceof Error ? parseErr.message : String(parseErr);
+        throw new Error(
+          `Server responded with status ${res.status}: ${detail}`,
+        );
+      }
       setResult(data);
       setStatus(data.ok ? "success" : "error");
     } catch (err) {

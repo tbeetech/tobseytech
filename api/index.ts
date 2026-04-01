@@ -158,6 +158,12 @@ const ready = (async () => {
   });
 })();
 
+// Prevent the rejected promise from becoming an unhandled rejection, which
+// terminates the process in Node.js >= 15 and causes Vercel to return its own
+// HTML error page instead of our JSON response.  The handler below still
+// awaits `ready` and catches the rejection to return a proper 503.
+ready.catch(() => {});
+
 // Export a handler that waits for initialization then delegates to the Express app.
 // If initialization failed (e.g. missing required env vars), return a clear 503
 // instead of leaking an unhandled rejection that Vercel turns into a generic 500.
