@@ -1594,8 +1594,8 @@ ENGAGEMENT RULES:
         role: m.role === "assistant" ? ("model" as const) : ("user" as const),
         parts: [{ text: m.content }],
       }));
-      const firstUserIdx = raw.findIndex((m) => m.role === "user");
-      const history = firstUserIdx === -1 ? [] : raw.slice(firstUserIdx);
+      const firstUserIndex = raw.findIndex((m) => m.role === "user");
+      const history = firstUserIndex === -1 ? [] : raw.slice(firstUserIndex);
 
       const chat = model.startChat({
         history,
@@ -1705,12 +1705,12 @@ ENGAGEMENT PRINCIPLES:
           model: "gemini-1.5-flash",
           systemInstruction: COSMO_SYSTEM_PROMPT,
         });
-        const rawCosmo = messages.slice(0, -1).map((m) => ({
+        const raw = messages.slice(0, -1).map((m) => ({
           role: m.role === "assistant" ? ("model" as const) : ("user" as const),
           parts: [{ text: m.content }],
         }));
-        const firstCosmoUser = rawCosmo.findIndex((m) => m.role === "user");
-        const history = firstCosmoUser === -1 ? [] : rawCosmo.slice(firstCosmoUser);
+        const firstUserIndex = raw.findIndex((m) => m.role === "user");
+        const history = firstUserIndex === -1 ? [] : raw.slice(firstUserIndex);
         const chat = model.startChat({
           history,
           generationConfig: { maxOutputTokens: 600, temperature: 0.6 },
