@@ -17,30 +17,23 @@ Set the following environment variables in your Vercel project's **Settings → 
 
 | Variable | Description | Example |
 |---|---|---|
-| `MONGODB_URI` | Your MongoDB Atlas connection string | `mongodb+srv://<user>:<password>@cluster0.xxxxx.mongodb.net/tobseytech?retryWrites=true&w=majority&appName=Cluster0` |
-| `SESSION_SECRET` | A long random string for session signing | `some-very-long-random-secret-string-here` |
-| `NODE_ENV` | Set to production | `production` |
+| `MONGODB_URI` | Your MongoDB Atlas connection string | `mongodb+srv://<user>:<password>@cluster0.mpmy7ir.mongodb.net/?appName=Cluster0` |
+| `SESSION_SECRET` | A long random string for session signing — set this so sessions survive cold-start restarts | `some-very-long-random-secret-string-here` |
+| `ADMIN_DASHBOARD_PASSWORD` | Secondary password required to open `/dashboard` | `use-a-strong-random-password-here` |
 
 > **Do not commit real credentials to the repository or `vercel.json`.** Vercel environment
 > variables must be set in the Vercel dashboard (or with Vercel's CLI in your own terminal).
 > This repository intentionally keeps only placeholder values in `.env.example`.
->
-> For the required environment variables shown in the table above, add them in
-> **Vercel → Project Settings → Environment Variables**:
-> - `MONGODB_URI`
-> - `SESSION_SECRET`
-> - `ADMIN_SEED_PASSWORD`
-> - `ADMIN_DASHBOARD_PASSWORD`
-> - `ADMIN_SEED_EMAIL`
 
 > **Session persistence:** When `MONGODB_URI` is set the server stores sessions in MongoDB
 > (collection `sessions`) so that user logins survive cold-start restarts between serverless
 > invocations.  Without `MONGODB_URI` the server falls back to an in-memory store — every cold
 > start logs all users out, so `MONGODB_URI` is strongly recommended in production.
 >
-> **Fail-fast protection:** Production startup rejects missing `MONGODB_URI` or
-> `SESSION_SECRET` to prevent silent data/session loss. `ADMIN_DASHBOARD_PASSWORD`
-> is optional for startup but required to access `/dashboard`.
+> **Startup protection:** The server will refuse to start if `MONGODB_URI` is missing.
+> `SESSION_SECRET` is strongly recommended — without it a random per-process secret is generated
+> on every cold start, logging all users out. `ADMIN_DASHBOARD_PASSWORD` is optional for startup
+> but required to access `/dashboard`.
 
 ### 3. Optional Environment Variables
 
@@ -54,15 +47,16 @@ Set the following environment variables in your Vercel project's **Settings → 
 | `OPENAI_API_KEY` | Required for Prophet AI chat widget |
 | `PERPLEXITY_API_KEY` | Required for Cosmo Research AI (falls back to OpenAI if not set) |
 
-### 4. Admin Dashboard Password
+### 4. Optional: Admin Seed Account
+
+These variables are entirely optional. If set, the server automatically creates or updates the primary `tbeetech` admin account on each cold start.
 
 | Variable | Description | Example |
 |---|---|---|
-| `ADMIN_DASHBOARD_PASSWORD` | Secondary password required to open `/dashboard` | `use-a-strong-random-password-here` |
 | `ADMIN_SEED_EMAIL` | Email for the `tbeetech` admin account | `admin@example.com` |
 | `ADMIN_SEED_PASSWORD` | Password for the `tbeetech` admin account | `change-me-to-a-strong-password` |
 
-The `tbeetech` user is created (or promoted to `admin`) automatically when the serverless function cold-starts for the first time.
+> Both variables must be set together — setting one without the other is ignored (the server logs a warning and skips seeding).
 
 ### 5. MongoDB Atlas Setup
 1. Log in to [MongoDB Atlas](https://cloud.mongodb.com)

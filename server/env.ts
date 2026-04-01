@@ -65,13 +65,7 @@ export function getSessionSecret(): string {
     return configuredSecret;
   }
 
-  // No secret configured — generate a random one and warn.
-  // In production this means all sessions are lost on every server restart.
-  // Users should set SESSION_SECRET in their host's environment variables.
-  console.warn(
-    "[config] SESSION_SECRET is not set — using a random per-process secret. " +
-    "All sessions will be invalidated on every server restart. " +
-    "Set SESSION_SECRET in your environment variables for persistent sessions."
-  );
+  // No secret configured — generate a random one.
+  // validateRuntimeEnv() already warned about this at startup.
   return randomBytes(32).toString("hex");
 }
