@@ -6,6 +6,7 @@ import bcrypt from "bcryptjs";
 import { randomBytes, timingSafeEqual } from "crypto";
 import rateLimit from "express-rate-limit";
 import OpenAI from "openai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import mongoose from "mongoose";
 import { storage } from "./storage.js";
 import { ADMIN_DASHBOARD_PASSWORD } from "./env.js";
@@ -1566,23 +1567,43 @@ ENGAGEMENT RULES:
     return _openai;
   }
 
+  let _gemini: GoogleGenerativeAI | null = null;
+  function getGemini() {
+    if (!_gemini) {
+      _gemini = new GoogleGenerativeAI(process.env.GEMINI_FLASH_API_KEY!);
+    }
+    return _gemini;
+  }
+
   app.post("/api/prophet", prophetRateLimiter, async (req, res) => {
     try {
       const { messages } = prophetMessageSchema.parse(req.body);
-      if (!process.env.OPENAI_API_KEY) {
-        return res.status(503).json({ message: "Prophet AI is offline — OPENAI_API_KEY not configured." });
+      if (!process.env.GEMINI_FLASH_API_KEY) {
+        return res.status(503).json({ message: "Prophet AI is offline — GEMINI_FLASH_API_KEY not configured." });
       }
-      const openai = getOpenAI();
-      const completion = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
-        messages: [
-          { role: "system", content: PROPHET_SYSTEM_PROMPT },
-          ...messages,
-        ],
-        max_tokens: 400,
-        temperature: 0.7,
+      const gemini = getGemini();
+      const model = gemini.getGenerativeModel({
+        model: "gemini-2.0-flash",
+        systemInstruction: PROPHET_SYSTEM_PROMPT,
       });
-      const reply = completion.choices[0]?.message?.content ?? "No response received.";
+
+      // Build Gemini chat history from previous messages (all except the last user message)
+      const history = messages.slice(0, -1).map((m) => ({
+        role: m.role === "assistant" ? "model" : "user",
+        parts: [{ text: m.content }],
+      }));
+
+      const chat = model.startChat({
+        history,
+        generationConfig: {
+          maxOutputTokens: 400,
+          temperature: 0.7,
+        },
+      });
+
+      const lastMessage = messages[messages.length - 1].content;
+      const result = await chat.sendMessage(lastMessage);
+      const reply = result.response.text() || "No response received.";
       res.json({ reply });
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -1653,9 +1674,10 @@ ENGAGEMENT PRINCIPLES:
       const { messages } = cosmoMessageSchema.parse(req.body);
 
       const hasPerplexity = Boolean(process.env.PERPLEXITY_API_KEY);
+      const hasGemini = Boolean(process.env.GEMINI_FLASH_API_KEY);
       const hasOpenAI = Boolean(process.env.OPENAI_API_KEY);
 
-      if (!hasPerplexity && !hasOpenAI) {
+      if (!hasPerplexity && !hasGemini && !hasOpenAI) {
         return res.status(503).json({ message: "Cosmo Research AI is offline — no AI API key configured." });
       }
 
@@ -1673,6 +1695,23 @@ ENGAGEMENT PRINCIPLES:
           temperature: 0.6,
         });
         reply = completion.choices[0]?.message?.content ?? "No response received.";
+      } else if (hasGemini) {
+        const gemini = getGemini();
+        const model = gemini.getGenerativeModel({
+          model: "gemini-2.0-flash",
+          systemInstruction: COSMO_SYSTEM_PROMPT,
+        });
+        const history = messages.slice(0, -1).map((m) => ({
+          role: m.role === "assistant" ? "model" : "user",
+          parts: [{ text: m.content }],
+        }));
+        const chat = model.startChat({
+          history,
+          generationConfig: { maxOutputTokens: 600, temperature: 0.6 },
+        });
+        const lastMessage = messages[messages.length - 1].content;
+        const result = await chat.sendMessage(lastMessage);
+        reply = result.response.text() || "No response received.";
       } else {
         const openai = getOpenAI();
         const completion = await openai.chat.completions.create({
