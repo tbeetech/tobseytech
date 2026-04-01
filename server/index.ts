@@ -215,4 +215,7 @@ app.use((req, res, next) => {
   }, () => {
     log(`serving on port ${port}`);
   });
-})();
+})().catch((err) => {
+  console.error("[startup] Fatal error during server initialization:", err);
+  process.exit(1);
+});
