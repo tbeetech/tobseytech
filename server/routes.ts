@@ -71,7 +71,11 @@ function getMailer() {
   return _mailer;
 }
 
-const GEMINI_MODEL = "gemini-1.5-flash";
+const GEMINI_TEXT_MODELS = [
+  "gemini-2.5-flash",
+  "gemini-2.0-flash",
+  "gemini-2.0-flash-001",
+] as const;
 const GEMINI_API_KEY_ENV_VARS = [
   "GEMINI_FLASH_API_KEY",
   "GEMINI_API_KEY",
@@ -98,6 +102,65 @@ function getErrorMessage(error: unknown): string {
     return error.message;
   }
   return String(error);
+}
+
+function isGeminiModelNotFoundError(error: unknown): boolean {
+  const message = getErrorMessage(error);
+  return /not found/i.test(message) && /models\//i.test(message);
+}
+
+type GeminiChatMessage = {
+  role: "user" | "assistant";
+  content: string;
+};
+
+async function generateGeminiChatReply(params: {
+  gemini: GoogleGenerativeAI;
+  systemInstruction: string;
+  messages: GeminiChatMessage[];
+  maxOutputTokens: number;
+  temperature: number;
+}): Promise<{ reply: string; model: string }> {
+  const { gemini, systemInstruction, messages, maxOutputTokens, temperature } = params;
+  const raw = messages.slice(0, -1).map((m) => ({
+    role: m.role === "assistant" ? ("model" as const) : ("user" as const),
+    parts: [{ text: m.content }],
+  }));
+  const firstUserIndex = raw.findIndex((m) => m.role === "user");
+  const history = firstUserIndex === -1 ? [] : raw.slice(firstUserIndex);
+  const lastMessage = messages[messages.length - 1]?.content ?? "";
+
+  let lastError: unknown = null;
+
+  for (const modelName of GEMINI_TEXT_MODELS) {
+    try {
+      const model = gemini.getGenerativeModel({
+        model: modelName,
+        systemInstruction,
+      });
+      const chat = model.startChat({
+        history,
+        generationConfig: {
+          maxOutputTokens,
+          temperature,
+        },
+      });
+      const result = await chat.sendMessage(lastMessage);
+      const reply = result.response.text() || "No response received.";
+      return { reply, model: modelName };
+    } catch (error) {
+      lastError = error;
+      if (isGeminiModelNotFoundError(error)) {
+        continue;
+      }
+      throw error;
+    }
+  }
+
+  throw (
+    lastError ??
+    new Error(`No supported Gemini text model is available. Tried: ${GEMINI_TEXT_MODELS.join(", ")}`)
+  );
 }
 
 function requireAuth(req: Request, res: Response, next: NextFunction) {
@@ -1621,33 +1684,14 @@ ENGAGEMENT RULES:
         });
       }
       const { client: gemini } = getGemini();
-      const model = gemini.getGenerativeModel({
-        model: GEMINI_MODEL,
+      const { reply, model } = await generateGeminiChatReply({
+        gemini,
         systemInstruction: PROPHET_SYSTEM_PROMPT,
+        messages,
+        maxOutputTokens: 400,
+        temperature: 0.7,
       });
-
-      // Build Gemini chat history from previous messages (all except the last user message).
-      // Gemini requires history to start with a "user" role, so drop any leading "model" entries
-      // (e.g. the assistant's canned opening line sent by the client).
-      const raw = messages.slice(0, -1).map((m) => ({
-        role: m.role === "assistant" ? ("model" as const) : ("user" as const),
-        parts: [{ text: m.content }],
-      }));
-      const firstUserIndex = raw.findIndex((m) => m.role === "user");
-      const history = firstUserIndex === -1 ? [] : raw.slice(firstUserIndex);
-
-      const chat = model.startChat({
-        history,
-        generationConfig: {
-          maxOutputTokens: 400,
-          temperature: 0.7,
-        },
-      });
-
-      const lastMessage = messages[messages.length - 1].content;
-      const result = await chat.sendMessage(lastMessage);
-      const reply = result.response.text() || "No response received.";
-      res.json({ reply });
+      res.json({ reply, model });
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid request", errors: error.errors });
@@ -1666,7 +1710,7 @@ ENGAGEMENT RULES:
       return res.status(503).json({
         ok: false,
         provider: "gemini",
-        model: GEMINI_MODEL,
+        candidateModels: GEMINI_TEXT_MODELS,
         keyConfigured: false,
         acceptedEnvVars: GEMINI_API_KEY_ENV_VARS,
         message: `No Gemini API key found. Configure one of: ${GEMINI_API_KEY_ENV_VARS.join(", ")}.`,
@@ -1681,17 +1725,19 @@ ENGAGEMENT RULES:
     try {
       const startedAt = Date.now();
       const { client: gemini } = getGemini();
-      const model = gemini.getGenerativeModel({
-        model: GEMINI_MODEL,
+      const { reply, model } = await generateGeminiChatReply({
+        gemini,
         systemInstruction: PROPHET_SYSTEM_PROMPT,
+        messages: [{ role: "user", content: prompt }],
+        maxOutputTokens: 120,
+        temperature: 0.2,
       });
-      const result = await model.generateContent(prompt);
-      const reply = result.response.text() || "";
 
       res.json({
         ok: true,
         provider: "gemini",
-        model: GEMINI_MODEL,
+        model,
+        candidateModels: GEMINI_TEXT_MODELS,
         keyConfigured: true,
         keyEnvVar: geminiConfig.envVar,
         latencyMs: Date.now() - startedAt,
@@ -1703,7 +1749,7 @@ ENGAGEMENT RULES:
       res.status(502).json({
         ok: false,
         provider: "gemini",
-        model: GEMINI_MODEL,
+        candidateModels: GEMINI_TEXT_MODELS,
         keyConfigured: true,
         keyEnvVar: geminiConfig.envVar,
         prompt,
@@ -1796,23 +1842,14 @@ ENGAGEMENT PRINCIPLES:
         reply = completion.choices[0]?.message?.content ?? "No response received.";
       } else if (hasGemini) {
         const { client: gemini } = getGemini();
-        const model = gemini.getGenerativeModel({
-          model: GEMINI_MODEL,
+        const result = await generateGeminiChatReply({
+          gemini,
           systemInstruction: COSMO_SYSTEM_PROMPT,
+          messages,
+          maxOutputTokens: 600,
+          temperature: 0.6,
         });
-        const raw = messages.slice(0, -1).map((m) => ({
-          role: m.role === "assistant" ? ("model" as const) : ("user" as const),
-          parts: [{ text: m.content }],
-        }));
-        const firstUserIndex = raw.findIndex((m) => m.role === "user");
-        const history = firstUserIndex === -1 ? [] : raw.slice(firstUserIndex);
-        const chat = model.startChat({
-          history,
-          generationConfig: { maxOutputTokens: 600, temperature: 0.6 },
-        });
-        const lastMessage = messages[messages.length - 1].content;
-        const result = await chat.sendMessage(lastMessage);
-        reply = result.response.text() || "No response received.";
+        reply = result.reply;
       } else {
         const openai = getOpenAI();
         const completion = await openai.chat.completions.create({
