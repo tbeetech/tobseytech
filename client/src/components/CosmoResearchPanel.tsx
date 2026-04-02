@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Send, Loader2, ChevronDown, Telescope } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, getApiErrorMessage } from "@/lib/queryClient";
 
 interface ChatMessage {
   role: "user" | "assistant";
@@ -63,10 +63,7 @@ export default function CosmoResearchPanel() {
       const data = await res.json();
       setMessages([...next, { role: "assistant", content: data.reply }]);
     } catch (err: any) {
-      const errText =
-        err?.message?.includes("503")
-          ? "Cosmo Research AI is offline — API key not configured."
-          : "Connection lost. Please try again.";
+      const errText = getApiErrorMessage(err, "Connection lost. Please try again.");
       setMessages([...next, { role: "assistant", content: `⚠ ${errText}` }]);
     } finally {
       setLoading(false);
@@ -408,3 +405,4 @@ export default function CosmoResearchPanel() {
     </>
   );
 }
+

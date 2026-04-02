@@ -44,8 +44,11 @@ Set the following environment variables in your Vercel project's **Settings → 
 | `SMTP_PASS` | SMTP password or app password |
 | `EMAIL_FROM` | Sender email address |
 | `APP_URL` | Public URL of your Vercel deployment (e.g. `https://tobseytech.vercel.app`) |
-| `OPENAI_API_KEY` | Required for Prophet AI chat widget |
-| `PERPLEXITY_API_KEY` | Required for Cosmo Research AI (falls back to OpenAI if not set) |
+| `GEMINI_FLASH_API_KEY` | Preferred Gemini key for Prophet AI chat widget and Gemini-backed Cosmo fallback |
+| `GEMINI_API_KEY` | Accepted alias for the same Gemini key |
+| `GOOGLE_API_KEY` | Accepted alias for the same Gemini key |
+| `OPENAI_API_KEY` | Optional fallback for Cosmo Research AI when Perplexity and Gemini are not set |
+| `PERPLEXITY_API_KEY` | Preferred provider for Cosmo Research AI |
 
 ### 4. Optional: Admin Seed Account
 
@@ -86,6 +89,20 @@ Vercel will build the frontend (`vite build`) and deploy `api/index.ts` as a ser
 | Sessions | MongoDB (connect-mongo) |
 
 Requests for `/api/*` are routed to the serverless Express function; all other paths are served from the static CDN build with a SPA fallback to `index.html`.
+
+### 7. Debugging Gemini on Vercel
+
+After deploying, open:
+
+```
+/api/debug/prophet
+```
+
+Expected results:
+
+- `200 OK`: Gemini key was detected and the model responded.
+- `503`: No Gemini key was found. Set `GEMINI_FLASH_API_KEY` or one of the accepted aliases.
+- `502`: The key was detected, but Gemini rejected the request. The response body includes the provider error message to help diagnose invalid keys, permission issues, or model access problems.
 
 ---
 

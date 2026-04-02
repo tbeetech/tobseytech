@@ -3,8 +3,31 @@ import { QueryClient, QueryFunction } from "@tanstack/react-query";
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
     const text = (await res.text()) || res.statusText;
-    throw new Error(`${res.status}: ${text}`);
+    let message = text;
+
+    try {
+      const payload = JSON.parse(text);
+      if (payload && typeof payload === "object") {
+        const baseMessage = typeof payload.message === "string" ? payload.message : null;
+        const detail = typeof payload.detail === "string" ? payload.detail : null;
+        if (baseMessage && detail) {
+          message = `${baseMessage} ${detail}`;
+        } else if (baseMessage) {
+          message = baseMessage;
+        }
+      }
+    } catch {
+      // Fall back to the raw response body.
+    }
+
+    throw new Error(`${res.status}: ${message}`);
   }
+}
+
+export function getApiErrorMessage(error: unknown, fallback: string): string {
+  const raw = error instanceof Error ? error.message : String(error ?? "");
+  const cleaned = raw.replace(/^\d+:\s*/, "").trim();
+  return cleaned || fallback;
 }
 
 export async function apiRequest(

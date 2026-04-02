@@ -71,6 +71,35 @@ function getMailer() {
   return _mailer;
 }
 
+const GEMINI_MODEL = "gemini-1.5-flash";
+const GEMINI_API_KEY_ENV_VARS = [
+  "GEMINI_FLASH_API_KEY",
+  "GEMINI_API_KEY",
+  "GOOGLE_API_KEY",
+] as const;
+
+type GeminiApiKeyConfig = {
+  envVar: (typeof GEMINI_API_KEY_ENV_VARS)[number];
+  value: string;
+};
+
+function getGeminiApiKeyConfig(): GeminiApiKeyConfig | null {
+  for (const envVar of GEMINI_API_KEY_ENV_VARS) {
+    const value = process.env[envVar]?.trim();
+    if (value) {
+      return { envVar, value };
+    }
+  }
+  return null;
+}
+
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return String(error);
+}
+
 function requireAuth(req: Request, res: Response, next: NextFunction) {
   if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
   next();
@@ -1568,22 +1597,32 @@ ENGAGEMENT RULES:
   }
 
   let _gemini: GoogleGenerativeAI | null = null;
+  let _geminiCacheKey: string | null = null;
   function getGemini() {
-    if (!_gemini) {
-      _gemini = new GoogleGenerativeAI(process.env.GEMINI_FLASH_API_KEY!);
+    const config = getGeminiApiKeyConfig();
+    if (!config) {
+      throw new Error(`Gemini API key not configured. Set one of: ${GEMINI_API_KEY_ENV_VARS.join(", ")}`);
     }
-    return _gemini;
+    const cacheKey = `${config.envVar}:${config.value}`;
+    if (!_gemini || _geminiCacheKey !== cacheKey) {
+      _gemini = new GoogleGenerativeAI(config.value);
+      _geminiCacheKey = cacheKey;
+    }
+    return { client: _gemini, config };
   }
 
   app.post("/api/prophet", prophetRateLimiter, async (req, res) => {
     try {
       const { messages } = prophetMessageSchema.parse(req.body);
-      if (!process.env.GEMINI_FLASH_API_KEY) {
-        return res.status(503).json({ message: "Prophet AI is offline — GEMINI_FLASH_API_KEY not configured." });
+      const geminiConfig = getGeminiApiKeyConfig();
+      if (!geminiConfig) {
+        return res.status(503).json({
+          message: `Prophet AI is offline — configure one of: ${GEMINI_API_KEY_ENV_VARS.join(", ")}.`,
+        });
       }
-      const gemini = getGemini();
+      const { client: gemini } = getGemini();
       const model = gemini.getGenerativeModel({
-        model: "gemini-1.5-flash",
+        model: GEMINI_MODEL,
         systemInstruction: PROPHET_SYSTEM_PROMPT,
       });
 
@@ -1614,7 +1653,63 @@ ENGAGEMENT RULES:
         return res.status(400).json({ message: "Invalid request", errors: error.errors });
       }
       console.error("[prophet]", error);
-      res.status(500).json({ message: "Prophet AI encountered an error." });
+      res.status(502).json({
+        message: "Prophet AI encountered a Gemini error.",
+        detail: getErrorMessage(error),
+      });
+    }
+  });
+
+  app.get("/api/debug/prophet", prophetRateLimiter, async (req, res) => {
+    const geminiConfig = getGeminiApiKeyConfig();
+    if (!geminiConfig) {
+      return res.status(503).json({
+        ok: false,
+        provider: "gemini",
+        model: GEMINI_MODEL,
+        keyConfigured: false,
+        acceptedEnvVars: GEMINI_API_KEY_ENV_VARS,
+        message: `No Gemini API key found. Configure one of: ${GEMINI_API_KEY_ENV_VARS.join(", ")}.`,
+      });
+    }
+
+    const prompt =
+      typeof req.query.prompt === "string" && req.query.prompt.trim()
+        ? req.query.prompt.trim().slice(0, 200)
+        : "Reply with exactly: PROPHET LINK OK";
+
+    try {
+      const startedAt = Date.now();
+      const { client: gemini } = getGemini();
+      const model = gemini.getGenerativeModel({
+        model: GEMINI_MODEL,
+        systemInstruction: PROPHET_SYSTEM_PROMPT,
+      });
+      const result = await model.generateContent(prompt);
+      const reply = result.response.text() || "";
+
+      res.json({
+        ok: true,
+        provider: "gemini",
+        model: GEMINI_MODEL,
+        keyConfigured: true,
+        keyEnvVar: geminiConfig.envVar,
+        latencyMs: Date.now() - startedAt,
+        prompt,
+        reply,
+      });
+    } catch (error) {
+      console.error("[prophet-debug]", error);
+      res.status(502).json({
+        ok: false,
+        provider: "gemini",
+        model: GEMINI_MODEL,
+        keyConfigured: true,
+        keyEnvVar: geminiConfig.envVar,
+        prompt,
+        message: "Gemini connectivity test failed.",
+        detail: getErrorMessage(error),
+      });
     }
   });
 
@@ -1678,7 +1773,7 @@ ENGAGEMENT PRINCIPLES:
       const { messages } = cosmoMessageSchema.parse(req.body);
 
       const hasPerplexity = Boolean(process.env.PERPLEXITY_API_KEY);
-      const hasGemini = Boolean(process.env.GEMINI_FLASH_API_KEY);
+      const hasGemini = Boolean(getGeminiApiKeyConfig());
       const hasOpenAI = Boolean(process.env.OPENAI_API_KEY);
 
       if (!hasPerplexity && !hasGemini && !hasOpenAI) {
@@ -1700,9 +1795,9 @@ ENGAGEMENT PRINCIPLES:
         });
         reply = completion.choices[0]?.message?.content ?? "No response received.";
       } else if (hasGemini) {
-        const gemini = getGemini();
+        const { client: gemini } = getGemini();
         const model = gemini.getGenerativeModel({
-          model: "gemini-1.5-flash",
+          model: GEMINI_MODEL,
           systemInstruction: COSMO_SYSTEM_PROMPT,
         });
         const raw = messages.slice(0, -1).map((m) => ({

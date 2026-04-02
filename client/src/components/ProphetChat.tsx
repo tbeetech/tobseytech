@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Send, Loader2, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, getApiErrorMessage } from "@/lib/queryClient";
 
 interface ChatMessage {
   role: "user" | "assistant";
@@ -47,10 +47,7 @@ export default function ProphetChat() {
       const data = await res.json();
       setMessages([...next, { role: "assistant", content: data.reply }]);
     } catch (err: any) {
-      const errText =
-        err?.message?.includes("503")
-          ? "Prophet AI is offline — API key not configured."
-          : "Signal lost. Try again.";
+      const errText = getApiErrorMessage(err, "Signal lost. Try again.");
       setMessages([...next, { role: "assistant", content: `⚠ ${errText}` }]);
     } finally {
       setLoading(false);
@@ -329,3 +326,4 @@ export default function ProphetChat() {
     </>
   );
 }
+
