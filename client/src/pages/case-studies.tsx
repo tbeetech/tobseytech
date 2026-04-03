@@ -1,7 +1,24 @@
 import Navigation from "@/components/Navigation";
 import { CheckCircle2, TrendingUp, ExternalLink, Smartphone } from "lucide-react";
 
-const cases = [
+interface CaseStudy {
+  title: string;
+  slug: string;
+  category: string;
+  client: string;
+  duration: string;
+  impact: string;
+  metricValue: string;
+  metricLabel: string;
+  overview: string;
+  solution: string;
+  results: string[];
+  tech: string[];
+  link: string | null;
+  linkType: "website" | "app";
+}
+
+const cases: CaseStudy[] = [
   {
     title: "Glow FM Content Repurposing Pipeline",
     slug: "glow-fm",
@@ -22,8 +39,8 @@ const cases = [
       "Consistent brand voice across all channels",
     ],
     tech: ["Python", "OpenAI API", "Make (Integromat)", "Buffer API"],
-    link: "https://glowfmradio.com" as string | null,
-    linkType: "website" as "website" | "app",
+    link: "https://glowfmradio.com",
+    linkType: "website",
   },
   {
     title: "Maktaris Herbals E-Commerce Store",
@@ -45,8 +62,8 @@ const cases = [
       "Mobile-friendly design for on-the-go shoppers",
     ],
     tech: ["HTML/CSS", "JavaScript", "Responsive Design", "E-Commerce UI"],
-    link: "https://maktaris.onrender.com" as string | null,
-    linkType: "website" as "website" | "app",
+    link: "https://maktaris.onrender.com",
+    linkType: "website",
   },
   {
     title: "Compassionate Backers Financial Services Landing Page",
@@ -68,8 +85,8 @@ const cases = [
       "Success metrics displayed prominently (398+ reports, 3K+ clients)",
     ],
     tech: ["HTML/CSS", "JavaScript", "Responsive Design", "Contact Form"],
-    link: "https://loan-landing-page.onrender.com" as string | null,
-    linkType: "website" as "website" | "app",
+    link: "https://loan-landing-page.onrender.com",
+    linkType: "website",
   },
   {
     title: "SME WhatsApp Auto-Responder",
@@ -91,8 +108,8 @@ const cases = [
       "Owner reclaimed 4+ hours per day",
     ],
     tech: ["WhatsApp Business API", "Node.js", "OpenAI", "Twilio"],
-    link: null as string | null,
-    linkType: "website" as "website" | "app",
+    link: null,
+    linkType: "website",
   },
   {
     title: "Lead Sorting Automation",
@@ -114,8 +131,8 @@ const cases = [
       "Pipeline visibility improved — no leads dropped",
     ],
     tech: ["Zapier", "HubSpot CRM", "Google Sheets", "Meta Ads API"],
-    link: null as string | null,
-    linkType: "website" as "website" | "app",
+    link: null,
+    linkType: "website",
   },
   {
     title: "E-Commerce Product Feed Sync",
@@ -137,8 +154,8 @@ const cases = [
       "Zero overselling incidents after deployment",
     ],
     tech: ["Node.js", "WooCommerce REST API", "Jumia Seller API", "Konga API"],
-    link: null as string | null,
-    linkType: "website" as "website" | "app",
+    link: null,
+    linkType: "website",
   },
   {
     title: "Digital Skills Training Cohort",
@@ -160,8 +177,8 @@ const cases = [
       "NPS score of 9.1 / 10 from participants",
     ],
     tech: ["ChatGPT", "Make (Integromat)", "Notion", "Google Looker Studio"],
-    link: null as string | null,
-    linkType: "website" as "website" | "app",
+    link: null,
+    linkType: "website",
   },
 ];
 

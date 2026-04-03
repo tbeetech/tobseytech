@@ -1,6 +1,17 @@
 import { ArrowRight, ExternalLink, Smartphone } from "lucide-react";
 
-const cases = [
+interface CaseStudyCard {
+  title: string;
+  category: string;
+  impact: string;
+  detail: string;
+  metric: string;
+  slug: string;
+  link: string | null;
+  linkType: "website" | "app";
+}
+
+const cases: CaseStudyCard[] = [
   {
     title: "FebLuxury for Fashion Sales",
     category: "E-Commerce & Fashion",
@@ -8,8 +19,8 @@ const cases = [
     detail: "Designed and built an elegant, conversion-optimised e-commerce website for FebLuxury, enabling seamless product browsing, order management, and online sales for a premium fashion brand.",
     metric: "Sales-ready online store",
     slug: "febluxury-fashion-sales",
-    link: null as string | null,
-    linkType: "website" as "website" | "app",
+    link: null,
+    linkType: "website",
   },
   {
     title: "Glow FM Radio Station Interactive Website",
@@ -19,7 +30,7 @@ const cases = [
     metric: "Full broadcast platform",
     slug: "glow-fm-website",
     link: "https://glowfmradio.com",
-    linkType: "website" as "website" | "app",
+    linkType: "website",
   },
   {
     title: "Maktaris Herbals E-Commerce Store",
@@ -29,7 +40,7 @@ const cases = [
     metric: "Full product storefront",
     slug: "maktaris-herbals",
     link: "https://maktaris.onrender.com",
-    linkType: "website" as "website" | "app",
+    linkType: "website",
   },
   {
     title: "Compassionate Backers Financial Services Landing Page",
@@ -39,7 +50,7 @@ const cases = [
     metric: "Service-ready landing page",
     slug: "compassionate-backers",
     link: "https://loan-landing-page.onrender.com",
-    linkType: "website" as "website" | "app",
+    linkType: "website",
   },
   {
     title: "Cryptocurrency Simulation Profit & Trading Training Growth Website",
@@ -48,8 +59,8 @@ const cases = [
     detail: "Developed an immersive crypto trading simulation and training website that lets users practise buying, selling, and portfolio management in a safe environment — tracking growth and profit metrics over time.",
     metric: "Hands-on trading training",
     slug: "crypto-trading-training",
-    link: null as string | null,
-    linkType: "website" as "website" | "app",
+    link: null,
+    linkType: "website",
   },
   {
     title: "Glow FM Mobile Application",
@@ -58,8 +69,8 @@ const cases = [
     detail: "Created a dedicated mobile application for Glow FM, delivering live radio streaming, episode replays, news updates, and push notifications to thousands of listeners on Android and iOS.",
     metric: "Live mobile radio app",
     slug: "glow-fm-mobile-app",
-    link: null as string | null,
-    linkType: "app" as "website" | "app",
+    link: null,
+    linkType: "app",
   },
   {
     title: "Social Media Management & Growth of Glow 99.1 FM",
@@ -68,8 +79,8 @@ const cases = [
     detail: "Managed and grew Glow 99.1 FM's social media presence across Facebook, Instagram, and Twitter — developing content calendars, running engagement campaigns, and growing the station's digital audience significantly.",
     metric: "Multi-platform audience growth",
     slug: "glow-fm-social-media",
-    link: null as string | null,
-    linkType: "website" as "website" | "app",
+    link: null,
+    linkType: "website",
   },
 ];
 
