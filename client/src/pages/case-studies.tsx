@@ -1,7 +1,24 @@
 import Navigation from "@/components/Navigation";
-import { CheckCircle2, TrendingUp } from "lucide-react";
+import { CheckCircle2, TrendingUp, ExternalLink, Smartphone } from "lucide-react";
 
-const cases = [
+interface CaseStudy {
+  title: string;
+  slug: string;
+  category: string;
+  client: string;
+  duration: string;
+  impact: string;
+  metricValue: string;
+  metricLabel: string;
+  overview: string;
+  solution: string;
+  results: string[];
+  tech: string[];
+  link: string | null;
+  linkType: "website" | "app";
+}
+
+const cases: CaseStudy[] = [
   {
     title: "Glow FM Content Repurposing Pipeline",
     slug: "glow-fm",
@@ -22,6 +39,54 @@ const cases = [
       "Consistent brand voice across all channels",
     ],
     tech: ["Python", "OpenAI API", "Make (Integromat)", "Buffer API"],
+    link: "https://glowfmradio.com",
+    linkType: "website",
+  },
+  {
+    title: "Maktaris Herbals E-Commerce Store",
+    slug: "maktaris-herbals",
+    category: "E-Commerce & Health",
+    client: "Maktaris Herbals (Health & Wellness)",
+    duration: "3 weeks",
+    impact: "Full online herbal products store with customer testimonials",
+    metricValue: "15+",
+    metricLabel: "Products Listed",
+    overview:
+      "Maktaris Herbals needed a professional online presence to showcase and sell their chemical-free herbal products — including herbs for arthritis, high blood pressure, endometriosis, and more — while building trust through real customer testimonials.",
+    solution:
+      "Designed and developed a fully responsive e-commerce website featuring a product catalogue with pricing, featured product sections, detailed product modals, customer testimonial carousel, ambassador profiles, and a streamlined ordering flow with cheap shipping and easy payment options.",
+    results: [
+      "15+ herbal products listed with descriptions and pricing",
+      "Customer testimonials section building buyer trust",
+      "Featured product showcase driving conversions",
+      "Mobile-friendly design for on-the-go shoppers",
+    ],
+    tech: ["HTML/CSS", "JavaScript", "Responsive Design", "E-Commerce UI"],
+    link: "https://maktaris.onrender.com",
+    linkType: "website",
+  },
+  {
+    title: "Compassionate Backers Financial Services Landing Page",
+    slug: "compassionate-backers",
+    category: "FinTech & Services",
+    client: "Compassionate Backers (Financial Services)",
+    duration: "2 weeks",
+    impact: "Professional web presence for loan & investment services",
+    metricValue: "398+",
+    metricLabel: "Success Reports",
+    overview:
+      "Compassionate Backers, a financial services company established in 2019, needed a professional landing page to showcase their loan, asset acquisition, and investment services — while building credibility with potential clients and streamlining enquiry submissions.",
+    solution:
+      "Built a clean, professional landing page featuring service showcases for loans, asset acquisition, and investment, an about section highlighting mission and vision, success metrics display (398+ success reports, 3K+ happy clients), and an integrated contact form for service requests.",
+    results: [
+      "3 core financial services showcased clearly",
+      "Contact form integrated for direct enquiries",
+      "Trust-building about section with mission and vision",
+      "Success metrics displayed prominently (398+ reports, 3K+ clients)",
+    ],
+    tech: ["HTML/CSS", "JavaScript", "Responsive Design", "Contact Form"],
+    link: "https://loan-landing-page.onrender.com",
+    linkType: "website",
   },
   {
     title: "SME WhatsApp Auto-Responder",
@@ -43,6 +108,8 @@ const cases = [
       "Owner reclaimed 4+ hours per day",
     ],
     tech: ["WhatsApp Business API", "Node.js", "OpenAI", "Twilio"],
+    link: null,
+    linkType: "website",
   },
   {
     title: "Lead Sorting Automation",
@@ -64,6 +131,8 @@ const cases = [
       "Pipeline visibility improved — no leads dropped",
     ],
     tech: ["Zapier", "HubSpot CRM", "Google Sheets", "Meta Ads API"],
+    link: null,
+    linkType: "website",
   },
   {
     title: "E-Commerce Product Feed Sync",
@@ -85,6 +154,8 @@ const cases = [
       "Zero overselling incidents after deployment",
     ],
     tech: ["Node.js", "WooCommerce REST API", "Jumia Seller API", "Konga API"],
+    link: null,
+    linkType: "website",
   },
   {
     title: "Digital Skills Training Cohort",
@@ -106,6 +177,8 @@ const cases = [
       "NPS score of 9.1 / 10 from participants",
     ],
     tech: ["ChatGPT", "Make (Integromat)", "Notion", "Google Looker Studio"],
+    link: null,
+    linkType: "website",
   },
 ];
 
@@ -124,7 +197,7 @@ export default function CaseStudiesPage() {
           </div>
 
           <div className="space-y-16">
-            {cases.map(({ title, slug, category, client, duration, impact, metricValue, metricLabel, overview, solution, results, tech }) => (
+            {cases.map(({ title, slug, category, client, duration, impact, metricValue, metricLabel, overview, solution, results, tech, link, linkType }) => (
               <div
                 key={slug}
                 id={slug}
@@ -143,6 +216,20 @@ export default function CaseStudiesPage() {
                         <span>Client: <span className="text-gray-300">{client}</span></span>
                         <span>Duration: <span className="text-gray-300">{duration}</span></span>
                       </div>
+                      {link && (
+                        <a
+                          href={link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 mt-3 px-4 py-2 bg-gradient-to-r from-galactic-orange to-galactic-gold text-space-black font-orbitron font-bold text-xs rounded-lg hover:shadow-[0_0_16px_rgba(255,165,0,0.4)] transition-all"
+                        >
+                          {linkType === "app" ? (
+                            <>Access App <Smartphone className="w-4 h-4" /></>
+                          ) : (
+                            <>View Website <ExternalLink className="w-4 h-4" /></>
+                          )}
+                        </a>
+                      )}
                     </div>
                     <div className="text-center bg-galactic-green/10 border border-galactic-green/30 rounded-xl px-6 py-4">
                       <div className="font-orbitron font-black text-3xl text-galactic-green">{metricValue}</div>
