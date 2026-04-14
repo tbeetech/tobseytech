@@ -45,7 +45,7 @@ const cases = [
     tech: ["Zapier", "HubSpot CRM", "Google Sheets", "Meta Ads API"],
   },
   {
-    title: "Invisphere Crypto & Assets Accreditation Portfolio Training Simulation Platform",
+    title: "Invisphere: Crypto Accreditation & Portfolio Training Platform",
     slug: "invisphere",
     category: "FinTech & Blockchain",
     client: "Invisphere (invisphere.com)",
@@ -54,9 +54,9 @@ const cases = [
     metricValue: "100%",
     metricLabel: "Real-Time Accuracy",
     overview:
-      "Invisphere needed a professional cryptocurrency and digital assets accreditation platform that combines real-time market intelligence with portfolio training simulation — allowing users to practise trading, portfolio management, and investment strategy in a risk-free environment powered by live market data.",
+      "Invisphere needed a professional cryptocurrency and digital assets accreditation platform. The goal was to combine real-time market intelligence with portfolio training simulation. Users should be able to practise trading, portfolio management, and investment strategy in a risk-free environment powered by live market data.",
     solution:
-      "Designed and built a full-stack crypto investment and analytics platform featuring real-time market intelligence, automated analytics, portfolio tracking, and institutional-grade trading simulation tools. Users can practise buying, selling, and managing portfolios of Bitcoin, Ethereum, and top crypto assets with live price feeds, performance dashboards, and accreditation-ready progress tracking.",
+      "Designed and built a full-stack crypto investment and analytics platform featuring real-time market intelligence, automated analytics, and portfolio tracking. The platform includes institutional-grade trading simulation tools. Users can practise buying, selling, and managing portfolios of Bitcoin, Ethereum, and top crypto assets with live price feeds, performance dashboards, and accreditation-ready progress tracking.",
     results: [
       "Real-time market data integration with live price feeds",
       "Comprehensive portfolio tracking and performance analytics",
