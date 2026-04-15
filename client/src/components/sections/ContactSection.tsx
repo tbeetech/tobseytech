@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Mail, MessageCircle, Linkedin, Send } from "lucide-react";
 
-const CONTACT_EMAIL = "hello@tobseytech.com";
+const CONTACT_EMAIL = "CEO@TOBSEYTECH.BIZ";
 
 export default function ContactSection() {
   const [isSubmitting, setIsSubmitting] = useState(false);

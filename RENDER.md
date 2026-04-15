@@ -46,6 +46,7 @@ Set the following environment variables in your Render service's **Environment**
 | `SMTP_USER` | SMTP username / email |
 | `SMTP_PASS` | SMTP password or app password |
 | `EMAIL_FROM` | Sender email address |
+| `EMAIL_TO` | Recipient for contact form submissions (defaults to `CEO@TOBSEYTECH.BIZ`) |
 
 ### 4. MongoDB Atlas Setup
 1. Log in to [MongoDB Atlas](https://cloud.mongodb.com)
