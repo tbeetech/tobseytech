@@ -19,7 +19,7 @@ const cases: CaseStudyCard[] = [
     detail: "Designed and built an elegant, conversion-optimised e-commerce website for FebLuxury, enabling seamless product browsing, order management, and online sales for a premium fashion brand.",
     metric: "Sales-ready online store",
     slug: "febluxury-fashion-sales",
-    link: null,
+    link: "https://feb-frontend-git-master-tobis-projects-280098ad.vercel.app/",
     linkType: "website",
   },
   {
@@ -59,7 +59,7 @@ const cases: CaseStudyCard[] = [
     detail: "Developed an immersive crypto trading simulation and training website that lets users practise buying, selling, and portfolio management in a safe environment — tracking growth and profit metrics over time.",
     metric: "Hands-on trading training",
     slug: "crypto-trading-training",
-    link: null,
+    link: "https://invisphere.com",
     linkType: "website",
   },
   {
@@ -69,7 +69,7 @@ const cases: CaseStudyCard[] = [
     detail: "Created a dedicated mobile application for Glow FM, delivering live radio streaming, episode replays, news updates, and push notifications to thousands of listeners on Android and iOS.",
     metric: "Live mobile radio app",
     slug: "glow-fm-mobile-app",
-    link: null,
+    link: "https://play.google.com/store/apps/details?id=com.glowfmradio.app&pcampaignid=web_share",
     linkType: "app",
   },
   {

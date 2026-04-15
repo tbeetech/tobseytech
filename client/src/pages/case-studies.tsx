@@ -20,6 +20,29 @@ interface CaseStudy {
 
 const cases: CaseStudy[] = [
   {
+    title: "FebLuxury E-Commerce for Fashion Sales",
+    slug: "febluxury-fashion-sales",
+    category: "E-Commerce & Fashion",
+    client: "FebLuxury (Luxury Fashion Brand)",
+    duration: "6 weeks",
+    impact: "Full online store for luxury fashion brand",
+    metricValue: "100%",
+    metricLabel: "Sales-Ready",
+    overview:
+      "FebLuxury, a premium fashion brand, needed a modern, conversion-optimised e-commerce platform to showcase their luxury collections online and enable seamless purchasing for fashion-conscious customers.",
+    solution:
+      "Designed and built an elegant, fully responsive e-commerce website featuring product browsing with rich imagery, streamlined checkout flow, order management, and a brand-consistent UI that reflects the luxury positioning of the FebLuxury label.",
+    results: [
+      "Fully functional online store launched",
+      "Conversion-optimised product pages with rich media",
+      "Seamless order management and checkout flow",
+      "Mobile-responsive design for on-the-go shoppers",
+    ],
+    tech: ["React", "TypeScript", "E-Commerce UI", "Responsive Design"],
+    link: "https://feb-frontend-git-master-tobis-projects-280098ad.vercel.app/",
+    linkType: "website",
+  },
+  {
     title: "Glow FM Content Repurposing Pipeline",
     slug: "glow-fm",
     category: "Media Automation",
@@ -156,6 +179,29 @@ const cases: CaseStudy[] = [
     tech: ["ChatGPT", "Make (Integromat)", "Notion", "Google Looker Studio"],
     link: null,
     linkType: "website",
+  },
+  {
+    title: "Glow FM Mobile Application",
+    slug: "glow-fm-mobile-app",
+    category: "Mobile Development",
+    client: "Glow FM (Radio Station)",
+    duration: "6 weeks",
+    impact: "On-the-go listening for loyal audience",
+    metricValue: "1000+",
+    metricLabel: "Downloads",
+    overview:
+      "Glow FM needed a dedicated mobile application to extend their reach beyond the website, allowing loyal listeners to tune in on the go with live streaming, episode replays, and real-time updates.",
+    solution:
+      "Created a feature-rich mobile application for Glow FM delivering live radio streaming, episode replays, news updates, and push notifications to thousands of listeners on Android — ensuring a seamless listening experience anywhere, anytime.",
+    results: [
+      "Live radio streaming directly from mobile devices",
+      "Episode replay and on-demand content access",
+      "Push notifications for breaking news and show schedules",
+      "Smooth, intuitive user interface for all audiences",
+    ],
+    tech: ["Mobile Development", "Live Streaming", "Push Notifications", "Android"],
+    link: "https://play.google.com/store/apps/details?id=com.glowfmradio.app&pcampaignid=web_share",
+    linkType: "app",
   },
 ];
 
