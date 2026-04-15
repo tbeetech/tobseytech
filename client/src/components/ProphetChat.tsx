@@ -10,8 +10,8 @@ interface ChatMessage {
 }
 
 const OPENING_LINES = [
-  "PROPHET ONLINE. I am your navigation intelligence for this platform.",
-  "Awaiting your directive. Ask me anything about TobseyTech.",
+  "PROPHET ONLINE. I'm your AI assistant — ask me anything.",
+  "I can help with coding, research, analysis, creative writing, and much more.",
 ];
 
 export default function ProphetChat() {
@@ -127,8 +127,8 @@ export default function ProphetChat() {
             style={{
               top: "76px",
               right: "12px",
-              width: "min(370px, calc(100vw - 24px))",
-              maxHeight: minimized ? "44px" : "520px",
+              width: "min(420px, calc(100vw - 24px))",
+              maxHeight: minimized ? "44px" : "620px",
               background: "linear-gradient(160deg, rgba(14,11,4,0.98) 0%, rgba(26,20,6,0.98) 100%)",
               border: "1px solid rgba(255,165,0,0.4)",
               borderRadius: "10px",
@@ -163,7 +163,7 @@ export default function ProphetChat() {
                   className="font-orbitron text-[10px] tracking-wider opacity-60"
                   style={{ color: "var(--galactic-gold)" }}
                 >
-                  · NAVIGATION AI
+                  · AI ASSISTANT
                 </span>
               </div>
               <div className="flex items-center gap-1">
@@ -196,7 +196,7 @@ export default function ProphetChat() {
                 className="shrink-0 text-center font-orbitron text-[9px] tracking-[0.25em] py-1 opacity-40"
                 style={{ color: "var(--galactic-gold)", borderBottom: "1px solid rgba(255,165,0,0.1)" }}
               >
-                ▌ CLASSIFIED · LEVEL-3 SPARTAN · TOBSEYTECH ▐
+                ▌ AGENTIC AI · POWERED BY GEMINI · TOBSEYTECH ▐
               </div>
             )}
 
@@ -289,8 +289,8 @@ export default function ProphetChat() {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKey}
-                  placeholder="Enter directive…"
-                  maxLength={500}
+                  placeholder="Ask me anything…"
+                  maxLength={2000}
                   disabled={loading}
                   data-testid="prophet-chat-input"
                   className="flex-1 bg-transparent outline-none text-xs placeholder:opacity-30"

@@ -43,6 +43,7 @@ Set the following environment variables in your Vercel project's **Settings → 
 | `SMTP_USER` | SMTP username / email |
 | `SMTP_PASS` | SMTP password or app password |
 | `EMAIL_FROM` | Sender email address |
+| `EMAIL_TO` | Recipient for contact form submissions (defaults to `CEO@TOBSEYTECH.BIZ`) |
 | `APP_URL` | Public URL of your Vercel deployment (e.g. `https://tobseytech.vercel.app`) |
 | `GEMINI_FLASH_API_KEY` | Preferred Gemini key for Prophet AI chat widget and Gemini-backed Cosmo fallback |
 | `GEMINI_API_KEY` | Accepted alias for the same Gemini key |
