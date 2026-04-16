@@ -111,10 +111,9 @@ passport.use(
   new LocalStrategy(async (username, password, done) => {
     try {
       // Allow login via username or email
-      let user = await storage.getUserByUsername(username);
-      if (!user && username.includes("@")) {
-        user = await storage.getUserByEmail(username);
-      }
+      const user =
+        (await storage.getUserByUsername(username)) ||
+        (await storage.getUserByEmail(username));
       if (!user) return done(null, false, { message: "Incorrect username/email or password" });
       const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) return done(null, false, { message: "Incorrect username/email or password" });
