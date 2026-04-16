@@ -304,7 +304,7 @@ async function loadHtmlTemplate(): Promise<string | null> {
 }
 
 /** Serve the SPA HTML with default (unmodified) meta tags as a fallback. */
-async function serveFallbackHtml(_req: Request, res: Response) {
+async function serveFallbackHtml(req: Request, res: Response) {
   const template = await loadHtmlTemplate();
   if (template) {
     return res.status(200).set({ "Content-Type": "text/html" }).end(template);
@@ -1920,7 +1920,7 @@ ENGAGEMENT PRINCIPLES:
   // /blog/:slug → /api/blog-html/:slug so we can inject post-specific meta
   // tags and then serve the SPA HTML as normal.
 
-  app.get("/api/blog-html/:slug", async (req, res) => {
+  app.get("/api/blog-html/:slug", authRateLimiter, async (req, res) => {
     try {
       const post = await storage.getBlogPostBySlug(req.params.slug);
       if (!post || !post.published) {
