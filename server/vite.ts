@@ -5,6 +5,8 @@ import { createServer as createViteServer, createLogger } from "vite";
 import { type Server } from "http";
 import viteConfig from "../vite.config.js";
 import { nanoid } from "nanoid";
+import { storage } from "./storage.js";
+import { injectBlogMetaTags } from "./ogTags.js";
 
 const viteLogger = createLogger();
 
@@ -58,6 +60,21 @@ export async function setupVite(app: Express, server: Server) {
         `src="/src/main.tsx"`,
         `src="/src/main.tsx?v=${nanoid()}"`,
       );
+
+      // Inject blog-specific OG meta tags for social media crawlers
+      const blogSlug = extractBlogSlug(url);
+      if (blogSlug) {
+        try {
+          const post = await storage.getBlogPostBySlug(blogSlug);
+          if (post && post.published) {
+            const baseUrl = `${req.protocol}://${req.get("host")}`;
+            template = injectBlogMetaTags(template, post, baseUrl);
+          }
+        } catch {
+          // non-fatal — serve template with default meta tags
+        }
+      }
+
       const page = await vite.transformIndexHtml(url, template);
       res.status(200).set({ "Content-Type": "text/html" }).end(page);
     } catch (e) {
@@ -79,7 +96,35 @@ export function serveStatic(app: Express) {
   app.use(express.static(distPath));
 
   // fall through to index.html if the file doesn't exist
-  app.use("*", (_req, res) => {
-    res.sendFile(path.resolve(distPath, "index.html"));
+  app.use("*", async (req, res) => {
+    const htmlPath = path.resolve(distPath, "index.html");
+
+    // Inject blog-specific OG meta tags for social media crawlers
+    const blogSlug = extractBlogSlug(req.originalUrl);
+    if (blogSlug) {
+      try {
+        const post = await storage.getBlogPostBySlug(blogSlug);
+        if (post && post.published) {
+          let html = await fs.promises.readFile(htmlPath, "utf-8");
+          const baseUrl = `${req.protocol}://${req.get("host")}`;
+          html = injectBlogMetaTags(html, post, baseUrl);
+          return res.status(200).set({ "Content-Type": "text/html" }).end(html);
+        }
+      } catch {
+        // non-fatal — serve default index.html
+      }
+    }
+
+    res.sendFile(htmlPath);
   });
+}
+
+/** Extract the blog slug from a URL path like /blog/my-post-slug */
+function extractBlogSlug(url: string): string | null {
+  const match = url.match(/^\/blog\/([^/?#]+)/);
+  // Exclude known non-slug paths
+  if (!match || match[1] === "new" || match[1] === "edit" || match[1] === "slug") {
+    return null;
+  }
+  return decodeURIComponent(match[1]);
 }
