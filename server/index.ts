@@ -9,6 +9,7 @@ import { registerRoutes } from "./routes.js";
 import { setupVite, serveStatic, log } from "./vite.js";
 import { initStorage, storage } from "./storage.js";
 import { ensureAdminUser, promoteAdminByEmail } from "./seed.js";
+import { startTechCrunchPoller } from "./techcrunch.js";
 import { getClientPromise } from "./mongodb.js";
 import {
   ADMIN_SEED_EMAIL,
@@ -181,6 +182,9 @@ app.use((req, res, next) => {
   }
 
   const server = await registerRoutes(app);
+
+  // Start the TechCrunch RSS auto-blog poller after routes are registered
+  startTechCrunchPoller();
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;

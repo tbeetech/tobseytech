@@ -13,6 +13,7 @@ import mongoose from "mongoose";
 import { storage } from "./storage.js";
 import { ADMIN_DASHBOARD_PASSWORD } from "./env.js";
 import { injectBlogMetaTags } from "./ogTags.js";
+import { syncTechCrunchFeed, getSyncStatus } from "./techcrunch.js";
 import {
   insertContactSchema,
   insertProductSchema,
@@ -1939,6 +1940,28 @@ ENGAGEMENT PRINCIPLES:
     } catch (err) {
       console.error("[blog-html]", err);
       serveFallbackHtml(req, res);
+    }
+  });
+
+  // ─── TechCrunch Auto-Blog Admin Endpoints ──────────────────────────────────
+
+  // Get sync status (admin only)
+  app.get("/api/admin/techcrunch/status", requireAdmin, (_req, res) => {
+    res.json(getSyncStatus());
+  });
+
+  // Manually trigger a TechCrunch sync (admin only)
+  app.post("/api/admin/techcrunch/sync", requireAdmin, async (_req, res) => {
+    try {
+      const status = getSyncStatus();
+      if (status.isSyncing) {
+        return res.status(409).json({ message: "A sync is already in progress." });
+      }
+      // Run sync in the background and return immediately
+      syncTechCrunchFeed().catch(() => {});
+      res.json({ message: "TechCrunch sync started. Check status endpoint for progress." });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to start TechCrunch sync." });
     }
   });
 }
