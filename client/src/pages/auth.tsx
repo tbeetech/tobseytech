@@ -162,7 +162,7 @@ export default function AuthPage() {
                       htmlFor="login-username"
                       className="text-xs font-semibold text-galactic-orange/90 uppercase tracking-wide"
                     >
-                      Username
+                      Username or Email
                     </Label>
                     <Input
                       id="login-username"
@@ -172,7 +172,7 @@ export default function AuthPage() {
                       required
                       className="h-10 border-galactic-orange/20 text-white text-sm"
                       style={{ background: "rgba(0,0,0,0.6)" }}
-                      placeholder="your_username"
+                      placeholder="your_username or you@example.com"
                     />
                   </div>
                   <div className="space-y-1.5 input-glow">

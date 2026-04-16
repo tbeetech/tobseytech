@@ -23,7 +23,7 @@ export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
 
 export const loginSchema = z.object({
-  username: z.string().min(1),
+  username: z.string().min(1), // accepts username or email
   password: z.string().min(1),
 });
 
