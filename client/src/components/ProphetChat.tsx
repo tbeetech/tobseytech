@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Send, Loader2, ChevronDown } from "lucide-react";
+import { X, Send, Loader2, ChevronDown, Maximize2, Minimize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { apiRequest, getApiErrorMessage } from "@/lib/queryClient";
 
@@ -22,6 +22,7 @@ export default function ProphetChat() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [minimized, setMinimized] = useState(false);
+  const [fullscreen, setFullscreen] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -71,7 +72,7 @@ export default function ProphetChat() {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
             transition={{ type: "spring", stiffness: 260, damping: 22 }}
-            onClick={() => setOpen(true)}
+            onClick={() => { setOpen(true); setFullscreen(true); }}
             data-testid="prophet-chat-trigger"
             aria-label="Open Prophet AI"
             className="fixed z-40 flex items-center gap-2 cursor-pointer select-none"
@@ -125,15 +126,29 @@ export default function ProphetChat() {
             data-testid="prophet-chat-panel"
             className="fixed z-40 flex flex-col overflow-hidden"
             style={{
-              top: "76px",
-              right: "12px",
-              width: "min(420px, calc(100vw - 24px))",
-              maxHeight: minimized ? "44px" : "620px",
+              ...(fullscreen
+                ? {
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    width: "100vw",
+                    height: "100vh",
+                    maxHeight: minimized ? "44px" : "100vh",
+                    borderRadius: 0,
+                  }
+                : {
+                    top: "76px",
+                    right: "12px",
+                    width: "min(420px, calc(100vw - 24px))",
+                    maxHeight: minimized ? "44px" : "620px",
+                    borderRadius: "10px",
+                  }),
               background: "linear-gradient(160deg, rgba(14,11,4,0.98) 0%, rgba(26,20,6,0.98) 100%)",
-              border: "1px solid rgba(255,165,0,0.4)",
-              borderRadius: "10px",
-              boxShadow:
-                "0 8px 40px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,215,0,0.06), 0 0 32px rgba(255,165,0,0.08)",
+              border: fullscreen ? "none" : "1px solid rgba(255,165,0,0.4)",
+              boxShadow: fullscreen
+                ? "none"
+                : "0 8px 40px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,215,0,0.06), 0 0 32px rgba(255,165,0,0.08)",
               transition: "max-height 0.25s ease",
             }}
           >
@@ -168,6 +183,18 @@ export default function ProphetChat() {
               </div>
               <div className="flex items-center gap-1">
                 <button
+                  aria-label={fullscreen ? "Exit fullscreen" : "Fullscreen"}
+                  className="p-1 rounded hover:bg-white/5 transition-colors"
+                  style={{ color: "var(--galactic-orange)" }}
+                  onClick={(e) => { e.stopPropagation(); setFullscreen((v) => !v); }}
+                >
+                  {fullscreen ? (
+                    <Minimize2 className="w-3.5 h-3.5" />
+                  ) : (
+                    <Maximize2 className="w-3.5 h-3.5" />
+                  )}
+                </button>
+                <button
                   aria-label={minimized ? "Expand Prophet" : "Minimize Prophet"}
                   className="p-1 rounded hover:bg-white/5 transition-colors"
                   style={{ color: "var(--galactic-orange)" }}
@@ -183,7 +210,7 @@ export default function ProphetChat() {
                   data-testid="prophet-chat-close"
                   className="p-1 rounded hover:bg-white/5 transition-colors"
                   style={{ color: "var(--galactic-orange)" }}
-                  onClick={(e) => { e.stopPropagation(); setOpen(false); setMinimized(false); }}
+                  onClick={(e) => { e.stopPropagation(); setOpen(false); setMinimized(false); setFullscreen(false); }}
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
