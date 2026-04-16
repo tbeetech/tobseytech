@@ -17,6 +17,15 @@ import type { InsertBlogPost } from "../shared/schema.js";
 
 const TECHCRUNCH_FEED_URL = "https://techcrunch.com/feed/";
 
+/** Maximum characters of article text sent to the AI for rewriting. */
+const MAX_ARTICLE_CONTENT_LENGTH = 6000;
+
+/** Delay between consecutive AI calls to respect rate limits (ms). */
+const AI_RATE_LIMIT_DELAY_MS = 1500;
+
+/** Delay before the first sync after server startup (ms). */
+const INITIAL_SYNC_DELAY_MS = 10_000;
+
 const POLL_INTERVAL_MS = (() => {
   const minutes = parseInt(process.env.TECHCRUNCH_POLL_INTERVAL_MINUTES ?? "30", 10);
   return (Number.isFinite(minutes) && minutes >= 1 ? minutes : 30) * 60 * 1000;
@@ -106,14 +115,20 @@ function parseRssItems(xml: string): FeedItem[] {
 
 /** Strip HTML tags and decode common entities. */
 function stripHtml(html: string): string {
-  return html
-    .replace(/<[^>]+>/g, "")
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&#039;/g, "'")
+  // Repeatedly strip tags until none remain (handles nested/broken tags)
+  let text = html;
+  let previous = "";
+  while (text !== previous) {
+    previous = text;
+    text = text.replace(/<[^>]*>/g, "");
+  }
+  return text
     .replace(/&nbsp;/g, " ")
+    .replace(/&#039;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/&gt;/g, ">")
+    .replace(/&lt;/g, "<")
+    .replace(/&amp;/g, "&")
     .trim();
 }
 
@@ -153,7 +168,7 @@ async function rewriteArticle(
   title: string,
   plainTextContent: string,
 ): Promise<string> {
-  const userPrompt = `Original article title: "${title}"\n\nOriginal article content:\n${plainTextContent.slice(0, 6000)}`;
+  const userPrompt = `Original article title: "${title}"\n\nOriginal article content:\n${plainTextContent.slice(0, MAX_ARTICLE_CONTENT_LENGTH)}`;
 
   for (const modelName of GEMINI_TEXT_MODELS) {
     try {
@@ -272,7 +287,7 @@ export async function syncTechCrunchFeed(): Promise<number> {
         console.log(`[techcrunch] Created post: "${item.title}" (${slug})`);
 
         // Small delay between AI calls to respect rate limits
-        await new Promise((r) => setTimeout(r, 1500));
+        await new Promise((r) => setTimeout(r, AI_RATE_LIMIT_DELAY_MS));
       } catch (itemErr) {
         const msg = itemErr instanceof Error ? itemErr.message : String(itemErr);
         console.error(`[techcrunch] Failed to process item "${item.title}":`, msg);
@@ -307,11 +322,11 @@ export function startTechCrunchPoller(): void {
 
   // Run the first sync after a short startup delay so it doesn't block boot
   setTimeout(() => {
-    syncTechCrunchFeed().catch(() => {});
-  }, 10_000);
+    syncTechCrunchFeed().catch((err) => console.error("[techcrunch] Initial sync error:", err));
+  }, INITIAL_SYNC_DELAY_MS);
 
   pollingTimer = setInterval(() => {
-    syncTechCrunchFeed().catch(() => {});
+    syncTechCrunchFeed().catch((err) => console.error("[techcrunch] Scheduled sync error:", err));
   }, POLL_INTERVAL_MS);
 }
 

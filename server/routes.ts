@@ -1946,19 +1946,19 @@ ENGAGEMENT PRINCIPLES:
   // ─── TechCrunch Auto-Blog Admin Endpoints ──────────────────────────────────
 
   // Get sync status (admin only)
-  app.get("/api/admin/techcrunch/status", requireAdmin, (_req, res) => {
+  app.get("/api/admin/techcrunch/status", authRateLimiter, requireAdmin, (_req, res) => {
     res.json(getSyncStatus());
   });
 
   // Manually trigger a TechCrunch sync (admin only)
-  app.post("/api/admin/techcrunch/sync", requireAdmin, async (_req, res) => {
+  app.post("/api/admin/techcrunch/sync", authRateLimiter, requireAdmin, async (_req, res) => {
     try {
       const status = getSyncStatus();
       if (status.isSyncing) {
         return res.status(409).json({ message: "A sync is already in progress." });
       }
       // Run sync in the background and return immediately
-      syncTechCrunchFeed().catch(() => {});
+      syncTechCrunchFeed().catch((err) => console.error("[admin] Manual TechCrunch sync error:", err));
       res.json({ message: "TechCrunch sync started. Check status endpoint for progress." });
     } catch (error) {
       res.status(500).json({ message: "Failed to start TechCrunch sync." });
