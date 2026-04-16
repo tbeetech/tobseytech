@@ -4,12 +4,15 @@ import { WebSocketServer, WebSocket } from "ws";
 import passport from "passport";
 import bcrypt from "bcryptjs";
 import { randomBytes, timingSafeEqual } from "crypto";
+import fs from "fs";
+import path from "path";
 import rateLimit from "express-rate-limit";
 import OpenAI from "openai";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import mongoose from "mongoose";
 import { storage } from "./storage.js";
 import { ADMIN_DASHBOARD_PASSWORD } from "./env.js";
+import { injectBlogMetaTags } from "./ogTags.js";
 import {
   insertContactSchema,
   insertProductSchema,
@@ -267,6 +270,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   return httpServer;
+}
+
+// ─── HTML template helpers (blog OG tags on Vercel) ─────────────────────────
+
+let _cachedHtmlTemplate: string | null = null;
+
+/**
+ * Try to load the built index.html used by the SPA.  On Vercel the build
+ * output is at `dist/public/index.html`; during local production runs it's at
+ * `<server dir>/public/index.html`; and in development we fall back to the
+ * source `client/index.html`.
+ */
+async function loadHtmlTemplate(): Promise<string | null> {
+  if (_cachedHtmlTemplate) return _cachedHtmlTemplate;
+
+  const candidates = [
+    path.resolve(process.cwd(), "dist", "public", "index.html"),
+    path.resolve(import.meta.dirname, "public", "index.html"),
+    path.resolve(import.meta.dirname, "..", "client", "index.html"),
+  ];
+
+  for (const p of candidates) {
+    try {
+      const html = await fs.promises.readFile(p, "utf-8");
+      _cachedHtmlTemplate = html;
+      return html;
+    } catch {
+      // try next candidate
+    }
+  }
+  return null;
+}
+
+/** Serve the SPA HTML with default (unmodified) meta tags as a fallback. */
+async function serveFallbackHtml(_req: Request, res: Response) {
+  const template = await loadHtmlTemplate();
+  if (template) {
+    return res.status(200).set({ "Content-Type": "text/html" }).end(template);
+  }
+  // Last resort: redirect to home page
+  res.redirect("/");
 }
 
 async function _registerRouteHandlers(app: Express): Promise<void> {
@@ -1865,6 +1909,36 @@ ENGAGEMENT PRINCIPLES:
       }
       console.error("[cosmo]", error);
       res.status(500).json({ message: "Cosmo Research AI encountered an error." });
+    }
+  });
+
+  // ─── Blog HTML with OG meta tags (Vercel SSR) ────────────────────────────
+  //
+  // When deployed on Vercel the static index.html is served by the CDN for
+  // all non-API routes.  Social-media crawlers that hit /blog/:slug therefore
+  // see only the default site-level OG tags.  This route lets Vercel rewrite
+  // /blog/:slug → /api/blog-html/:slug so we can inject post-specific meta
+  // tags and then serve the SPA HTML as normal.
+
+  app.get("/api/blog-html/:slug", async (req, res) => {
+    try {
+      const post = await storage.getBlogPostBySlug(req.params.slug);
+      if (!post || !post.published) {
+        // Fall back to plain index.html (Vercel CDN will handle 404 via SPA)
+        return serveFallbackHtml(req, res);
+      }
+
+      const baseUrl = `${req.protocol}://${req.get("host")}`;
+      const template = await loadHtmlTemplate();
+      if (!template) {
+        return serveFallbackHtml(req, res);
+      }
+
+      const html = injectBlogMetaTags(template, post, baseUrl);
+      res.status(200).set({ "Content-Type": "text/html" }).end(html);
+    } catch (err) {
+      console.error("[blog-html]", err);
+      serveFallbackHtml(req, res);
     }
   });
 }
