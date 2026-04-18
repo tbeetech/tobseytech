@@ -20,7 +20,8 @@ async function throwIfResNotOk(res: Response) {
       // Fall back to the raw response body.
     }
 
-    throw new Error(`${res.status}: ${message}`);
+    // Return user-friendly message without HTTP status codes
+    throw new Error(message);
   }
 }
 

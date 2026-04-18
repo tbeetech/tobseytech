@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, CheckCircle } from "lucide-react";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, getApiErrorMessage } from "@/lib/queryClient";
 
 export default function ResetPasswordPage() {
   const { token } = useParams<{ token: string }>();
@@ -36,7 +36,7 @@ export default function ResetPasswordPage() {
       setDone(true);
       setTimeout(() => navigate("/auth"), 3000);
     } catch (err: any) {
-      toast({ title: "Reset failed", description: err.message, variant: "destructive" });
+      toast({ title: "Reset failed", description: getApiErrorMessage(err, "Could not reset your password. Please try again."), variant: "destructive" });
     } finally {
       setLoading(false);
     }

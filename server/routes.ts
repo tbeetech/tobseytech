@@ -391,7 +391,7 @@ async function _registerRouteHandlers(app: Express): Promise<void> {
 
   // ─── Auth routes ────────────────────────────────────────────────────────
 
-  app.post("/api/auth/register", authRateLimiter, async (req, res) => {
+  app.post("/api/auth/register", async (req, res) => {
     try {
       const data = insertUserSchema.parse(req.body);
       // Normalize email to lowercase so duplicate checks and storage are consistent.
@@ -435,7 +435,7 @@ async function _registerRouteHandlers(app: Express): Promise<void> {
     }
   });
 
-  app.post("/api/auth/login", authRateLimiter, (req, res, next) => {
+  app.post("/api/auth/login", (req, res, next) => {
     try {
       loginSchema.parse(req.body);
     } catch (err) {
@@ -453,7 +453,7 @@ async function _registerRouteHandlers(app: Express): Promise<void> {
     })(req, res, next);
   });
 
-  app.post("/api/auth/logout", authRateLimiter, (req, res) => {
+  app.post("/api/auth/logout", (req, res) => {
     req.logout((err) => {
       if (err) return res.status(500).json({ message: "Logout failed" });
       req.session.destroy((destroyErr) => {
@@ -468,7 +468,7 @@ async function _registerRouteHandlers(app: Express): Promise<void> {
     });
   });
 
-  app.get("/api/auth/me", authRateLimiter, (req, res) => {
+  app.get("/api/auth/me", (req, res) => {
     if (!req.isAuthenticated() || !req.user) {
       return res.status(401).json({ message: "Not authenticated" });
     }

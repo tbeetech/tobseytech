@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
+import { getApiErrorMessage } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -30,7 +31,7 @@ export default function AuthPage() {
       await login(loginForm.username, loginForm.password);
       navigate("/blog");
     } catch (err: any) {
-      toast({ title: "Login failed", description: err?.message || "An error occurred. Please try again.", variant: "destructive" });
+      toast({ title: "Login failed", description: getApiErrorMessage(err, "Invalid username or password. Please try again."), variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -49,7 +50,7 @@ export default function AuthPage() {
       await register(registerForm.username, registerForm.email, registerForm.password);
       navigate("/blog");
     } catch (err: any) {
-      toast({ title: "Registration failed", description: err?.message || "An error occurred. Please try again.", variant: "destructive" });
+      toast({ title: "Registration failed", description: getApiErrorMessage(err, "Could not create your account. Please try again."), variant: "destructive" });
     } finally {
       setLoading(false);
     }
