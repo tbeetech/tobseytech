@@ -221,7 +221,7 @@ export default function ChatPage() {
       return res.json();
     },
     enabled: !!user,
-    refetchInterval: 10000,
+    refetchInterval: 3000,
   });
 
   const { data: serverMessages = [] } = useQuery<Message[]>({
@@ -233,7 +233,7 @@ export default function ChatPage() {
       return res.json();
     },
     enabled: !!user && !!selectedUserId,
-    refetchInterval: selectedUserId ? 5000 : false,
+    refetchInterval: selectedUserId ? 3000 : false,
   });
 
   // Merge server messages with pending (optimistic) ones, deduplicating by id

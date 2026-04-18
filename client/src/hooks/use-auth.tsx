@@ -38,7 +38,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const res = await apiRequest("POST", "/api/auth/login", { username, password });
     const data = await res.json();
     if (!data || !data.id || !data.username) {
-      throw new Error("Authentication failed: server returned an unexpected response");
+      throw new Error("Unable to log in. Please check your credentials and try again.");
     }
     setUser(data);
   };
@@ -47,7 +47,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const res = await apiRequest("POST", "/api/auth/register", { username, email, password });
     const data = await res.json();
     if (!data || !data.id || !data.username) {
-      throw new Error("Registration failed: server returned an unexpected response");
+      throw new Error("Unable to create your account. Please try again.");
     }
     setUser(data);
   };

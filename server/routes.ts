@@ -40,6 +40,16 @@ const authRateLimiter = rateLimit({
   message: { message: "Too many requests, please try again later" },
 });
 
+// Lenient rate limiter for login/register/me so users don't get blocked
+// during normal usage (e.g. page refreshes, typos, session checks)
+const authLenientLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: "Too many requests, please try again later" },
+});
+
 /** Type guard for MongoDB duplicate-key errors (E11000). */
 function isMongoDBDuplicateKeyError(err: unknown): err is { code: number; keyPattern: Record<string, unknown> } {
   return (
@@ -391,7 +401,7 @@ async function _registerRouteHandlers(app: Express): Promise<void> {
 
   // ─── Auth routes ────────────────────────────────────────────────────────
 
-  app.post("/api/auth/register", authRateLimiter, async (req, res) => {
+  app.post("/api/auth/register", authLenientLimiter, async (req, res) => {
     try {
       const data = insertUserSchema.parse(req.body);
       // Normalize email to lowercase so duplicate checks and storage are consistent.
@@ -435,7 +445,7 @@ async function _registerRouteHandlers(app: Express): Promise<void> {
     }
   });
 
-  app.post("/api/auth/login", authRateLimiter, (req, res, next) => {
+  app.post("/api/auth/login", authLenientLimiter, (req, res, next) => {
     try {
       loginSchema.parse(req.body);
     } catch (err) {
@@ -453,7 +463,7 @@ async function _registerRouteHandlers(app: Express): Promise<void> {
     })(req, res, next);
   });
 
-  app.post("/api/auth/logout", authRateLimiter, (req, res) => {
+  app.post("/api/auth/logout", authLenientLimiter, (req, res) => {
     req.logout((err) => {
       if (err) return res.status(500).json({ message: "Logout failed" });
       req.session.destroy((destroyErr) => {
@@ -468,7 +478,7 @@ async function _registerRouteHandlers(app: Express): Promise<void> {
     });
   });
 
-  app.get("/api/auth/me", authRateLimiter, (req, res) => {
+  app.get("/api/auth/me", authLenientLimiter, (req, res) => {
     if (!req.isAuthenticated() || !req.user) {
       return res.status(401).json({ message: "Not authenticated" });
     }
