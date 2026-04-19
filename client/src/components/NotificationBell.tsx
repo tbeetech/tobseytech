@@ -140,11 +140,7 @@ export default function NotificationBell() {
     <div className="relative" ref={panelRef}>
       {/* Bell button */}
       <button
-        onClick={() => {
-          // Don't open an empty panel — only toggle when there is something to show
-          if (notifications.length === 0 && unreadCount === 0) return;
-          setOpen((o) => !o);
-        }}
+        onClick={() => setOpen((o) => !o)}
         className="relative hover:text-galactic-gold transition-colors duration-300 nav-link text-galactic-orange"
         aria-label="Notifications"
         data-testid="notification-bell"
