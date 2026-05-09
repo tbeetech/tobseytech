@@ -22,12 +22,23 @@ interface BotFeed {
   tags: string[];
 }
 
-interface BotWorkerStatus {
+export interface BotWorkerStatus {
   running: boolean;
+  paused: boolean;
+  cycleRunning: boolean;
   lastRun: Date | null;
   postsCreated: number;
   errors: number;
-  feeds: Array<{ name: string; lastFetched: Date | null; articlesFound: number }>;
+  pollIntervalMs: number;
+  maxArticlesPerFeed: number;
+  feeds: Array<{ name: string; enabled: boolean; lastFetched: Date | null; articlesFound: number }>;
+}
+
+export interface BotConfig {
+  pollIntervalMs?: number;
+  maxArticlesPerFeed?: number;
+  /** Map of feed name → enabled. Only provided keys are updated. */
+  feedEnabled?: Record<string, boolean>;
 }
 
 // ─── Feed configuration ───────────────────────────────────────────────────────
@@ -78,24 +89,38 @@ const FALLBACK_LOGO_URL = "/og-image.svg";
 const MIN_POLL_INTERVAL_MS = 30_000;
 const DEFAULT_POLL_INTERVAL_MS = 300_000;
 const _rawPollInterval = parseInt(process.env.BOT_POLL_INTERVAL_MS || String(DEFAULT_POLL_INTERVAL_MS), 10);
-const POLL_INTERVAL_MS = Number.isFinite(_rawPollInterval) && _rawPollInterval >= MIN_POLL_INTERVAL_MS
+const INITIAL_POLL_INTERVAL_MS = Number.isFinite(_rawPollInterval) && _rawPollInterval >= MIN_POLL_INTERVAL_MS
   ? _rawPollInterval
   : DEFAULT_POLL_INTERVAL_MS;
 
 // Maximum articles to process per feed per cycle (1–100, default 5)
 const _rawMaxArticles = parseInt(process.env.BOT_MAX_ARTICLES_PER_FEED || "5", 10);
-const MAX_ARTICLES_PER_FEED = Number.isFinite(_rawMaxArticles) && _rawMaxArticles >= 1
+const INITIAL_MAX_ARTICLES = Number.isFinite(_rawMaxArticles) && _rawMaxArticles >= 1
   ? Math.min(_rawMaxArticles, 100)
   : 5;
+
+// ─── Runtime configuration (mutable by admin) ────────────────────────────────
+
+let _pollIntervalMs = INITIAL_POLL_INTERVAL_MS;
+let _maxArticlesPerFeed = INITIAL_MAX_ARTICLES;
+
+// Per-feed enabled flags (keyed by feed name)
+const _feedEnabled: Record<string, boolean> = Object.fromEntries(
+  TECH_FEEDS.map((f) => [f.name, true])
+);
 
 // ─── State ────────────────────────────────────────────────────────────────────
 
 const status: BotWorkerStatus = {
   running: false,
+  paused: false,
+  cycleRunning: false,
   lastRun: null,
   postsCreated: 0,
   errors: 0,
-  feeds: TECH_FEEDS.map((f) => ({ name: f.name, lastFetched: null, articlesFound: 0 })),
+  get pollIntervalMs() { return _pollIntervalMs; },
+  get maxArticlesPerFeed() { return _maxArticlesPerFeed; },
+  feeds: TECH_FEEDS.map((f) => ({ name: f.name, enabled: true, lastFetched: null, articlesFound: 0 })),
 };
 
 // Set of article GUIDs / links already posted this session (+ persisted slugs from DB)
@@ -104,7 +129,6 @@ const seenGuids = new Set<string>();
 let _pollTimer: ReturnType<typeof setTimeout> | null = null;
 let _botAdminId: string | null = null;
 let _botAdminName = "TobseyTech Bot";
-let _cycleRunning = false;
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -229,6 +253,11 @@ const parser = new Parser({
 });
 
 async function fetchAndPostFeed(feed: BotFeed, feedIndex: number): Promise<void> {
+  // Skip disabled feeds
+  if (!_feedEnabled[feed.name]) {
+    return;
+  }
+
   const feedStatus = status.feeds[feedIndex];
   try {
     const parsed = await parser.parseURL(feed.url);
@@ -237,7 +266,7 @@ async function fetchAndPostFeed(feed: BotFeed, feedIndex: number): Promise<void>
 
     let processed = 0;
     for (const item of parsed.items as RssItem[]) {
-      if (processed >= MAX_ARTICLES_PER_FEED) break;
+      if (processed >= _maxArticlesPerFeed) break;
 
       const guid = item.guid || item.link || item.title || "";
       if (!guid || seenGuids.has(guid)) continue;
@@ -295,12 +324,12 @@ async function runCycle(): Promise<void> {
   }
 
   // Prevent overlapping cycles: skip if a cycle is already in progress
-  if (_cycleRunning) {
+  if (status.cycleRunning) {
     console.log("[botWorker] Previous cycle still running — skipping this tick.");
     return;
   }
 
-  _cycleRunning = true;
+  status.cycleRunning = true;
   status.lastRun = new Date();
   console.log(`[botWorker] 🔄 Starting fetch cycle (${new Date().toISOString()})`);
 
@@ -308,7 +337,7 @@ async function runCycle(): Promise<void> {
     await Promise.allSettled(TECH_FEEDS.map((feed, i) => fetchAndPostFeed(feed, i)));
     console.log(`[botWorker] ✔ Cycle complete. Total posts created: ${status.postsCreated}`);
   } finally {
-    _cycleRunning = false;
+    status.cycleRunning = false;
   }
 }
 
@@ -344,44 +373,114 @@ async function resolveBotAdmin(): Promise<void> {
 
 /** Start the background polling loop. */
 export async function startBotWorker(): Promise<void> {
-  if (status.running) {
+  if (status.running && !status.paused) {
     console.log("[botWorker] Already running — skipping start.");
     return;
   }
 
   await resolveBotAdmin();
   status.running = true;
+  status.paused = false;
 
   console.log(
-    `[botWorker] 🤖 Bot worker started. Poll interval: ${POLL_INTERVAL_MS / 1000}s`
+    `[botWorker] 🤖 Bot worker started. Poll interval: ${_pollIntervalMs / 1000}s`
   );
 
   // Use recursive setTimeout instead of setInterval so a slow cycle never
   // overlaps with the next scheduled one — the next tick is only scheduled
   // AFTER the previous cycle has fully completed.
   async function scheduledCycle(): Promise<void> {
-    if (!status.running) return;
+    if (!status.running || status.paused) return;
     await runCycle();
-    if (status.running) {
-      _pollTimer = setTimeout(scheduledCycle, POLL_INTERVAL_MS);
+    if (status.running && !status.paused) {
+      _pollTimer = setTimeout(scheduledCycle, _pollIntervalMs);
     }
   }
 
   // Run an initial cycle immediately, then continue on the schedule
   await runCycle();
-  if (status.running) {
-    _pollTimer = setTimeout(scheduledCycle, POLL_INTERVAL_MS);
+  if (status.running && !status.paused) {
+    _pollTimer = setTimeout(scheduledCycle, _pollIntervalMs);
   }
 }
 
-/** Stop the background polling loop. */
+/** Stop the background polling loop permanently (not just paused). */
 export function stopBotWorker(): void {
   status.running = false;
+  status.paused = false;
   if (_pollTimer) {
     clearTimeout(_pollTimer);
     _pollTimer = null;
   }
   console.log("[botWorker] 🛑 Bot worker stopped.");
+}
+
+/** Pause the polling loop (keeps `running` true, stops scheduling new cycles). */
+export function pauseBotWorker(): void {
+  if (!status.running) {
+    console.log("[botWorker] Cannot pause — worker is not running.");
+    return;
+  }
+  status.paused = true;
+  if (_pollTimer) {
+    clearTimeout(_pollTimer);
+    _pollTimer = null;
+  }
+  console.log("[botWorker] ⏸ Bot worker paused.");
+}
+
+/** Resume a paused polling loop. */
+export async function resumeBotWorker(): Promise<void> {
+  if (!status.paused) {
+    console.log("[botWorker] Not paused — nothing to resume.");
+    return;
+  }
+  status.paused = false;
+  console.log("[botWorker] ▶ Bot worker resumed.");
+
+  async function scheduledCycle(): Promise<void> {
+    if (!status.running || status.paused) return;
+    await runCycle();
+    if (status.running && !status.paused) {
+      _pollTimer = setTimeout(scheduledCycle, _pollIntervalMs);
+    }
+  }
+
+  await runCycle();
+  if (status.running && !status.paused) {
+    _pollTimer = setTimeout(scheduledCycle, _pollIntervalMs);
+  }
+}
+
+/** Update runtime configuration without restarting the worker. */
+export function updateBotConfig(config: BotConfig): void {
+  if (config.pollIntervalMs !== undefined) {
+    const v = Number(config.pollIntervalMs);
+    if (Number.isFinite(v) && v >= MIN_POLL_INTERVAL_MS) {
+      _pollIntervalMs = v;
+      console.log(`[botWorker] ⚙ Poll interval updated to ${v / 1000}s`);
+    }
+  }
+
+  if (config.maxArticlesPerFeed !== undefined) {
+    const v = Math.max(1, Math.min(100, Number(config.maxArticlesPerFeed)));
+    if (Number.isFinite(v)) {
+      _maxArticlesPerFeed = v;
+      console.log(`[botWorker] ⚙ Max articles per feed updated to ${v}`);
+    }
+  }
+
+  if (config.feedEnabled) {
+    for (const [name, enabled] of Object.entries(config.feedEnabled)) {
+      if (name in _feedEnabled) {
+        _feedEnabled[name] = Boolean(enabled);
+        // Sync the status.feeds enabled field too
+        const feedEntry = status.feeds.find((f) => f.name === name);
+        if (feedEntry) feedEntry.enabled = Boolean(enabled);
+        console.log(`[botWorker] ⚙ Feed "${name}" ${enabled ? "enabled" : "disabled"}`);
+      }
+    }
+  }
 }
 
 /** Trigger an immediate fetch cycle (used by the manual-trigger API route). */
@@ -391,5 +490,15 @@ export async function triggerBotCycle(): Promise<void> {
 
 /** Return a read-only snapshot of the current bot status. */
 export function getBotStatus(): BotWorkerStatus {
-  return { ...status, feeds: status.feeds.map((f) => ({ ...f })) };
+  return {
+    running: status.running,
+    paused: status.paused,
+    cycleRunning: status.cycleRunning,
+    lastRun: status.lastRun,
+    postsCreated: status.postsCreated,
+    errors: status.errors,
+    pollIntervalMs: _pollIntervalMs,
+    maxArticlesPerFeed: _maxArticlesPerFeed,
+    feeds: status.feeds.map((f) => ({ ...f })),
+  };
 }

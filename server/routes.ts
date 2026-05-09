@@ -13,7 +13,7 @@ import mongoose from "mongoose";
 import { storage } from "./storage.js";
 import { ADMIN_DASHBOARD_PASSWORD } from "./env.js";
 import { injectBlogMetaTags } from "./ogTags.js";
-import { getBotStatus, triggerBotCycle } from "./botWorker.js";
+import { getBotStatus, triggerBotCycle, pauseBotWorker, resumeBotWorker, startBotWorker as _startBotWorker, updateBotConfig } from "./botWorker.js";
 import {
   insertContactSchema,
   insertProductSchema,
@@ -1944,6 +1944,61 @@ ENGAGEMENT PRINCIPLES:
       res.json({ ok: true, message: "Bot fetch cycle triggered." });
     } catch {
       res.status(500).json({ message: "Failed to trigger bot cycle" });
+    }
+  });
+
+  // POST /api/bot/pause — pause the polling loop (admin only)
+  app.post("/api/bot/pause", authRateLimiter, requireAdmin, (_req, res) => {
+    try {
+      pauseBotWorker();
+      res.json({ ok: true, message: "Bot worker paused." });
+    } catch {
+      res.status(500).json({ message: "Failed to pause bot worker" });
+    }
+  });
+
+  // POST /api/bot/resume — resume a paused polling loop (admin only)
+  app.post("/api/bot/resume", authRateLimiter, requireAdmin, async (_req, res) => {
+    try {
+      resumeBotWorker().catch((err: unknown) => {
+        console.error("[bot/resume]", err);
+      });
+      res.json({ ok: true, message: "Bot worker resumed." });
+    } catch {
+      res.status(500).json({ message: "Failed to resume bot worker" });
+    }
+  });
+
+  // POST /api/bot/start — start the worker if it was never started (admin only)
+  app.post("/api/bot/start", authRateLimiter, requireAdmin, async (_req, res) => {
+    try {
+      _startBotWorker().catch((err: unknown) => {
+        console.error("[bot/start]", err);
+      });
+      res.json({ ok: true, message: "Bot worker starting." });
+    } catch {
+      res.status(500).json({ message: "Failed to start bot worker" });
+    }
+  });
+
+  // PATCH /api/bot/config — update runtime config (admin only)
+  app.patch("/api/bot/config", authRateLimiter, requireAdmin, (req, res) => {
+    try {
+      const { pollIntervalMs, maxArticlesPerFeed, feedEnabled } = req.body;
+
+      // Basic validation
+      if (
+        (pollIntervalMs !== undefined && typeof pollIntervalMs !== "number") ||
+        (maxArticlesPerFeed !== undefined && typeof maxArticlesPerFeed !== "number") ||
+        (feedEnabled !== undefined && (typeof feedEnabled !== "object" || Array.isArray(feedEnabled)))
+      ) {
+        return res.status(400).json({ message: "Invalid configuration values" });
+      }
+
+      updateBotConfig({ pollIntervalMs, maxArticlesPerFeed, feedEnabled });
+      res.json({ ok: true, status: getBotStatus() });
+    } catch {
+      res.status(500).json({ message: "Failed to update bot configuration" });
     }
   });
 
