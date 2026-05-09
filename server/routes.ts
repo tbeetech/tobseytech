@@ -190,6 +190,9 @@ function requireAdmin(req: Request, res: Response, next: NextFunction) {
   next();
 }
 
+// Dashboard verification expires after 8 hours (ms)
+const DASHBOARD_VERIFIED_TTL_MS = 8 * 60 * 60 * 1000;
+
 // Allows any authenticated user who has verified the dashboard password,
 // as well as users with the admin role.
 function requireDashboardAccess(req: Request, res: Response, next: NextFunction) {
@@ -197,8 +200,16 @@ function requireDashboardAccess(req: Request, res: Response, next: NextFunction)
   if (!req.isAuthenticated()) {
     return res.status(401).json({ message: "Unauthorized" });
   }
-  if (user?.role === "admin" || (req.session as any).dashboardVerified === true) {
+  if (user?.role === "admin") {
     return next();
+  }
+  const verifiedAt: number | undefined = (req.session as any).dashboardVerifiedAt;
+  if (verifiedAt && Date.now() - verifiedAt < DASHBOARD_VERIFIED_TTL_MS) {
+    return next();
+  }
+  // Clear an expired flag to keep the session clean
+  if (verifiedAt) {
+    delete (req.session as any).dashboardVerifiedAt;
   }
   return res.status(403).json({ message: "Forbidden" });
 }
@@ -1431,9 +1442,9 @@ async function _registerRouteHandlers(app: Express): Promise<void> {
     if (!match) {
       return res.status(401).json({ message: "Invalid dashboard password" });
     }
-    // Mark this session as dashboard-verified so subsequent admin data
-    // requests succeed without requiring the admin role.
-    (req.session as any).dashboardVerified = true;
+    // Mark this session as dashboard-verified with a timestamp so
+    // requireDashboardAccess can enforce the TTL window.
+    (req.session as any).dashboardVerifiedAt = Date.now();
     req.session.save(() => res.json({ ok: true }));
   });
 
