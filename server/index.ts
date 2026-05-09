@@ -10,6 +10,7 @@ import { setupVite, serveStatic, log } from "./vite.js";
 import { initStorage, storage } from "./storage.js";
 import { ensureAdminUser, promoteAdminByEmail } from "./seed.js";
 import { getClientPromise } from "./mongodb.js";
+import { startBotWorker, stopBotWorker } from "./botWorker.js";
 import {
   ADMIN_SEED_EMAIL,
   getSessionSecret,
@@ -178,6 +179,14 @@ app.use((req, res, next) => {
   await ensureAdminUser();
   if (ADMIN_SEED_EMAIL) {
     await promoteAdminByEmail(ADMIN_SEED_EMAIL);
+  }
+
+  // Start the background bot worker that auto-fetches tech news from RSS feeds
+  // and publishes them to the blog in real-time.
+  if (process.env.BOT_WORKER_ENABLED !== "false") {
+    startBotWorker().catch((err) => {
+      console.error("[startup] Bot worker failed to start:", err);
+    });
   }
 
   const server = await registerRoutes(app);

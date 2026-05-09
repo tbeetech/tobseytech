@@ -1922,6 +1922,32 @@ ENGAGEMENT PRINCIPLES:
     }
   });
 
+  // ─── Bot Worker routes ────────────────────────────────────────────────────
+
+  // GET /api/bot/status — read-only status (admin only)
+  app.get("/api/bot/status", authRateLimiter, requireAdmin, (_req, res) => {
+    try {
+      const { getBotStatus } = require("./botWorker.js");
+      res.json(getBotStatus());
+    } catch {
+      res.status(500).json({ message: "Failed to retrieve bot status" });
+    }
+  });
+
+  // POST /api/bot/trigger — manually kick off an immediate fetch cycle (admin only)
+  app.post("/api/bot/trigger", authRateLimiter, requireAdmin, async (_req, res) => {
+    try {
+      const { triggerBotCycle } = require("./botWorker.js");
+      // Fire-and-forget — respond immediately so the request doesn't time out
+      triggerBotCycle().catch((err: unknown) => {
+        console.error("[bot/trigger]", err);
+      });
+      res.json({ ok: true, message: "Bot fetch cycle triggered." });
+    } catch {
+      res.status(500).json({ message: "Failed to trigger bot cycle" });
+    }
+  });
+
   // ─── Blog HTML with OG meta tags (Vercel SSR) ────────────────────────────
   //
   // When deployed on Vercel the static index.html is served by the CDN for
