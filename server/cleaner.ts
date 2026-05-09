@@ -104,8 +104,12 @@ export function cleanTextField(raw: string): string {
 
 /**
  * Fix common HTML artifacts in a *content* field that legitimately contains
- * HTML markup.  We must NOT strip the HTML structure; instead we:
+ * HTML markup.  This helper is retained for ad-hoc use but is no longer
+ * called by cleanPost or auditAndClean — those paths now use cleanTextField
+ * to strip HTML entirely so content is stored as plain text for the Markdown
+ * renderer on the frontend.
  *
+ * When called it will:
  * - Resolve double-encoded entities (&amp;amp; → &amp;, etc.)
  * - Replace the most common typographic entity sequences with real Unicode
  *   characters so they render correctly even when the page's HTML parser is
@@ -160,14 +164,15 @@ export interface PostTextFields {
  *
  * - title   → full HTML strip + entity decode + whitespace normalise
  * - excerpt → same as title (excerpt is always plain text)
- * - content → entity fixes only (HTML markup is preserved for rendering)
+ * - content → same as title: HTML is stripped so the content is stored as
+ *             plain text compatible with the Markdown renderer on the frontend
  */
 export function cleanPost<T extends PostTextFields>(post: T): T {
   return {
     ...post,
     title: cleanTextField(post.title),
     excerpt: cleanTextField(post.excerpt),
-    content: cleanContentHtml(post.content),
+    content: cleanTextField(post.content),
   };
 }
 
@@ -198,7 +203,7 @@ export async function auditAndClean(store: IStorage): Promise<AuditResult> {
     try {
       const cleanedTitle   = cleanTextField(post.title);
       const cleanedExcerpt = cleanTextField(post.excerpt);
-      const cleanedContent = cleanContentHtml(post.content);
+      const cleanedContent = cleanTextField(post.content);
 
       const changed =
         cleanedTitle   !== post.title   ||
