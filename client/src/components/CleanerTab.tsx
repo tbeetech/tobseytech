@@ -90,7 +90,7 @@ export default function CleanerTab() {
               <p className="text-gray-400 text-xs leading-relaxed">
                 Admin-triggered deep scan of every post already in the database.
                 Retroactively fixes double-encoded entities, leftover HTML snippets,
-                and typographic artefacts — updating only records that actually changed.
+                and typographic artifacts — updating only records that actually changed.
               </p>
             </div>
           </div>
