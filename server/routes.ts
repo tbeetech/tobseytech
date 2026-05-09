@@ -190,6 +190,30 @@ function requireAdmin(req: Request, res: Response, next: NextFunction) {
   next();
 }
 
+// Dashboard verification expires after 8 hours (ms)
+const DASHBOARD_VERIFIED_TTL_MS = 8 * 60 * 60 * 1000;
+
+// Allows any authenticated user who has verified the dashboard password,
+// as well as users with the admin role.
+function requireDashboardAccess(req: Request, res: Response, next: NextFunction) {
+  const user = req.user as any;
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+  if (user?.role === "admin") {
+    return next();
+  }
+  const verifiedAt: number | undefined = (req.session as any).dashboardVerifiedAt;
+  if (verifiedAt && Date.now() - verifiedAt < DASHBOARD_VERIFIED_TTL_MS) {
+    return next();
+  }
+  // Clear an expired flag to keep the session clean
+  if (verifiedAt) {
+    delete (req.session as any).dashboardVerifiedAt;
+  }
+  return res.status(403).json({ message: "Forbidden" });
+}
+
 function sendAuthenticatedUser(req: Request, res: Response, user: any, statusCode = 200) {
   const { password: _pw, ...safeUser } = user;
   req.session.save((sessionErr) => {
@@ -590,8 +614,8 @@ async function _registerRouteHandlers(app: Express): Promise<void> {
     }
   });
 
-  // List all posts including drafts (admin only)
-  app.get("/api/blog/all", authRateLimiter, requireAdmin, async (req, res) => {
+  // List all posts including drafts (admin or dashboard-verified)
+  app.get("/api/blog/all", authRateLimiter, requireDashboardAccess, async (req, res) => {
     try {
       const posts = await storage.getBlogPosts(false);
       res.json(posts);
@@ -918,7 +942,7 @@ async function _registerRouteHandlers(app: Express): Promise<void> {
     }
   });
 
-  app.get("/api/blog/:id/suggestions", authRateLimiter, requireAdmin, async (req, res) => {
+  app.get("/api/blog/:id/suggestions", authRateLimiter, requireDashboardAccess, async (req, res) => {
     try {
       const suggestions = await storage.getEditSuggestions(req.params.id);
       res.json(suggestions);
@@ -927,7 +951,7 @@ async function _registerRouteHandlers(app: Express): Promise<void> {
     }
   });
 
-  app.patch("/api/suggestions/:id", authRateLimiter, requireAdmin, async (req, res) => {
+  app.patch("/api/suggestions/:id", authRateLimiter, requireDashboardAccess, async (req, res) => {
     try {
       const { status } = req.body;
       if (!["accepted", "rejected"].includes(status)) {
@@ -1245,7 +1269,7 @@ async function _registerRouteHandlers(app: Express): Promise<void> {
     }
   });
 
-  app.get("/api/contacts", authRateLimiter, requireAdmin, async (req, res) => {
+  app.get("/api/contacts", authRateLimiter, requireDashboardAccess, async (req, res) => {
     try {
       const contacts = await storage.getContacts();
       res.json(contacts);
@@ -1254,7 +1278,7 @@ async function _registerRouteHandlers(app: Express): Promise<void> {
     }
   });
 
-  app.get("/api/contacts/:id", authRateLimiter, requireAdmin, async (req, res) => {
+  app.get("/api/contacts/:id", authRateLimiter, requireDashboardAccess, async (req, res) => {
     try {
       const contact = await storage.getContact(req.params.id);
       if (!contact) {
@@ -1267,7 +1291,7 @@ async function _registerRouteHandlers(app: Express): Promise<void> {
     }
   });
 
-  app.patch("/api/contacts/:id/status", authRateLimiter, requireAdmin, async (req, res) => {
+  app.patch("/api/contacts/:id/status", authRateLimiter, requireDashboardAccess, async (req, res) => {
     try {
       const { status } = req.body;
       if (!status) {
@@ -1398,7 +1422,9 @@ async function _registerRouteHandlers(app: Express): Promise<void> {
   // ─── Admin dashboard routes ───────────────────────────────────────────────
 
   // Verify admin dashboard password (secondary password gate)
-  app.post("/api/admin/verify-password", authRateLimiter, requireAdmin, (req, res) => {
+  // Any authenticated user may attempt verification; the correct password
+  // grants dashboard access regardless of role.
+  app.post("/api/admin/verify-password", authRateLimiter, requireAuth, (req, res) => {
     const { password } = req.body;
     const adminDashboardPassword = ADMIN_DASHBOARD_PASSWORD;
     if (!adminDashboardPassword) {
@@ -1416,11 +1442,14 @@ async function _registerRouteHandlers(app: Express): Promise<void> {
     if (!match) {
       return res.status(401).json({ message: "Invalid dashboard password" });
     }
-    res.json({ ok: true });
+    // Mark this session as dashboard-verified with a timestamp so
+    // requireDashboardAccess can enforce the TTL window.
+    (req.session as any).dashboardVerifiedAt = Date.now();
+    req.session.save(() => res.json({ ok: true }));
   });
 
-  // Get all users (admin only)
-  app.get("/api/admin/users", authRateLimiter, requireAdmin, async (req, res) => {
+  // Get all users (admin or dashboard-verified)
+  app.get("/api/admin/users", authRateLimiter, requireDashboardAccess, async (req, res) => {
     try {
       const users = await storage.getAllUsers();
       const safe = users.map(({ password: _pw, ...u }) => u);
@@ -1430,8 +1459,8 @@ async function _registerRouteHandlers(app: Express): Promise<void> {
     }
   });
 
-  // Update user role (admin only)
-  app.patch("/api/admin/users/:id/role", authRateLimiter, requireAdmin, async (req, res) => {
+  // Update user role (admin or dashboard-verified)
+  app.patch("/api/admin/users/:id/role", authRateLimiter, requireDashboardAccess, async (req, res) => {
     try {
       const { role } = req.body;
       if (role !== "user" && role !== "admin") {
@@ -1447,7 +1476,7 @@ async function _registerRouteHandlers(app: Express): Promise<void> {
   });
 
   // Admin stats
-  app.get("/api/admin/stats", authRateLimiter, requireAdmin, async (req, res) => {
+  app.get("/api/admin/stats", authRateLimiter, requireDashboardAccess, async (req, res) => {
     try {
       const [users, posts, contacts] = await Promise.all([
         storage.getAllUsers(),
@@ -1467,8 +1496,8 @@ async function _registerRouteHandlers(app: Express): Promise<void> {
     }
   });
 
-  // Admin: get all contacts (add requireAdmin guard)
-  app.get("/api/admin/contacts", authRateLimiter, requireAdmin, async (req, res) => {
+  // Admin: get all contacts (admin or dashboard-verified)
+  app.get("/api/admin/contacts", authRateLimiter, requireDashboardAccess, async (req, res) => {
     try {
       const contacts = await storage.getContacts();
       res.json(contacts);
@@ -1478,7 +1507,7 @@ async function _registerRouteHandlers(app: Express): Promise<void> {
   });
 
   // Admin: get all edit suggestions across all posts
-  app.get("/api/admin/suggestions", authRateLimiter, requireAdmin, async (req, res) => {
+  app.get("/api/admin/suggestions", authRateLimiter, requireDashboardAccess, async (req, res) => {
     try {
       const posts = await storage.getBlogPosts(false);
       const allSuggestions = await Promise.all(
@@ -1508,7 +1537,7 @@ async function _registerRouteHandlers(app: Express): Promise<void> {
   const POST_FETCHER_TIMEOUT_MS = 12000;
 
   // Admin: fetch tech blog post suggestions from public sources (Dev.to)
-  app.post("/api/admin/fetch-posts", authRateLimiter, requireAdmin, async (req, res) => {
+  app.post("/api/admin/fetch-posts", authRateLimiter, requireDashboardAccess, async (req, res) => {
     try {
       const { topics = [], count = 30 } = req.body as { topics?: string[]; count?: number };
       const safeCount = Math.min(Math.max(Number(count) || 30, 1), 30);
@@ -1925,8 +1954,8 @@ ENGAGEMENT PRINCIPLES:
 
   // ─── Bot Worker routes ────────────────────────────────────────────────────
 
-  // GET /api/bot/status — read-only status (admin only)
-  app.get("/api/bot/status", authRateLimiter, requireAdmin, (_req, res) => {
+  // GET /api/bot/status — read-only status (admin or dashboard-verified)
+  app.get("/api/bot/status", authRateLimiter, requireDashboardAccess, (_req, res) => {
     try {
       res.json(getBotStatus());
     } catch {
@@ -1934,8 +1963,8 @@ ENGAGEMENT PRINCIPLES:
     }
   });
 
-  // POST /api/bot/trigger — manually kick off an immediate fetch cycle (admin only)
-  app.post("/api/bot/trigger", authRateLimiter, requireAdmin, async (_req, res) => {
+  // POST /api/bot/trigger — manually kick off an immediate fetch cycle (admin or dashboard-verified)
+  app.post("/api/bot/trigger", authRateLimiter, requireDashboardAccess, async (_req, res) => {
     try {
       // Fire-and-forget — respond immediately so the request doesn't time out
       triggerBotCycle().catch((err: unknown) => {
@@ -1947,8 +1976,8 @@ ENGAGEMENT PRINCIPLES:
     }
   });
 
-  // POST /api/bot/pause — pause the polling loop (admin only)
-  app.post("/api/bot/pause", authRateLimiter, requireAdmin, (_req, res) => {
+  // POST /api/bot/pause — pause the polling loop (admin or dashboard-verified)
+  app.post("/api/bot/pause", authRateLimiter, requireDashboardAccess, (_req, res) => {
     try {
       pauseBotWorker();
       res.json({ ok: true, message: "Bot worker paused." });
@@ -1957,8 +1986,8 @@ ENGAGEMENT PRINCIPLES:
     }
   });
 
-  // POST /api/bot/resume — resume a paused polling loop (admin only)
-  app.post("/api/bot/resume", authRateLimiter, requireAdmin, async (_req, res) => {
+  // POST /api/bot/resume — resume a paused polling loop (admin or dashboard-verified)
+  app.post("/api/bot/resume", authRateLimiter, requireDashboardAccess, async (_req, res) => {
     try {
       resumeBotWorker().catch((err: unknown) => {
         console.error("[bot/resume]", err);
@@ -1969,8 +1998,8 @@ ENGAGEMENT PRINCIPLES:
     }
   });
 
-  // POST /api/bot/start — start the worker if it was never started (admin only)
-  app.post("/api/bot/start", authRateLimiter, requireAdmin, async (_req, res) => {
+  // POST /api/bot/start — start the worker if it was never started (admin or dashboard-verified)
+  app.post("/api/bot/start", authRateLimiter, requireDashboardAccess, async (_req, res) => {
     try {
       _startBotWorker().catch((err: unknown) => {
         console.error("[bot/start]", err);
@@ -1981,8 +2010,8 @@ ENGAGEMENT PRINCIPLES:
     }
   });
 
-  // PATCH /api/bot/config — update runtime config (admin only)
-  app.patch("/api/bot/config", authRateLimiter, requireAdmin, (req, res) => {
+  // PATCH /api/bot/config — update runtime config (admin or dashboard-verified)
+  app.patch("/api/bot/config", authRateLimiter, requireDashboardAccess, (req, res) => {
     try {
       const { pollIntervalMs, maxArticlesPerFeed, feedEnabled } = req.body;
 

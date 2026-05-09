@@ -248,23 +248,6 @@ export default function DashboardPage() {
     );
   }
 
-  // Not admin
-  if (user.role !== "admin") {
-    return (
-      <div className="min-h-screen bg-space-black text-white">
-        <Navigation />
-        <div className="container mx-auto px-6 pt-28 text-center">
-          <Shield className="w-16 h-16 text-galactic-orange/30 mx-auto mb-4" />
-          <h1 className="text-2xl font-orbitron font-bold text-galactic-orange mb-2">Access Denied</h1>
-          <p className="text-gray-400 mb-4">Only administrators can access the dashboard.</p>
-          <Link href="/">
-            <Button className="bg-galactic-orange text-space-black font-orbitron">Go Home</Button>
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
   // Admin password gate
   if (!isVerified) {
     return (
