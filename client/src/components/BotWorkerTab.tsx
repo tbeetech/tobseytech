@@ -317,14 +317,19 @@ export default function BotWorkerTab() {
             </Button>
           )}
 
-          {/* Trigger now */}
+          {/* Trigger now — disabled when paused, cycling, or any mutation in flight */}
           <Button
             size="sm"
             onClick={() => triggerMutation.mutate()}
-            disabled={anyMutating || cycleRunning || paused}
+            disabled={anyMutating || cycleRunning || paused || !running}
             variant="outline"
             className="border-galactic-orange/40 text-galactic-orange hover:bg-galactic-orange/10 font-orbitron text-xs h-8"
-            title={paused ? "Resume the bot first" : "Run an immediate fetch cycle"}
+            title={
+              paused ? "Resume the bot first" :
+              !running ? "Start the bot first" :
+              cycleRunning ? "Cycle already running" :
+              "Run an immediate fetch cycle"
+            }
           >
             {triggerMutation.isPending || cycleRunning ? (
               <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" />

@@ -118,8 +118,8 @@ const status: BotWorkerStatus = {
   lastRun: null,
   postsCreated: 0,
   errors: 0,
-  get pollIntervalMs() { return _pollIntervalMs; },
-  get maxArticlesPerFeed() { return _maxArticlesPerFeed; },
+  pollIntervalMs: INITIAL_POLL_INTERVAL_MS,
+  maxArticlesPerFeed: INITIAL_MAX_ARTICLES,
   feeds: TECH_FEEDS.map((f) => ({ name: f.name, enabled: true, lastFetched: null, articlesFound: 0 })),
 };
 
@@ -253,10 +253,12 @@ const parser = new Parser({
 });
 
 async function fetchAndPostFeed(feed: BotFeed, feedIndex: number): Promise<void> {
-  // Skip disabled feeds
-  if (!_feedEnabled[feed.name]) {
+  // Skip disabled feeds or when admin is not yet resolved
+  if (!_feedEnabled[feed.name] || !_botAdminId) {
     return;
   }
+
+  const adminId = _botAdminId; // captured for this call
 
   const feedStatus = status.feeds[feedIndex];
   try {
@@ -301,7 +303,7 @@ async function fetchAndPostFeed(feed: BotFeed, feedIndex: number): Promise<void>
         tags,
         category: feed.category,
         published: true, // auto-publish curated content
-        authorId: _botAdminId!,
+        authorId: adminId,
         authorName: `${_botAdminName} · ${feed.name}`,
       });
 
@@ -371,6 +373,17 @@ async function resolveBotAdmin(): Promise<void> {
   }
 }
 
+/**
+ * Schedule the next cycle tick, clamping the interval to a safe server-controlled
+ * range (MIN_POLL_INTERVAL_MS … 24 hours) so that admin-supplied values cannot
+ * cause resource-exhaustion via a zero or excessively large timer.
+ */
+function scheduleNextCycle(fn: () => Promise<void>): void {
+  const MAX_POLL_INTERVAL_MS = 86_400_000; // 24 h
+  const safeInterval = Math.max(MIN_POLL_INTERVAL_MS, Math.min(MAX_POLL_INTERVAL_MS, _pollIntervalMs));
+  _pollTimer = setTimeout(fn, safeInterval);
+}
+
 /** Start the background polling loop. */
 export async function startBotWorker(): Promise<void> {
   if (status.running && !status.paused) {
@@ -386,21 +399,19 @@ export async function startBotWorker(): Promise<void> {
     `[botWorker] 🤖 Bot worker started. Poll interval: ${_pollIntervalMs / 1000}s`
   );
 
-  // Use recursive setTimeout instead of setInterval so a slow cycle never
-  // overlaps with the next scheduled one — the next tick is only scheduled
-  // AFTER the previous cycle has fully completed.
+  // Use recursive setTimeout so a slow cycle never overlaps with the next tick.
   async function scheduledCycle(): Promise<void> {
     if (!status.running || status.paused) return;
     await runCycle();
     if (status.running && !status.paused) {
-      _pollTimer = setTimeout(scheduledCycle, _pollIntervalMs);
+      scheduleNextCycle(scheduledCycle);
     }
   }
 
   // Run an initial cycle immediately, then continue on the schedule
   await runCycle();
   if (status.running && !status.paused) {
-    _pollTimer = setTimeout(scheduledCycle, _pollIntervalMs);
+    scheduleNextCycle(scheduledCycle);
   }
 }
 
@@ -442,31 +453,34 @@ export async function resumeBotWorker(): Promise<void> {
     if (!status.running || status.paused) return;
     await runCycle();
     if (status.running && !status.paused) {
-      _pollTimer = setTimeout(scheduledCycle, _pollIntervalMs);
+      scheduleNextCycle(scheduledCycle);
     }
   }
 
   await runCycle();
   if (status.running && !status.paused) {
-    _pollTimer = setTimeout(scheduledCycle, _pollIntervalMs);
+    scheduleNextCycle(scheduledCycle);
   }
 }
 
 /** Update runtime configuration without restarting the worker. */
 export function updateBotConfig(config: BotConfig): void {
   if (config.pollIntervalMs !== undefined) {
-    const v = Number(config.pollIntervalMs);
-    if (Number.isFinite(v) && v >= MIN_POLL_INTERVAL_MS) {
-      _pollIntervalMs = v;
-      console.log(`[botWorker] ⚙ Poll interval updated to ${v / 1000}s`);
+    const raw = Number(config.pollIntervalMs);
+    // Clamp to [MIN_POLL_INTERVAL_MS, 24 h] — same bounds used in scheduleNextCycle
+    if (Number.isFinite(raw) && raw >= MIN_POLL_INTERVAL_MS) {
+      _pollIntervalMs = Math.min(raw, 86_400_000);
+      status.pollIntervalMs = _pollIntervalMs;
+      console.log(`[botWorker] ⚙ Poll interval updated to ${_pollIntervalMs / 1000}s`);
     }
   }
 
   if (config.maxArticlesPerFeed !== undefined) {
-    const v = Math.max(1, Math.min(100, Number(config.maxArticlesPerFeed)));
-    if (Number.isFinite(v)) {
-      _maxArticlesPerFeed = v;
-      console.log(`[botWorker] ⚙ Max articles per feed updated to ${v}`);
+    const raw = Number(config.maxArticlesPerFeed);
+    if (Number.isFinite(raw) && !Number.isNaN(raw)) {
+      _maxArticlesPerFeed = Math.max(1, Math.min(100, Math.floor(raw)));
+      status.maxArticlesPerFeed = _maxArticlesPerFeed;
+      console.log(`[botWorker] ⚙ Max articles per feed updated to ${_maxArticlesPerFeed}`);
     }
   }
 

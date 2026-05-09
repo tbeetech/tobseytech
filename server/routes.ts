@@ -1986,13 +1986,24 @@ ENGAGEMENT PRINCIPLES:
     try {
       const { pollIntervalMs, maxArticlesPerFeed, feedEnabled } = req.body;
 
-      // Basic validation
+      // Validate numeric fields: must be finite numbers within acceptable ranges
+      if (pollIntervalMs !== undefined) {
+        const v = Number(pollIntervalMs);
+        if (!Number.isFinite(v) || v < 30_000 || v > 86_400_000) {
+          return res.status(400).json({ message: "pollIntervalMs must be between 30000 and 86400000 ms" });
+        }
+      }
+      if (maxArticlesPerFeed !== undefined) {
+        const v = Number(maxArticlesPerFeed);
+        if (!Number.isFinite(v) || v < 1 || v > 100) {
+          return res.status(400).json({ message: "maxArticlesPerFeed must be between 1 and 100" });
+        }
+      }
       if (
-        (pollIntervalMs !== undefined && typeof pollIntervalMs !== "number") ||
-        (maxArticlesPerFeed !== undefined && typeof maxArticlesPerFeed !== "number") ||
-        (feedEnabled !== undefined && (typeof feedEnabled !== "object" || Array.isArray(feedEnabled)))
+        feedEnabled !== undefined &&
+        (typeof feedEnabled !== "object" || Array.isArray(feedEnabled) || feedEnabled === null)
       ) {
-        return res.status(400).json({ message: "Invalid configuration values" });
+        return res.status(400).json({ message: "feedEnabled must be a key/value object" });
       }
 
       updateBotConfig({ pollIntervalMs, maxArticlesPerFeed, feedEnabled });
