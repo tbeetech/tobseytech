@@ -12,6 +12,7 @@
 
 import Parser from "rss-parser";
 import { storage } from "./storage.js";
+import { cleanPost } from "./cleaner.js";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -285,8 +286,8 @@ async function fetchAndPostFeed(feed: BotFeed, feedIndex: number): Promise<void>
       }
 
       const coverImage = extractImage(item);
-      const excerpt = buildExcerpt(item.contentSnippet || item.summary || item.content || "");
-      const content = buildContent(item, feed.name, coverImage);
+      const rawExcerpt = buildExcerpt(item.contentSnippet || item.summary || item.content || "");
+      const rawContent = buildContent(item, feed.name, coverImage);
       const tags = [
         ...feed.tags,
         ...(item.categories ?? []).slice(0, 4).map((c: string) =>
@@ -294,11 +295,14 @@ async function fetchAndPostFeed(feed: BotFeed, feedIndex: number): Promise<void>
         ),
       ].filter(Boolean);
 
+      // ── Synchronous Gate: clean all text fields before they reach the DB ──
+      const cleaned = cleanPost({ title, excerpt: rawExcerpt, content: rawContent });
+
       await storage.createBlogPost({
-        title,
+        title:   cleaned.title,
         slug,
-        excerpt,
-        content,
+        excerpt: cleaned.excerpt,
+        content: cleaned.content,
         coverImage: hasValidCoverImage(coverImage) ? coverImage : null,
         tags,
         category: feed.category,
