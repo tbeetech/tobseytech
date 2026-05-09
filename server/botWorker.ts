@@ -468,8 +468,8 @@ export function updateBotConfig(config: BotConfig): void {
   if (config.pollIntervalMs !== undefined) {
     const raw = Number(config.pollIntervalMs);
     // Clamp to [MIN_POLL_INTERVAL_MS, 24 h] — same bounds used in scheduleNextCycle
-    if (Number.isFinite(raw) && raw >= MIN_POLL_INTERVAL_MS) {
-      _pollIntervalMs = Math.min(raw, 86_400_000);
+    if (Number.isFinite(raw) && raw >= MIN_POLL_INTERVAL_MS && raw <= 86_400_000) {
+      _pollIntervalMs = raw;
       status.pollIntervalMs = _pollIntervalMs;
       console.log(`[botWorker] ⚙ Poll interval updated to ${_pollIntervalMs / 1000}s`);
     }
@@ -477,7 +477,7 @@ export function updateBotConfig(config: BotConfig): void {
 
   if (config.maxArticlesPerFeed !== undefined) {
     const raw = Number(config.maxArticlesPerFeed);
-    if (Number.isFinite(raw) && !Number.isNaN(raw)) {
+    if (Number.isFinite(raw)) {
       _maxArticlesPerFeed = Math.max(1, Math.min(100, Math.floor(raw)));
       status.maxArticlesPerFeed = _maxArticlesPerFeed;
       console.log(`[botWorker] ⚙ Max articles per feed updated to ${_maxArticlesPerFeed}`);
