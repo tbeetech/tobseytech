@@ -29,6 +29,7 @@ import {
   Rss,
   Bot,
   Sparkles,
+  Zap,
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { format } from "date-fns";
@@ -226,6 +227,28 @@ export default function DashboardPage() {
     onError: () => toast({ title: "Failed to review suggestion", variant: "destructive" }),
   });
 
+  const { data: prophetStatusData } = useQuery<{ enabled: boolean }>({
+    queryKey: ["/api/prophet/status"],
+    queryFn: async () => {
+      const res = await fetch("/api/prophet/status");
+      if (!res.ok) throw new Error("Failed");
+      return res.json();
+    },
+    enabled: isVerified,
+  });
+
+  const toggleProphetMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest("POST", "/api/admin/prophet/toggle");
+      return res.json() as Promise<{ enabled: boolean }>;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/prophet/status"] });
+      toast({ title: data.enabled ? "Prophet AI activated" : "Prophet AI deactivated" });
+    },
+    onError: () => toast({ title: "Failed to toggle Prophet AI", variant: "destructive" }),
+  });
+
   // Loading state
   if (authLoading) {
     return (
@@ -365,6 +388,9 @@ export default function DashboardPage() {
             </TabsTrigger>
             <TabsTrigger value="cleaner" className="font-orbitron text-sm rounded-lg">
               <Sparkles className="w-4 h-4 mr-1" /> Cleaner
+            </TabsTrigger>
+            <TabsTrigger value="prophet" className="font-orbitron text-sm rounded-lg">
+              <Zap className="w-4 h-4 mr-1" /> Prophet AI
             </TabsTrigger>
           </TabsList>
 
@@ -779,6 +805,73 @@ export default function DashboardPage() {
           {/* ── Cleaner & Corrector Tab ── */}
           <TabsContent value="cleaner">
             <CleanerTab />
+          </TabsContent>
+
+          {/* ── Prophet AI Tab ── */}
+          <TabsContent value="prophet">
+            <div className="glass-effect rounded-xl p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-lg font-orbitron font-bold text-galactic-orange flex items-center gap-2">
+                  <Zap className="w-5 h-5" /> Prophet AI
+                </h2>
+              </div>
+              <div className="flex flex-col items-center gap-6 py-8">
+                <div
+                  className="w-24 h-24 rounded-full flex items-center justify-center shadow-lg"
+                  style={{
+                    background: prophetStatusData?.enabled
+                      ? "linear-gradient(135deg, rgba(255,165,0,0.25), rgba(255,215,0,0.15))"
+                      : "rgba(255,255,255,0.05)",
+                    border: prophetStatusData?.enabled
+                      ? "2px solid rgba(255,165,0,0.6)"
+                      : "2px solid rgba(255,255,255,0.15)",
+                    boxShadow: prophetStatusData?.enabled
+                      ? "0 0 32px rgba(255,165,0,0.3)"
+                      : "none",
+                  }}
+                >
+                  <Zap
+                    className="w-10 h-10"
+                    style={{ color: prophetStatusData?.enabled ? "var(--galactic-orange)" : "rgba(255,255,255,0.3)" }}
+                  />
+                </div>
+                <div className="text-center">
+                  <p className="font-orbitron text-xl font-bold mb-1" style={{ color: prophetStatusData?.enabled ? "var(--galactic-orange)" : "rgba(255,255,255,0.4)" }}>
+                    PROPHET AI
+                  </p>
+                  <p className="text-sm text-gray-400 mb-1">
+                    Status:{" "}
+                    <span
+                      className="font-semibold"
+                      style={{ color: prophetStatusData?.enabled ? "#22c55e" : "#ef4444" }}
+                    >
+                      {prophetStatusData?.enabled ? "ACTIVE" : "INACTIVE"}
+                    </span>
+                  </p>
+                  <p className="text-xs text-gray-500 max-w-xs">
+                    When deactivated, the Prophet AI button is hidden from all users and the chat endpoint is disabled.
+                  </p>
+                </div>
+                <Button
+                  onClick={() => toggleProphetMutation.mutate()}
+                  disabled={toggleProphetMutation.isPending}
+                  className="font-orbitron font-bold px-8 h-11"
+                  style={
+                    prophetStatusData?.enabled
+                      ? { background: "rgba(239,68,68,0.15)", border: "1px solid rgba(239,68,68,0.5)", color: "#ef4444" }
+                      : { background: "linear-gradient(135deg, var(--galactic-orange), var(--galactic-gold))", color: "#000" }
+                  }
+                >
+                  {toggleProphetMutation.isPending ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : prophetStatusData?.enabled ? (
+                    "Deactivate Prophet AI"
+                  ) : (
+                    "Activate Prophet AI"
+                  )}
+                </Button>
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
       </div>

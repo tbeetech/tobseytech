@@ -1682,6 +1682,22 @@ async function _registerRouteHandlers(app: Express): Promise<void> {
 
   // ─── Prophet AI — navigation & questioner AI ────────────────────────────
 
+  // Module-level flag: admin can enable/disable Prophet AI at runtime.
+  // Defaults to true (enabled). Resets to true on server restart.
+  let prophetEnabled = true;
+
+  // Public: check whether Prophet AI is currently enabled
+  app.get("/api/prophet/status", (req, res) => {
+    res.json({ enabled: prophetEnabled });
+  });
+
+  // Admin: toggle Prophet AI on or off
+  app.post("/api/admin/prophet/toggle", authRateLimiter, requireDashboardAccess, (req, res) => {
+    prophetEnabled = !prophetEnabled;
+    console.log(`[prophet] Admin toggled Prophet AI: ${prophetEnabled ? "ENABLED" : "DISABLED"}`);
+    res.json({ enabled: prophetEnabled });
+  });
+
   const prophetRateLimiter = rateLimit({
     windowMs: 60 * 1000, // 1 minute window
     max: 20,
@@ -1755,6 +1771,9 @@ GUIDELINES:
 
   app.post("/api/prophet", prophetRateLimiter, async (req, res) => {
     try {
+      if (!prophetEnabled) {
+        return res.status(503).json({ message: "Prophet AI is currently offline." });
+      }
       const { messages } = prophetMessageSchema.parse(req.body);
       const geminiConfig = getGeminiApiKeyConfig();
       if (!geminiConfig) {
