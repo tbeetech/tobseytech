@@ -168,7 +168,7 @@ export function stripSourceAttribution(text: string): string {
   let out = text;
 
   // Remove the full block: optional blank lines + horizontal rule + attribution
-  out = out.replace(/\s*\n\s*---\s*\n[\s\S]*?Originally published by[\s\S]*$/im, "");
+  out = out.replace(/\s*\n\s*---\s*\nOriginally published by[\s\S]*$/im, "");
 
   // Remove standalone "Originally published by …" sentences (to end of that line)
   out = out.replace(/Originally published by[^\n]*/gi, "");
@@ -177,7 +177,7 @@ export function stripSourceAttribution(text: string): string {
   out = out.replace(/Read the original article[^\n]*/gi, "");
 
   // Remove "Source: <anything>" lines
-  out = out.replace(/^Source:\s*\S+[^\n]*/gim, "");
+  out = out.replace(/^Source:\s*[^\n]*/gim, "");
 
   // Collapse any resulting multiple blank lines and trim
   out = out.replace(/\n{3,}/g, "\n\n").trim();
