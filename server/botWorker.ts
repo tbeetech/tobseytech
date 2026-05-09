@@ -200,9 +200,7 @@ function extractImage(item: RssItem): string {
  * frontend.  The cover image is stored separately in the `coverImage` field
  * and rendered by the frontend, so it is NOT embedded here.
  */
-function buildContent(item: RssItem, feedName: string): string {
-  const sourceUrl = item.link || "#";
-  const sourceDate = item.pubDate ? new Date(item.pubDate).toDateString() : "";
+function buildContent(item: RssItem): string {
   const rawHtml =
     item["content:encoded"] ||
     item.content ||
@@ -213,14 +211,9 @@ function buildContent(item: RssItem, feedName: string): string {
   // Decode HTML entities first, then strip all tags to get clean plain text.
   const body = rawHtml
     ? stripHtml(decodeHtmlEntities(rawHtml))
-    : "Read the full article at the source link below.";
+    : "";
 
-  const attribution = [
-    `Originally published by ${feedName}${sourceDate ? ` on ${sourceDate}` : ""}.`,
-    `Source: ${sourceUrl}`,
-  ].join(" ");
-
-  return `${body}\n\n---\n${attribution}`;
+  return body;
 }
 
 // ─── Core fetch logic ─────────────────────────────────────────────────────────
@@ -273,7 +266,7 @@ async function fetchAndPostFeed(feed: BotFeed, feedIndex: number): Promise<void>
 
       const coverImage = extractImage(item);
       const rawExcerpt = buildExcerpt(item.contentSnippet || item.summary || item.content || "");
-      const rawContent = buildContent(item, feed.name);
+      const rawContent = buildContent(item);
       const tags = [
         ...feed.tags,
         ...(item.categories ?? []).slice(0, 4).map((c: string) =>

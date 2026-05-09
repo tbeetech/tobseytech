@@ -151,6 +151,40 @@ export function cleanContentHtml(html: string): string {
   return out.trim();
 }
 
+// ─── Source attribution stripper ─────────────────────────────────────────────
+
+/**
+ * Remove any source-attribution lines that the bot previously appended to
+ * content.  Handles:
+ *  - The separator + attribution block added by buildContent:
+ *      \n\n---\nOriginally published by … Source: …
+ *  - Standalone "Originally published by …" sentences anywhere in the text
+ *  - "Read the original article" phrases (with or without a URL)
+ *  - "Source: <url>" lines
+ */
+export function stripSourceAttribution(text: string): string {
+  if (!text) return text;
+
+  let out = text;
+
+  // Remove the full block: optional blank lines + horizontal rule + attribution
+  out = out.replace(/\s*\n\s*---\s*\n[\s\S]*?Originally published by[\s\S]*$/im, "");
+
+  // Remove standalone "Originally published by …" sentences (to end of that line)
+  out = out.replace(/Originally published by[^\n]*/gi, "");
+
+  // Remove "Read the original article" links/phrases (to end of that line)
+  out = out.replace(/Read the original article[^\n]*/gi, "");
+
+  // Remove "Source: <anything>" lines
+  out = out.replace(/^Source:\s*\S+[^\n]*/gim, "");
+
+  // Collapse any resulting multiple blank lines and trim
+  out = out.replace(/\n{3,}/g, "\n\n").trim();
+
+  return out;
+}
+
 // ─── Public gate — clean a post before it enters the DB ──────────────────────
 
 export interface PostTextFields {
@@ -164,15 +198,14 @@ export interface PostTextFields {
  *
  * - title   → full HTML strip + entity decode + whitespace normalise
  * - excerpt → same as title (excerpt is always plain text)
- * - content → same as title: HTML is stripped so the content is stored as
- *             plain text compatible with the Markdown renderer on the frontend
+ * - content → HTML strip + entity decode + source-attribution removal
  */
 export function cleanPost<T extends PostTextFields>(post: T): T {
   return {
     ...post,
     title: cleanTextField(post.title),
     excerpt: cleanTextField(post.excerpt),
-    content: cleanTextField(post.content),
+    content: stripSourceAttribution(cleanTextField(post.content)),
   };
 }
 
@@ -203,7 +236,7 @@ export async function auditAndClean(store: IStorage): Promise<AuditResult> {
     try {
       const cleanedTitle   = cleanTextField(post.title);
       const cleanedExcerpt = cleanTextField(post.excerpt);
-      const cleanedContent = cleanTextField(post.content);
+      const cleanedContent = stripSourceAttribution(cleanTextField(post.content));
 
       const changed =
         cleanedTitle   !== post.title   ||
