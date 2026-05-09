@@ -13,6 +13,7 @@ import mongoose from "mongoose";
 import { storage } from "./storage.js";
 import { ADMIN_DASHBOARD_PASSWORD } from "./env.js";
 import { injectBlogMetaTags } from "./ogTags.js";
+import { getBotStatus, triggerBotCycle, pauseBotWorker, resumeBotWorker, startBotWorker as _startBotWorker, updateBotConfig } from "./botWorker.js";
 import {
   insertContactSchema,
   insertProductSchema,
@@ -1919,6 +1920,96 @@ ENGAGEMENT PRINCIPLES:
       }
       console.error("[cosmo]", error);
       res.status(500).json({ message: "Cosmo Research AI encountered an error." });
+    }
+  });
+
+  // ─── Bot Worker routes ────────────────────────────────────────────────────
+
+  // GET /api/bot/status — read-only status (admin only)
+  app.get("/api/bot/status", authRateLimiter, requireAdmin, (_req, res) => {
+    try {
+      res.json(getBotStatus());
+    } catch {
+      res.status(500).json({ message: "Failed to retrieve bot status" });
+    }
+  });
+
+  // POST /api/bot/trigger — manually kick off an immediate fetch cycle (admin only)
+  app.post("/api/bot/trigger", authRateLimiter, requireAdmin, async (_req, res) => {
+    try {
+      // Fire-and-forget — respond immediately so the request doesn't time out
+      triggerBotCycle().catch((err: unknown) => {
+        console.error("[bot/trigger]", err);
+      });
+      res.json({ ok: true, message: "Bot fetch cycle triggered." });
+    } catch {
+      res.status(500).json({ message: "Failed to trigger bot cycle" });
+    }
+  });
+
+  // POST /api/bot/pause — pause the polling loop (admin only)
+  app.post("/api/bot/pause", authRateLimiter, requireAdmin, (_req, res) => {
+    try {
+      pauseBotWorker();
+      res.json({ ok: true, message: "Bot worker paused." });
+    } catch {
+      res.status(500).json({ message: "Failed to pause bot worker" });
+    }
+  });
+
+  // POST /api/bot/resume — resume a paused polling loop (admin only)
+  app.post("/api/bot/resume", authRateLimiter, requireAdmin, async (_req, res) => {
+    try {
+      resumeBotWorker().catch((err: unknown) => {
+        console.error("[bot/resume]", err);
+      });
+      res.json({ ok: true, message: "Bot worker resumed." });
+    } catch {
+      res.status(500).json({ message: "Failed to resume bot worker" });
+    }
+  });
+
+  // POST /api/bot/start — start the worker if it was never started (admin only)
+  app.post("/api/bot/start", authRateLimiter, requireAdmin, async (_req, res) => {
+    try {
+      _startBotWorker().catch((err: unknown) => {
+        console.error("[bot/start]", err);
+      });
+      res.json({ ok: true, message: "Bot worker starting." });
+    } catch {
+      res.status(500).json({ message: "Failed to start bot worker" });
+    }
+  });
+
+  // PATCH /api/bot/config — update runtime config (admin only)
+  app.patch("/api/bot/config", authRateLimiter, requireAdmin, (req, res) => {
+    try {
+      const { pollIntervalMs, maxArticlesPerFeed, feedEnabled } = req.body;
+
+      // Validate numeric fields: must be finite numbers within acceptable ranges
+      if (pollIntervalMs !== undefined) {
+        const v = Number(pollIntervalMs);
+        if (!Number.isFinite(v) || v < 30_000 || v > 86_400_000) {
+          return res.status(400).json({ message: "pollIntervalMs must be between 30000 and 86400000 ms" });
+        }
+      }
+      if (maxArticlesPerFeed !== undefined) {
+        const v = Number(maxArticlesPerFeed);
+        if (!Number.isFinite(v) || v < 1 || v > 100) {
+          return res.status(400).json({ message: "maxArticlesPerFeed must be between 1 and 100" });
+        }
+      }
+      if (
+        feedEnabled !== undefined &&
+        (typeof feedEnabled !== "object" || Array.isArray(feedEnabled) || feedEnabled === null)
+      ) {
+        return res.status(400).json({ message: "feedEnabled must be a key/value object" });
+      }
+
+      updateBotConfig({ pollIntervalMs, maxArticlesPerFeed, feedEnabled });
+      res.json({ ok: true, status: getBotStatus() });
+    } catch {
+      res.status(500).json({ message: "Failed to update bot configuration" });
     }
   });
 
