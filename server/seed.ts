@@ -8,11 +8,12 @@ import { ADMIN_SEED_EMAIL, ADMIN_SEED_PASSWORD } from "./env.js";
  *
  * Environment variables used:
  *   ADMIN_SEED_EMAIL     – email address for the seeded account (required)
- *   ADMIN_SEED_PASSWORD  – password for the seeded account (required)
+ *   ADMIN_SEED_PASSWORD  – initial password used only when creating the account
+ *                          for the very first time (required)
  *
- * If the user already exists their role is promoted to "admin" and the
- * password is synced to the current value of ADMIN_SEED_PASSWORD so that
- * updating the env var on Render (or locally) takes effect on the next restart.
+ * If the user already exists only the role is promoted to "admin" when needed.
+ * The password is intentionally NOT overwritten on subsequent restarts so that
+ * password changes made via the "Forgot Password" flow are preserved.
  */
 
 export async function ensureAdminUser(): Promise<void> {
@@ -31,22 +32,10 @@ export async function ensureAdminUser(): Promise<void> {
     const existing = await storage.getUserByUsername(username);
 
     if (existing) {
-      let changed = false;
       if (existing.role !== "admin") {
         await storage.updateUserRole(existing.id, "admin");
         console.log(`[seed] Promoted existing user "${username}" to admin.`);
-        changed = true;
-      }
-      // Always sync the password so that a new ADMIN_SEED_PASSWORD takes effect
-      // on the next server restart without requiring a manual DB update.
-      const passwordMatches = await bcrypt.compare(password, existing.password);
-      if (!passwordMatches) {
-        const hashed = await bcrypt.hash(password, 12);
-        await storage.updateUserPassword(existing.id, hashed);
-        console.log(`[seed] Updated password for admin user "${username}".`);
-        changed = true;
-      }
-      if (!changed) {
+      } else {
         console.log(`[seed] Admin user "${username}" is up-to-date – nothing to do.`);
       }
       return;
