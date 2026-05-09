@@ -14,6 +14,7 @@ import { storage } from "./storage.js";
 import { ADMIN_DASHBOARD_PASSWORD } from "./env.js";
 import { injectBlogMetaTags } from "./ogTags.js";
 import { getBotStatus, triggerBotCycle, pauseBotWorker, resumeBotWorker, startBotWorker as _startBotWorker, updateBotConfig } from "./botWorker.js";
+import { auditAndClean } from "./cleaner.js";
 import {
   insertContactSchema,
   insertProductSchema,
@@ -2039,6 +2040,16 @@ ENGAGEMENT PRINCIPLES:
       res.json({ ok: true, status: getBotStatus() });
     } catch {
       res.status(500).json({ message: "Failed to update bot configuration" });
+    }
+  });
+
+  // POST /api/bot/audit — manual audit: retroactively clean all DB posts (admin or dashboard-verified)
+  app.post("/api/bot/audit", authRateLimiter, requireDashboardAccess, async (_req, res) => {
+    try {
+      const result = await auditAndClean(storage);
+      res.json({ ok: true, ...result });
+    } catch {
+      res.status(500).json({ message: "Audit failed — see server logs for details." });
     }
   });
 

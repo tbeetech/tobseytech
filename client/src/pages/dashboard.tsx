@@ -28,12 +28,14 @@ import {
   Share2,
   Rss,
   Bot,
+  Sparkles,
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { format } from "date-fns";
 import { SharePostDialog } from "@/components/share-post-dialog";
 import PostFetcherTab from "@/components/PostFetcherTab";
 import BotWorkerTab from "@/components/BotWorkerTab";
+import CleanerTab from "@/components/CleanerTab";
 
 interface SafeUser {
   id: string;
@@ -360,6 +362,9 @@ export default function DashboardPage() {
             </TabsTrigger>
             <TabsTrigger value="bot" className="font-orbitron text-sm rounded-lg">
               <Bot className="w-4 h-4 mr-1" /> Bot Worker
+            </TabsTrigger>
+            <TabsTrigger value="cleaner" className="font-orbitron text-sm rounded-lg">
+              <Sparkles className="w-4 h-4 mr-1" /> Cleaner
             </TabsTrigger>
           </TabsList>
 
@@ -769,6 +774,11 @@ export default function DashboardPage() {
           {/* ── Bot Worker Tab ── */}
           <TabsContent value="bot">
             <BotWorkerTab />
+          </TabsContent>
+
+          {/* ── Cleaner & Corrector Tab ── */}
+          <TabsContent value="cleaner">
+            <CleanerTab />
           </TabsContent>
         </Tabs>
       </div>
