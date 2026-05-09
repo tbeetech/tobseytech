@@ -12,7 +12,7 @@
 
 import Parser from "rss-parser";
 import { storage } from "./storage.js";
-import { cleanPost } from "./cleaner.js";
+import { cleanPost, decodeHtmlEntities } from "./cleaner.js";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -195,46 +195,32 @@ function extractImage(item: RssItem): string {
 }
 
 /**
- * Build the blog post content HTML, including the original article link and
- * the cover image (so the source link is always attached to every post).
+ * Build the blog post content as plain text, stripping all HTML from the RSS
+ * article body so it renders correctly through the Markdown pipeline on the
+ * frontend.  The cover image is stored separately in the `coverImage` field
+ * and rendered by the frontend, so it is NOT embedded here.
  */
-function buildContent(
-  item: RssItem,
-  feedName: string,
-  coverImage: string
-): string {
+function buildContent(item: RssItem, feedName: string): string {
   const sourceUrl = item.link || "#";
   const sourceDate = item.pubDate ? new Date(item.pubDate).toDateString() : "";
-  const rawContent =
+  const rawHtml =
     item["content:encoded"] ||
     item.content ||
     item.summary ||
     item.contentSnippet ||
     "";
 
-  const imageHtml = hasValidCoverImage(coverImage)
-    ? `<img src="${coverImage}" alt="Cover image" style="max-width:100%;border-radius:8px;margin-bottom:1.5rem;" />`
-    : `<img src="${FALLBACK_LOGO_URL}" alt="TobseyTech" style="max-width:200px;margin-bottom:1.5rem;" />`;
+  // Decode HTML entities first, then strip all tags to get clean plain text.
+  const body = rawHtml
+    ? stripHtml(decodeHtmlEntities(rawHtml))
+    : "Read the full article at the source link below.";
 
-  const sourceHtml = `
-<p style="font-size:0.85rem;color:#888;margin-bottom:1.5rem;">
-  Originally published by <strong>${feedName}</strong>${sourceDate ? ` on ${sourceDate}` : ""}.
-  <a href="${sourceUrl}" target="_blank" rel="noopener noreferrer">Read the original article →</a>
-</p>`;
+  const attribution = [
+    `Originally published by ${feedName}${sourceDate ? ` on ${sourceDate}` : ""}.`,
+    `Source: ${sourceUrl}`,
+  ].join(" ");
 
-  const body = rawContent
-    ? rawContent
-    : `<p>Read the full article at the source link below.</p>`;
-
-  const footer = `
-<hr style="margin:2rem 0;border-color:#333;" />
-<p style="font-size:0.85rem;color:#888;">
-  This article was automatically curated from <strong>${feedName}</strong> to keep
-  TobseyTech readers up to date with the latest industry news.
-  <a href="${sourceUrl}" target="_blank" rel="noopener noreferrer">View source →</a>
-</p>`;
-
-  return `${imageHtml}${sourceHtml}${body}${footer}`;
+  return `${body}\n\n---\n${attribution}`;
 }
 
 // ─── Core fetch logic ─────────────────────────────────────────────────────────
@@ -287,7 +273,7 @@ async function fetchAndPostFeed(feed: BotFeed, feedIndex: number): Promise<void>
 
       const coverImage = extractImage(item);
       const rawExcerpt = buildExcerpt(item.contentSnippet || item.summary || item.content || "");
-      const rawContent = buildContent(item, feed.name, coverImage);
+      const rawContent = buildContent(item, feed.name);
       const tags = [
         ...feed.tags,
         ...(item.categories ?? []).slice(0, 4).map((c: string) =>
