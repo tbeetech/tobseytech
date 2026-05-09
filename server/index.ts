@@ -185,7 +185,7 @@ app.use((req, res, next) => {
   // and publishes them to the blog in real-time.
   if (process.env.BOT_WORKER_ENABLED !== "false") {
     startBotWorker().catch((err) => {
-      console.error("[startup] Bot worker failed to start:", err);
+      console.error("[startup] Bot worker failed to start (blog auto-posting disabled):", err);
     });
   }
 

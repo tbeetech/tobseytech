@@ -101,7 +101,7 @@ const status: BotWorkerStatus = {
 // Set of article GUIDs / links already posted this session (+ persisted slugs from DB)
 const seenGuids = new Set<string>();
 
-let _pollTimer: ReturnType<typeof setInterval> | null = null;
+let _pollTimer: ReturnType<typeof setTimeout> | null = null;
 let _botAdminId: string | null = null;
 let _botAdminName = "TobseyTech Bot";
 let _cycleRunning = false;
@@ -268,7 +268,7 @@ async function fetchAndPostFeed(feed: BotFeed, feedIndex: number): Promise<void>
         slug,
         excerpt,
         content,
-        coverImage: coverImage || null,
+        coverImage: hasValidCoverImage(coverImage) ? coverImage : null,
         tags,
         category: feed.category,
         published: true, // auto-publish curated content
@@ -352,25 +352,35 @@ export async function startBotWorker(): Promise<void> {
   await resolveBotAdmin();
   status.running = true;
 
-  // Run an initial cycle immediately, then on a schedule
-  await runCycle();
-
-  _pollTimer = setInterval(async () => {
-    await runCycle();
-  }, POLL_INTERVAL_MS);
-
   console.log(
     `[botWorker] 🤖 Bot worker started. Poll interval: ${POLL_INTERVAL_MS / 1000}s`
   );
+
+  // Use recursive setTimeout instead of setInterval so a slow cycle never
+  // overlaps with the next scheduled one — the next tick is only scheduled
+  // AFTER the previous cycle has fully completed.
+  async function scheduledCycle(): Promise<void> {
+    if (!status.running) return;
+    await runCycle();
+    if (status.running) {
+      _pollTimer = setTimeout(scheduledCycle, POLL_INTERVAL_MS);
+    }
+  }
+
+  // Run an initial cycle immediately, then continue on the schedule
+  await runCycle();
+  if (status.running) {
+    _pollTimer = setTimeout(scheduledCycle, POLL_INTERVAL_MS);
+  }
 }
 
 /** Stop the background polling loop. */
 export function stopBotWorker(): void {
+  status.running = false;
   if (_pollTimer) {
-    clearInterval(_pollTimer);
+    clearTimeout(_pollTimer);
     _pollTimer = null;
   }
-  status.running = false;
   console.log("[botWorker] 🛑 Bot worker stopped.");
 }
 
