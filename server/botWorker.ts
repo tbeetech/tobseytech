@@ -74,11 +74,19 @@ const TECH_FEEDS: BotFeed[] = [
 // Fallback logo URL used when an article has no cover image
 const FALLBACK_LOGO_URL = "/og-image.svg";
 
-// How often (ms) the worker polls all feeds
-const POLL_INTERVAL_MS = parseInt(process.env.BOT_POLL_INTERVAL_MS || "300000", 10); // default 5 min
+// How often (ms) the worker polls all feeds — minimum 30 s, default 5 min
+const MIN_POLL_INTERVAL_MS = 30_000;
+const DEFAULT_POLL_INTERVAL_MS = 300_000;
+const _rawPollInterval = parseInt(process.env.BOT_POLL_INTERVAL_MS || String(DEFAULT_POLL_INTERVAL_MS), 10);
+const POLL_INTERVAL_MS = Number.isFinite(_rawPollInterval) && _rawPollInterval >= MIN_POLL_INTERVAL_MS
+  ? _rawPollInterval
+  : DEFAULT_POLL_INTERVAL_MS;
 
-// Maximum articles to process per feed per cycle (prevents DB spam on first run)
-const MAX_ARTICLES_PER_FEED = parseInt(process.env.BOT_MAX_ARTICLES_PER_FEED || "5", 10);
+// Maximum articles to process per feed per cycle (1–100, default 5)
+const _rawMaxArticles = parseInt(process.env.BOT_MAX_ARTICLES_PER_FEED || "5", 10);
+const MAX_ARTICLES_PER_FEED = Number.isFinite(_rawMaxArticles) && _rawMaxArticles >= 1
+  ? Math.min(_rawMaxArticles, 100)
+  : 5;
 
 // ─── State ────────────────────────────────────────────────────────────────────
 
@@ -96,6 +104,7 @@ const seenGuids = new Set<string>();
 let _pollTimer: ReturnType<typeof setInterval> | null = null;
 let _botAdminId: string | null = null;
 let _botAdminName = "TobseyTech Bot";
+let _cycleRunning = false;
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -122,15 +131,30 @@ function buildExcerpt(raw: string): string {
   return plain.length > 300 ? plain.slice(0, 297) + "…" : plain || "Read the full article at the source link.";
 }
 
+// Extended RSS item type that includes non-standard fields exposed by rss-parser
+interface RssItem extends Parser.Item {
+  "media:content"?: { $: { url: string } } | Array<{ $: { url: string } }>;
+  "content:encoded"?: string;
+}
+
+/** Returns true when a cover image URL is a real remote image (not the fallback). */
+function hasValidCoverImage(coverImage: string): boolean {
+  return Boolean(coverImage) && coverImage !== FALLBACK_LOGO_URL;
+}
+
 /**
  * Extract the best available cover image URL from an RSS item.
- * Checks: media:content → enclosure → og:image in content → first <img> in content.
+ * Checks: media:content → enclosure → first <img> in content.
  */
-function extractImage(item: Parser.Item & Record<string, any>): string {
+function extractImage(item: RssItem): string {
   // rss-parser exposes media:content as item["media:content"]
   const mediaContent = item["media:content"];
-  if (mediaContent?.$.url) return mediaContent.$.url;
-  if (Array.isArray(mediaContent) && mediaContent[0]?.$.url) return mediaContent[0].$.url;
+  if (mediaContent && !Array.isArray(mediaContent) && mediaContent.$.url) {
+    return mediaContent.$.url;
+  }
+  if (Array.isArray(mediaContent) && mediaContent[0]?.$.url) {
+    return mediaContent[0].$.url;
+  }
 
   // Enclosure (podcasts / images attached to feed)
   if (item.enclosure?.url && /\.(jpe?g|png|webp|gif|svg)(\?|$)/i.test(item.enclosure.url)) {
@@ -150,7 +174,7 @@ function extractImage(item: Parser.Item & Record<string, any>): string {
  * the cover image (so the source link is always attached to every post).
  */
 function buildContent(
-  item: Parser.Item & Record<string, any>,
+  item: RssItem,
   feedName: string,
   coverImage: string
 ): string {
@@ -163,10 +187,9 @@ function buildContent(
     item.contentSnippet ||
     "";
 
-  const imageHtml =
-    coverImage && coverImage !== FALLBACK_LOGO_URL
-      ? `<img src="${coverImage}" alt="Cover image" style="max-width:100%;border-radius:8px;margin-bottom:1.5rem;" />`
-      : `<img src="${FALLBACK_LOGO_URL}" alt="TobseyTech" style="max-width:200px;margin-bottom:1.5rem;" />`;
+  const imageHtml = hasValidCoverImage(coverImage)
+    ? `<img src="${coverImage}" alt="Cover image" style="max-width:100%;border-radius:8px;margin-bottom:1.5rem;" />`
+    : `<img src="${FALLBACK_LOGO_URL}" alt="TobseyTech" style="max-width:200px;margin-bottom:1.5rem;" />`;
 
   const sourceHtml = `
 <p style="font-size:0.85rem;color:#888;margin-bottom:1.5rem;">
@@ -213,7 +236,7 @@ async function fetchAndPostFeed(feed: BotFeed, feedIndex: number): Promise<void>
     feedStatus.articlesFound = parsed.items.length;
 
     let processed = 0;
-    for (const item of parsed.items) {
+    for (const item of parsed.items as RssItem[]) {
       if (processed >= MAX_ARTICLES_PER_FEED) break;
 
       const guid = item.guid || item.link || item.title || "";
@@ -230,9 +253,9 @@ async function fetchAndPostFeed(feed: BotFeed, feedIndex: number): Promise<void>
         continue;
       }
 
-      const coverImage = extractImage(item as any);
+      const coverImage = extractImage(item);
       const excerpt = buildExcerpt(item.contentSnippet || item.summary || item.content || "");
-      const content = buildContent(item as any, feed.name, coverImage);
+      const content = buildContent(item, feed.name, coverImage);
       const tags = [
         ...feed.tags,
         ...(item.categories ?? []).slice(0, 4).map((c: string) =>
@@ -271,12 +294,22 @@ async function runCycle(): Promise<void> {
     return;
   }
 
+  // Prevent overlapping cycles: skip if a cycle is already in progress
+  if (_cycleRunning) {
+    console.log("[botWorker] Previous cycle still running — skipping this tick.");
+    return;
+  }
+
+  _cycleRunning = true;
   status.lastRun = new Date();
   console.log(`[botWorker] 🔄 Starting fetch cycle (${new Date().toISOString()})`);
 
-  await Promise.allSettled(TECH_FEEDS.map((feed, i) => fetchAndPostFeed(feed, i)));
-
-  console.log(`[botWorker] ✔ Cycle complete. Total posts created: ${status.postsCreated}`);
+  try {
+    await Promise.allSettled(TECH_FEEDS.map((feed, i) => fetchAndPostFeed(feed, i)));
+    console.log(`[botWorker] ✔ Cycle complete. Total posts created: ${status.postsCreated}`);
+  } finally {
+    _cycleRunning = false;
+  }
 }
 
 // ─── Public API ───────────────────────────────────────────────────────────────
