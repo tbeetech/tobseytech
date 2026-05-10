@@ -14,6 +14,7 @@
     { "source": "/blog/edit/:id", "destination": "/index.html" },
     { "source": "/blog/slug/:slug", "destination": "/index.html" },
     { "source": "/blog/:slug", "destination": "/api?path=blog-html/:slug" },
+    { "source": "/s/:code", "destination": "/api?path=s/:code" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
