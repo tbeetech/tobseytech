@@ -68,7 +68,7 @@ export default function AuthPage() {
       {/* Animated background orbs */}
       <div
         className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full blur-3xl animate-pulse-slow pointer-events-none"
-        style={{ background: "rgba(255,165,0,0.05)" }}
+        style={{ background: "rgba(34,197,94,0.05)" }}
       />
       <div
         className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full blur-3xl animate-pulse-slow pointer-events-none"
@@ -81,7 +81,7 @@ export default function AuthPage() {
         <div className="max-w-md">
           {/* Logo */}
           <div className="relative mb-8 flex flex-col items-center">
-            <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-galactic-orange via-galactic-gold to-galactic-orange flex items-center justify-center shadow-[0_0_50px_rgba(255,165,0,0.4)] animate-glow">
+            <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-galactic-orange via-galactic-gold to-galactic-orange flex items-center justify-center shadow-[0_0_50px_rgba(34,197,94,0.4)] animate-glow">
               <span className="text-space-black font-orbitron font-black text-3xl">TST</span>
             </div>
             <div className="absolute w-24 h-24 rounded-2xl border border-galactic-orange/30 scale-125 animate-pulse-slow" />
@@ -105,13 +105,13 @@ export default function AuthPage() {
                 key={i}
                 className="flex items-center gap-4 p-4 rounded-xl border border-galactic-orange/10 animate-slide-up"
                 style={{
-                  background: "rgba(255,165,0,0.05)",
+                  background: "rgba(34,197,94,0.05)",
                   animationDelay: `${i * 0.1}s`,
                 }}
               >
                 <div
                   className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
-                  style={{ background: "rgba(255,165,0,0.15)" }}
+                  style={{ background: "rgba(34,197,94,0.15)" }}
                 >
                   <Icon className="w-4 h-4 text-galactic-orange" />
                 </div>
@@ -125,7 +125,7 @@ export default function AuthPage() {
       {/* Divider */}
       <div
         className="hidden lg:block w-px"
-        style={{ background: "linear-gradient(to bottom, transparent, rgba(255,165,0,0.2), transparent)" }}
+        style={{ background: "linear-gradient(to bottom, transparent, rgba(34,197,94,0.2), transparent)" }}
       />
 
       {/* Right panel – auth form */}
@@ -133,7 +133,7 @@ export default function AuthPage() {
         <div className="w-full max-w-sm">
           {/* Mobile logo */}
           <div className="lg:hidden text-center mb-8">
-            <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-galactic-orange to-galactic-gold flex items-center justify-center mx-auto mb-3 shadow-[0_0_30px_rgba(255,165,0,0.4)]">
+            <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-galactic-orange to-galactic-gold flex items-center justify-center mx-auto mb-3 shadow-[0_0_30px_rgba(34,197,94,0.4)]">
               <span className="text-space-black font-orbitron font-black text-xl">TST</span>
             </div>
             <h1 className="text-3xl font-orbitron font-black gradient-text">TOBSEYTECH</h1>
@@ -197,7 +197,7 @@ export default function AuthPage() {
                   <Button
                     type="submit"
                     disabled={loading}
-                    className="w-full h-10 bg-gradient-to-r from-galactic-orange to-galactic-gold text-space-black font-orbitron font-bold text-sm transition-all mt-2 hover:shadow-[0_0_25px_rgba(255,165,0,0.4)]"
+                    className="w-full h-10 bg-gradient-to-r from-galactic-orange to-galactic-gold text-space-black font-orbitron font-bold text-sm transition-all mt-2 hover:shadow-[0_0_25px_rgba(34,197,94,0.4)]"
                   >
                     {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Sign In →"}
                   </Button>
@@ -297,7 +297,7 @@ export default function AuthPage() {
                   <Button
                     type="submit"
                     disabled={loading}
-                    className="w-full h-10 bg-gradient-to-r from-galactic-orange to-galactic-gold text-space-black font-orbitron font-bold text-sm transition-all mt-2 hover:shadow-[0_0_25px_rgba(255,165,0,0.4)]"
+                    className="w-full h-10 bg-gradient-to-r from-galactic-orange to-galactic-gold text-space-black font-orbitron font-bold text-sm transition-all mt-2 hover:shadow-[0_0_25px_rgba(34,197,94,0.4)]"
                   >
                     {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Create Account →"}
                   </Button>

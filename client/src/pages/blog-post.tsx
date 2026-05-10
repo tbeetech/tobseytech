@@ -316,7 +316,7 @@ export default function BlogPostPage() {
               <Button
                 size="sm"
                 className="border border-galactic-orange/30 text-galactic-orange hover:bg-galactic-orange hover:text-space-black font-orbitron"
-                style={{ background: "rgba(255,165,0,0.08)" }}
+                style={{ background: "rgba(34,197,94,0.08)" }}
               >
                 <Pencil className="w-4 h-4 mr-2" /> Edit
               </Button>
@@ -393,7 +393,7 @@ export default function BlogPostPage() {
               <Button
                 onClick={() => suggestMutation.mutate()}
                 disabled={!suggestReason.trim() || suggestMutation.isPending}
-                className="bg-gradient-to-r from-galactic-orange to-galactic-gold text-space-black font-orbitron font-bold hover:shadow-[0_0_20px_rgba(255,165,0,0.3)] transition-all"
+                className="bg-gradient-to-r from-galactic-orange to-galactic-gold text-space-black font-orbitron font-bold hover:shadow-[0_0_20px_rgba(34,197,94,0.3)] transition-all"
               >
                 {suggestMutation.isPending ? (
                   <Loader2 className="w-4 h-4 animate-spin mr-2" />
@@ -435,12 +435,12 @@ export default function BlogPostPage() {
                 placeholder="Share your thoughts..."
                 rows={3}
                 className="border-galactic-orange/20 text-white resize-none mb-3"
-                style={{ background: "rgba(255,165,0,0.03)" }}
+                style={{ background: "rgba(34,197,94,0.03)" }}
               />
               <Button
                 onClick={() => commentMutation.mutate()}
                 disabled={!commentText.trim() || commentMutation.isPending}
-                className="bg-gradient-to-r from-galactic-orange to-galactic-gold text-space-black font-orbitron font-bold hover:shadow-[0_0_20px_rgba(255,165,0,0.3)] transition-all"
+                className="bg-gradient-to-r from-galactic-orange to-galactic-gold text-space-black font-orbitron font-bold hover:shadow-[0_0_20px_rgba(34,197,94,0.3)] transition-all"
               >
                 {commentMutation.isPending ? (
                   <Loader2 className="w-4 h-4 animate-spin mr-2" />
@@ -469,7 +469,7 @@ export default function BlogPostPage() {
                 <div key={comment.id} className="comment-card group">
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full flex items-center justify-center text-galactic-orange text-xs font-orbitron font-bold" style={{ background: "rgba(255,165,0,0.15)" }}>
+                      <div className="w-8 h-8 rounded-full flex items-center justify-center text-galactic-orange text-xs font-orbitron font-bold" style={{ background: "rgba(34,197,94,0.15)" }}>
                         {comment.username.slice(0, 2).toUpperCase()}
                       </div>
                       <div>

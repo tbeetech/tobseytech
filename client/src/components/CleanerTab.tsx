@@ -117,7 +117,7 @@ export default function CleanerTab() {
           <Button
             onClick={() => auditMutation.mutate()}
             disabled={auditMutation.isPending}
-            className="bg-galactic-orange text-space-black font-orbitron text-xs hover:bg-galactic-gold shadow-[0_0_15px_rgba(255,165,0,0.3)] hover:shadow-[0_0_25px_rgba(255,215,0,0.4)] transition-all h-9"
+            className="bg-galactic-orange text-space-black font-orbitron text-xs hover:bg-galactic-gold shadow-[0_0_15px_rgba(34,197,94,0.3)] hover:shadow-[0_0_25px_rgba(34,197,94,0.4)] transition-all h-9"
           >
             {auditMutation.isPending ? (
               <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Scanning…</>

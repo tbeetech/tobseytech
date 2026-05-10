@@ -20,8 +20,8 @@ const trendData = [
 ];
 
 const trendCards = [
-  { label: "AI / LLMs", score: 95, color: "#FF8C00", insight: "Generative AI is reshaping every industry. TOBSEYTECH builds custom AI integrations on GPT-4, Claude & Gemini." },
-  { label: "No-Code Tools", score: 80, color: "#FFD700", insight: "No-code automation reduces time-to-market by 60%. We pair no-code with custom dev for optimal speed." },
+  { label: "AI / LLMs", score: 95, color: "#22c55e", insight: "Generative AI is reshaping every industry. TOBSEYTECH builds custom AI integrations on GPT-4, Claude & Gemini." },
+  { label: "No-Code Tools", score: 80, color: "#22c55e", insight: "No-code automation reduces time-to-market by 60%. We pair no-code with custom dev for optimal speed." },
   { label: "Cybersecurity", score: 88, color: "#00E5FF", insight: "Cyber threats grew 38% YoY. Every TOBSEYTECH solution includes security-by-design principles." },
   { label: "Cloud Native", score: 85, color: "#9C27B0", insight: "Cloud-native architecture cuts infrastructure costs up to 40% while delivering infinite scalability." },
   { label: "Edge Computing", score: 68, color: "#4CAF50", insight: "Processing data closer to the source reduces latency — key for real-time AI decision-making." },
@@ -70,8 +70,8 @@ export default function TechTrendsSection() {
                 <Radar
                   name="Tech Adoption"
                   dataKey="A"
-                  stroke="#FF8C00"
-                  fill="#FF8C00"
+                  stroke="#22c55e"
+                  fill="#22c55e"
                   fillOpacity={0.25}
                   strokeWidth={2}
                 />

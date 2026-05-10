@@ -2,8 +2,8 @@ import { useRef, useEffect, useState } from "react";
 import { Globe2, MapPin } from "lucide-react";
 
 const regions = [
-  { name: "Nigeria", flag: "🇳🇬", clients: 45, color: "#FF8C00", x: 50, y: 52 },
-  { name: "Ghana", flag: "🇬🇭", clients: 18, color: "#FFD700", x: 46, y: 53 },
+  { name: "Nigeria", flag: "🇳🇬", clients: 45, color: "#22c55e", x: 50, y: 52 },
+  { name: "Ghana", flag: "🇬🇭", clients: 18, color: "#22c55e", x: 46, y: 53 },
   { name: "Kenya", flag: "🇰🇪", clients: 22, color: "#00E5FF", x: 57, y: 56 },
   { name: "South Africa", flag: "🇿🇦", clients: 15, color: "#9C27B0", x: 53, y: 67 },
   { name: "UK", flag: "🇬🇧", clients: 12, color: "#4CAF50", x: 47, y: 30 },

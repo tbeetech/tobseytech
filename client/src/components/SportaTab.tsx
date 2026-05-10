@@ -330,7 +330,7 @@ function CampaignWizard({ onComplete, onCancel }: { onComplete: () => void; onCa
                   onClick={() => set("industry", ind)}
                   className={`px-3 py-1.5 rounded-xl text-xs font-orbitron font-semibold border transition-all ${
                     data.industry === ind
-                      ? "bg-galactic-orange text-space-black border-galactic-orange shadow-[0_0_12px_rgba(255,165,0,0.3)]"
+                      ? "bg-galactic-orange text-space-black border-galactic-orange shadow-[0_0_12px_rgba(34,197,94,0.3)]"
                       : "border-galactic-orange/20 text-gray-400 hover:border-galactic-orange/50 glass-effect"
                   }`}
                 >
@@ -566,7 +566,7 @@ function CampaignWizard({ onComplete, onCancel }: { onComplete: () => void; onCa
 
         {step === 10 && (
           <div className="text-center py-6">
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-galactic-orange to-galactic-gold flex items-center justify-center mx-auto mb-4 shadow-[0_0_30px_rgba(255,165,0,0.4)]">
+            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-galactic-orange to-galactic-gold flex items-center justify-center mx-auto mb-4 shadow-[0_0_30px_rgba(34,197,94,0.4)]">
               <Zap className="w-10 h-10 text-space-black" />
             </div>
             <h3 className="font-orbitron font-bold text-white text-xl mb-2">Ready to Launch!</h3>
@@ -605,7 +605,7 @@ function CampaignWizard({ onComplete, onCancel }: { onComplete: () => void; onCa
             size="sm"
             onClick={() => createMutation.mutate()}
             disabled={createMutation.isPending}
-            className="bg-galactic-orange text-space-black font-orbitron text-xs hover:bg-galactic-gold shadow-[0_0_20px_rgba(255,165,0,0.3)]"
+            className="bg-galactic-orange text-space-black font-orbitron text-xs hover:bg-galactic-gold shadow-[0_0_20px_rgba(34,197,94,0.3)]"
           >
             {createMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" /> : <Zap className="w-3.5 h-3.5 mr-1" />}
             Launch Campaign

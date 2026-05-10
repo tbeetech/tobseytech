@@ -79,7 +79,7 @@ const demoSteps = [
         </div>
         <div className="h-16 flex items-end gap-1">
           {[30, 50, 40, 70, 60, 80, 95].map((h, i) => (
-            <div key={i} className="flex-1 rounded-t" style={{ height: `${h}%`, background: `rgba(255, 215, 0, ${0.2 + i * 0.08})` }} />
+            <div key={i} className="flex-1 rounded-t" style={{ height: `${h}%`, background: `rgba(34, 197, 94, ${0.2 + i * 0.08})` }} />
           ))}
         </div>
         <p className="text-center text-xs text-gray-500 mt-2 font-orbitron">7-day leads trend</p>

@@ -151,7 +151,7 @@ export default function NotificationBell() {
           <BellOff className="w-5 h-5 opacity-60" />
         )}
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-galactic-orange text-space-black text-[10px] font-bold px-1 leading-none shadow-[0_0_8px_rgba(255,165,0,0.6)]">
+          <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-galactic-orange text-space-black text-[10px] font-bold px-1 leading-none shadow-[0_0_8px_rgba(34,197,94,0.6)]">
             {unreadCount > 99 ? "99+" : unreadCount}
           </span>
         )}

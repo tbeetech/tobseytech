@@ -177,7 +177,7 @@ export default function FeatureSportaPage() {
               </div>
               <div className="flex justify-center gap-4">
                 <Link href="/dashboard">
-                  <Button className="bg-galactic-orange text-space-black font-orbitron font-bold px-8 h-12 text-sm hover:bg-galactic-gold shadow-[0_0_30px_rgba(255,165,0,0.4)] hover:shadow-[0_0_40px_rgba(255,215,0,0.5)] transition-all">
+                  <Button className="bg-galactic-orange text-space-black font-orbitron font-bold px-8 h-12 text-sm hover:bg-galactic-gold shadow-[0_0_30px_rgba(34,197,94,0.4)] hover:shadow-[0_0_40px_rgba(34,197,94,0.5)] transition-all">
                     <Zap className="w-4 h-4 mr-2" /> Launch SPORTA
                   </Button>
                 </Link>
@@ -292,7 +292,7 @@ export default function FeatureSportaPage() {
                   onClick={() => setActiveIndustry(i)}
                   className={`px-4 py-2 rounded-xl border text-sm font-orbitron font-semibold transition-all ${
                     activeIndustry === i
-                      ? "bg-galactic-orange text-space-black border-galactic-orange shadow-[0_0_15px_rgba(255,165,0,0.4)]"
+                      ? "bg-galactic-orange text-space-black border-galactic-orange shadow-[0_0_15px_rgba(34,197,94,0.4)]"
                       : "border-galactic-orange/20 text-gray-300 hover:border-galactic-orange/50 hover:text-white glass-effect"
                   }`}
                 >
@@ -397,7 +397,7 @@ export default function FeatureSportaPage() {
         {/* ── CTA ── */}
         <section className="py-20 px-6 bg-gradient-to-b from-transparent to-space-dark/60">
           <div className="container mx-auto max-w-2xl text-center">
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-galactic-orange to-galactic-gold flex items-center justify-center mx-auto mb-6 shadow-[0_0_40px_rgba(255,165,0,0.5)]">
+            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-galactic-orange to-galactic-gold flex items-center justify-center mx-auto mb-6 shadow-[0_0_40px_rgba(34,197,94,0.5)]">
               <Zap className="w-10 h-10 text-space-black" />
             </div>
             <h2 className="font-orbitron font-black text-4xl gradient-text mb-4">
@@ -408,7 +408,7 @@ export default function FeatureSportaPage() {
             </p>
             <div className="flex justify-center gap-4 flex-wrap">
               <Link href="/dashboard">
-                <Button className="bg-galactic-orange text-space-black font-orbitron font-bold px-8 h-12 hover:bg-galactic-gold shadow-[0_0_30px_rgba(255,165,0,0.3)] transition-all">
+                <Button className="bg-galactic-orange text-space-black font-orbitron font-bold px-8 h-12 hover:bg-galactic-gold shadow-[0_0_30px_rgba(34,197,94,0.3)] transition-all">
                   <Play className="w-4 h-4 mr-2" /> Open Dashboard
                 </Button>
               </Link>

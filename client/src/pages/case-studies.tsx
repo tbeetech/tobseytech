@@ -244,7 +244,7 @@ export default function CaseStudiesPage() {
                           href={link}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 mt-3 px-4 py-2 bg-gradient-to-r from-galactic-orange to-galactic-gold text-space-black font-orbitron font-bold text-xs rounded-lg hover:shadow-[0_0_16px_rgba(255,165,0,0.4)] transition-all"
+                          className="inline-flex items-center gap-2 mt-3 px-4 py-2 bg-gradient-to-r from-galactic-orange to-galactic-gold text-space-black font-orbitron font-bold text-xs rounded-lg hover:shadow-[0_0_16px_rgba(34,197,94,0.4)] transition-all"
                         >
                           {linkType === "app" ? (
                             <>Access App <Smartphone className="w-4 h-4" /></>
@@ -309,7 +309,7 @@ export default function CaseStudiesPage() {
           <div className="text-center mt-16">
             <a
               href="/#contact"
-              className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-galactic-orange to-galactic-gold text-space-black font-orbitron font-bold rounded-xl hover:shadow-[0_0_24px_rgba(255,165,0,0.4)] transition-all"
+              className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-galactic-orange to-galactic-gold text-space-black font-orbitron font-bold rounded-xl hover:shadow-[0_0_24px_rgba(34,197,94,0.4)] transition-all"
             >
               <TrendingUp className="w-5 h-5" />
               Start Your Project

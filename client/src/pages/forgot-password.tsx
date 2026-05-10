@@ -52,13 +52,13 @@ export default function ForgotPasswordPage() {
     <div className="min-h-screen flex items-center justify-center auth-bg relative overflow-hidden px-6">
       <div
         className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full blur-3xl animate-pulse-slow pointer-events-none"
-        style={{ background: "rgba(255,165,0,0.05)" }}
+        style={{ background: "rgba(34,197,94,0.05)" }}
       />
       <div className="absolute inset-0 starfield opacity-30 pointer-events-none" />
 
       <div className="w-full max-w-sm relative z-10">
         <div className="text-center mb-8">
-          <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-galactic-orange to-galactic-gold flex items-center justify-center mx-auto mb-3 shadow-[0_0_30px_rgba(255,165,0,0.4)]">
+          <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-galactic-orange to-galactic-gold flex items-center justify-center mx-auto mb-3 shadow-[0_0_30px_rgba(34,197,94,0.4)]">
             <span className="text-space-black font-orbitron font-black text-xl">TST</span>
           </div>
           <h1 className="text-3xl font-orbitron font-black gradient-text">TOBSEYTECH</h1>
@@ -69,7 +69,7 @@ export default function ForgotPasswordPage() {
             <div className="text-center space-y-4">
               <div
                 className="w-12 h-12 rounded-full flex items-center justify-center mx-auto"
-                style={{ background: "rgba(255,165,0,0.15)" }}
+                style={{ background: "rgba(34,197,94,0.15)" }}
               >
                 <CheckCircle className="w-6 h-6 text-galactic-orange" />
               </div>
@@ -155,7 +155,7 @@ export default function ForgotPasswordPage() {
                 <Button
                   type="submit"
                   disabled={loading}
-                  className="w-full h-10 bg-gradient-to-r from-galactic-orange to-galactic-gold text-space-black font-orbitron font-bold text-sm transition-all mt-2 hover:shadow-[0_0_25px_rgba(255,165,0,0.4)]"
+                  className="w-full h-10 bg-gradient-to-r from-galactic-orange to-galactic-gold text-space-black font-orbitron font-bold text-sm transition-all mt-2 hover:shadow-[0_0_25px_rgba(34,197,94,0.4)]"
                 >
                   {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Reset Password →"}
                 </Button>

@@ -158,7 +158,7 @@ export default function Hero() {
           <Link href="/book-demo">
             <Button
               size="lg"
-              className="bg-gradient-to-r from-galactic-orange to-galactic-gold text-space-black font-orbitron font-bold px-8 hover:shadow-[0_0_30px_rgba(255,165,0,0.5)] transition-all"
+              className="bg-gradient-to-r from-galactic-orange to-galactic-gold text-space-black font-orbitron font-bold px-8 hover:shadow-[0_0_30px_rgba(34,197,94,0.5)] transition-all"
             >
               Book a Consultation
             </Button>

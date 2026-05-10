@@ -92,7 +92,7 @@ export default function ROICalculatorSection() {
 
               <Button
                 onClick={() => setCalculated(true)}
-                className="w-full bg-gradient-to-r from-galactic-orange to-galactic-gold text-space-black font-orbitron font-bold hover:shadow-[0_0_20px_rgba(255,165,0,0.4)] transition-all"
+                className="w-full bg-gradient-to-r from-galactic-orange to-galactic-gold text-space-black font-orbitron font-bold hover:shadow-[0_0_20px_rgba(34,197,94,0.4)] transition-all"
               >
                 <Calculator className="w-4 h-4 mr-2" /> Calculate My ROI
               </Button>
