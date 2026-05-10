@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Send, Loader2, ChevronDown, Maximize2, Minimize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { apiRequest, getApiErrorMessage } from "@/lib/queryClient";
+import { useQuery } from "@tanstack/react-query";
 
 interface ChatMessage {
   role: "user" | "assistant";
@@ -25,6 +26,26 @@ export default function ProphetChat() {
   const [fullscreen, setFullscreen] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const { data: statusData } = useQuery<{ enabled: boolean }>({
+    queryKey: ["/api/prophet/status"],
+    queryFn: async () => {
+      const res = await fetch("/api/prophet/status");
+      if (!res.ok) return { enabled: true };
+      return res.json();
+    },
+    refetchInterval: 30000,
+  });
+
+  const prophetEnabled = statusData?.enabled !== false;
+
+  useEffect(() => {
+    if (!prophetEnabled && open) {
+      setOpen(false);
+      setMinimized(false);
+      setFullscreen(false);
+    }
+  }, [prophetEnabled, open]);
 
   useEffect(() => {
     if (open && !minimized) {
@@ -66,7 +87,7 @@ export default function ProphetChat() {
     <>
       {/* ── Trigger button — fixed below the nav bar ── */}
       <AnimatePresence>
-        {!open && (
+        {!open && prophetEnabled && (
           <motion.button
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
