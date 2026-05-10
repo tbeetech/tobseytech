@@ -38,6 +38,15 @@ import FeatureGlobalImpactPage from "@/pages/feature-global-impact";
 import FeatureSportaPage from "@/pages/feature-sporta";
 import ProphetChat from "@/components/ProphetChat";
 import TestDataPage from "@/pages/testdata";
+import VlogPage from "@/pages/vlog";
+import VlogPostPage from "@/pages/vlog-post";
+import AdminSpeedCrackerPage from "@/pages/admin-speed-cracker";
+import AdminSpeedCrackerWorkflowsPage from "@/pages/admin-speed-cracker-workflows";
+import AdminSpeedCrackerApprovalPage from "@/pages/admin-speed-cracker-approval";
+import AdminSpeedCrackerVlogPage from "@/pages/admin-speed-cracker-vlog";
+import AdminSpeedCrackerBlogPage from "@/pages/admin-speed-cracker-blog";
+import AdminSpeedCrackerAnalyticsPage from "@/pages/admin-speed-cracker-analytics";
+import AdminSpeedCrackerSettingsPage from "@/pages/admin-speed-cracker-settings";
 
 function Router() {
   return (
@@ -79,6 +88,17 @@ function Router() {
       <Route path="/feature/global-impact" component={FeatureGlobalImpactPage} />
       <Route path="/feature/sporta" component={FeatureSportaPage} />
       <Route path="/testdata" component={TestDataPage} />
+      {/* Vlog (public) */}
+      <Route path="/vlog" component={VlogPage} />
+      <Route path="/vlog/:slug" component={VlogPostPage} />
+      {/* Speed Cracker — admin-only routes */}
+      <Route path="/admin/speed-cracker" component={AdminSpeedCrackerPage} />
+      <Route path="/admin/speed-cracker/workflows" component={AdminSpeedCrackerWorkflowsPage} />
+      <Route path="/admin/speed-cracker/approval-center" component={AdminSpeedCrackerApprovalPage} />
+      <Route path="/admin/speed-cracker/vlog-manager" component={AdminSpeedCrackerVlogPage} />
+      <Route path="/admin/speed-cracker/blog-manager" component={AdminSpeedCrackerBlogPage} />
+      <Route path="/admin/speed-cracker/analytics" component={AdminSpeedCrackerAnalyticsPage} />
+      <Route path="/admin/speed-cracker/settings" component={AdminSpeedCrackerSettingsPage} />
       <Route component={NotFound} />
     </Switch>
   );
