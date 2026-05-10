@@ -1684,7 +1684,10 @@ async function _registerRouteHandlers(app: Express): Promise<void> {
     }
   });
 
-  app.get("/s/:code", async (req, res) => {
+  // Short-URL redirect handler used by both direct Express (Render.com) and
+  // the Vercel serverless function (reached via /api/s/:code after the
+  // vercel.json rewrite "/s/:code" → "/api?path=s/:code").
+  const handleShortUrlRedirect = async (req: Request, res: Response) => {
     try {
       const entry = await storage.getShortUrl(req.params.code);
       if (!entry) return res.status(404).send("Short URL not found");
@@ -1692,7 +1695,10 @@ async function _registerRouteHandlers(app: Express): Promise<void> {
     } catch {
       res.status(500).send("Internal server error");
     }
-  });
+  };
+
+  app.get("/s/:code", handleShortUrlRedirect);
+  app.get("/api/s/:code", handleShortUrlRedirect);
 
   // ─── Prophet AI — navigation & questioner AI ────────────────────────────
 
