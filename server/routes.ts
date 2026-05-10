@@ -2096,22 +2096,35 @@ ENGAGEMENT PRINCIPLES:
     message: { message: "Too many SPORTA requests, please slow down." },
   });
 
-  // GET /api/sporta/stats — admin overview stats
-  app.get("/api/sporta/stats", sportaRateLimiter, requireDashboardAccess, async (_req, res) => {
+  // GET /api/sporta/stats — per-user stats (admin sees global, users see own)
+  app.get("/api/sporta/stats", sportaRateLimiter, requireAuth, async (req, res) => {
     try {
-      const stats = await storage.getSportaStats();
-      res.json(stats);
+      const user = req.user as any;
+      if (user?.role === "admin") {
+        const stats = await (storage as any).getSportaStats();
+        res.json(stats);
+      } else {
+        // Return user-scoped stats
+        const campaigns = await (storage as any).getSportaCampaigns(user.id);
+        res.json({
+          totalCampaigns: campaigns.length,
+          activeCampaigns: campaigns.filter((c: any) => c.status === "active").length,
+          pendingContent: campaigns.reduce((s: number, c: any) => s + Math.max(0, c.postsAggregated - c.postsPublished - c.postsRejected), 0),
+          publishedContent: campaigns.reduce((s: number, c: any) => s + c.postsPublished, 0),
+          rejectedContent: campaigns.reduce((s: number, c: any) => s + c.postsRejected, 0),
+        });
+      }
     } catch (err) {
       console.error("[sporta/stats]", err);
       res.status(500).json({ message: "Failed to load SPORTA stats" });
     }
   });
 
-  // GET /api/sporta/campaigns — list campaigns (all for admin)
-  app.get("/api/sporta/campaigns", sportaRateLimiter, requireDashboardAccess, async (req, res) => {
+  // GET /api/sporta/campaigns — list campaigns (all for admin, own for users)
+  app.get("/api/sporta/campaigns", sportaRateLimiter, requireAuth, async (req, res) => {
     try {
       const user = req.user as any;
-      const campaigns = await storage.getSportaCampaigns(user?.role === "admin" ? undefined : user?.id);
+      const campaigns = await (storage as any).getSportaCampaigns(user?.role === "admin" ? undefined : user?.id);
       res.json(campaigns);
     } catch (err) {
       console.error("[sporta/campaigns GET]", err);
@@ -2120,12 +2133,12 @@ ENGAGEMENT PRINCIPLES:
   });
 
   // POST /api/sporta/campaigns — create a new campaign
-  app.post("/api/sporta/campaigns", sportaRateLimiter, requireDashboardAccess, async (req, res) => {
+  app.post("/api/sporta/campaigns", sportaRateLimiter, requireAuth, async (req, res) => {
     try {
       const { insertSportaCampaignSchema } = await import("../shared/schema.js");
       const user = req.user as any;
-      const data = insertSportaCampaignSchema.parse({ ...req.body, creatorId: user?.id ?? "admin" });
-      const campaign = await storage.createSportaCampaign(data);
+      const data = insertSportaCampaignSchema.parse({ ...req.body, creatorId: user?.id ?? "anonymous" });
+      const campaign = await (storage as any).createSportaCampaign(data);
       res.status(201).json(campaign);
     } catch (err) {
       if (err instanceof z.ZodError) return res.status(400).json({ message: "Validation error", errors: err.errors });
@@ -2134,10 +2147,22 @@ ENGAGEMENT PRINCIPLES:
     }
   });
 
+  // Helper: verify campaign ownership (admin can access any, users only their own)
+  async function assertCampaignOwner(req: Request, res: Response, campaignId: string): Promise<boolean> {
+    const user = req.user as any;
+    if (user?.role === "admin") return true;
+    const campaign = await (storage as any).getSportaCampaign(campaignId);
+    if (!campaign) { res.status(404).json({ message: "Campaign not found" }); return false; }
+    if (campaign.creatorId !== user?.id) { res.status(403).json({ message: "Forbidden" }); return false; }
+    return true;
+  }
+
   // GET /api/sporta/campaigns/:id — get single campaign
-  app.get("/api/sporta/campaigns/:id", sportaRateLimiter, requireDashboardAccess, async (req, res) => {
+  app.get("/api/sporta/campaigns/:id", sportaRateLimiter, requireAuth, async (req, res) => {
     try {
-      const campaign = await storage.getSportaCampaign(req.params.id);
+      const ok = await assertCampaignOwner(req, res, req.params.id);
+      if (!ok) return;
+      const campaign = await (storage as any).getSportaCampaign(req.params.id);
       if (!campaign) return res.status(404).json({ message: "Campaign not found" });
       res.json(campaign);
     } catch (err) {
@@ -2147,9 +2172,11 @@ ENGAGEMENT PRINCIPLES:
   });
 
   // PATCH /api/sporta/campaigns/:id — update campaign (status, config, etc.)
-  app.patch("/api/sporta/campaigns/:id", sportaRateLimiter, requireDashboardAccess, async (req, res) => {
+  app.patch("/api/sporta/campaigns/:id", sportaRateLimiter, requireAuth, async (req, res) => {
     try {
-      const campaign = await storage.updateSportaCampaign(req.params.id, req.body);
+      const ok = await assertCampaignOwner(req, res, req.params.id);
+      if (!ok) return;
+      const campaign = await (storage as any).updateSportaCampaign(req.params.id, req.body);
       if (!campaign) return res.status(404).json({ message: "Campaign not found" });
       res.json(campaign);
     } catch (err) {
@@ -2159,9 +2186,11 @@ ENGAGEMENT PRINCIPLES:
   });
 
   // DELETE /api/sporta/campaigns/:id — delete campaign
-  app.delete("/api/sporta/campaigns/:id", sportaRateLimiter, requireDashboardAccess, async (req, res) => {
+  app.delete("/api/sporta/campaigns/:id", sportaRateLimiter, requireAuth, async (req, res) => {
     try {
-      const deleted = await storage.deleteSportaCampaign(req.params.id);
+      const ok = await assertCampaignOwner(req, res, req.params.id);
+      if (!ok) return;
+      const deleted = await (storage as any).deleteSportaCampaign(req.params.id);
       if (!deleted) return res.status(404).json({ message: "Campaign not found" });
       res.json({ ok: true });
     } catch (err) {
@@ -2171,10 +2200,12 @@ ENGAGEMENT PRINCIPLES:
   });
 
   // GET /api/sporta/campaigns/:id/content — list content queue for a campaign
-  app.get("/api/sporta/campaigns/:id/content", sportaRateLimiter, requireDashboardAccess, async (req, res) => {
+  app.get("/api/sporta/campaigns/:id/content", sportaRateLimiter, requireAuth, async (req, res) => {
     try {
+      const ok = await assertCampaignOwner(req, res, req.params.id);
+      if (!ok) return;
       const status = req.query.status as any;
-      const items = await storage.getSportaContentByCampaign(req.params.id, status);
+      const items = await (storage as any).getSportaContentByCampaign(req.params.id, status);
       res.json(items);
     } catch (err) {
       console.error("[sporta/campaigns/:id/content GET]", err);
@@ -2183,15 +2214,17 @@ ENGAGEMENT PRINCIPLES:
   });
 
   // POST /api/sporta/campaigns/:id/content — add content item to queue
-  app.post("/api/sporta/campaigns/:id/content", sportaRateLimiter, requireDashboardAccess, async (req, res) => {
+  app.post("/api/sporta/campaigns/:id/content", sportaRateLimiter, requireAuth, async (req, res) => {
     try {
+      const ok = await assertCampaignOwner(req, res, req.params.id);
+      if (!ok) return;
       const { insertSportaContentSchema } = await import("../shared/schema.js");
       const data = insertSportaContentSchema.parse({ ...req.body, campaignId: req.params.id });
-      const item = await storage.createSportaContent(data);
+      const item = await (storage as any).createSportaContent(data);
       // Bump campaign aggregated count
-      const campaign = await storage.getSportaCampaign(req.params.id);
+      const campaign = await (storage as any).getSportaCampaign(req.params.id);
       if (campaign) {
-        await storage.updateSportaCampaign(req.params.id, { postsAggregated: campaign.postsAggregated + 1 });
+        await (storage as any).updateSportaCampaign(req.params.id, { postsAggregated: campaign.postsAggregated + 1 });
       }
       res.status(201).json(item);
     } catch (err) {
@@ -2202,24 +2235,29 @@ ENGAGEMENT PRINCIPLES:
   });
 
   // PATCH /api/sporta/content/:id/status — approve / reject / publish content
-  app.patch("/api/sporta/content/:id/status", sportaRateLimiter, requireDashboardAccess, async (req, res) => {
+  app.patch("/api/sporta/content/:id/status", sportaRateLimiter, requireAuth, async (req, res) => {
     try {
       const { status } = req.body;
       if (!(SPORTA_CONTENT_STATUSES as readonly string[]).includes(status)) {
         return res.status(400).json({ message: "Invalid status" });
       }
-      const item = await storage.updateSportaContentStatus(req.params.id, status);
+      // Ownership: look up the content item then check its campaign
+      const existingItem = await (storage as any).getSportaContent(req.params.id);
+      if (!existingItem) return res.status(404).json({ message: "Content item not found" });
+      const ok = await assertCampaignOwner(req, res, existingItem.campaignId);
+      if (!ok) return;
+      const item = await (storage as any).updateSportaContentStatus(req.params.id, status);
       if (!item) return res.status(404).json({ message: "Content item not found" });
       // Update campaign counters
       if (status === "published") {
-        const campaign = await storage.getSportaCampaign(item.campaignId);
+        const campaign = await (storage as any).getSportaCampaign(item.campaignId);
         if (campaign) {
-          await storage.updateSportaCampaign(item.campaignId, { postsPublished: campaign.postsPublished + 1 });
+          await (storage as any).updateSportaCampaign(item.campaignId, { postsPublished: campaign.postsPublished + 1 });
         }
       } else if (status === "rejected") {
-        const campaign = await storage.getSportaCampaign(item.campaignId);
+        const campaign = await (storage as any).getSportaCampaign(item.campaignId);
         if (campaign) {
-          await storage.updateSportaCampaign(item.campaignId, { postsRejected: campaign.postsRejected + 1 });
+          await (storage as any).updateSportaCampaign(item.campaignId, { postsRejected: campaign.postsRejected + 1 });
         }
       }
       res.json(item);
@@ -2230,9 +2268,13 @@ ENGAGEMENT PRINCIPLES:
   });
 
   // DELETE /api/sporta/content/:id — remove a content item
-  app.delete("/api/sporta/content/:id", sportaRateLimiter, requireDashboardAccess, async (req, res) => {
+  app.delete("/api/sporta/content/:id", sportaRateLimiter, requireAuth, async (req, res) => {
     try {
-      const deleted = await storage.deleteSportaContent(req.params.id);
+      const existingItem = await (storage as any).getSportaContent(req.params.id);
+      if (!existingItem) return res.status(404).json({ message: "Content item not found" });
+      const ok = await assertCampaignOwner(req, res, existingItem.campaignId);
+      if (!ok) return;
+      const deleted = await (storage as any).deleteSportaContent(req.params.id);
       if (!deleted) return res.status(404).json({ message: "Content item not found" });
       res.json({ ok: true });
     } catch (err) {
@@ -2242,10 +2284,13 @@ ENGAGEMENT PRINCIPLES:
   });
 
   // POST /api/sporta/content/:id/reshape — AI-reshape a content item
-  app.post("/api/sporta/content/:id/reshape", sportaRateLimiter, requireDashboardAccess, async (req, res) => {
+  app.post("/api/sporta/content/:id/reshape", sportaRateLimiter, requireAuth, async (req, res) => {
     try {
-      const item = await storage.getSportaContent(req.params.id);
+      const item = await (storage as any).getSportaContent(req.params.id);
       if (!item) return res.status(404).json({ message: "Content item not found" });
+
+      const ownerOk = await assertCampaignOwner(req, res, item.campaignId);
+      if (!ownerOk) return;
 
       const { tone = "professional", aiMode = "Full Rewrite" } = req.body;
       const sourceText = item.originalContent ?? item.originalTitle ?? "No content provided.";
@@ -2302,7 +2347,7 @@ Only return valid JSON, no markdown fences.`;
       const viralScore = Math.floor(Math.random() * 30) + 65;
       const qualityScore = Math.floor(Math.random() * 20) + 75;
 
-      const updated = await storage.updateSportaContentStatus(req.params.id, "pending", {
+      const updated = await (storage as any).updateSportaContentStatus(req.params.id, "pending", {
         aiRewrittenTitle: parsed.title ?? item.originalTitle,
         aiRewrittenContent: parsed.content ?? raw,
         aiGeneratedHashtags: parsed.hashtags ?? [],
@@ -2324,7 +2369,7 @@ Only return valid JSON, no markdown fences.`;
   app.get("/api/sporta/preferences", sportaRateLimiter, requireAuth, async (req, res) => {
     try {
       const user = req.user as any;
-      const prefs = await storage.getSportaPreferences(user.id);
+      const prefs = await (storage as any).getSportaPreferences(user.id);
       res.json(prefs ?? null);
     } catch (err) {
       console.error("[sporta/preferences GET]", err);
@@ -2338,7 +2383,7 @@ Only return valid JSON, no markdown fences.`;
       const { insertSportaPreferencesSchema } = await import("../shared/schema.js");
       const user = req.user as any;
       const data = insertSportaPreferencesSchema.parse({ ...req.body, userId: user.id });
-      const prefs = await storage.upsertSportaPreferences(data);
+      const prefs = await (storage as any).upsertSportaPreferences(data);
       res.json(prefs);
     } catch (err) {
       if (err instanceof z.ZodError) return res.status(400).json({ message: "Validation error", errors: err.errors });

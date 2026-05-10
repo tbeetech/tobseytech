@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Menu, X, LogIn, LogOut, User, MessageCircle, LayoutDashboard, ChevronDown } from "lucide-react";
+import { Menu, X, LogIn, LogOut, User, MessageCircle, LayoutDashboard, ChevronDown, Globe2 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import NotificationBell from "@/components/NotificationBell";
 import {
@@ -121,6 +121,11 @@ export default function Navigation() {
             <Link href="/blog">
               <button className="nav-link text-galactic-orange/90 hover:text-galactic-gold font-orbitron text-xs tracking-wide transition-colors">
                 Blog
+              </button>
+            </Link>
+            <Link href="/sporta">
+              <button className="nav-link text-galactic-orange/90 hover:text-galactic-gold font-orbitron text-xs tracking-wide transition-colors flex items-center gap-1">
+                <Globe2 className="w-3 h-3" /> SPORTA
               </button>
             </Link>
             <Link href="/features">

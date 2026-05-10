@@ -36,6 +36,7 @@ import FeatureMentorshipPage from "@/pages/feature-mentorship";
 import FeatureLiveDemoPage from "@/pages/feature-live-demo";
 import FeatureGlobalImpactPage from "@/pages/feature-global-impact";
 import FeatureSportaPage from "@/pages/feature-sporta";
+import SportaPage from "@/pages/sporta";
 import ProphetChat from "@/components/ProphetChat";
 import TestDataPage from "@/pages/testdata";
 import VlogPage from "@/pages/vlog";
@@ -87,6 +88,8 @@ function Router() {
       <Route path="/feature/live-demo" component={FeatureLiveDemoPage} />
       <Route path="/feature/global-impact" component={FeatureGlobalImpactPage} />
       <Route path="/feature/sporta" component={FeatureSportaPage} />
+      {/* SPORTA — accessible to all authenticated users */}
+      <Route path="/sporta" component={SportaPage} />
       <Route path="/testdata" component={TestDataPage} />
       {/* Vlog (public) */}
       <Route path="/vlog" component={VlogPage} />
