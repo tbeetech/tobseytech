@@ -245,6 +245,9 @@ export default function DashboardPage() {
       return res.json() as Promise<{ enabled: boolean }>;
     },
     onSuccess: (data) => {
+      // Immediately reflect the new state in the cache so ProphetChat hides/shows right away,
+      // then refetch to confirm the server state.
+      queryClient.setQueryData(["/api/prophet/status"], data);
       queryClient.invalidateQueries({ queryKey: ["/api/prophet/status"] });
       toast({ title: data.enabled ? "Prophet AI activated" : "Prophet AI deactivated" });
     },
