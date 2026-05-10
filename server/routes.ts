@@ -2137,7 +2137,7 @@ ENGAGEMENT PRINCIPLES:
     try {
       const { insertSportaCampaignSchema } = await import("../shared/schema.js");
       const user = req.user as any;
-      const data = insertSportaCampaignSchema.parse({ ...req.body, creatorId: user?.id ?? "anonymous" });
+      const data = insertSportaCampaignSchema.parse({ ...req.body, creatorId: user.id });
       const campaign = await (storage as any).createSportaCampaign(data);
       res.status(201).json(campaign);
     } catch (err) {
@@ -2247,20 +2247,19 @@ ENGAGEMENT PRINCIPLES:
       const ok = await assertCampaignOwner(req, res, existingItem.campaignId);
       if (!ok) return;
       const item = await (storage as any).updateSportaContentStatus(req.params.id, status);
-      if (!item) return res.status(404).json({ message: "Content item not found" });
       // Update campaign counters
-      if (status === "published") {
+      if (item && status === "published") {
         const campaign = await (storage as any).getSportaCampaign(item.campaignId);
         if (campaign) {
           await (storage as any).updateSportaCampaign(item.campaignId, { postsPublished: campaign.postsPublished + 1 });
         }
-      } else if (status === "rejected") {
+      } else if (item && status === "rejected") {
         const campaign = await (storage as any).getSportaCampaign(item.campaignId);
         if (campaign) {
           await (storage as any).updateSportaCampaign(item.campaignId, { postsRejected: campaign.postsRejected + 1 });
         }
       }
-      res.json(item);
+      res.json(item ?? existingItem);
     } catch (err) {
       console.error("[sporta/content/:id/status PATCH]", err);
       res.status(500).json({ message: "Failed to update content status" });
