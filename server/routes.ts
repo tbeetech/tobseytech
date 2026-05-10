@@ -30,6 +30,7 @@ import {
   insertEditSuggestionSchema,
   insertMessageSchema,
   type InsertNotification,
+  SPORTA_CONTENT_STATUSES,
 } from "../shared/schema.js";
 import { z } from "zod";
 import nodemailer from "nodemailer";
@@ -2191,7 +2192,7 @@ ENGAGEMENT PRINCIPLES:
   app.patch("/api/sporta/content/:id/status", sportaRateLimiter, requireDashboardAccess, async (req, res) => {
     try {
       const { status } = req.body;
-      if (!["approved", "rejected", "published", "pending"].includes(status)) {
+      if (!(SPORTA_CONTENT_STATUSES as readonly string[]).includes(status)) {
         return res.status(400).json({ message: "Invalid status" });
       }
       const item = await storage.updateSportaContentStatus(req.params.id, status);
@@ -2240,7 +2241,7 @@ ENGAGEMENT PRINCIPLES:
       const hasOpenAI = Boolean(process.env.OPENAI_API_KEY);
 
       if (!hasGemini && !hasOpenAI) {
-        return res.status(503).json({ message: "No AI API key configured for SPORTA reshaping." });
+        return res.status(503).json({ message: "No AI API key configured for SPORTA reshaping. Set GEMINI_API_KEY or OPENAI_API_KEY to enable content reshaping." });
       }
 
       const systemPrompt = `You are SPORTA, an elite AI content reshaper for social media publishing.
@@ -2283,6 +2284,8 @@ Only return valid JSON, no markdown fences.`;
         parsed = { title: item.originalTitle, content: raw, hashtags: [] };
       }
 
+      // Placeholder scores — in production these would come from a dedicated
+      // AI scoring model or a secondary LLM call analysing the reshaped content.
       const viralScore = Math.floor(Math.random() * 30) + 65;
       const qualityScore = Math.floor(Math.random() * 20) + 75;
 
@@ -2292,6 +2295,7 @@ Only return valid JSON, no markdown fences.`;
         aiGeneratedHashtags: parsed.hashtags ?? [],
         aiViralScore: viralScore,
         aiQualityScore: qualityScore,
+        // Placeholder engagement and confidence scores — replace with real AI scoring in production.
         aiEngagementPrediction: Math.floor(Math.random() * 25) + 70,
         aiConfidenceScore: Math.floor(Math.random() * 15) + 80,
       });
