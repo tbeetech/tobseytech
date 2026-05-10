@@ -35,6 +35,7 @@ import FeaturePartnersPage from "@/pages/feature-partners";
 import FeatureMentorshipPage from "@/pages/feature-mentorship";
 import FeatureLiveDemoPage from "@/pages/feature-live-demo";
 import FeatureGlobalImpactPage from "@/pages/feature-global-impact";
+import FeatureSportaPage from "@/pages/feature-sporta";
 import ProphetChat from "@/components/ProphetChat";
 import TestDataPage from "@/pages/testdata";
 
@@ -76,6 +77,7 @@ function Router() {
       <Route path="/feature/mentorship" component={FeatureMentorshipPage} />
       <Route path="/feature/live-demo" component={FeatureLiveDemoPage} />
       <Route path="/feature/global-impact" component={FeatureGlobalImpactPage} />
+      <Route path="/feature/sporta" component={FeatureSportaPage} />
       <Route path="/testdata" component={TestDataPage} />
       <Route component={NotFound} />
     </Switch>

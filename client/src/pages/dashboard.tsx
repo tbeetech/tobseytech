@@ -30,6 +30,7 @@ import {
   Bot,
   Sparkles,
   Zap,
+  Globe2,
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { format } from "date-fns";
@@ -37,6 +38,7 @@ import { SharePostDialog } from "@/components/share-post-dialog";
 import PostFetcherTab from "@/components/PostFetcherTab";
 import BotWorkerTab from "@/components/BotWorkerTab";
 import CleanerTab from "@/components/CleanerTab";
+import SportaTab from "@/components/SportaTab";
 
 interface SafeUser {
   id: string;
@@ -391,6 +393,9 @@ export default function DashboardPage() {
             </TabsTrigger>
             <TabsTrigger value="prophet" className="font-orbitron text-sm rounded-lg">
               <Zap className="w-4 h-4 mr-1" /> Prophet AI
+            </TabsTrigger>
+            <TabsTrigger value="sporta" className="font-orbitron text-sm rounded-lg">
+              <Globe2 className="w-4 h-4 mr-1" /> SPORTA
             </TabsTrigger>
           </TabsList>
 
@@ -872,6 +877,11 @@ export default function DashboardPage() {
                 </Button>
               </div>
             </div>
+          </TabsContent>
+
+          {/* ── SPORTA Tab ── */}
+          <TabsContent value="sporta">
+            <SportaTab />
           </TabsContent>
         </Tabs>
       </div>

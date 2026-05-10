@@ -304,3 +304,200 @@ export const insertNotificationSchema = z.object({
 });
 
 export type InsertNotification = z.infer<typeof insertNotificationSchema>;
+
+// ─── SPORTA – AI Agentic Social Media Aggregator ─────────────────────────────
+
+export const SPORTA_INDUSTRIES = [
+  "Fashion", "Cars", "Agriculture", "Technology", "Crypto", "Sports",
+  "Politics", "Entertainment", "Church", "Business", "Ecommerce",
+  "Real Estate", "Motivation", "Luxury", "Education", "Gaming", "AI",
+  "Finance", "Health", "Travel", "Food", "Beauty", "Podcasts", "News", "Custom",
+] as const;
+export type SportaIndustry = (typeof SPORTA_INDUSTRIES)[number];
+
+export const SPORTA_CONTENT_TYPES = [
+  "Videos", "Shorts", "Reels", "Articles", "Threads", "Podcasts",
+  "Memes", "Images", "Quotes", "Tutorials", "Reviews",
+] as const;
+export type SportaContentType = (typeof SPORTA_CONTENT_TYPES)[number];
+
+export const SPORTA_PLATFORMS = [
+  "Facebook", "Instagram", "X/Twitter", "TikTok", "YouTube", "Reddit",
+  "LinkedIn", "Pinterest", "Threads", "Telegram", "RSS", "Medium",
+  "Dev.to", "Vimeo", "Dailymotion",
+] as const;
+export type SportaPlatform = (typeof SPORTA_PLATFORMS)[number];
+
+export const SPORTA_PUBLISHING_DESTINATIONS = [
+  "Facebook", "Instagram", "TikTok", "X", "LinkedIn", "Pinterest",
+  "YouTube Community", "Telegram", "Website Blog", "Website Vlog",
+] as const;
+export type SportaPublishingDestination = (typeof SPORTA_PUBLISHING_DESTINATIONS)[number];
+
+export const SPORTA_AI_MODES = [
+  "Light Rewrite", "Full Rewrite", "Summary", "Expand", "Social Caption",
+  "Blog Article", "Newsletter", "Thread", "SEO Optimized", "Viral Optimized",
+] as const;
+export type SportaAiMode = (typeof SPORTA_AI_MODES)[number];
+
+export const SPORTA_APPROVAL_MODES = [
+  "fully_automatic", "semi_automatic", "manual",
+] as const;
+export type SportaApprovalMode = (typeof SPORTA_APPROVAL_MODES)[number];
+
+export const SPORTA_CAMPAIGN_STATUSES = [
+  "draft", "active", "paused", "completed", "stopped",
+] as const;
+export type SportaCampaignStatus = (typeof SPORTA_CAMPAIGN_STATUSES)[number];
+
+export const SPORTA_CONTENT_STATUSES = [
+  "pending", "approved", "rejected", "published", "failed",
+] as const;
+export type SportaContentStatus = (typeof SPORTA_CONTENT_STATUSES)[number];
+
+export const insertSportaCampaignSchema = z.object({
+  name: z.string().min(1).max(100),
+  industry: z.enum(SPORTA_INDUSTRIES),
+  contentTypes: z.array(z.enum(SPORTA_CONTENT_TYPES)).min(1),
+  sourcePlatforms: z.array(z.enum(SPORTA_PLATFORMS)).min(1),
+  publishingDestinations: z.array(z.enum(SPORTA_PUBLISHING_DESTINATIONS)).min(1),
+  aiMode: z.enum(SPORTA_AI_MODES),
+  approvalMode: z.enum(SPORTA_APPROVAL_MODES),
+  timelinePreference: z.string().min(1),
+  postingFrequency: z.string().min(1),
+  keywords: z.array(z.string()).default([]),
+  bannedKeywords: z.array(z.string()).default([]),
+  hashtags: z.array(z.string()).default([]),
+  languages: z.array(z.string()).default(["English"]),
+  tone: z.string().default("professional"),
+  audience: z.string().default("general"),
+  enableSeo: z.boolean().default(true),
+  enableViral: z.boolean().default(false),
+  enableNsfwFilter: z.boolean().default(true),
+  enableDuplicateFilter: z.boolean().default(true),
+  minEngagement: z.number().int().default(0),
+  creatorId: z.string().min(1),
+});
+
+export type InsertSportaCampaign = z.infer<typeof insertSportaCampaignSchema>;
+
+export interface SportaCampaign {
+  id: string;
+  name: string;
+  industry: SportaIndustry;
+  contentTypes: SportaContentType[];
+  sourcePlatforms: SportaPlatform[];
+  publishingDestinations: SportaPublishingDestination[];
+  aiMode: SportaAiMode;
+  approvalMode: SportaApprovalMode;
+  timelinePreference: string;
+  postingFrequency: string;
+  keywords: string[];
+  bannedKeywords: string[];
+  hashtags: string[];
+  languages: string[];
+  tone: string;
+  audience: string;
+  enableSeo: boolean;
+  enableViral: boolean;
+  enableNsfwFilter: boolean;
+  enableDuplicateFilter: boolean;
+  minEngagement: number;
+  status: SportaCampaignStatus;
+  creatorId: string;
+  postsAggregated: number;
+  postsPublished: number;
+  postsRejected: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export const insertSportaContentSchema = z.object({
+  campaignId: z.string().min(1),
+  sourceUrl: z.string().url(),
+  sourcePlatform: z.enum(SPORTA_PLATFORMS),
+  originalTitle: z.string().max(500).optional(),
+  originalContent: z.string().optional(),
+  originalAuthor: z.string().max(200).optional(),
+  originalThumbnail: z.string().url().optional().nullable(),
+  mediaType: z.enum(SPORTA_CONTENT_TYPES),
+  embedCode: z.string().optional(),
+  aiRewrittenTitle: z.string().max(500).optional(),
+  aiRewrittenContent: z.string().optional(),
+  aiGeneratedHashtags: z.array(z.string()).default([]),
+  aiQualityScore: z.number().min(0).max(100).optional(),
+  aiViralScore: z.number().min(0).max(100).optional(),
+  aiEngagementPrediction: z.number().min(0).max(100).optional(),
+  aiConfidenceScore: z.number().min(0).max(100).optional(),
+});
+
+export type InsertSportaContent = z.infer<typeof insertSportaContentSchema>;
+
+export interface SportaContent {
+  id: string;
+  campaignId: string;
+  sourceUrl: string;
+  sourcePlatform: SportaPlatform;
+  originalTitle?: string;
+  originalContent?: string;
+  originalAuthor?: string;
+  originalThumbnail?: string | null;
+  mediaType: SportaContentType;
+  embedCode?: string;
+  aiRewrittenTitle?: string;
+  aiRewrittenContent?: string;
+  aiGeneratedHashtags: string[];
+  aiQualityScore?: number;
+  aiViralScore?: number;
+  aiEngagementPrediction?: number;
+  aiConfidenceScore?: number;
+  status: SportaContentStatus;
+  publishedAt?: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export const insertSportaPreferencesSchema = z.object({
+  userId: z.string().min(1),
+  defaultTone: z.string().default("professional"),
+  defaultAudience: z.string().default("general"),
+  preferShortCaptions: z.boolean().default(false),
+  preferViralContent: z.boolean().default(false),
+  preferEducationalContent: z.boolean().default(false),
+  avoidPolitics: z.boolean().default(false),
+  preferredLanguages: z.array(z.string()).default(["English"]),
+  preferredHashtags: z.array(z.string()).default([]),
+  preferredCta: z.string().default("Learn More"),
+  preferredPostingHours: z.array(z.number()).default([9, 12, 17, 20]),
+  preserveOriginalMeaning: z.boolean().default(true),
+  rewritingAggressiveness: z.number().min(1).max(10).default(5),
+  generateEmojis: z.boolean().default(true),
+  seoOptimize: z.boolean().default(true),
+  humanizeContent: z.boolean().default(true),
+  preferredAudienceAge: z.string().default("18-35"),
+});
+
+export type InsertSportaPreferences = z.infer<typeof insertSportaPreferencesSchema>;
+
+export interface SportaPreferences {
+  id: string;
+  userId: string;
+  defaultTone: string;
+  defaultAudience: string;
+  preferShortCaptions: boolean;
+  preferViralContent: boolean;
+  preferEducationalContent: boolean;
+  avoidPolitics: boolean;
+  preferredLanguages: string[];
+  preferredHashtags: string[];
+  preferredCta: string;
+  preferredPostingHours: number[];
+  preserveOriginalMeaning: boolean;
+  rewritingAggressiveness: number;
+  generateEmojis: boolean;
+  seoOptimize: boolean;
+  humanizeContent: boolean;
+  preferredAudienceAge: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
