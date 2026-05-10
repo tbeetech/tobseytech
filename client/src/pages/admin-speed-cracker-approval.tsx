@@ -31,29 +31,19 @@ export default function AdminSpeedCrackerApprovalPage() {
   });
 
   const { data: allContent = [], isLoading } = useQuery<SportaContent[]>({
-    queryKey: ["/api/speed-cracker/all-pending"],
+    queryKey: ["/api/speed-cracker/pending-content"],
     queryFn: async () => {
-      const results: SportaContent[] = [];
-      await Promise.all(
-        campaigns.map(async (c) => {
-          try {
-            const res = await fetch(`/api/sporta/campaigns/${c.id}/content?status=pending`, { credentials: "include" });
-            if (res.ok) {
-              const items = await res.json();
-              results.push(...items);
-            }
-          } catch { /* ignore */ }
-        })
-      );
-      return results.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      const res = await fetch("/api/speed-cracker/pending-content", { credentials: "include" });
+      if (!res.ok) throw new Error("Failed");
+      return res.json();
     },
-    enabled: user?.role === "admin" && campaigns.length > 0,
+    enabled: user?.role === "admin",
   });
 
   const approveMutation = useMutation({
     mutationFn: (id: string) => apiRequest("POST", `/api/speed-cracker/content/${id}/approve`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/speed-cracker/all-pending"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/speed-cracker/pending-content"] });
       queryClient.invalidateQueries({ queryKey: ["/api/speed-cracker/stats"] });
       toast({ title: "Content approved" });
     },
@@ -63,7 +53,7 @@ export default function AdminSpeedCrackerApprovalPage() {
   const rejectMutation = useMutation({
     mutationFn: (id: string) => apiRequest("POST", `/api/speed-cracker/content/${id}/reject`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/speed-cracker/all-pending"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/speed-cracker/pending-content"] });
       queryClient.invalidateQueries({ queryKey: ["/api/speed-cracker/stats"] });
       toast({ title: "Content rejected" });
     },
@@ -74,7 +64,7 @@ export default function AdminSpeedCrackerApprovalPage() {
     mutationFn: () => apiRequest("POST", "/api/speed-cracker/content/bulk-approve", { ids: Array.from(selectedItems) }),
     onSuccess: async (res) => {
       const data = await res.json();
-      queryClient.invalidateQueries({ queryKey: ["/api/speed-cracker/all-pending"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/speed-cracker/pending-content"] });
       queryClient.invalidateQueries({ queryKey: ["/api/speed-cracker/stats"] });
       toast({ title: `Approved ${data.approved} items` });
       setSelectedItems(new Set());
@@ -86,7 +76,7 @@ export default function AdminSpeedCrackerApprovalPage() {
     mutationFn: () => apiRequest("POST", "/api/speed-cracker/content/bulk-reject", { ids: Array.from(selectedItems) }),
     onSuccess: async (res) => {
       const data = await res.json();
-      queryClient.invalidateQueries({ queryKey: ["/api/speed-cracker/all-pending"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/speed-cracker/pending-content"] });
       queryClient.invalidateQueries({ queryKey: ["/api/speed-cracker/stats"] });
       toast({ title: `Rejected ${data.rejected} items` });
       setSelectedItems(new Set());

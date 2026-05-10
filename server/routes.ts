@@ -351,6 +351,19 @@ async function serveFallbackHtml(req: Request, res: Response) {
 }
 
 async function _registerRouteHandlers(app: Express): Promise<void> {
+  /** Generate a URL-safe slug from a title string, appending a timestamp suffix. */
+  function generateContentSlug(title: string): string {
+    return (
+      title
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, "")
+        .replace(/\s+/g, "-")
+        .slice(0, 80) +
+      "-" +
+      Date.now()
+    );
+  }
+
   // ─── Health check ────────────────────────────────────────────────────────
 
   app.get("/api/health", async (_req, res) => {
@@ -2388,6 +2401,18 @@ Only return valid JSON, no markdown fences.`;
     }
   });
 
+  // GET /api/speed-cracker/pending-content — all pending content across all campaigns
+  app.get("/api/speed-cracker/pending-content", scRateLimiter, requireAdmin, async (req, res) => {
+    try {
+      const limit = Math.min(Number(req.query.limit) || 200, 500);
+      const items = await (storage as any).getAllSportaContentByStatus("pending", limit);
+      res.json(items);
+    } catch (err) {
+      console.error("[speed-cracker/pending-content]", err);
+      res.status(500).json({ message: "Failed to load pending content" });
+    }
+  });
+
   // ─── Vlog CRUD (admin) ───────────────────────────────────────────────────
 
   // GET /api/speed-cracker/vlogs — list all vlogs (admin sees all, public sees published)
@@ -2464,14 +2489,12 @@ Only return valid JSON, no markdown fences.`;
       if (!item) return res.status(404).json({ message: "Content item not found" });
       const user = req.user as any;
       const { insertVlogPostSchema } = await import("../shared/schema.js");
-      const embedPlatform = item.sourcePlatform === "YouTube" ? "YouTube"
-        : item.sourcePlatform === "TikTok" ? "TikTok"
-        : item.sourcePlatform === "Vimeo" ? "Vimeo"
-        : item.sourcePlatform === "Instagram" ? "Instagram"
-        : item.sourcePlatform === "Facebook" ? "Facebook"
-        : "YouTube";
-      const titleBase = (item.aiRewrittenTitle || item.originalTitle || "Untitled").toLowerCase();
-      const slug = titleBase.replace(/[^a-z0-9\s-]/g, "").replace(/\s+/g, "-").slice(0, 80) + "-" + Date.now();
+      const PLATFORM_MAP: Record<string, string> = {
+        YouTube: "YouTube", TikTok: "TikTok", Vimeo: "Vimeo",
+        Instagram: "Instagram", Facebook: "Facebook", Dailymotion: "Dailymotion",
+      };
+      const embedPlatform = PLATFORM_MAP[item.sourcePlatform] ?? "YouTube";
+      const slug = generateContentSlug(item.aiRewrittenTitle || item.originalTitle || "untitled");
       const data = insertVlogPostSchema.parse({
         title: item.aiRewrittenTitle || item.originalTitle || "Untitled",
         slug,
@@ -2506,8 +2529,7 @@ Only return valid JSON, no markdown fences.`;
       const item = await (storage as any).getSportaContent(req.params.contentId);
       if (!item) return res.status(404).json({ message: "Content item not found" });
       const user = req.user as any;
-      const titleBase = (item.aiRewrittenTitle || item.originalTitle || "Untitled").toLowerCase();
-      const slug = titleBase.replace(/[^a-z0-9\s-]/g, "").replace(/\s+/g, "-").slice(0, 80) + "-" + Date.now();
+      const slug = generateContentSlug(item.aiRewrittenTitle || item.originalTitle || "untitled");
       const post = await storage.createBlogPost({
         title: item.aiRewrittenTitle || item.originalTitle || "Untitled",
         slug,

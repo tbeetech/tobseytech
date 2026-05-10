@@ -85,7 +85,7 @@ export default function AdminSpeedCrackerSettingsPage() {
           <div className="flex items-center justify-between">
             <div>
               <Label className="text-white text-sm">Auto-Approve Content</Label>
-              <p className="text-xs text-gray-400 text-red-300">⚠ Bypasses manual review — use with caution</p>
+              <p className="text-xs text-red-300">⚠ Bypasses manual review — use with caution</p>
             </div>
             <Switch
               checked={settings.autoApprove}

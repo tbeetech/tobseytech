@@ -3,33 +3,18 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { generateSlug } from "@/lib/utils";
 import SpeedCrackerLayout from "@/components/SpeedCrackerLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Loader2, Video, Plus, Trash2, Eye, EyeOff, ExternalLink, Edit3, X, Check,
+  Loader2, Video, Plus, Trash2, Eye, EyeOff, ExternalLink, X, Check,
 } from "lucide-react";
 import { format } from "date-fns";
 import type { VlogPost } from "../../../shared/schema";
 
 const EMBED_PLATFORMS = ["YouTube", "TikTok", "Vimeo", "Instagram", "Facebook", "Dailymotion"] as const;
-
-function getEmbedHtml(embedUrl: string, platform: string): string {
-  try {
-    const url = new URL(embedUrl);
-    if (platform === "YouTube") {
-      let videoId = url.searchParams.get("v");
-      if (!videoId) videoId = url.pathname.split("/").pop() ?? "";
-      return `<iframe width="560" height="315" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe>`;
-    }
-    if (platform === "Vimeo") {
-      const id = url.pathname.split("/").pop() ?? "";
-      return `<iframe src="https://player.vimeo.com/video/${id}" width="640" height="360" frameborder="0" allowfullscreen></iframe>`;
-    }
-  } catch { /* ignore */ }
-  return `<iframe src="${embedUrl}" width="640" height="360" frameborder="0" allowfullscreen></iframe>`;
-}
 
 export default function AdminSpeedCrackerVlogPage() {
   const { user } = useAuth();
@@ -63,7 +48,7 @@ export default function AdminSpeedCrackerVlogPage() {
 
   const createMutation = useMutation({
     mutationFn: async () => {
-      const slug = form.slug || form.title.toLowerCase().replace(/[^a-z0-9\s-]/g, "").replace(/\s+/g, "-").slice(0, 80) + "-" + Date.now();
+      const slug = form.slug || generateSlug(form.title || "untitled");
       return apiRequest("POST", "/api/speed-cracker/vlogs", {
         ...form,
         slug,

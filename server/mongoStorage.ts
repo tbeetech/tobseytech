@@ -767,6 +767,11 @@ export class MongoStorage {
     return docs.map(docToSportaContent);
   }
 
+  async getAllSportaContentByStatus(status: SportaContentStatus, limit = 200): Promise<SportaContent[]> {
+    const docs = await SportaContentModel.find({ status }).sort({ createdAt: -1 }).limit(limit).lean();
+    return docs.map(docToSportaContent);
+  }
+
   async getSportaContent(id: string): Promise<SportaContent | undefined> {
     if (!mongoose.Types.ObjectId.isValid(id)) return undefined;
     const doc = await SportaContentModel.findById(id).lean();
