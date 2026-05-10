@@ -286,7 +286,7 @@ export default function DashboardPage() {
         <div className="min-h-screen flex items-center justify-center px-4">
           <div className="w-full max-w-md">
             <div className="text-center mb-8">
-              <div className="w-20 h-20 border-2 border-galactic-orange rounded-full flex items-center justify-center bg-gradient-to-br from-galactic-orange to-galactic-gold mx-auto mb-4 shadow-[0_0_30px_rgba(255,165,0,0.5)]">
+              <div className="w-20 h-20 border-2 border-galactic-orange rounded-full flex items-center justify-center bg-gradient-to-br from-galactic-orange to-galactic-gold mx-auto mb-4 shadow-[0_0_30px_rgba(34,197,94,0.5)]">
                 <LayoutDashboard className="w-8 h-8 text-space-black" />
               </div>
               <h1 className="text-3xl font-orbitron font-bold gradient-text">Admin Dashboard</h1>
@@ -320,7 +320,7 @@ export default function DashboardPage() {
                 <Button
                   type="submit"
                   disabled={verifying}
-                  className="w-full h-11 bg-galactic-orange text-space-black font-orbitron font-bold hover:bg-galactic-gold shadow-[0_0_20px_rgba(255,165,0,0.3)] hover:shadow-[0_0_30px_rgba(255,215,0,0.5)] transition-all"
+                  className="w-full h-11 bg-galactic-orange text-space-black font-orbitron font-bold hover:bg-galactic-gold shadow-[0_0_20px_rgba(34,197,94,0.3)] hover:shadow-[0_0_30px_rgba(34,197,94,0.5)] transition-all"
                 >
                   {verifying ? <Loader2 className="w-5 h-5 animate-spin" /> : "Access Dashboard"}
                 </Button>
@@ -828,13 +828,13 @@ export default function DashboardPage() {
                   className="w-24 h-24 rounded-full flex items-center justify-center shadow-lg"
                   style={{
                     background: prophetStatusData?.enabled
-                      ? "linear-gradient(135deg, rgba(255,165,0,0.25), rgba(255,215,0,0.15))"
+                      ? "linear-gradient(135deg, rgba(34,197,94,0.25), rgba(34,197,94,0.15))"
                       : "rgba(255,255,255,0.05)",
                     border: prophetStatusData?.enabled
-                      ? "2px solid rgba(255,165,0,0.6)"
+                      ? "2px solid rgba(34,197,94,0.6)"
                       : "2px solid rgba(255,255,255,0.15)",
                     boxShadow: prophetStatusData?.enabled
-                      ? "0 0 32px rgba(255,165,0,0.3)"
+                      ? "0 0 32px rgba(34,197,94,0.3)"
                       : "none",
                   }}
                 >

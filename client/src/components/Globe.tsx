@@ -18,7 +18,7 @@ export default function Globe() {
     // Create globe
     const geometry = new window.THREE.SphereGeometry(1.5, 64, 64);
     const material = new window.THREE.MeshBasicMaterial({
-      color: 0xFF8C00,
+      color: 0x22c55e,
       wireframe: true,
       transparent: true,
       opacity: 0.8
@@ -42,7 +42,7 @@ export default function Globe() {
     
     pointsGeometry.setAttribute('position', new window.THREE.BufferAttribute(positions, 3));
     const pointsMaterial = new window.THREE.PointsMaterial({ 
-      color: 0xFFD700, 
+      color: 0x22c55e, 
       size: 0.08,
       transparent: true,
       opacity: 0.9

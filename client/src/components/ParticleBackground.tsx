@@ -8,14 +8,14 @@ export default function ParticleBackground() {
       window.particlesJS('particles-js', {
         particles: {
           number: { value: 120, density: { enable: true, value_area: 800 } },
-          color: { value: ['#FF8C00', '#FFD700', '#00FF00', '#FF0000'] },
+          color: { value: ['#22c55e', '#16a34a', '#00FF00', '#FF0000'] },
           shape: { type: 'circle' },
           opacity: { value: 0.7, random: true },
           size: { value: 4, random: true },
           line_linked: {
             enable: true,
             distance: 200,
-            color: '#FF8C00',
+            color: '#22c55e',
             opacity: 0.6,
             width: 2
           },

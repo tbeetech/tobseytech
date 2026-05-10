@@ -94,7 +94,7 @@ export default function AboutSection() {
                 key={phase}
                 className={`glass-effect p-6 rounded-xl border text-center transition-colors ${
                   i === 0
-                    ? "border-galactic-orange/60 shadow-[0_0_16px_rgba(255,165,0,0.15)]"
+                    ? "border-galactic-orange/60 shadow-[0_0_16px_rgba(34,197,94,0.15)]"
                     : "border-galactic-gold/20 opacity-70"
                 }`}
               >

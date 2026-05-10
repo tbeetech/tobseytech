@@ -108,15 +108,15 @@ export default function ProphetChat() {
             {/* outer glow ring */}
             <span
               className="absolute inset-0 rounded-full animate-ping opacity-25"
-              style={{ background: "rgba(255,165,0,0.5)" }}
+              style={{ background: "rgba(34,197,94,0.5)" }}
             />
             <span
               className="relative flex items-center gap-2 px-3 py-1.5 rounded-full font-orbitron text-xs font-bold tracking-widest shadow-lg"
               style={{
                 background: "linear-gradient(135deg, rgba(20,16,8,0.97) 0%, rgba(40,30,5,0.97) 100%)",
-                border: "1px solid rgba(255,165,0,0.55)",
+                border: "1px solid rgba(34,197,94,0.55)",
                 color: "var(--galactic-orange)",
-                boxShadow: "0 0 18px rgba(255,165,0,0.25), inset 0 1px 0 rgba(255,215,0,0.08)",
+                boxShadow: "0 0 18px rgba(34,197,94,0.25), inset 0 1px 0 rgba(34,197,94,0.08)",
               }}
             >
               {/* tactical icon */}
@@ -170,10 +170,10 @@ export default function ProphetChat() {
                     borderRadius: "10px",
                   }),
               background: "linear-gradient(160deg, rgba(14,11,4,0.98) 0%, rgba(26,20,6,0.98) 100%)",
-              border: fullscreen ? "none" : "1px solid rgba(255,165,0,0.4)",
+              border: fullscreen ? "none" : "1px solid rgba(34,197,94,0.4)",
               boxShadow: fullscreen
                 ? "none"
-                : "0 8px 40px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,215,0,0.06), 0 0 32px rgba(255,165,0,0.08)",
+                : "0 8px 40px rgba(0,0,0,0.7), 0 0 0 1px rgba(34,197,94,0.06), 0 0 32px rgba(34,197,94,0.08)",
               transition: "max-height 0.25s ease",
             }}
           >
@@ -182,8 +182,8 @@ export default function ProphetChat() {
               className="flex items-center justify-between px-4 py-2.5 shrink-0 cursor-pointer select-none"
               style={{
                 background:
-                  "linear-gradient(90deg, rgba(255,165,0,0.12) 0%, rgba(255,165,0,0.04) 100%)",
-                borderBottom: minimized ? "none" : "1px solid rgba(255,165,0,0.2)",
+                  "linear-gradient(90deg, rgba(34,197,94,0.12) 0%, rgba(34,197,94,0.04) 100%)",
+                borderBottom: minimized ? "none" : "1px solid rgba(34,197,94,0.2)",
               }}
               onClick={() => setMinimized((v) => !v)}
             >
@@ -246,7 +246,7 @@ export default function ProphetChat() {
             {!minimized && (
               <div
                 className="shrink-0 text-center font-orbitron text-[9px] tracking-[0.25em] py-1 opacity-40"
-                style={{ color: "var(--galactic-gold)", borderBottom: "1px solid rgba(255,165,0,0.1)" }}
+                style={{ color: "var(--galactic-gold)", borderBottom: "1px solid rgba(34,197,94,0.1)" }}
               >
                 ▌ AGENTIC AI · POWERED BY GEMINI · TOBSEYTECH ▐
               </div>
@@ -256,7 +256,7 @@ export default function ProphetChat() {
             {!minimized && (
               <div
                 className="flex-1 overflow-y-auto px-3 py-3 flex flex-col gap-3"
-                style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(255,165,0,0.3) transparent" }}
+                style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(34,197,94,0.3) transparent" }}
               >
                 {messages.map((msg, i) => (
                   <div
@@ -276,15 +276,15 @@ export default function ProphetChat() {
                       style={
                         msg.role === "assistant"
                           ? {
-                              background: "rgba(255,165,0,0.07)",
-                              border: "1px solid rgba(255,165,0,0.18)",
+                              background: "rgba(34,197,94,0.07)",
+                              border: "1px solid rgba(34,197,94,0.18)",
                               borderRadius: "2px 8px 8px 8px",
                               color: "rgba(255,255,255,0.88)",
                               fontFamily: "var(--font-sans)",
                             }
                           : {
-                              background: "rgba(255,165,0,0.15)",
-                              border: "1px solid rgba(255,165,0,0.35)",
+                              background: "rgba(34,197,94,0.15)",
+                              border: "1px solid rgba(34,197,94,0.35)",
                               borderRadius: "8px 2px 8px 8px",
                               color: "var(--galactic-gold)",
                               fontFamily: "var(--font-orbitron)",
@@ -308,8 +308,8 @@ export default function ProphetChat() {
                     <div
                       className="flex items-center gap-1.5 px-3 py-2"
                       style={{
-                        background: "rgba(255,165,0,0.07)",
-                        border: "1px solid rgba(255,165,0,0.18)",
+                        background: "rgba(34,197,94,0.07)",
+                        border: "1px solid rgba(34,197,94,0.18)",
                         borderRadius: "2px 8px 8px 8px",
                       }}
                     >
@@ -334,7 +334,7 @@ export default function ProphetChat() {
             {!minimized && (
               <div
                 className="shrink-0 flex items-center gap-2 px-3 py-2.5"
-                style={{ borderTop: "1px solid rgba(255,165,0,0.2)" }}
+                style={{ borderTop: "1px solid rgba(34,197,94,0.2)" }}
               >
                 <input
                   ref={inputRef}
@@ -362,10 +362,10 @@ export default function ProphetChat() {
                   style={{
                     background: input.trim()
                       ? "linear-gradient(135deg, var(--galactic-orange), var(--galactic-gold))"
-                      : "rgba(255,165,0,0.1)",
-                    border: "1px solid rgba(255,165,0,0.35)",
+                      : "rgba(34,197,94,0.1)",
+                    border: "1px solid rgba(34,197,94,0.35)",
                     borderRadius: "4px",
-                    color: input.trim() ? "#000" : "rgba(255,165,0,0.3)",
+                    color: input.trim() ? "#000" : "rgba(34,197,94,0.3)",
                   }}
                 >
                   <Send className="w-3 h-3" />

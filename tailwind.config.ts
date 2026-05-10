@@ -69,7 +69,7 @@ export default {
         "space-black": "var(--space-black)",
         "deep-space": "var(--deep-space)",
         "carbon": "var(--carbon)",
-        "neon-yellow": "#FFD700",
+        "neon-green": "#22c55e",
         "galactic-orange": "var(--galactic-orange)",
         "galactic-gold": "var(--galactic-gold)",
         "galactic-green": "var(--galactic-green)",

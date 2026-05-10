@@ -39,9 +39,11 @@ export default function Navigation() {
           {/* Logo */}
           <Link href="/">
             <div className="flex items-center gap-3 cursor-pointer" data-testid="nav-logo">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-galactic-orange to-galactic-gold flex items-center justify-center shadow-[0_0_16px_rgba(255,165,0,0.35)]">
-                <span className="text-space-black font-orbitron font-black text-base">T</span>
-              </div>
+              <img
+                src="https://i.pinimg.com/1200x/58/b9/9e/58b99ee7bfbbf7c0043a1950be716265.jpg"
+                alt="TOBSEYTECH Logo"
+                className="w-10 h-10 rounded-xl object-cover shadow-[0_0_16px_rgba(34,197,94,0.35)]"
+              />
               <span className="font-orbitron font-bold text-lg gradient-text">TOBSEYTECH</span>
             </div>
           </Link>
@@ -49,7 +51,7 @@ export default function Navigation() {
           {/* Gradient separator (desktop only) */}
           <div
             className="hidden md:block h-6 w-px mx-4"
-            style={{ background: "linear-gradient(to bottom, transparent, rgba(255,165,0,0.3), transparent)" }}
+            style={{ background: "linear-gradient(to bottom, transparent, rgba(34,197,94,0.3), transparent)" }}
           />
 
           {/* Desktop nav links */}
@@ -126,7 +128,7 @@ export default function Navigation() {
               <Link href="/auth">
                 <Button
                   size="sm"
-                  className="bg-gradient-to-r from-galactic-orange to-galactic-gold text-space-black font-orbitron font-bold text-xs h-8 hover:shadow-[0_0_16px_rgba(255,165,0,0.4)] transition-all"
+                  className="bg-gradient-to-r from-galactic-orange to-galactic-gold text-space-black font-orbitron font-bold text-xs h-8 hover:shadow-[0_0_16px_rgba(34,197,94,0.4)] transition-all"
                 >
                   <LogIn className="w-3 h-3 mr-1" /> Sign In
                 </Button>
@@ -183,7 +185,7 @@ export default function Navigation() {
                 </button>
               </Link>
 
-              <div className="h-px my-1" style={{ background: "rgba(255,165,0,0.15)" }} />
+              <div className="h-px my-1" style={{ background: "rgba(34,197,94,0.15)" }} />
 
               {user ? (
                 <>

@@ -63,7 +63,7 @@ export default function BlogPage() {
         className="pt-28 pb-14 relative overflow-hidden"
         style={{
           background:
-            "radial-gradient(ellipse 70% 60% at 50% 0%, rgba(255,165,0,0.10) 0%, transparent 65%), var(--space-black)",
+            "radial-gradient(ellipse 70% 60% at 50% 0%, rgba(34,197,94,0.10) 0%, transparent 65%), var(--space-black)",
         }}
       >
         <div className="absolute inset-0 starfield opacity-20 pointer-events-none" />
@@ -79,7 +79,7 @@ export default function BlogPage() {
           </p>
           {user && (
             <Link href="/blog/new">
-              <Button className="bg-gradient-to-r from-galactic-orange to-galactic-gold text-space-black font-orbitron font-bold hover:shadow-[0_0_25px_rgba(255,165,0,0.4)] transition-all">
+              <Button className="bg-gradient-to-r from-galactic-orange to-galactic-gold text-space-black font-orbitron font-bold hover:shadow-[0_0_25px_rgba(34,197,94,0.4)] transition-all">
                 <PenLine className="w-4 h-4 mr-2" />
                 Write a Post
               </Button>
@@ -98,7 +98,7 @@ export default function BlogPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-10 h-10 border-galactic-orange/20 text-white text-sm focus:border-galactic-orange neon-input"
-              style={{ background: "rgba(255,165,0,0.04)" }}
+              style={{ background: "rgba(34,197,94,0.04)" }}
             />
           </div>
           <div className="flex flex-wrap gap-2">
@@ -166,7 +166,7 @@ export default function BlogPage() {
                     ) : (
                       <div
                         className="w-full h-full min-h-[220px] flex items-center justify-center"
-                        style={{ background: "linear-gradient(135deg, rgba(255,165,0,0.15), rgba(0,212,255,0.08))" }}
+                        style={{ background: "linear-gradient(135deg, rgba(34,197,94,0.15), rgba(0,212,255,0.08))" }}
                       >
                         <span className="text-6xl font-orbitron text-galactic-orange/30">TST</span>
                       </div>
@@ -219,7 +219,7 @@ export default function BlogPage() {
                       ) : (
                         <div
                           className="w-full h-full flex items-center justify-center"
-                          style={{ background: "linear-gradient(135deg, rgba(255,165,0,0.1), rgba(0,212,255,0.05))" }}
+                          style={{ background: "linear-gradient(135deg, rgba(34,197,94,0.1), rgba(0,212,255,0.05))" }}
                         >
                           <span className="text-3xl font-orbitron text-galactic-orange/25">TST</span>
                         </div>
