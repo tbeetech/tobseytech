@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import {
   Calculator, Rocket, Brain, Activity, GraduationCap, Trophy,
   BookOpen, TrendingUp, ArrowRight, Wrench, Award, Handshake,
-  UserCheck, Play, Globe2, Layers
+  UserCheck, Play, Globe2, Layers, Zap
 } from "lucide-react";
 
 const features = [
@@ -195,6 +195,17 @@ const features = [
     anchor: "/career-hub",
     isPage: true,
   },
+  {
+    number: "18",
+    icon: Zap,
+    title: "SPORTA",
+    description: "Enterprise AI agentic social media aggregator, reshaper & mass publishing system. Aggregate 17+ platforms, reshape with AI, and auto-publish everywhere.",
+    tags: ["AI", "Automation", "Social Media", "Publishing"],
+    color: "text-galactic-orange",
+    border: "border-galactic-orange",
+    anchor: "/feature/sporta",
+    isPage: true,
+  },
 ];
 
 const allTags = ["All", ...Array.from(new Set(features.flatMap(f => f.tags)))];
@@ -202,7 +213,7 @@ const allTags = ["All", ...Array.from(new Set(features.flatMap(f => f.tags)))];
 export default function FeaturesPage() {
   return (
     <div className="min-h-screen bg-space-black text-white">
-      <title>17 Interactive Features – TOBSEYTECH</title>
+      <title>18 Interactive Features – TOBSEYTECH</title>
       <Navigation />
 
       <main className="pt-24 pb-20">
@@ -212,15 +223,15 @@ export default function FeaturesPage() {
             <Layers className="w-4 h-4" /> Platform Features
           </div>
           <h1 className="font-orbitron font-bold text-4xl md:text-6xl gradient-text mb-6">
-            17 Investor-Ready Features
+            18 Investor-Ready Features
           </h1>
           <p className="text-gray-300 max-w-3xl mx-auto text-lg leading-relaxed mb-8">
             TOBSEYTECH isn't just a service agency — it's an interactive digital ecosystem. Every feature below is live, built, and designed to attract users, retain community, and demonstrate platform value to investors.
           </p>
           <div className="flex flex-wrap justify-center gap-4 mb-6">
             {[
-              { label: "Interactive Features", value: "17" },
-              { label: "Live Today", value: "17/17" },
+              { label: "Interactive Features", value: "18" },
+              { label: "Live Today", value: "18/18" },
               { label: "User-Facing", value: "✓" },
               { label: "Investor-Ready", value: "✓" },
             ].map(({ label, value }) => (

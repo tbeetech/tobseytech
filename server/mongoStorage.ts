@@ -22,6 +22,14 @@ import type {
   InsertMessage,
   Notification,
   InsertNotification,
+  SportaCampaign,
+  InsertSportaCampaign,
+  SportaContent,
+  InsertSportaContent,
+  SportaPreferences,
+  InsertSportaPreferences,
+  SportaCampaignStatus,
+  SportaContentStatus,
 } from "../shared/schema.js";
 import { UserModel } from "./models/User.js";
 import { ContactModel } from "./models/Contact.js";
@@ -36,6 +44,9 @@ import { FriendshipModel } from "./models/Friendship.js";
 import { MessageModel } from "./models/Message.js";
 import { NotificationModel } from "./models/Notification.js";
 import { ShortUrlModel } from "./models/ShortUrl.js";
+import { SportaCampaignModel } from "./models/SportaCampaign.js";
+import { SportaContentModel } from "./models/SportaContent.js";
+import { SportaPreferencesModel } from "./models/SportaPreferences.js";
 import { randomBytes } from "crypto";
 import mongoose from "mongoose";
 
@@ -181,6 +192,90 @@ function docToNotification(doc: any): Notification {
 }
 
 const MAX_NOTIFICATIONS_PER_USER = 50;
+
+function docToSportaCampaign(doc: any): SportaCampaign {
+  return {
+    id: doc._id.toString(),
+    name: doc.name,
+    industry: doc.industry,
+    contentTypes: doc.contentTypes ?? [],
+    sourcePlatforms: doc.sourcePlatforms ?? [],
+    publishingDestinations: doc.publishingDestinations ?? [],
+    aiMode: doc.aiMode,
+    approvalMode: doc.approvalMode,
+    timelinePreference: doc.timelinePreference,
+    postingFrequency: doc.postingFrequency,
+    keywords: doc.keywords ?? [],
+    bannedKeywords: doc.bannedKeywords ?? [],
+    hashtags: doc.hashtags ?? [],
+    languages: doc.languages ?? ["English"],
+    tone: doc.tone,
+    audience: doc.audience,
+    enableSeo: doc.enableSeo,
+    enableViral: doc.enableViral,
+    enableNsfwFilter: doc.enableNsfwFilter,
+    enableDuplicateFilter: doc.enableDuplicateFilter,
+    minEngagement: doc.minEngagement ?? 0,
+    status: doc.status,
+    creatorId: doc.creatorId,
+    postsAggregated: doc.postsAggregated ?? 0,
+    postsPublished: doc.postsPublished ?? 0,
+    postsRejected: doc.postsRejected ?? 0,
+    createdAt: doc.createdAt,
+    updatedAt: doc.updatedAt,
+  };
+}
+
+function docToSportaContent(doc: any): SportaContent {
+  return {
+    id: doc._id.toString(),
+    campaignId: doc.campaignId,
+    sourceUrl: doc.sourceUrl,
+    sourcePlatform: doc.sourcePlatform,
+    originalTitle: doc.originalTitle,
+    originalContent: doc.originalContent,
+    originalAuthor: doc.originalAuthor,
+    originalThumbnail: doc.originalThumbnail ?? null,
+    mediaType: doc.mediaType,
+    embedCode: doc.embedCode,
+    aiRewrittenTitle: doc.aiRewrittenTitle,
+    aiRewrittenContent: doc.aiRewrittenContent,
+    aiGeneratedHashtags: doc.aiGeneratedHashtags ?? [],
+    aiQualityScore: doc.aiQualityScore,
+    aiViralScore: doc.aiViralScore,
+    aiEngagementPrediction: doc.aiEngagementPrediction,
+    aiConfidenceScore: doc.aiConfidenceScore,
+    status: doc.status,
+    publishedAt: doc.publishedAt,
+    createdAt: doc.createdAt,
+    updatedAt: doc.updatedAt,
+  };
+}
+
+function docToSportaPreferences(doc: any): SportaPreferences {
+  return {
+    id: doc._id.toString(),
+    userId: doc.userId,
+    defaultTone: doc.defaultTone,
+    defaultAudience: doc.defaultAudience,
+    preferShortCaptions: doc.preferShortCaptions,
+    preferViralContent: doc.preferViralContent,
+    preferEducationalContent: doc.preferEducationalContent,
+    avoidPolitics: doc.avoidPolitics,
+    preferredLanguages: doc.preferredLanguages ?? ["English"],
+    preferredHashtags: doc.preferredHashtags ?? [],
+    preferredCta: doc.preferredCta,
+    preferredPostingHours: doc.preferredPostingHours ?? [9, 12, 17, 20],
+    preserveOriginalMeaning: doc.preserveOriginalMeaning,
+    rewritingAggressiveness: doc.rewritingAggressiveness,
+    generateEmojis: doc.generateEmojis,
+    seoOptimize: doc.seoOptimize,
+    humanizeContent: doc.humanizeContent,
+    preferredAudienceAge: doc.preferredAudienceAge,
+    createdAt: doc.createdAt,
+    updatedAt: doc.updatedAt,
+  };
+}
 
 export class MongoStorage {
   // ─── User methods ────────────────────────────────────────────────────────
@@ -581,5 +676,97 @@ export class MongoStorage {
     const doc = await ShortUrlModel.findOne({ code }).lean();
     if (!doc) return undefined;
     return { code: doc.code, url: doc.url, createdAt: doc.createdAt as Date };
+  }
+
+  // ─── SPORTA – Campaign methods ───────────────────────────────────────────
+
+  async createSportaCampaign(data: InsertSportaCampaign): Promise<SportaCampaign> {
+    const doc = await SportaCampaignModel.create({ ...data, status: "draft", postsAggregated: 0, postsPublished: 0, postsRejected: 0 });
+    return docToSportaCampaign(doc.toObject());
+  }
+
+  async getSportaCampaigns(creatorId?: string): Promise<SportaCampaign[]> {
+    const filter = creatorId ? { creatorId } : {};
+    const docs = await SportaCampaignModel.find(filter).sort({ createdAt: -1 }).lean();
+    return docs.map(docToSportaCampaign);
+  }
+
+  async getSportaCampaign(id: string): Promise<SportaCampaign | undefined> {
+    if (!mongoose.Types.ObjectId.isValid(id)) return undefined;
+    const doc = await SportaCampaignModel.findById(id).lean();
+    return doc ? docToSportaCampaign(doc) : undefined;
+  }
+
+  async updateSportaCampaign(id: string, updates: Partial<InsertSportaCampaign & { status: SportaCampaignStatus; postsAggregated: number; postsPublished: number; postsRejected: number }>): Promise<SportaCampaign | undefined> {
+    if (!mongoose.Types.ObjectId.isValid(id)) return undefined;
+    const doc = await SportaCampaignModel.findByIdAndUpdate(id, updates, { new: true }).lean();
+    return doc ? docToSportaCampaign(doc) : undefined;
+  }
+
+  async deleteSportaCampaign(id: string): Promise<boolean> {
+    if (!mongoose.Types.ObjectId.isValid(id)) return false;
+    const result = await SportaCampaignModel.findByIdAndDelete(id);
+    return !!result;
+  }
+
+  // ─── SPORTA – Content queue methods ─────────────────────────────────────
+
+  async createSportaContent(data: InsertSportaContent): Promise<SportaContent> {
+    const doc = await SportaContentModel.create({ ...data, status: "pending" });
+    return docToSportaContent(doc.toObject());
+  }
+
+  async getSportaContentByCampaign(campaignId: string, status?: SportaContentStatus): Promise<SportaContent[]> {
+    const filter: any = { campaignId };
+    if (status) filter.status = status;
+    const docs = await SportaContentModel.find(filter).sort({ createdAt: -1 }).lean();
+    return docs.map(docToSportaContent);
+  }
+
+  async getSportaContent(id: string): Promise<SportaContent | undefined> {
+    if (!mongoose.Types.ObjectId.isValid(id)) return undefined;
+    const doc = await SportaContentModel.findById(id).lean();
+    return doc ? docToSportaContent(doc) : undefined;
+  }
+
+  async updateSportaContentStatus(id: string, status: SportaContentStatus, extra?: Partial<SportaContent>): Promise<SportaContent | undefined> {
+    if (!mongoose.Types.ObjectId.isValid(id)) return undefined;
+    const updates: any = { status, ...extra };
+    if (status === "published") updates.publishedAt = new Date();
+    const doc = await SportaContentModel.findByIdAndUpdate(id, updates, { new: true }).lean();
+    return doc ? docToSportaContent(doc) : undefined;
+  }
+
+  async deleteSportaContent(id: string): Promise<boolean> {
+    if (!mongoose.Types.ObjectId.isValid(id)) return false;
+    const result = await SportaContentModel.findByIdAndDelete(id);
+    return !!result;
+  }
+
+  async getSportaStats(): Promise<{ totalCampaigns: number; activeCampaigns: number; pendingContent: number; publishedContent: number; rejectedContent: number }> {
+    const [totalCampaigns, activeCampaigns, pendingContent, publishedContent, rejectedContent] = await Promise.all([
+      SportaCampaignModel.countDocuments(),
+      SportaCampaignModel.countDocuments({ status: "active" }),
+      SportaContentModel.countDocuments({ status: "pending" }),
+      SportaContentModel.countDocuments({ status: "published" }),
+      SportaContentModel.countDocuments({ status: "rejected" }),
+    ]);
+    return { totalCampaigns, activeCampaigns, pendingContent, publishedContent, rejectedContent };
+  }
+
+  // ─── SPORTA – User preferences methods ──────────────────────────────────
+
+  async getSportaPreferences(userId: string): Promise<SportaPreferences | undefined> {
+    const doc = await SportaPreferencesModel.findOne({ userId }).lean();
+    return doc ? docToSportaPreferences(doc) : undefined;
+  }
+
+  async upsertSportaPreferences(data: InsertSportaPreferences): Promise<SportaPreferences> {
+    const doc = await SportaPreferencesModel.findOneAndUpdate(
+      { userId: data.userId },
+      data,
+      { new: true, upsert: true }
+    ).lean();
+    return docToSportaPreferences(doc!);
   }
 }
