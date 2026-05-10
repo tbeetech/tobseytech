@@ -31,14 +31,18 @@ export default function ProphetChat() {
     queryKey: ["/api/prophet/status"],
     queryFn: async () => {
       const res = await fetch("/api/prophet/status");
-      if (!res.ok) return { enabled: false };
+      if (!res.ok) {
+        console.error("[ProphetChat] Status check failed:", res.status);
+        return { enabled: false };
+      }
       return res.json();
     },
     refetchInterval: 10000,
   });
 
   // Only show Prophet once we have a confirmed enabled=true from the server.
-  // While loading or when disabled, Prophet stays completely hidden.
+  // `statusLoading` is only true during the initial fetch (React Query v5), not
+  // during background 10-second refetches, so there is no recurring flicker.
   const prophetEnabled = !statusLoading && statusData?.enabled === true;
 
   useEffect(() => {
