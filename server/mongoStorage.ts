@@ -30,6 +30,11 @@ import type {
   InsertSportaPreferences,
   SportaCampaignStatus,
   SportaContentStatus,
+  VlogPost,
+  InsertVlogPost,
+  UpdateVlogPost,
+  AuditLog,
+  InsertAuditLog,
 } from "../shared/schema.js";
 import { UserModel } from "./models/User.js";
 import { ContactModel } from "./models/Contact.js";
@@ -47,6 +52,8 @@ import { ShortUrlModel } from "./models/ShortUrl.js";
 import { SportaCampaignModel } from "./models/SportaCampaign.js";
 import { SportaContentModel } from "./models/SportaContent.js";
 import { SportaPreferencesModel } from "./models/SportaPreferences.js";
+import { VlogPostModel } from "./models/VlogPost.js";
+import { AuditLogModel } from "./models/AuditLog.js";
 import { randomBytes } from "crypto";
 import mongoose from "mongoose";
 
@@ -274,6 +281,43 @@ function docToSportaPreferences(doc: any): SportaPreferences {
     preferredAudienceAge: doc.preferredAudienceAge,
     createdAt: doc.createdAt,
     updatedAt: doc.updatedAt,
+  };
+}
+
+function docToVlogPost(doc: any): VlogPost {
+  return {
+    id: doc._id.toString(),
+    title: doc.title,
+    slug: doc.slug,
+    description: doc.description,
+    embedUrl: doc.embedUrl,
+    embedPlatform: doc.embedPlatform,
+    thumbnail: doc.thumbnail ?? null,
+    tags: doc.tags ?? [],
+    category: doc.category,
+    seoTitle: doc.seoTitle,
+    seoDescription: doc.seoDescription,
+    published: doc.published,
+    authorId: doc.authorId,
+    authorName: doc.authorName,
+    sourceContentId: doc.sourceContentId,
+    campaignId: doc.campaignId,
+    createdAt: doc.createdAt,
+    updatedAt: doc.updatedAt,
+  };
+}
+
+function docToAuditLog(doc: any): AuditLog {
+  return {
+    id: doc._id.toString(),
+    adminId: doc.adminId,
+    adminName: doc.adminName,
+    action: doc.action,
+    targetId: doc.targetId,
+    targetType: doc.targetType,
+    details: doc.details,
+    ipAddress: doc.ipAddress,
+    createdAt: doc.createdAt,
   };
 }
 
@@ -768,5 +812,58 @@ export class MongoStorage {
       { new: true, upsert: true }
     ).lean();
     return docToSportaPreferences(doc!);
+  }
+
+  // ─── VlogPost methods ────────────────────────────────────────────────────
+
+  async getVlogPosts(publishedOnly?: boolean): Promise<VlogPost[]> {
+    const filter = publishedOnly ? { published: true } : {};
+    const docs = await VlogPostModel.find(filter).sort({ createdAt: -1 }).lean();
+    return docs.map(docToVlogPost);
+  }
+
+  async getVlogPost(id: string): Promise<VlogPost | undefined> {
+    if (!mongoose.Types.ObjectId.isValid(id)) return undefined;
+    const doc = await VlogPostModel.findById(id).lean();
+    return doc ? docToVlogPost(doc) : undefined;
+  }
+
+  async getVlogPostBySlug(slug: string): Promise<VlogPost | undefined> {
+    const doc = await VlogPostModel.findOne({ slug }).lean();
+    return doc ? docToVlogPost(doc) : undefined;
+  }
+
+  async createVlogPost(data: InsertVlogPost): Promise<VlogPost> {
+    const doc = await VlogPostModel.create(data);
+    return docToVlogPost(doc.toObject());
+  }
+
+  async updateVlogPost(id: string, updates: UpdateVlogPost): Promise<VlogPost | undefined> {
+    if (!mongoose.Types.ObjectId.isValid(id)) return undefined;
+    const doc = await VlogPostModel.findByIdAndUpdate(id, updates, { new: true }).lean();
+    return doc ? docToVlogPost(doc) : undefined;
+  }
+
+  async deleteVlogPost(id: string): Promise<boolean> {
+    if (!mongoose.Types.ObjectId.isValid(id)) return false;
+    const result = await VlogPostModel.findByIdAndDelete(id);
+    return !!result;
+  }
+
+  // ─── Audit Log methods ───────────────────────────────────────────────────
+
+  async createAuditLog(data: InsertAuditLog): Promise<AuditLog> {
+    const doc = await AuditLogModel.create(data);
+    return docToAuditLog(doc.toObject());
+  }
+
+  async getAuditLogs(opts?: { adminId?: string; limit?: number }): Promise<AuditLog[]> {
+    const filter: any = {};
+    if (opts?.adminId) filter.adminId = opts.adminId;
+    const docs = await AuditLogModel.find(filter)
+      .sort({ createdAt: -1 })
+      .limit(opts?.limit ?? 200)
+      .lean();
+    return docs.map(docToAuditLog);
   }
 }

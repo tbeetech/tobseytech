@@ -2334,6 +2334,286 @@ Only return valid JSON, no markdown fences.`;
     }
   });
 
+  // ─── Speed Cracker — Admin-only Content Automation System ───────────────
+  // All routes under /api/speed-cracker require role === "admin".
+
+  const scRateLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    max: 120,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { message: "Too many Speed Cracker requests, please slow down." },
+  });
+
+  async function auditLog(req: Request, action: string, targetId?: string, targetType?: string, details?: Record<string, unknown>) {
+    const user = req.user as any;
+    try {
+      await (storage as any).createAuditLog({
+        adminId: user?.id ?? "unknown",
+        adminName: user?.username ?? "unknown",
+        action,
+        targetId,
+        targetType,
+        details,
+        ipAddress: req.ip ?? undefined,
+      });
+    } catch { /* non-critical */ }
+  }
+
+  // GET /api/speed-cracker/stats
+  app.get("/api/speed-cracker/stats", scRateLimiter, requireAdmin, async (_req, res) => {
+    try {
+      const [sportaStats, totalVlogs, publishedVlogs] = await Promise.all([
+        (storage as any).getSportaStats(),
+        (storage as any).getVlogPosts().then((v: any[]) => v.length),
+        (storage as any).getVlogPosts(true).then((v: any[]) => v.length),
+      ]);
+      res.json({ ...sportaStats, totalVlogs, publishedVlogs });
+    } catch (err) {
+      console.error("[speed-cracker/stats]", err);
+      res.status(500).json({ message: "Failed to load stats" });
+    }
+  });
+
+  // GET /api/speed-cracker/audit-logs
+  app.get("/api/speed-cracker/audit-logs", scRateLimiter, requireAdmin, async (req, res) => {
+    try {
+      const limit = Math.min(Number(req.query.limit) || 100, 500);
+      const adminId = req.query.adminId as string | undefined;
+      const logs = await (storage as any).getAuditLogs({ limit, adminId });
+      res.json(logs);
+    } catch (err) {
+      console.error("[speed-cracker/audit-logs]", err);
+      res.status(500).json({ message: "Failed to load audit logs" });
+    }
+  });
+
+  // ─── Vlog CRUD (admin) ───────────────────────────────────────────────────
+
+  // GET /api/speed-cracker/vlogs — list all vlogs (admin sees all, public sees published)
+  app.get("/api/speed-cracker/vlogs", scRateLimiter, requireAdmin, async (_req, res) => {
+    try {
+      const vlogs = await (storage as any).getVlogPosts();
+      res.json(vlogs);
+    } catch (err) {
+      console.error("[speed-cracker/vlogs GET]", err);
+      res.status(500).json({ message: "Failed to load vlogs" });
+    }
+  });
+
+  // POST /api/speed-cracker/vlogs — create a vlog entry
+  app.post("/api/speed-cracker/vlogs", scRateLimiter, requireAdmin, async (req, res) => {
+    try {
+      const { insertVlogPostSchema } = await import("../shared/schema.js");
+      const user = req.user as any;
+      const data = insertVlogPostSchema.parse({ ...req.body, authorId: user.id, authorName: user.username });
+      const vlog = await (storage as any).createVlogPost(data);
+      await auditLog(req, "speed_cracker.vlog.create", vlog.id, "VlogPost", { title: vlog.title });
+      res.status(201).json(vlog);
+    } catch (err) {
+      if (err instanceof z.ZodError) return res.status(400).json({ message: "Validation error", errors: err.errors });
+      console.error("[speed-cracker/vlogs POST]", err);
+      res.status(500).json({ message: "Failed to create vlog" });
+    }
+  });
+
+  // GET /api/speed-cracker/vlogs/:id — get single vlog
+  app.get("/api/speed-cracker/vlogs/:id", scRateLimiter, requireAdmin, async (req, res) => {
+    try {
+      const vlog = await (storage as any).getVlogPost(req.params.id);
+      if (!vlog) return res.status(404).json({ message: "Vlog not found" });
+      res.json(vlog);
+    } catch (err) {
+      console.error("[speed-cracker/vlogs/:id GET]", err);
+      res.status(500).json({ message: "Failed to load vlog" });
+    }
+  });
+
+  // PATCH /api/speed-cracker/vlogs/:id — update a vlog entry
+  app.patch("/api/speed-cracker/vlogs/:id", scRateLimiter, requireAdmin, async (req, res) => {
+    try {
+      const vlog = await (storage as any).updateVlogPost(req.params.id, req.body);
+      if (!vlog) return res.status(404).json({ message: "Vlog not found" });
+      const action = req.body.published === true ? "speed_cracker.vlog.publish" : "speed_cracker.vlog.update";
+      await auditLog(req, action, vlog.id, "VlogPost", { title: vlog.title });
+      res.json(vlog);
+    } catch (err) {
+      console.error("[speed-cracker/vlogs/:id PATCH]", err);
+      res.status(500).json({ message: "Failed to update vlog" });
+    }
+  });
+
+  // DELETE /api/speed-cracker/vlogs/:id — delete a vlog entry
+  app.delete("/api/speed-cracker/vlogs/:id", scRateLimiter, requireAdmin, async (req, res) => {
+    try {
+      const deleted = await (storage as any).deleteVlogPost(req.params.id);
+      if (!deleted) return res.status(404).json({ message: "Vlog not found" });
+      await auditLog(req, "speed_cracker.vlog.delete", req.params.id, "VlogPost");
+      res.json({ success: true });
+    } catch (err) {
+      console.error("[speed-cracker/vlogs/:id DELETE]", err);
+      res.status(500).json({ message: "Failed to delete vlog" });
+    }
+  });
+
+  // POST /api/speed-cracker/vlogs/from-content/:contentId
+  // Promote an approved SportaContent item to a VlogPost
+  app.post("/api/speed-cracker/vlogs/from-content/:contentId", scRateLimiter, requireAdmin, async (req, res) => {
+    try {
+      const item = await (storage as any).getSportaContent(req.params.contentId);
+      if (!item) return res.status(404).json({ message: "Content item not found" });
+      const user = req.user as any;
+      const { insertVlogPostSchema } = await import("../shared/schema.js");
+      const embedPlatform = item.sourcePlatform === "YouTube" ? "YouTube"
+        : item.sourcePlatform === "TikTok" ? "TikTok"
+        : item.sourcePlatform === "Vimeo" ? "Vimeo"
+        : item.sourcePlatform === "Instagram" ? "Instagram"
+        : item.sourcePlatform === "Facebook" ? "Facebook"
+        : "YouTube";
+      const titleBase = (item.aiRewrittenTitle || item.originalTitle || "Untitled").toLowerCase();
+      const slug = titleBase.replace(/[^a-z0-9\s-]/g, "").replace(/\s+/g, "-").slice(0, 80) + "-" + Date.now();
+      const data = insertVlogPostSchema.parse({
+        title: item.aiRewrittenTitle || item.originalTitle || "Untitled",
+        slug,
+        description: item.aiRewrittenContent || item.originalContent || "",
+        embedUrl: item.sourceUrl,
+        embedPlatform,
+        thumbnail: item.originalThumbnail || null,
+        tags: item.aiGeneratedHashtags || [],
+        category: req.body.category || "General",
+        seoTitle: item.aiRewrittenTitle,
+        seoDescription: item.aiRewrittenContent?.slice(0, 160),
+        published: false,
+        authorId: user.id,
+        authorName: user.username,
+        sourceContentId: item.id,
+        campaignId: item.campaignId,
+      });
+      const vlog = await (storage as any).createVlogPost(data);
+      await auditLog(req, "speed_cracker.vlog.create", vlog.id, "VlogPost", { sourceContentId: item.id });
+      res.status(201).json(vlog);
+    } catch (err) {
+      if (err instanceof z.ZodError) return res.status(400).json({ message: "Validation error", errors: err.errors });
+      console.error("[speed-cracker/vlogs/from-content]", err);
+      res.status(500).json({ message: "Failed to create vlog from content" });
+    }
+  });
+
+  // POST /api/speed-cracker/blog/from-content/:contentId
+  // Promote an approved SportaContent item to a BlogPost
+  app.post("/api/speed-cracker/blog/from-content/:contentId", scRateLimiter, requireAdmin, async (req, res) => {
+    try {
+      const item = await (storage as any).getSportaContent(req.params.contentId);
+      if (!item) return res.status(404).json({ message: "Content item not found" });
+      const user = req.user as any;
+      const titleBase = (item.aiRewrittenTitle || item.originalTitle || "Untitled").toLowerCase();
+      const slug = titleBase.replace(/[^a-z0-9\s-]/g, "").replace(/\s+/g, "-").slice(0, 80) + "-" + Date.now();
+      const post = await storage.createBlogPost({
+        title: item.aiRewrittenTitle || item.originalTitle || "Untitled",
+        slug,
+        excerpt: (item.aiRewrittenContent || item.originalContent || "").slice(0, 300),
+        content: item.aiRewrittenContent || item.originalContent || "",
+        coverImage: item.originalThumbnail || null,
+        tags: item.aiGeneratedHashtags || [],
+        category: req.body.category || "General",
+        published: false,
+        authorId: user.id,
+        authorName: user.username,
+      });
+      await auditLog(req, "speed_cracker.blog.publish", post.id, "BlogPost", { sourceContentId: item.id });
+      res.status(201).json(post);
+    } catch (err) {
+      if (err instanceof z.ZodError) return res.status(400).json({ message: "Validation error", errors: err.errors });
+      console.error("[speed-cracker/blog/from-content]", err);
+      res.status(500).json({ message: "Failed to create blog post from content" });
+    }
+  });
+
+  // POST /api/speed-cracker/content/:id/approve  — convenience audit-logged approve
+  app.post("/api/speed-cracker/content/:id/approve", scRateLimiter, requireAdmin, async (req, res) => {
+    try {
+      const item = await (storage as any).updateSportaContentStatus(req.params.id, "approved");
+      if (!item) return res.status(404).json({ message: "Content not found" });
+      await auditLog(req, "speed_cracker.content.approve", item.id, "SportaContent");
+      res.json(item);
+    } catch (err) {
+      console.error("[speed-cracker/content/approve]", err);
+      res.status(500).json({ message: "Failed to approve content" });
+    }
+  });
+
+  // POST /api/speed-cracker/content/:id/reject — convenience audit-logged reject
+  app.post("/api/speed-cracker/content/:id/reject", scRateLimiter, requireAdmin, async (req, res) => {
+    try {
+      const item = await (storage as any).updateSportaContentStatus(req.params.id, "rejected");
+      if (!item) return res.status(404).json({ message: "Content not found" });
+      await auditLog(req, "speed_cracker.content.reject", item.id, "SportaContent");
+      res.json(item);
+    } catch (err) {
+      console.error("[speed-cracker/content/reject]", err);
+      res.status(500).json({ message: "Failed to reject content" });
+    }
+  });
+
+  // POST /api/speed-cracker/content/bulk-approve
+  app.post("/api/speed-cracker/content/bulk-approve", scRateLimiter, requireAdmin, async (req, res) => {
+    try {
+      const { ids } = z.object({ ids: z.array(z.string()).min(1) }).parse(req.body);
+      const results = await Promise.allSettled(
+        ids.map((id: string) => (storage as any).updateSportaContentStatus(id, "approved"))
+      );
+      const approved = results.filter((r) => r.status === "fulfilled").length;
+      await auditLog(req, "speed_cracker.content.bulk_approve", undefined, "SportaContent", { count: approved });
+      res.json({ approved, total: ids.length });
+    } catch (err) {
+      if (err instanceof z.ZodError) return res.status(400).json({ message: "Validation error", errors: err.errors });
+      console.error("[speed-cracker/content/bulk-approve]", err);
+      res.status(500).json({ message: "Bulk approve failed" });
+    }
+  });
+
+  // POST /api/speed-cracker/content/bulk-reject
+  app.post("/api/speed-cracker/content/bulk-reject", scRateLimiter, requireAdmin, async (req, res) => {
+    try {
+      const { ids } = z.object({ ids: z.array(z.string()).min(1) }).parse(req.body);
+      const results = await Promise.allSettled(
+        ids.map((id: string) => (storage as any).updateSportaContentStatus(id, "rejected"))
+      );
+      const rejected = results.filter((r) => r.status === "fulfilled").length;
+      await auditLog(req, "speed_cracker.content.bulk_reject", undefined, "SportaContent", { count: rejected });
+      res.json({ rejected, total: ids.length });
+    } catch (err) {
+      if (err instanceof z.ZodError) return res.status(400).json({ message: "Validation error", errors: err.errors });
+      console.error("[speed-cracker/content/bulk-reject]", err);
+      res.status(500).json({ message: "Bulk reject failed" });
+    }
+  });
+
+  // ─── Public Vlog routes ──────────────────────────────────────────────────
+
+  // GET /api/vlog — published vlogs for public consumption
+  app.get("/api/vlog", authRateLimiter, async (_req, res) => {
+    try {
+      const vlogs = await (storage as any).getVlogPosts(true);
+      res.json(vlogs);
+    } catch (err) {
+      console.error("[vlog GET]", err);
+      res.status(500).json({ message: "Failed to load vlogs" });
+    }
+  });
+
+  // GET /api/vlog/:slug — single published vlog by slug
+  app.get("/api/vlog/:slug", authRateLimiter, async (req, res) => {
+    try {
+      const vlog = await (storage as any).getVlogPostBySlug(req.params.slug);
+      if (!vlog || !vlog.published) return res.status(404).json({ message: "Vlog not found" });
+      res.json(vlog);
+    } catch (err) {
+      console.error("[vlog/:slug GET]", err);
+      res.status(500).json({ message: "Failed to load vlog" });
+    }
+  });
+
   // ─── Blog HTML with OG meta tags (Vercel SSR) ────────────────────────────
   // all non-API routes.  Social-media crawlers that hit /blog/:slug therefore
   // see only the default site-level OG tags.  This route lets Vercel rewrite

@@ -457,6 +457,104 @@ export interface SportaContent {
   updatedAt: Date;
 }
 
+// ─── Vlog Posts ───────────────────────────────────────────────────────────────
+
+export const VLOG_EMBED_PLATFORMS = [
+  "YouTube", "TikTok", "Vimeo", "Instagram", "Facebook", "Dailymotion",
+] as const;
+export type VlogEmbedPlatform = (typeof VLOG_EMBED_PLATFORMS)[number];
+
+export const insertVlogPostSchema = z.object({
+  title: z.string().min(1).max(300),
+  slug: z.string().min(1).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Slug must be lowercase with hyphens"),
+  description: z.string().min(1),
+  embedUrl: z.string().url(),
+  embedPlatform: z.enum(VLOG_EMBED_PLATFORMS),
+  thumbnail: z.string().url().optional().nullable(),
+  tags: z.array(z.string()).default([]),
+  category: z.string().min(1),
+  seoTitle: z.string().max(160).optional(),
+  seoDescription: z.string().max(320).optional(),
+  published: z.boolean().default(false),
+  authorId: z.string().min(1),
+  authorName: z.string().min(1),
+  sourceContentId: z.string().optional(), // ref to SportaContent._id
+  campaignId: z.string().optional(),       // ref to SportaCampaign._id
+});
+
+export const updateVlogPostSchema = insertVlogPostSchema.partial();
+
+export type InsertVlogPost = z.infer<typeof insertVlogPostSchema>;
+export type UpdateVlogPost = z.infer<typeof updateVlogPostSchema>;
+
+export interface VlogPost {
+  id: string;
+  title: string;
+  slug: string;
+  description: string;
+  embedUrl: string;
+  embedPlatform: VlogEmbedPlatform;
+  thumbnail: string | null;
+  tags: string[];
+  category: string;
+  seoTitle?: string;
+  seoDescription?: string;
+  published: boolean;
+  authorId: string;
+  authorName: string;
+  sourceContentId?: string;
+  campaignId?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// ─── Audit Logs ───────────────────────────────────────────────────────────────
+
+export const AUDIT_ACTIONS = [
+  "speed_cracker.campaign.create",
+  "speed_cracker.campaign.update",
+  "speed_cracker.campaign.delete",
+  "speed_cracker.campaign.launch",
+  "speed_cracker.campaign.pause",
+  "speed_cracker.content.approve",
+  "speed_cracker.content.reject",
+  "speed_cracker.content.publish",
+  "speed_cracker.content.bulk_approve",
+  "speed_cracker.content.bulk_reject",
+  "speed_cracker.vlog.create",
+  "speed_cracker.vlog.update",
+  "speed_cracker.vlog.delete",
+  "speed_cracker.vlog.publish",
+  "speed_cracker.blog.publish",
+  "speed_cracker.settings.update",
+  "admin.user.role_change",
+] as const;
+export type AuditAction = (typeof AUDIT_ACTIONS)[number];
+
+export interface AuditLog {
+  id: string;
+  adminId: string;
+  adminName: string;
+  action: AuditAction;
+  targetId?: string;
+  targetType?: string;
+  details?: Record<string, unknown>;
+  ipAddress?: string;
+  createdAt: Date;
+}
+
+export const insertAuditLogSchema = z.object({
+  adminId: z.string().min(1),
+  adminName: z.string().min(1),
+  action: z.enum(AUDIT_ACTIONS),
+  targetId: z.string().optional(),
+  targetType: z.string().optional(),
+  details: z.record(z.unknown()).optional(),
+  ipAddress: z.string().optional(),
+});
+
+export type InsertAuditLog = z.infer<typeof insertAuditLogSchema>;
+
 export const insertSportaPreferencesSchema = z.object({
   userId: z.string().min(1),
   defaultTone: z.string().default("professional"),
