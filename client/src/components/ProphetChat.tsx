@@ -27,17 +27,19 @@ export default function ProphetChat() {
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const { data: statusData } = useQuery<{ enabled: boolean }>({
+  const { data: statusData, isLoading: statusLoading } = useQuery<{ enabled: boolean }>({
     queryKey: ["/api/prophet/status"],
     queryFn: async () => {
       const res = await fetch("/api/prophet/status");
-      if (!res.ok) return { enabled: true };
+      if (!res.ok) return { enabled: false };
       return res.json();
     },
-    refetchInterval: 30000,
+    refetchInterval: 10000,
   });
 
-  const prophetEnabled = statusData?.enabled !== false;
+  // Only show Prophet once we have a confirmed enabled=true from the server.
+  // While loading or when disabled, Prophet stays completely hidden.
+  const prophetEnabled = !statusLoading && statusData?.enabled === true;
 
   useEffect(() => {
     if (!prophetEnabled && open) {
@@ -153,9 +155,7 @@ export default function ProphetChat() {
                     left: 0,
                     right: 0,
                     bottom: 0,
-                    width: "100vw",
-                    height: "100vh",
-                    maxHeight: minimized ? "44px" : "100vh",
+                    maxHeight: minimized ? "44px" : "100%",
                     borderRadius: 0,
                   }
                 : {
