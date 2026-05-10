@@ -1,50 +1,14 @@
 import { useState, useEffect } from "react";
-import { Link, useLocation } from "wouter";
+import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Menu, X, LogIn, LogOut, User, MessageCircle, LayoutDashboard, ChevronDown, Globe2 } from "lucide-react";
+import { Menu, X, LogIn, LogOut, User, MessageCircle, LayoutDashboard, Globe2 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import NotificationBell from "@/components/NotificationBell";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-
-function MobilePowerHill({ features, onSelect }: { features: { id: string; label: string; href: string }[]; onSelect: (href: string) => void }) {
-  const [open, setOpen] = useState(false);
-  return (
-    <div>
-      <button
-        className="text-left nav-link text-galactic-orange/90 hover:text-galactic-gold font-orbitron text-sm transition-colors flex items-center gap-1"
-        onClick={() => setOpen((v) => !v)}
-        data-testid="mobile-nav-powerhill-trigger"
-      >
-        Power-Hill <ChevronDown className={`w-3 h-3 transition-transform ${open ? "rotate-180" : ""}`} />
-      </button>
-      {open && (
-        <div className="ml-3 mt-2 flex flex-col gap-2 border-l border-galactic-orange/20 pl-3">
-          {features.map((feature) => (
-            <button
-              key={feature.id}
-              onClick={() => onSelect(feature.href)}
-              className="text-left text-galactic-orange/80 hover:text-galactic-gold font-orbitron text-xs transition-colors"
-              data-testid={`mobile-nav-powerhill-${feature.id}`}
-            >
-              {feature.label}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
 
 export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const { user, logout } = useAuth();
-  const [, navigate] = useLocation();
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
@@ -67,24 +31,6 @@ export default function Navigation() {
     { id: "contact", label: "Contact" },
   ];
 
-  const powerHillFeatures = [
-    { id: "roi-calculator", label: "01 · ROI Calculator", href: "/feature/roi-calculator" },
-    { id: "innovation-roadmap", label: "02 · Innovation Roadmap", href: "/feature/innovation-roadmap" },
-    { id: "skills-quiz", label: "03 · Digital Skills Assessment", href: "/feature/skills-quiz" },
-    { id: "tech-trends", label: "04 · Tech Trends Radar", href: "/feature/tech-trends" },
-    { id: "learning-path", label: "05 · Learning Path", href: "/learning-path" },
-    { id: "challenges", label: "06 · Community Challenges", href: "/feature/challenges" },
-    { id: "resources", label: "07 · Resource Library", href: "/feature/resources" },
-    { id: "investor-metrics", label: "08 · Investor KPI Dashboard", href: "/feature/investor-metrics" },
-    { id: "service-comparison", label: "09 · Service Comparison", href: "/feature/service-comparison" },
-    { id: "startup-toolkit", label: "10 · Startup Digital Toolkit", href: "/feature/startup-toolkit" },
-    { id: "badges", label: "11 · Achievement Badges", href: "/profile" },
-    { id: "partners", label: "12 · Partner Network", href: "/feature/partners" },
-    { id: "mentorship", label: "13 · Mentorship Network", href: "/feature/mentorship" },
-    { id: "live-demo", label: "14 · Live Platform Demo", href: "/feature/live-demo" },
-    { id: "global-impact", label: "15 · Global Impact Map", href: "/feature/global-impact" },
-    { id: "features-hub", label: "16 · Features Hub", href: "/features" },
-  ];
 
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 military-nav ${isScrolled ? "backdrop-blur-xl" : ""}`}>
@@ -138,25 +84,11 @@ export default function Navigation() {
                 Career Hub
               </button>
             </Link>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="nav-link text-galactic-orange/90 hover:text-galactic-gold font-orbitron text-xs tracking-wide transition-colors flex items-center gap-1" data-testid="nav-powerhill-trigger">
-                  Power-Hill <ChevronDown className="w-3 h-3" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                className="bg-space-black border border-galactic-orange/30 max-h-96 overflow-y-auto z-50"
-                align="start"
-              >
-                {powerHillFeatures.map((feature) => (
-                  <DropdownMenuItem key={feature.id} asChild className="text-galactic-orange/90 hover:text-galactic-gold hover:bg-galactic-orange/10 font-orbitron text-xs cursor-pointer">
-                    <Link href={feature.href} onClick={() => setIsOpen(false)}>
-                      {feature.label}
-                    </Link>
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <Link href="/features">
+              <button className="nav-link text-galactic-orange/90 hover:text-galactic-gold font-orbitron text-xs tracking-wide transition-colors" data-testid="nav-powerhub-trigger">
+                PowerHub
+              </button>
+            </Link>
           </div>
 
           {/* Desktop auth actions */}
@@ -244,8 +176,12 @@ export default function Navigation() {
                 </button>
               </Link>
 
-              {/* Power-Hill dropdown (mobile) */}
-              <MobilePowerHill features={powerHillFeatures} onSelect={(href) => { navigate(href); setIsOpen(false); }} />
+              {/* PowerHub link (mobile) */}
+              <Link href="/features" onClick={() => setIsOpen(false)}>
+                <button className="text-left nav-link text-galactic-orange/90 hover:text-galactic-gold font-orbitron text-sm transition-colors" data-testid="mobile-nav-powerhub-trigger">
+                  PowerHub
+                </button>
+              </Link>
 
               <div className="h-px my-1" style={{ background: "rgba(255,165,0,0.15)" }} />
 
