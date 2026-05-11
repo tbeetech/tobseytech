@@ -138,7 +138,7 @@ export default function KingdomPrinciplesSection() {
           <div className="text-center mb-8">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-galactic-green/30 text-galactic-green text-sm font-orbitron mb-3">
               <span className="w-1.5 h-1.5 rounded-full bg-galactic-green animate-ping" />
-              Async &amp; Real-Time Platform
+              Async & Real-Time Platform
             </div>
             <h3 className="font-orbitron font-bold text-xl sm:text-2xl gradient-text mb-2">
               Always On. Never Blocking.
