@@ -168,7 +168,7 @@ function jaccardSimilarity(a: Set<string>, b: Set<string>): number {
 
 /**
  * Minimum Jaccard similarity at which two titles are treated as the same story.
- * 0.65 means 65 % of significant words must overlap.  Tune with
+ * 0.65 means 65% of significant words must overlap.  Tune with
  * `BOT_TITLE_SIMILARITY_THRESHOLD` env var (0.0 – 1.0).
  */
 const _rawSimilarityThreshold = parseFloat(
@@ -349,8 +349,6 @@ async function fetchAndPostFeed(feed: BotFeed, feedIndex: number): Promise<void>
       }
       if (isSimilar) {
         seenGuids.add(guid);
-        seenNormalizedTitles.add(normTitle);
-        seenTokenIndex.set(normTitle, newTokens);
         continue;
       }
 
