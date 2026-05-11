@@ -7,7 +7,7 @@ export default function CTASection() {
         Ready to Automate Your Workflow? Book a Free Consultation.
       </h2>
       <a
-        href="/book-demo"
+        href="/contact"
         className="inline-block mt-4 px-6 py-3 bg-black text-white rounded-lg font-medium hover:bg-gray-800"
       >
         Book a Consultation

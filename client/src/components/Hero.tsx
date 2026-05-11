@@ -155,7 +155,7 @@ export default function Hero() {
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-          <Link href="/book-demo">
+          <Link href="/contact">
             <Button
               size="lg"
               className="bg-gradient-to-r from-galactic-orange to-galactic-gold text-space-black font-orbitron font-bold px-8 hover:shadow-[0_0_30px_rgba(34,197,94,0.5)] transition-all"

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, Zap, Users, BookOpen, Heart } from "lucide-react";
+import { Loader2, Zap, Users, BookOpen, Heart, Eye, EyeOff } from "lucide-react";
 
 export default function AuthPage() {
   const { login, register, user } = useAuth();
@@ -18,6 +18,11 @@ export default function AuthPage() {
   const [registerForm, setRegisterForm] = useState({ username: "", email: "", password: "", confirmPassword: "" });
   const [passwordMismatch, setPasswordMismatch] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  // Eye toggle states
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
+  const [showRegPassword, setShowRegPassword] = useState(false);
+  const [showRegConfirmPassword, setShowRegConfirmPassword] = useState(false);
 
   if (user) {
     navigate("/blog");
@@ -79,7 +84,6 @@ export default function AuthPage() {
       {/* Left panel – brand showcase */}
       <div className="hidden lg:flex flex-1 flex-col items-center justify-center px-12 relative z-10">
         <div className="max-w-md">
-          {/* Logo */}
           <div className="relative mb-8 flex flex-col items-center">
             <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-galactic-orange via-galactic-gold to-galactic-orange flex items-center justify-center shadow-[0_0_50px_rgba(34,197,94,0.4)] animate-glow">
               <span className="text-space-black font-orbitron font-black text-3xl">TST</span>
@@ -98,7 +102,6 @@ export default function AuthPage() {
             Future Digital Solutions
           </p>
 
-          {/* Feature list */}
           <div className="space-y-4">
             {features.map(({ icon: Icon, text }, i) => (
               <div
@@ -183,16 +186,26 @@ export default function AuthPage() {
                     >
                       Password
                     </Label>
-                    <Input
-                      id="login-password"
-                      type="password"
-                      value={loginForm.password}
-                      onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
-                      required
-                      className="h-10 border-galactic-orange/20 text-white text-sm"
-                      style={{ background: "rgba(0,0,0,0.6)" }}
-                      placeholder="••••••••"
-                    />
+                    <div className="relative">
+                      <Input
+                        id="login-password"
+                        type={showLoginPassword ? "text" : "password"}
+                        value={loginForm.password}
+                        onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
+                        required
+                        className="h-10 border-galactic-orange/20 text-white text-sm pr-10"
+                        style={{ background: "rgba(0,0,0,0.6)" }}
+                        placeholder="••••••••"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowLoginPassword((v) => !v)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-galactic-orange/60 hover:text-galactic-orange transition-colors"
+                        aria-label={showLoginPassword ? "Hide password" : "Show password"}
+                      >
+                        {showLoginPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
                   </div>
                   <Button
                     type="submit"
@@ -257,17 +270,27 @@ export default function AuthPage() {
                     >
                       Password
                     </Label>
-                    <Input
-                      id="reg-password"
-                      type="password"
-                      value={registerForm.password}
-                      onChange={(e) => setRegisterForm({ ...registerForm, password: e.target.value })}
-                      required
-                      minLength={6}
-                      className="h-10 border-galactic-orange/20 text-white text-sm"
-                      style={{ background: "rgba(0,0,0,0.6)" }}
-                      placeholder="Min 6 characters"
-                    />
+                    <div className="relative">
+                      <Input
+                        id="reg-password"
+                        type={showRegPassword ? "text" : "password"}
+                        value={registerForm.password}
+                        onChange={(e) => setRegisterForm({ ...registerForm, password: e.target.value })}
+                        required
+                        minLength={6}
+                        className="h-10 border-galactic-orange/20 text-white text-sm pr-10"
+                        style={{ background: "rgba(0,0,0,0.6)" }}
+                        placeholder="Min 6 characters"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowRegPassword((v) => !v)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-galactic-orange/60 hover:text-galactic-orange transition-colors"
+                        aria-label={showRegPassword ? "Hide password" : "Show password"}
+                      >
+                        {showRegPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
                   </div>
                   <div className="space-y-1.5 input-glow">
                     <Label
@@ -276,20 +299,30 @@ export default function AuthPage() {
                     >
                       Confirm Password
                     </Label>
-                    <Input
-                      id="reg-confirm-password"
-                      type="password"
-                      value={registerForm.confirmPassword}
-                      onChange={(e) => {
-                        setRegisterForm({ ...registerForm, confirmPassword: e.target.value });
-                        setPasswordMismatch(false);
-                      }}
-                      required
-                      minLength={6}
-                      className={`h-10 border-galactic-orange/20 text-white text-sm ${passwordMismatch ? "border-red-500" : ""}`}
-                      style={{ background: "rgba(0,0,0,0.6)" }}
-                      placeholder="••••••••"
-                    />
+                    <div className="relative">
+                      <Input
+                        id="reg-confirm-password"
+                        type={showRegConfirmPassword ? "text" : "password"}
+                        value={registerForm.confirmPassword}
+                        onChange={(e) => {
+                          setRegisterForm({ ...registerForm, confirmPassword: e.target.value });
+                          setPasswordMismatch(false);
+                        }}
+                        required
+                        minLength={6}
+                        className={`h-10 border-galactic-orange/20 text-white text-sm pr-10 ${passwordMismatch ? "border-red-500" : ""}`}
+                        style={{ background: "rgba(0,0,0,0.6)" }}
+                        placeholder="••••••••"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowRegConfirmPassword((v) => !v)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-galactic-orange/60 hover:text-galactic-orange transition-colors"
+                        aria-label={showRegConfirmPassword ? "Hide password" : "Show password"}
+                      >
+                        {showRegConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
                     {passwordMismatch && (
                       <p className="text-red-400 text-xs mt-1">Passwords do not match</p>
                     )}
@@ -314,3 +347,4 @@ export default function AuthPage() {
     </div>
   );
 }
+

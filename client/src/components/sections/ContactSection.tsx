@@ -3,9 +3,24 @@ import { Mail, MessageCircle, Linkedin, Send } from "lucide-react";
 
 const CONTACT_EMAIL = "CEO@TOBSEYTECH.BIZ";
 
+const INQUIRY_TYPES = [
+  "AI Automation Systems",
+  "Web & App Development",
+  "AI Marketing Systems",
+  "Training & Upskilling",
+  "Book a Demo / Consultation",
+  "Partnership Inquiry",
+  "Investor Inquiry",
+  "Career / Jobs",
+  "General Question",
+  "Custom Inquiry",
+];
+
 export default function ContactSection() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitState, setSubmitState] = useState<"idle" | "success" | "error">("idle");
+  const [selectedService, setSelectedService] = useState(INQUIRY_TYPES[0]);
+  const [customInquiry, setCustomInquiry] = useState("");
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -19,6 +34,10 @@ export default function ContactSection() {
       return;
     }
 
+    const service = selectedService === "Custom Inquiry" && customInquiry.trim()
+      ? `Custom: ${customInquiry.trim()}`
+      : selectedService;
+
     setIsSubmitting(true);
     setSubmitState("idle");
 
@@ -26,7 +45,7 @@ export default function ContactSection() {
       const response = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, message, service: "Website contact form" }),
+        body: JSON.stringify({ name, email, message, service }),
       });
 
       if (!response.ok) {
@@ -55,7 +74,7 @@ export default function ContactSection() {
         </div>
 
         <div className="grid md:grid-cols-2 gap-8 sm:gap-12 max-w-5xl mx-auto">
-          {/* Direct mailto form */}
+          {/* Contact form */}
           <div className="glass-effect p-6 sm:p-8 rounded-2xl">
             <form
               onSubmit={handleSubmit}
@@ -88,6 +107,38 @@ export default function ContactSection() {
                 />
               </div>
               <div>
+                <label htmlFor="contact-service" className="block mb-2 text-neon-yellow font-orbitron text-sm">
+                  Inquiry Type
+                </label>
+                <select
+                  id="contact-service"
+                  name="service"
+                  value={selectedService}
+                  onChange={(e) => setSelectedService(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-lg bg-deep-space border border-galactic-orange/30 focus:border-galactic-orange focus:outline-none text-white text-sm transition-colors"
+                >
+                  {INQUIRY_TYPES.map((t) => (
+                    <option key={t} value={t}>{t}</option>
+                  ))}
+                </select>
+              </div>
+              {selectedService === "Custom Inquiry" && (
+                <div>
+                  <label htmlFor="custom-inquiry" className="block mb-2 text-neon-yellow font-orbitron text-sm">
+                    Describe Your Inquiry
+                  </label>
+                  <input
+                    id="custom-inquiry"
+                    type="text"
+                    value={customInquiry}
+                    onChange={(e) => setCustomInquiry(e.target.value)}
+                    required
+                    placeholder="Briefly describe what you need..."
+                    className="w-full px-4 py-2.5 rounded-lg bg-deep-space border border-galactic-orange/30 focus:border-galactic-orange focus:outline-none text-white placeholder-gray-500 text-sm transition-colors"
+                  />
+                </div>
+              )}
+              <div>
                 <label htmlFor="contact-message" className="block mb-2 text-neon-yellow font-orbitron text-sm">
                   Message
                 </label>
@@ -103,7 +154,7 @@ export default function ContactSection() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full flex items-center justify-center gap-2 py-3 bg-neon-yellow text-black font-semibold rounded-lg hover:bg-yellow-400 active:scale-95 transition-all font-orbitron text-sm"
+                className="w-full flex items-center justify-center gap-2 py-3 bg-neon-yellow text-black font-semibold rounded-lg hover:bg-yellow-400 active:scale-95 transition-all font-orbitron text-sm disabled:opacity-60"
               >
                 <Send className="w-4 h-4" />
                 {isSubmitting ? "Sending..." : "Send Message"}
@@ -185,3 +236,4 @@ export default function ContactSection() {
     </section>
   );
 }
+

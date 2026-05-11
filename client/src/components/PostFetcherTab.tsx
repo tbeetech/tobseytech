@@ -260,7 +260,7 @@ export default function PostFetcherTab() {
         </div>
 
         {/* Count + Fetch */}
-        <div className="flex items-end gap-3">
+        <div className="flex flex-wrap items-end gap-3">
           <div>
             <Label className="text-galactic-orange font-orbitron text-xs mb-2 block">
               Count (max 30)
@@ -277,7 +277,7 @@ export default function PostFetcherTab() {
           <Button
             onClick={() => fetchMutation.mutate()}
             disabled={fetchMutation.isPending || topics.length === 0}
-            className="h-9 bg-galactic-orange text-space-black font-orbitron text-xs hover:bg-galactic-gold shadow-[0_0_15px_rgba(34,197,94,0.3)] hover:shadow-[0_0_25px_rgba(34,197,94,0.4)] transition-all"
+            className="h-9 bg-galactic-orange text-space-black font-orbitron text-xs hover:bg-galactic-gold shadow-[0_0_15px_rgba(34,197,94,0.3)] hover:shadow-[0_0_25px_rgba(34,197,94,0.4)] transition-all flex-shrink-0"
           >
             {fetchMutation.isPending ? (
               <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Fetching…</>
@@ -286,7 +286,7 @@ export default function PostFetcherTab() {
             )}
           </Button>
           {visible.length > 0 && (
-            <span className="text-gray-400 text-xs ml-auto">
+            <span className="text-gray-400 text-xs">
               {visible.length} suggestion{visible.length !== 1 ? "s" : ""} ready
             </span>
           )}

@@ -15,11 +15,32 @@ const OPENING_LINES = [
   "I can help with coding, research, analysis, creative writing, and much more.",
 ];
 
+const ALL_STARTER_QUESTIONS = [
+  "What services does TOBSEYTECH offer?",
+  "How can AI automation help my business?",
+  "What is SPORTA and how does it work?",
+  "How do I get started with TOBSEYTECH?",
+  "What makes TOBSEYTECH different from other agencies?",
+  "Can you explain the Digital Maturity Assessment?",
+  "How long does a typical project take?",
+  "What industries does TOBSEYTECH work with?",
+  "How much does web development cost?",
+  "What AI tools do you use for clients?",
+  "Tell me about Kingdom Enhancement Corp.",
+  "How do I book a consultation?",
+];
+
+function pickRandomQuestions(n = 3): string[] {
+  const shuffled = [...ALL_STARTER_QUESTIONS].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, n);
+}
+
 export default function ProphetChat() {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
     { role: "assistant", content: OPENING_LINES[0] + " " + OPENING_LINES[1] },
   ]);
+  const [starterQuestions, setStarterQuestions] = useState<string[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [minimized, setMinimized] = useState(false);
@@ -40,9 +61,6 @@ export default function ProphetChat() {
     refetchInterval: 10000,
   });
 
-  // Only show Prophet once we have a confirmed enabled=true from the server.
-  // `statusLoading` is only true during the initial fetch (React Query v5), not
-  // during background 10-second refetches, so there is no recurring flicker.
   const prophetEnabled = !statusLoading && statusData?.enabled === true;
 
   useEffect(() => {
@@ -60,13 +78,21 @@ export default function ProphetChat() {
     }
   }, [messages, open, minimized]);
 
-  async function sendMessage() {
-    const text = input.trim();
-    if (!text || loading) return;
-    const userMsg: ChatMessage = { role: "user", content: text };
+  // Pick random starter questions each time the chat opens
+  useEffect(() => {
+    if (open) {
+      setStarterQuestions(pickRandomQuestions(3));
+    }
+  }, [open]);
+
+  async function sendMessage(text?: string) {
+    const msgText = (text ?? input).trim();
+    if (!msgText || loading) return;
+    const userMsg: ChatMessage = { role: "user", content: msgText };
     const next = [...messages, userMsg];
     setMessages(next);
     setInput("");
+    setStarterQuestions([]); // Hide starters after first message
     setLoading(true);
     try {
       const res = await apiRequest("POST", "/api/prophet", {
@@ -89,9 +115,19 @@ export default function ProphetChat() {
     }
   }
 
+  function handleClose() {
+    setOpen(false);
+    setMinimized(false);
+    setFullscreen(false);
+  }
+
+  function handleMinimize() {
+    setMinimized((v) => !v);
+  }
+
   return (
     <>
-      {/* ── Trigger button — fixed below the nav bar ── */}
+      {/* ── Trigger button ── */}
       <AnimatePresence>
         {!open && prophetEnabled && (
           <motion.button
@@ -99,13 +135,12 @@ export default function ProphetChat() {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
             transition={{ type: "spring", stiffness: 260, damping: 22 }}
-            onClick={() => { setOpen(true); setFullscreen(true); }}
+            onClick={() => { setOpen(true); setFullscreen(false); setMinimized(false); }}
             data-testid="prophet-chat-trigger"
             aria-label="Open Prophet AI"
             className="fixed z-40 flex items-center gap-2 cursor-pointer select-none"
             style={{ top: "76px", right: "18px" }}
           >
-            {/* outer glow ring */}
             <span
               className="absolute inset-0 rounded-full animate-ping opacity-25"
               style={{ background: "rgba(34,197,94,0.5)" }}
@@ -119,7 +154,6 @@ export default function ProphetChat() {
                 boxShadow: "0 0 18px rgba(34,197,94,0.25), inset 0 1px 0 rgba(34,197,94,0.08)",
               }}
             >
-              {/* tactical icon */}
               <svg
                 width="14"
                 height="14"
@@ -185,10 +219,9 @@ export default function ProphetChat() {
                   "linear-gradient(90deg, rgba(34,197,94,0.12) 0%, rgba(34,197,94,0.04) 100%)",
                 borderBottom: minimized ? "none" : "1px solid rgba(34,197,94,0.2)",
               }}
-              onClick={() => setMinimized((v) => !v)}
+              onClick={handleMinimize}
             >
               <div className="flex items-center gap-2">
-                {/* status dot */}
                 <span
                   className="w-2 h-2 rounded-full animate-pulse"
                   style={{ background: "#22c55e", boxShadow: "0 0 6px #22c55e" }}
@@ -207,6 +240,7 @@ export default function ProphetChat() {
                 </span>
               </div>
               <div className="flex items-center gap-1">
+                {/* Fullscreen toggle */}
                 <button
                   aria-label={fullscreen ? "Exit fullscreen" : "Fullscreen"}
                   className="p-1 rounded hover:bg-white/5 transition-colors"
@@ -219,23 +253,25 @@ export default function ProphetChat() {
                     <Maximize2 className="w-3.5 h-3.5" />
                   )}
                 </button>
+                {/* Minimize toggle */}
                 <button
                   aria-label={minimized ? "Expand Prophet" : "Minimize Prophet"}
                   className="p-1 rounded hover:bg-white/5 transition-colors"
                   style={{ color: "var(--galactic-orange)" }}
-                  onClick={(e) => { e.stopPropagation(); setMinimized((v) => !v); }}
+                  onClick={(e) => { e.stopPropagation(); handleMinimize(); }}
                 >
                   <ChevronDown
                     className="w-3.5 h-3.5 transition-transform"
                     style={{ transform: minimized ? "rotate(180deg)" : "rotate(0deg)" }}
                   />
                 </button>
+                {/* Close / X button */}
                 <button
                   aria-label="Close Prophet"
                   data-testid="prophet-chat-close"
-                  className="p-1 rounded hover:bg-white/5 transition-colors"
+                  className="p-1 rounded hover:bg-red-500/20 transition-colors"
                   style={{ color: "var(--galactic-orange)" }}
-                  onClick={(e) => { e.stopPropagation(); setOpen(false); setMinimized(false); setFullscreen(false); }}
+                  onClick={(e) => { e.stopPropagation(); handleClose(); }}
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
@@ -326,6 +362,34 @@ export default function ProphetChat() {
                     </div>
                   </div>
                 )}
+
+                {/* Starter questions */}
+                {starterQuestions.length > 0 && !loading && (
+                  <div className="flex flex-col gap-2 mt-1">
+                    <p
+                      className="font-orbitron text-[9px] tracking-widest opacity-50 pl-1"
+                      style={{ color: "var(--galactic-gold)" }}
+                    >
+                      SUGGESTED QUESTIONS
+                    </p>
+                    {starterQuestions.map((q) => (
+                      <button
+                        key={q}
+                        onClick={() => sendMessage(q)}
+                        className="text-left px-3 py-2 rounded-lg text-xs transition-colors"
+                        style={{
+                          background: "rgba(34,197,94,0.05)",
+                          border: "1px solid rgba(34,197,94,0.2)",
+                          color: "rgba(255,255,255,0.75)",
+                          fontFamily: "var(--font-sans)",
+                        }}
+                      >
+                        {q}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
                 <div ref={bottomRef} />
               </div>
             )}
@@ -355,7 +419,7 @@ export default function ProphetChat() {
                 />
                 <Button
                   size="icon"
-                  onClick={sendMessage}
+                  onClick={() => sendMessage()}
                   disabled={loading || !input.trim()}
                   data-testid="prophet-chat-send"
                   className="w-7 h-7 shrink-0"

@@ -2,9 +2,9 @@ import { Link } from "wouter";
 import Navigation from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import {
-  Calculator, Rocket, Brain, Activity, GraduationCap, Trophy,
-  BookOpen, TrendingUp, ArrowRight, Wrench, Award, Handshake,
-  UserCheck, Play, Globe2, Layers, Zap
+  Calculator, Rocket, Brain, Activity, GraduationCap,
+  BookOpen, TrendingUp, ArrowRight, Wrench, Award,
+  Play, Layers, Zap
 } from "lucide-react";
 
 const features = [
@@ -17,18 +17,16 @@ const features = [
     color: "text-galactic-orange",
     border: "border-galactic-orange",
     anchor: "/feature/roi-calculator",
-    isPage: true,
   },
   {
     number: "02",
     icon: Rocket,
     title: "Innovation Roadmap",
     description: "Animated milestone timeline showing TOBSEYTECH's journey from startup to Series A and beyond.",
-    tags: ["Visual", "Strategy", "Investor"],
+    tags: ["Visual", "Strategy"],
     color: "text-neon-cyan",
     border: "border-neon-cyan",
     anchor: "/feature/innovation-roadmap",
-    isPage: true,
   },
   {
     number: "03",
@@ -39,7 +37,6 @@ const features = [
     color: "text-neon-yellow",
     border: "border-neon-yellow",
     anchor: "/feature/skills-quiz",
-    isPage: true,
   },
   {
     number: "04",
@@ -50,7 +47,6 @@ const features = [
     color: "text-neon-purple",
     border: "border-neon-purple",
     anchor: "/feature/tech-trends",
-    isPage: true,
   },
   {
     number: "05",
@@ -61,21 +57,9 @@ const features = [
     color: "text-galactic-green",
     border: "border-galactic-green",
     anchor: "/learning-path",
-    isPage: true,
   },
   {
     number: "06",
-    icon: Trophy,
-    title: "Community Challenges",
-    description: "Monthly competitive challenges where members build real skills, win prizes, and get recognised.",
-    tags: ["Community", "Gamification", "Skills"],
-    color: "text-galactic-orange",
-    border: "border-galactic-orange",
-    anchor: "/feature/challenges",
-    isPage: true,
-  },
-  {
-    number: "07",
     icon: BookOpen,
     title: "Free Resource Library",
     description: "Curated e-books, templates, cheat sheets, and video guides — all free, all actionable.",
@@ -83,32 +67,19 @@ const features = [
     color: "text-galactic-green",
     border: "border-galactic-green",
     anchor: "/feature/resources",
-    isPage: true,
   },
   {
-    number: "08",
+    number: "07",
     icon: TrendingUp,
-    title: "Investor KPI Dashboard",
-    description: "Transparent platform metrics updated in real time — proving traction to investors with live data.",
-    tags: ["Investor", "Analytics", "Metrics"],
-    color: "text-galactic-gold",
-    border: "border-galactic-gold",
-    anchor: "/feature/investor-metrics",
-    isPage: true,
-  },
-  {
-    number: "09",
-    icon: ArrowRight,
     title: "Service Comparison",
     description: "Interactive 3-tier comparison table helping prospects choose the right service package instantly.",
     tags: ["Interactive", "Sales", "Pricing"],
     color: "text-neon-cyan",
     border: "border-neon-cyan",
     anchor: "/feature/service-comparison",
-    isPage: true,
   },
   {
-    number: "10",
+    number: "08",
     icon: Wrench,
     title: "Startup Digital Toolkit",
     description: "16-point interactive checklist every growing business needs, with expert tips for each item.",
@@ -116,87 +87,39 @@ const features = [
     color: "text-galactic-orange",
     border: "border-galactic-orange",
     anchor: "/feature/startup-toolkit",
-    isPage: true,
   },
   {
-    number: "11",
+    number: "09",
     icon: Award,
     title: "Achievement Badges",
-    description: "Gamification system rewarding community participation — from first post to mentorship completion.",
+    description: "Gamification system rewarding community participation — from first post to platform mastery.",
     tags: ["Gamification", "Community", "Rewards"],
     color: "text-neon-yellow",
     border: "border-neon-yellow",
     anchor: "/profile",
-    isPage: true,
   },
   {
-    number: "12",
-    icon: Handshake,
-    title: "Partner Network",
-    description: "Interactive showcase of TOBSEYTECH's technology partner ecosystem with hover-reveal insights.",
-    tags: ["Network", "Partners", "Ecosystem"],
-    color: "text-galactic-green",
-    border: "border-galactic-green",
-    anchor: "/feature/partners",
-    isPage: true,
-  },
-  {
-    number: "13",
-    icon: UserCheck,
-    title: "Mentorship Network",
-    description: "Connect with experienced digital practitioners for 1:1 sessions — apply to mentor or be mentored.",
-    tags: ["Mentorship", "Community", "1:1"],
-    color: "text-neon-purple",
-    border: "border-neon-purple",
-    anchor: "/feature/mentorship",
-    isPage: true,
-  },
-  {
-    number: "14",
+    number: "10",
     icon: Play,
-    title: "Live Platform Demo",
-    description: "Interactive preview of automation workflows, AI chat, analytics dashboard, and platform features.",
-    tags: ["Interactive", "Demo", "Showcase"],
-    color: "text-neon-cyan",
-    border: "border-neon-cyan",
-    anchor: "/feature/live-demo",
-    isPage: true,
-  },
-  {
-    number: "15",
-    icon: Globe2,
-    title: "Global Impact Map",
-    description: "Animated world map showing TOBSEYTECH's client footprint across 14+ countries on 5 continents.",
-    tags: ["Visual", "Global", "Impact"],
-    color: "text-galactic-orange",
-    border: "border-galactic-orange",
-    anchor: "/feature/global-impact",
-    isPage: true,
-  },
-  {
-    number: "16",
-    icon: Layers,
-    title: "Features Hub",
-    description: "This page — a unified, filterable showcase of all platform features for investors and prospects.",
-    tags: ["Showcase", "Overview", "Investor"],
-    color: "text-galactic-gold",
-    border: "border-galactic-gold",
-    anchor: "/features",
-    isPage: true,
-  },
-  {
-    number: "17",
-    icon: GraduationCap,
     title: "Career Intelligence Hub",
-    description: "Live job listings, curated courses, industry expert recommender, job site guide, and career strategy cheat codes — all in one place.",
+    description: "Live job listings, curated courses, industry expert recommender, and career strategy cheat codes — all in one place.",
     tags: ["Career", "Jobs", "Education", "AI"],
     color: "text-neon-cyan",
     border: "border-neon-cyan",
     anchor: "/career-hub",
-    isPage: true,
   },
   {
-    number: "18",
+    number: "11",
+    icon: Layers,
+    title: "Features Hub",
+    description: "This page — a unified, filterable showcase of all platform features for investors and prospects.",
+    tags: ["Showcase", "Overview"],
+    color: "text-galactic-gold",
+    border: "border-galactic-gold",
+    anchor: "/features",
+  },
+  {
+    number: "12",
     icon: Zap,
     title: "SPORTA",
     description: "Enterprise AI agentic social media aggregator, reshaper & mass publishing system. Aggregate 17+ platforms, reshape with AI, and auto-publish everywhere.",
@@ -204,16 +127,13 @@ const features = [
     color: "text-galactic-orange",
     border: "border-galactic-orange",
     anchor: "/feature/sporta",
-    isPage: true,
   },
 ];
-
-const allTags = ["All", ...Array.from(new Set(features.flatMap(f => f.tags)))];
 
 export default function FeaturesPage() {
   return (
     <div className="min-h-screen bg-space-black text-white">
-      <title>18 Interactive Features – TOBSEYTECH</title>
+      <title>12 Interactive Features – TOBSEYTECH</title>
       <Navigation />
 
       <main className="pt-24 pb-20">
@@ -223,15 +143,15 @@ export default function FeaturesPage() {
             <Layers className="w-4 h-4" /> Platform Features
           </div>
           <h1 className="font-orbitron font-bold text-4xl md:text-6xl gradient-text mb-6">
-            18 Investor-Ready Features
+            12 Investor-Ready Features
           </h1>
           <p className="text-gray-300 max-w-3xl mx-auto text-lg leading-relaxed mb-8">
             TOBSEYTECH isn't just a service agency — it's an interactive digital ecosystem. Every feature below is live, built, and designed to attract users, retain community, and demonstrate platform value to investors.
           </p>
           <div className="flex flex-wrap justify-center gap-4 mb-6">
             {[
-              { label: "Interactive Features", value: "18" },
-              { label: "Live Today", value: "18/18" },
+              { label: "Interactive Features", value: "12" },
+              { label: "Live Today", value: "12/12" },
               { label: "User-Facing", value: "✓" },
               { label: "Investor-Ready", value: "✓" },
             ].map(({ label, value }) => (
@@ -300,7 +220,7 @@ export default function FeaturesPage() {
                   Request Investor Deck
                 </Button>
               </Link>
-              <Link href="/book-demo">
+              <Link href="/contact">
                 <Button size="lg" variant="outline" className="border-galactic-orange/40 text-galactic-orange hover:bg-galactic-orange/10 font-orbitron">
                   Book a Platform Demo
                 </Button>
