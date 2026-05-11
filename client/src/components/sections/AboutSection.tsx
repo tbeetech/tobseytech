@@ -30,9 +30,9 @@ const pillars = [
 ];
 
 const kecPhases = [
-  { phase: "Phase 1 (Now)", name: "TOBSEYTECH", desc: "Digital agency: automation, web/app dev, AI, content, marketing." },
-  { phase: "Phase 2", name: "KEC Labs", desc: "Product R&D — SaaS tools, templates, and reusable accelerators." },
-  { phase: "Phase 3", name: "Kingdom Fund", desc: "Reinvest profits into Kingdom-aligned technology and social impact." },
+  { phase: "Phase 1 (Now)", name: "TOBSEYTECH", desc: "Digital agency: automation, web/app dev, AI, content, marketing, and Church Digital Technology." },
+  { phase: "Phase 2", name: "KEC Labs", desc: "Product R&D — SaaS tools, church platforms, ministry automation templates, and reusable accelerators." },
+  { phase: "Phase 3", name: "Kingdom Fund", desc: "Reinvest profits into Kingdom-aligned technology, church infrastructure, and social impact across Africa." },
 ];
 
 // Partner logos as inline SVGs / simple wordmark icons

@@ -141,17 +141,26 @@ export default function Hero() {
 
       {/* Content */}
       <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-galactic-orange/30 text-galactic-orange text-xs font-orbitron mb-6 backdrop-blur-sm">
-          <span className="w-1.5 h-1.5 rounded-full bg-galactic-orange animate-pulse" />
-          Next-Generation Digital Platform
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-6">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-galactic-orange/30 text-galactic-orange text-xs font-orbitron backdrop-blur-sm">
+            <span className="w-1.5 h-1.5 rounded-full bg-galactic-orange animate-pulse" />
+            God-Inclined Digital Platform
+          </div>
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-galactic-green/40 text-galactic-green text-xs font-orbitron backdrop-blur-sm">
+            <span className="w-1.5 h-1.5 rounded-full bg-galactic-green animate-ping" />
+            Live · Real-Time · Async
+          </div>
         </div>
 
         <h1 className="font-orbitron font-black text-4xl sm:text-5xl md:text-7xl gradient-text mb-6 leading-tight">
           Automate.<br className="sm:hidden" /> Scale. Transform.
         </h1>
 
-        <p className="text-gray-300 text-base sm:text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
+        <p className="text-gray-300 text-base sm:text-lg md:text-xl max-w-2xl mx-auto mb-3 leading-relaxed">
           Empowering businesses with AI-powered automation, 16 live platform features, and intelligent systems that scale with you.
+        </p>
+        <p className="text-galactic-gold text-sm sm:text-base max-w-xl mx-auto mb-10 font-orbitron leading-relaxed">
+          Kingdom Enhancement Technology — Serving Churches & Organisations in Real Time
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
