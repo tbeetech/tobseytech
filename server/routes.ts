@@ -377,6 +377,103 @@ async function _registerRouteHandlers(app: Express): Promise<void> {
     }
   });
 
+  // ─── Sitemap ─────────────────────────────────────────────────────────────
+
+  app.get("/sitemap.xml", async (req, res) => {
+    const baseUrl = process.env.APP_URL?.replace(/\/$/, "") || `${req.protocol}://${req.get("host")}`;
+    const now = new Date().toISOString().split("T")[0];
+
+    // Static pages with their change frequencies and priorities
+    const staticPages = [
+      { path: "/",                       changefreq: "weekly",  priority: "1.0" },
+      { path: "/features",               changefreq: "monthly", priority: "0.8" },
+      { path: "/pricing",                changefreq: "monthly", priority: "0.8" },
+      { path: "/blog",                   changefreq: "daily",   priority: "0.9" },
+      { path: "/vlog",                   changefreq: "weekly",  priority: "0.7" },
+      { path: "/case-studies",           changefreq: "monthly", priority: "0.7" },
+      { path: "/contact",                changefreq: "yearly",  priority: "0.6" },
+      { path: "/learning-path",          changefreq: "monthly", priority: "0.7" },
+      { path: "/career-hub",             changefreq: "monthly", priority: "0.7" },
+      { path: "/feature/roi-calculator",       changefreq: "monthly", priority: "0.6" },
+      { path: "/feature/innovation-roadmap",   changefreq: "monthly", priority: "0.6" },
+      { path: "/feature/skills-quiz",          changefreq: "monthly", priority: "0.6" },
+      { path: "/feature/tech-trends",          changefreq: "weekly",  priority: "0.6" },
+      { path: "/feature/resources",            changefreq: "monthly", priority: "0.6" },
+      { path: "/feature/service-comparison",   changefreq: "monthly", priority: "0.6" },
+      { path: "/feature/startup-toolkit",      changefreq: "monthly", priority: "0.6" },
+      { path: "/feature/sporta",               changefreq: "monthly", priority: "0.5" },
+    ];
+
+    // Fetch published blog posts
+    let blogUrls = "";
+    try {
+      const posts = await storage.getBlogPosts();
+      for (const post of posts) {
+        if (post.published && post.slug) {
+          const lastmod = post.updatedAt
+            ? new Date(post.updatedAt).toISOString().split("T")[0]
+            : now;
+          blogUrls += `
+  <url>
+    <loc>${baseUrl}/blog/${encodeURIComponent(post.slug)}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>`;
+        }
+      }
+    } catch {
+      // non-fatal — sitemap still serves static pages
+    }
+
+    // Fetch published vlog posts
+    let vlogUrls = "";
+    try {
+      const vlogs = await storage.getVlogPosts(true);
+      for (const vlog of vlogs) {
+        if (vlog.published && vlog.slug) {
+          const lastmod = vlog.updatedAt
+            ? new Date(vlog.updatedAt).toISOString().split("T")[0]
+            : now;
+          vlogUrls += `
+  <url>
+    <loc>${baseUrl}/vlog/${encodeURIComponent(vlog.slug)}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>`;
+        }
+      }
+    } catch {
+      // non-fatal
+    }
+
+    const staticUrls = staticPages
+      .map(
+        (p) => `
+  <url>
+    <loc>${baseUrl}${p.path}</loc>
+    <lastmod>${now}</lastmod>
+    <changefreq>${p.changefreq}</changefreq>
+    <priority>${p.priority}</priority>
+  </url>`,
+      )
+      .join("");
+
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+          http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">${staticUrls}${blogUrls}${vlogUrls}
+</urlset>`;
+
+    res.set({
+      "Content-Type": "application/xml; charset=utf-8",
+      "Cache-Control": "public, max-age=3600",
+    });
+    res.send(xml);
+  });
+
   // ─── Database connectivity test ──────────────────────────────────────────
 
   app.get("/api/testdata", async (_req, res) => {

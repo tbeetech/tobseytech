@@ -14,7 +14,7 @@ export function injectBlogMetaTags(
   const postUrl = `${baseUrl}/blog/${post.slug}`;
   const title = escapeHtml(post.title);
   const description = escapeHtml(post.excerpt);
-  const image = post.coverImage ?? "https://i.pinimg.com/1200x/58/b9/9e/58b99ee7bfbbf7c0043a1950be716265.jpg";
+  const image = post.coverImage ?? `${baseUrl}/og-image.svg`;
 
   // Replace <title>
   html = html.replace(
@@ -52,10 +52,15 @@ export function injectBlogMetaTags(
     `<meta property="og:image" content="${image}" />`,
   );
 
-  // Replace og:image:type — use jpeg for blog cover images and logo
+  // Replace og:image:type — detect from the image URL extension
+  const imageType = image.match(/\.svg(\?|$)/i)
+    ? "image/svg+xml"
+    : image.match(/\.png(\?|$)/i)
+      ? "image/png"
+      : "image/jpeg";
   html = html.replace(
     /<meta\s+property="og:image:type"\s+content="[^"]*"\s*\/?>/,
-    `<meta property="og:image:type" content="image/jpeg" />`,
+    `<meta property="og:image:type" content="${imageType}" />`,
   );
 
   // Replace og:image:alt

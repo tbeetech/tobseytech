@@ -1,0 +1,16 @@
+# robots.txt — TOBSEYTECH
+# https://tobseytech.com/robots.txt
+
+User-agent: *
+Allow: /
+
+# Block private/admin paths
+Disallow: /dashboard
+Disallow: /admin/
+Disallow: /api/
+Disallow: /testdata
+
+# Crawl-delay for well-behaved bots (seconds)
+Crawl-delay: 10
+
+Sitemap: https://tobseytech.com/sitemap.xml
