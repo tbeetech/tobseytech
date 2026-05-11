@@ -1,4 +1,4 @@
-import { Brain, Code, Bot, GraduationCap, Palette, Video, BarChart3, Megaphone } from "lucide-react";
+import { Brain, Code, Bot, GraduationCap, Palette, Video, BarChart3, Megaphone, Church } from "lucide-react";
 
 const services = [
   {
@@ -18,6 +18,12 @@ const services = [
     title: "AI Integrations",
     description: "Chat assistants, RAG knowledge bases, smart routing, and recommendation engines that make your data work for you.",
     tag: null,
+  },
+  {
+    icon: Church,
+    title: "Church Digital Technology",
+    description: "Live-streaming, church management systems, ministry automation bots, giving portals, and Kingdom-aligned digital platforms.",
+    tag: "Kingdom",
   },
   {
     icon: Megaphone,
@@ -67,7 +73,11 @@ export default function ServicesSection() {
           {services.map(({ icon: Icon, title, description, tag }) => (
             <div key={title} className="card text-center relative hover:border-galactic-orange/50 transition-colors">
               {tag && (
-                <span className="absolute top-3 right-3 px-2 py-0.5 bg-galactic-orange/20 text-galactic-orange rounded-full text-xs font-orbitron">
+                <span className={`absolute top-3 right-3 px-2 py-0.5 rounded-full text-xs font-orbitron ${
+                  tag === "Kingdom"
+                    ? "bg-galactic-gold/20 text-galactic-gold"
+                    : "bg-galactic-orange/20 text-galactic-orange"
+                }`}>
                   {tag}
                 </span>
               )}

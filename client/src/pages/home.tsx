@@ -7,6 +7,7 @@ import CTASection from "@/components/CTASection";
 import ContactSection from "@/components/sections/ContactSection";
 import FounderSection from "@/components/sections/FounderSection";
 import StatsSection from "@/components/sections/StatsSection";
+import KingdomPrinciplesSection from "@/components/sections/KingdomPrinciplesSection";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Layers } from "lucide-react";
@@ -22,6 +23,7 @@ export default function Home() {
         <Hero />
         <StatsSection />
         <ServicesSection />
+        <KingdomPrinciplesSection />
         <CTASection />
         <CaseStudiesSection />
         <FounderSection />
@@ -56,6 +58,7 @@ export default function Home() {
                 <span className="font-orbitron font-bold text-xl gradient-text">TOBSEYTECH</span>
               </div>
               <p className="text-gray-400 text-sm">Automate. Scale. Transform.</p>
+              <p className="text-galactic-gold text-xs font-orbitron mt-1">Kingdom Enhancement Corp · God-Inclined Technology</p>
             </div>
             <div>
               <h4 className="font-orbitron font-bold text-neon-yellow mb-4">Quick Links</h4>
@@ -92,7 +95,8 @@ export default function Home() {
           </div>
           
           <div className="border-t border-galactic-orange/30 mt-8 pt-8 text-center text-gray-400">
-            <p className="gradient-text">TOBSEYTECH • Automate. Scale. Transform.</p>
+            <p className="gradient-text">TOBSEYTECH · Kingdom Enhancement Corp</p>
+            <p className="text-xs mt-1 text-gray-500 font-orbitron">Automate. Scale. Transform. · God-Inclined · Real-Time · Async</p>
           </div>
         </div>
       </footer>
