@@ -12,7 +12,7 @@
 
 import Parser from "rss-parser";
 import { storage } from "./storage.js";
-import { cleanPost, decodeHtmlEntities } from "./cleaner.js";
+import { cleanPost, decodeHtmlEntities, normalizeTitle } from "./cleaner.js";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -126,6 +126,74 @@ const status: BotWorkerStatus = {
 
 // Set of article GUIDs / links already posted this session (+ persisted slugs from DB)
 const seenGuids = new Set<string>();
+
+// ─── Title-based duplicate-detection indices ──────────────────────────────────
+
+/**
+ * Stop-words excluded from Jaccard token sets so common English filler words
+ * don't inflate similarity scores between unrelated titles.
+ */
+const DEDUP_STOP_WORDS = new Set([
+  "a", "an", "the", "and", "or", "but", "in", "on", "at", "to", "for",
+  "of", "with", "by", "from", "is", "are", "was", "were", "be", "it",
+  "its", "this", "that", "as", "how", "why", "what", "when", "where",
+  "new", "get", "has", "have", "not", "can", "will", "just", "more",
+  "about", "than", "into", "after", "over", "also", "up", "out",
+]);
+
+/** Tokenise a title for Jaccard similarity: lower-case significant words only. */
+function titleTokens(title: string): Set<string> {
+  return new Set(
+    normalizeTitle(title)
+      .split(/\s+/)
+      .filter((w) => w.length > 2 && !DEDUP_STOP_WORDS.has(w))
+  );
+}
+
+/**
+ * Jaccard similarity coefficient between two token sets (0.0 – 1.0).
+ * Returns 1.0 when both sets are empty (both are "nothing"), 0.0 when one is
+ * empty and the other is not.
+ */
+function jaccardSimilarity(a: Set<string>, b: Set<string>): number {
+  if (a.size === 0 && b.size === 0) return 1.0;
+  if (a.size === 0 || b.size === 0) return 0.0;
+  let intersection = 0;
+  const aArr = Array.from(a);
+  for (const token of aArr) {
+    if (b.has(token)) intersection++;
+  }
+  return intersection / (a.size + b.size - intersection);
+}
+
+/**
+ * Minimum Jaccard similarity at which two titles are treated as the same story.
+ * 0.65 means 65% of significant words must overlap.  Tune with
+ * `BOT_TITLE_SIMILARITY_THRESHOLD` env var (0.0 – 1.0).
+ */
+const _rawSimilarityThreshold = parseFloat(
+  process.env.BOT_TITLE_SIMILARITY_THRESHOLD || "0.65"
+);
+const TITLE_SIMILARITY_THRESHOLD =
+  Number.isFinite(_rawSimilarityThreshold) &&
+  _rawSimilarityThreshold > 0 &&
+  _rawSimilarityThreshold <= 1
+    ? _rawSimilarityThreshold
+    : 0.65;
+
+/**
+ * In-memory index of all normalised titles already in the DB (seeded on
+ * startup, updated after every successful post).  Used for O(1) exact-title
+ * duplicate detection across server restarts.
+ */
+const seenNormalizedTitles = new Set<string>();
+
+/**
+ * Token index for near-duplicate detection.
+ * Maps each normalised title to its token set so we can run Jaccard
+ * similarity without re-tokenising on every comparison.
+ */
+const seenTokenIndex = new Map<string, Set<string>>();
 
 let _pollTimer: ReturnType<typeof setTimeout> | null = null;
 let _botAdminId: string | null = null;
@@ -251,18 +319,41 @@ async function fetchAndPostFeed(feed: BotFeed, feedIndex: number): Promise<void>
       if (processed >= _maxArticlesPerFeed) break;
 
       const guid = item.guid || item.link || item.title || "";
-      if (!guid || seenGuids.has(guid)) continue;
+      if (!guid) continue;
+
+      // ── Gate 1: exact GUID match (fast, in-memory) ───────────────────────
+      if (seenGuids.has(guid)) continue;
 
       const title = (item.title || "Untitled").trim();
-      const slugSuffix = Date.now().toString(36);
-      const slug = toSlug(title, slugSuffix);
 
-      // Check DB to avoid re-posting across restarts
-      const existing = await storage.getBlogPostBySlug(slug);
-      if (existing) {
+      // ── Gate 2: exact normalised-title match (survives restarts) ─────────
+      const normTitle = normalizeTitle(title);
+      if (seenNormalizedTitles.has(normTitle)) {
+        seenGuids.add(guid);
+        console.log(`[botWorker] ⏭ Skipping exact-title duplicate: "${title}"`);
+        continue;
+      }
+
+      // ── Gate 3: Jaccard similarity — same story from different sources ────
+      const newTokens = titleTokens(title);
+      let isSimilar = false;
+      const tokenEntries = Array.from(seenTokenIndex.entries());
+      for (const [existingNorm, existingTokens] of tokenEntries) {
+        if (jaccardSimilarity(newTokens, existingTokens) >= TITLE_SIMILARITY_THRESHOLD) {
+          isSimilar = true;
+          console.log(
+            `[botWorker] ⏭ Skipping near-duplicate: "${title}" ≈ "${existingNorm}" (Jaccard ≥ ${TITLE_SIMILARITY_THRESHOLD})`
+          );
+          break;
+        }
+      }
+      if (isSimilar) {
         seenGuids.add(guid);
         continue;
       }
+
+      const slugSuffix = Date.now().toString(36);
+      const slug = toSlug(title, slugSuffix);
 
       const coverImage = extractImage(item);
       const rawExcerpt = buildExcerpt(item.contentSnippet || item.summary || item.content || "");
@@ -290,7 +381,11 @@ async function fetchAndPostFeed(feed: BotFeed, feedIndex: number): Promise<void>
         authorName: `${_botAdminName} · ${feed.name}`,
       });
 
+      // ── Update all dedup indices so subsequent items in this cycle are checked ──
       seenGuids.add(guid);
+      seenNormalizedTitles.add(normTitle);
+      seenTokenIndex.set(normTitle, newTokens);
+
       status.postsCreated++;
       processed++;
       console.log(`[botWorker] ✅ Posted: "${title}" (${feed.name})`);
@@ -357,6 +452,29 @@ async function resolveBotAdmin(): Promise<void> {
 }
 
 /**
+ * Seed the in-memory dedup indices from all blog posts currently in the DB.
+ *
+ * Called once at startup so the Jaccard / exact-title checks survive server
+ * restarts and don't re-post articles that were published in a previous
+ * session.
+ */
+async function seedSeenPostsFromDb(): Promise<void> {
+  try {
+    const posts = await storage.getBlogPosts(false); // all posts, including drafts
+    let count = 0;
+    for (const post of posts) {
+      const norm = normalizeTitle(post.title);
+      seenNormalizedTitles.add(norm);
+      seenTokenIndex.set(norm, titleTokens(post.title));
+      count++;
+    }
+    console.log(`[botWorker] 📚 Seeded duplicate filter with ${count} existing posts from DB`);
+  } catch (err) {
+    console.error("[botWorker] Failed to seed duplicate filter from DB:", err);
+  }
+}
+
+/**
  * Schedule the next cycle tick, clamping the interval to a safe server-controlled
  * range (MIN_POLL_INTERVAL_MS … 24 hours) so that admin-supplied values cannot
  * cause resource-exhaustion via a zero or excessively large timer.
@@ -375,6 +493,7 @@ export async function startBotWorker(): Promise<void> {
   }
 
   await resolveBotAdmin();
+  await seedSeenPostsFromDb();
   status.running = true;
   status.paused = false;
 
