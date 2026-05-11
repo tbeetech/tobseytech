@@ -2,10 +2,236 @@ import { Link } from "wouter";
 import Navigation from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import {
-  Calculator, Rocket, Brain, Activity, GraduationCap, Trophy,
-  BookOpen, TrendingUp, ArrowRight, Wrench, Award, Handshake,
-  UserCheck, Play, Globe2, Layers, Zap
+  Calculator, Rocket, Brain, Activity, GraduationCap,
+  BookOpen, TrendingUp, ArrowRight, Wrench, Award,
+  Play, Layers, Zap
 } from "lucide-react";
+
+const features = [
+  {
+    number: "01",
+    icon: Calculator,
+    title: "ROI Calculator",
+    description: "Interactive financial model that calculates your exact business ROI from TOBSEYTECH services in real time.",
+    tags: ["Interactive", "Finance", "Analytics"],
+    color: "text-galactic-orange",
+    border: "border-galactic-orange",
+    anchor: "/feature/roi-calculator",
+  },
+  {
+    number: "02",
+    icon: Rocket,
+    title: "Innovation Roadmap",
+    description: "Animated milestone timeline showing TOBSEYTECH's journey from startup to Series A and beyond.",
+    tags: ["Visual", "Strategy"],
+    color: "text-neon-cyan",
+    border: "border-neon-cyan",
+    anchor: "/feature/innovation-roadmap",
+  },
+  {
+    number: "03",
+    icon: Brain,
+    title: "Digital Skills Assessment",
+    description: "4-question quiz that benchmarks your business's digital maturity and delivers a personalised roadmap.",
+    tags: ["Interactive", "Education", "Quiz"],
+    color: "text-neon-yellow",
+    border: "border-neon-yellow",
+    anchor: "/feature/skills-quiz",
+  },
+  {
+    number: "04",
+    icon: Activity,
+    title: "Tech Trends Radar",
+    description: "Live technology adoption radar showing where AI, automation, cloud, and cybersecurity are heading.",
+    tags: ["Visual", "Data", "Research"],
+    color: "text-neon-purple",
+    border: "border-neon-purple",
+    anchor: "/feature/tech-trends",
+  },
+  {
+    number: "05",
+    icon: GraduationCap,
+    title: "Learning Path Recommender",
+    description: "3-step quiz that curates a personalised curriculum of courses and services based on your exact goals.",
+    tags: ["Education", "Personalized", "AI"],
+    color: "text-galactic-green",
+    border: "border-galactic-green",
+    anchor: "/learning-path",
+  },
+  {
+    number: "06",
+    icon: BookOpen,
+    title: "Free Resource Library",
+    description: "Curated e-books, templates, cheat sheets, and video guides — all free, all actionable.",
+    tags: ["Education", "Free", "Resources"],
+    color: "text-galactic-green",
+    border: "border-galactic-green",
+    anchor: "/feature/resources",
+  },
+  {
+    number: "07",
+    icon: TrendingUp,
+    title: "Service Comparison",
+    description: "Interactive 3-tier comparison table helping prospects choose the right service package instantly.",
+    tags: ["Interactive", "Sales", "Pricing"],
+    color: "text-neon-cyan",
+    border: "border-neon-cyan",
+    anchor: "/feature/service-comparison",
+  },
+  {
+    number: "08",
+    icon: Wrench,
+    title: "Startup Digital Toolkit",
+    description: "16-point interactive checklist every growing business needs, with expert tips for each item.",
+    tags: ["Interactive", "Startup", "Education"],
+    color: "text-galactic-orange",
+    border: "border-galactic-orange",
+    anchor: "/feature/startup-toolkit",
+  },
+  {
+    number: "09",
+    icon: Award,
+    title: "Achievement Badges",
+    description: "Gamification system rewarding community participation — from first post to platform mastery.",
+    tags: ["Gamification", "Community", "Rewards"],
+    color: "text-neon-yellow",
+    border: "border-neon-yellow",
+    anchor: "/profile",
+  },
+  {
+    number: "10",
+    icon: Play,
+    title: "Career Intelligence Hub",
+    description: "Live job listings, curated courses, industry expert recommender, and career strategy cheat codes — all in one place.",
+    tags: ["Career", "Jobs", "Education", "AI"],
+    color: "text-neon-cyan",
+    border: "border-neon-cyan",
+    anchor: "/career-hub",
+  },
+  {
+    number: "11",
+    icon: Layers,
+    title: "Features Hub",
+    description: "This page — a unified, filterable showcase of all platform features for investors and prospects.",
+    tags: ["Showcase", "Overview"],
+    color: "text-galactic-gold",
+    border: "border-galactic-gold",
+    anchor: "/features",
+  },
+  {
+    number: "12",
+    icon: Zap,
+    title: "SPORTA",
+    description: "Enterprise AI agentic social media aggregator, reshaper & mass publishing system. Aggregate 17+ platforms, reshape with AI, and auto-publish everywhere.",
+    tags: ["AI", "Automation", "Social Media", "Publishing"],
+    color: "text-galactic-orange",
+    border: "border-galactic-orange",
+    anchor: "/feature/sporta",
+  },
+];
+
+export default function FeaturesPage() {
+  return (
+    <div className="min-h-screen bg-space-black text-white">
+      <title>12 Interactive Features – TOBSEYTECH</title>
+      <Navigation />
+
+      <main className="pt-24 pb-20">
+        {/* Hero */}
+        <div className="container mx-auto px-6 text-center mb-16">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-galactic-orange/30 text-galactic-orange text-sm font-orbitron mb-6">
+            <Layers className="w-4 h-4" /> Platform Features
+          </div>
+          <h1 className="font-orbitron font-bold text-4xl md:text-6xl gradient-text mb-6">
+            12 Investor-Ready Features
+          </h1>
+          <p className="text-gray-300 max-w-3xl mx-auto text-lg leading-relaxed mb-8">
+            TOBSEYTECH isn't just a service agency — it's an interactive digital ecosystem. Every feature below is live, built, and designed to attract users, retain community, and demonstrate platform value to investors.
+          </p>
+          <div className="flex flex-wrap justify-center gap-4 mb-6">
+            {[
+              { label: "Interactive Features", value: "12" },
+              { label: "Live Today", value: "12/12" },
+              { label: "User-Facing", value: "✓" },
+              { label: "Investor-Ready", value: "✓" },
+            ].map(({ label, value }) => (
+              <div key={label} className="px-5 py-3 glass-effect rounded-xl border border-galactic-orange/20">
+                <div className="font-orbitron font-bold text-galactic-orange text-xl">{value}</div>
+                <div className="text-gray-400 text-xs font-orbitron">{label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Features grid */}
+        <div className="container mx-auto px-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 max-w-7xl mx-auto">
+            {features.map((feature) => {
+              const Icon = feature.icon;
+              return (
+                <div
+                  key={feature.number}
+                  className={`glass-effect p-6 rounded-2xl border ${feature.border}/20 hover:${feature.border}/40 transition-all group relative flex flex-col`}
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <div className={`w-10 h-10 rounded-xl border ${feature.border}/30 flex items-center justify-center`}>
+                      <Icon className={`w-5 h-5 ${feature.color}`} />
+                    </div>
+                    <span className={`font-orbitron font-black text-2xl ${feature.color} opacity-20`}>{feature.number}</span>
+                  </div>
+
+                  <h3 className={`font-orbitron font-bold text-sm ${feature.color} mb-2`}>{feature.title}</h3>
+                  <p className="text-gray-400 text-xs leading-relaxed mb-3 flex-1">{feature.description}</p>
+
+                  <div className="flex flex-wrap gap-1.5 mb-4">
+                    {feature.tags.map(tag => (
+                      <span key={tag} className="text-xs px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-gray-400 font-orbitron">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+
+                  <Link href={feature.anchor}>
+                    <Button
+                      size="sm"
+                      className={`w-full font-orbitron text-xs bg-gradient-to-r from-galactic-orange/20 to-galactic-gold/20 text-white hover:from-galactic-orange/40 hover:to-galactic-gold/40 border ${feature.border}/20`}
+                    >
+                      Open Feature <ArrowRight className="w-3 h-3 ml-1" />
+                    </Button>
+                  </Link>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* CTA */}
+        <div className="container mx-auto px-6 mt-16 text-center">
+          <div className="glass-effect max-w-3xl mx-auto p-10 rounded-3xl border border-galactic-orange/30">
+            <h2 className="font-orbitron font-bold text-3xl gradient-text mb-4">
+              Ready to Invest or Partner?
+            </h2>
+            <p className="text-gray-300 mb-6 max-w-xl mx-auto">
+              TOBSEYTECH is raising investment to scale these features globally. Book a call with the founder or request the full investor deck.
+            </p>
+            <div className="flex flex-wrap justify-center gap-4">
+              <Link href="/contact">
+                <Button size="lg" className="bg-gradient-to-r from-galactic-orange to-galactic-gold text-space-black font-orbitron font-bold">
+                  Request Investor Deck
+                </Button>
+              </Link>
+              <Link href="/contact">
+                <Button size="lg" variant="outline" className="border-galactic-orange/40 text-galactic-orange hover:bg-galactic-orange/10 font-orbitron">
+                  Book a Platform Demo
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}
 
 const features = [
   {
@@ -300,7 +526,7 @@ export default function FeaturesPage() {
                   Request Investor Deck
                 </Button>
               </Link>
-              <Link href="/book-demo">
+              <Link href="/contact">
                 <Button size="lg" variant="outline" className="border-galactic-orange/40 text-galactic-orange hover:bg-galactic-orange/10 font-orbitron">
                   Book a Platform Demo
                 </Button>

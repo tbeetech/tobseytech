@@ -188,7 +188,7 @@ export default function LiveDemoSection() {
         </div>
 
         <div className="text-center mt-8">
-          <a href="/book-demo">
+          <a href="/contact">
             <Button size="lg" className="bg-gradient-to-r from-galactic-orange to-galactic-gold text-space-black font-orbitron font-bold">
               Book a Live 1:1 Demo
             </Button>

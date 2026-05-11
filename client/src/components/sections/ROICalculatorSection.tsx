@@ -137,7 +137,7 @@ export default function ROICalculatorSection() {
         </div>
 
         <div className="text-center mt-10">
-          <Link href="/book-demo">
+          <Link href="/contact">
             <Button size="lg" className="bg-gradient-to-r from-galactic-orange to-galactic-gold text-space-black font-orbitron font-bold px-8">
               Book a Demo & Unlock Your ROI
             </Button>

@@ -8,7 +8,6 @@ import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import PricingPage from "@/pages/pricing";
 import ContactPage from "@/pages/contact";
-import BookDemoPage from "@/pages/book-demo";
 import CaseStudiesPage from "@/pages/case-studies";
 import AuthPage from "@/pages/auth";
 import ForgotPasswordPage from "@/pages/forgot-password";
@@ -26,15 +25,9 @@ import FeatureROICalculatorPage from "@/pages/feature-roi-calculator";
 import FeatureInnovationRoadmapPage from "@/pages/feature-innovation-roadmap";
 import FeatureSkillsQuizPage from "@/pages/feature-skills-quiz";
 import FeatureTechTrendsPage from "@/pages/feature-tech-trends";
-import FeatureChallengesPage from "@/pages/feature-challenges";
 import FeatureResourcesPage from "@/pages/feature-resources";
-import FeatureInvestorMetricsPage from "@/pages/feature-investor-metrics";
 import FeatureServiceComparisonPage from "@/pages/feature-service-comparison";
 import FeatureStartupToolkitPage from "@/pages/feature-startup-toolkit";
-import FeaturePartnersPage from "@/pages/feature-partners";
-import FeatureMentorshipPage from "@/pages/feature-mentorship";
-import FeatureLiveDemoPage from "@/pages/feature-live-demo";
-import FeatureGlobalImpactPage from "@/pages/feature-global-impact";
 import FeatureSportaPage from "@/pages/feature-sporta";
 import SportaPage from "@/pages/sporta";
 import ProphetChat from "@/components/ProphetChat";
@@ -55,7 +48,8 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/pricing" component={PricingPage} />
       <Route path="/contact" component={ContactPage} />
-      <Route path="/book-demo" component={BookDemoPage} />
+      {/* Book-demo redirects to contact */}
+      <Route path="/book-demo"><Redirect to="/contact" /></Route>
       <Route path="/case-studies" component={CaseStudiesPage} />
       <Route path="/auth" component={AuthPage} />
       <Route path="/forgot-password" component={ForgotPasswordPage} />
@@ -78,15 +72,17 @@ function Router() {
       <Route path="/feature/innovation-roadmap" component={FeatureInnovationRoadmapPage} />
       <Route path="/feature/skills-quiz" component={FeatureSkillsQuizPage} />
       <Route path="/feature/tech-trends" component={FeatureTechTrendsPage} />
-      <Route path="/feature/challenges" component={FeatureChallengesPage} />
+      {/* Removed features — redirect to features hub */}
+      <Route path="/feature/challenges"><Redirect to="/features" /></Route>
+      <Route path="/feature/investor-metrics"><Redirect to="/features" /></Route>
+      <Route path="/feature/mentorship"><Redirect to="/features" /></Route>
+      <Route path="/feature/live-demo"><Redirect to="/features" /></Route>
+      <Route path="/feature/global-impact"><Redirect to="/features" /></Route>
+      {/* Partner network is now part of About, no longer a standalone feature */}
+      <Route path="/feature/partners"><Redirect to="/#about" /></Route>
       <Route path="/feature/resources" component={FeatureResourcesPage} />
-      <Route path="/feature/investor-metrics" component={FeatureInvestorMetricsPage} />
       <Route path="/feature/service-comparison" component={FeatureServiceComparisonPage} />
       <Route path="/feature/startup-toolkit" component={FeatureStartupToolkitPage} />
-      <Route path="/feature/partners" component={FeaturePartnersPage} />
-      <Route path="/feature/mentorship" component={FeatureMentorshipPage} />
-      <Route path="/feature/live-demo" component={FeatureLiveDemoPage} />
-      <Route path="/feature/global-impact" component={FeatureGlobalImpactPage} />
       <Route path="/feature/sporta" component={FeatureSportaPage} />
       {/* SPORTA — accessible to all authenticated users */}
       <Route path="/sporta" component={SportaPage} />

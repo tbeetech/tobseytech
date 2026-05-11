@@ -968,12 +968,12 @@ export default function SportaTab() {
 
       {/* Campaigns list */}
       <div className="glass-effect rounded-xl p-5">
-        <div className="flex items-center justify-between mb-5">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-galactic-orange/20 flex items-center justify-center">
+            <div className="w-9 h-9 rounded-full bg-galactic-orange/20 flex items-center justify-center shrink-0">
               <Zap className="w-4 h-4 text-galactic-orange" />
             </div>
-            <div>
+            <div className="min-w-0">
               <h2 className="text-base font-orbitron font-bold text-galactic-orange">SPORTA Campaigns</h2>
               <p className="text-gray-500 text-xs">AI-powered social media automation</p>
             </div>
@@ -1024,19 +1024,19 @@ export default function SportaTab() {
                 className="flex items-center justify-between p-4 bg-space-dark rounded-xl border border-white/5 hover:border-galactic-orange/20 transition-all cursor-pointer group"
                 onClick={() => setSelectedCampaignId(campaign.id)}
               >
-                <div className="flex-1 min-w-0 mr-4">
+                <div className="flex-1 min-w-0 mr-3">
                   <div className="flex items-center gap-2 mb-1 flex-wrap">
-                    <span className="text-white font-semibold text-sm truncate">{campaign.name}</span>
+                    <span className="text-white font-semibold text-sm truncate max-w-[160px]">{campaign.name}</span>
                     <StatusBadge status={campaign.status} />
                   </div>
-                  <div className="flex items-center gap-3 text-xs text-gray-500">
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-gray-500">
                     <span className="text-galactic-orange">{campaign.industry}</span>
                     <span>·</span>
-                    <span>{campaign.aiMode}</span>
+                    <span className="truncate max-w-[80px]">{campaign.aiMode}</span>
                     <span>·</span>
                     <span>{campaign.approvalMode.replace("_", " ")}</span>
                   </div>
-                  <div className="flex items-center gap-4 mt-1.5 text-[11px] text-gray-600">
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-1.5 text-[11px] text-gray-600">
                     <span><span className="text-blue-400">{campaign.postsAggregated}</span> aggregated</span>
                     <span><span className="text-green-400">{campaign.postsPublished}</span> published</span>
                     <span><span className="text-red-400">{campaign.postsRejected}</span> rejected</span>

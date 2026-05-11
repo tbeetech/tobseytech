@@ -18,7 +18,7 @@ export default function FeatureChallengesPage() {
             </Button>
           </Link>
           &nbsp;&nbsp;
-          <Link href="/book-demo">
+          <Link href="/contact">
             <Button className="bg-gradient-to-r from-galactic-orange to-galactic-gold text-space-black font-orbitron font-bold text-xs">
               Book a Demo <ArrowRight className="w-3 h-3 ml-1" />
             </Button>

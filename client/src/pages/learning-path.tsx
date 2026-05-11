@@ -211,7 +211,7 @@ export default function LearningPathPage() {
                   <Button onClick={reset} variant="ghost" className="text-gray-400 font-orbitron text-xs flex-1">
                     <RotateCcw className="w-4 h-4 mr-1" /> Retake
                   </Button>
-                  <Link href="/book-demo">
+                  <Link href="/contact">
                     <Button className="bg-gradient-to-r from-galactic-orange to-galactic-gold text-space-black font-orbitron font-bold text-xs flex-1">
                       Start My Journey
                     </Button>

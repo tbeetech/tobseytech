@@ -203,12 +203,12 @@ export default function SkillsQuizSection() {
                 <p className="text-gray-300 text-sm leading-relaxed max-w-md mx-auto">{level.desc}</p>
               </div>
 
-              <div className="p-4 rounded-xl border border-galactic-orange/30 bg-galactic-orange/5 mb-6">
+              <div className="p-4 rounded-xl border border-galactic-orange/30 bg-galactic-orange/5 mb-6 overflow-hidden">
                 <p className="text-xs font-orbitron text-gray-400 mb-1">Recommended Next Step</p>
-                <p className="text-galactic-orange font-orbitron font-bold">{level.recommendation}</p>
+                <p className="text-galactic-orange font-orbitron font-bold break-words">{level.recommendation}</p>
               </div>
 
-              <div className="flex gap-3 justify-center">
+              <div className="flex flex-wrap gap-3 justify-center">
                 <Button
                   onClick={handleReset}
                   variant="ghost"
@@ -217,7 +217,7 @@ export default function SkillsQuizSection() {
                   <RotateCcw className="w-4 h-4 mr-1" /> Retake Quiz
                 </Button>
                 <Button
-                  onClick={() => window.location.href = "/book-demo"}
+                  onClick={() => window.location.href = "/contact"}
                   className="bg-gradient-to-r from-galactic-orange to-galactic-gold text-space-black font-orbitron font-bold text-xs"
                 >
                   Get a Free Consultation

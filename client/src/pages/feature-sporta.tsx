@@ -169,9 +169,9 @@ export default function FeatureSportaPage() {
                   { label: "Workflow Steps", value: "10" },
                   { label: "Industries", value: "25" },
                 ].map(({ label, value }) => (
-                  <div key={label} className="px-4 py-3 glass-effect rounded-xl border border-galactic-orange/20 min-w-[100px]">
+                  <div key={label} className="px-4 py-3 glass-effect rounded-xl border border-galactic-orange/20 text-center">
                     <div className="font-orbitron font-black text-galactic-orange text-2xl">{value}</div>
-                    <div className="text-gray-400 text-xs font-orbitron">{label}</div>
+                    <div className="text-gray-400 text-xs font-orbitron whitespace-nowrap">{label}</div>
                   </div>
                 ))}
               </div>
@@ -412,7 +412,7 @@ export default function FeatureSportaPage() {
                   <Play className="w-4 h-4 mr-2" /> Open Dashboard
                 </Button>
               </Link>
-              <Link href="/book-demo">
+              <Link href="/contact">
                 <Button variant="outline" className="border-galactic-orange/40 text-galactic-orange font-orbitron font-bold px-8 h-12 hover:bg-galactic-orange/10">
                   Book a Demo <ArrowRight className="w-4 h-4 ml-1" />
                 </Button>
