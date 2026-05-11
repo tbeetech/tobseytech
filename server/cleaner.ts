@@ -17,6 +17,7 @@
  */
 
 import type { IStorage } from "./storage.js";
+import type { BlogPost } from "../shared/schema.js";
 
 // ─── HTML entity map ──────────────────────────────────────────────────────────
 
@@ -209,6 +210,21 @@ export function cleanPost<T extends PostTextFields>(post: T): T {
   };
 }
 
+// ─── Title normalisation (shared with botWorker) ──────────────────────────────
+
+/**
+ * Normalise a post title for duplicate-detection comparisons.
+ * Strips punctuation, lowercases, and collapses whitespace so minor
+ * editorial differences (dashes, capitalisation) don't defeat matching.
+ */
+export function normalizeTitle(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 // ─── Manual audit — retroactively clean all existing DB posts ─────────────────
 
 export interface AuditResult {
@@ -265,6 +281,74 @@ export async function auditAndClean(store: IStorage): Promise<AuditResult> {
 
   console.log(
     `[cleaner] Audit complete — total: ${result.total}, cleaned: ${result.cleaned}, unchanged: ${result.unchanged}, errors: ${result.errors}`
+  );
+
+  return result;
+}
+
+// ─── Deduplication — remove duplicate posts from the DB ──────────────────────
+
+export interface DeduplicateResult {
+  total: number;
+  duplicatesFound: number;
+  removed: number;
+  errors: number;
+}
+
+/**
+ * Scan all blog posts and remove exact-title duplicates, keeping the oldest
+ * copy of each post.  Two posts are considered duplicates when their
+ * `normalizeTitle()` representations are identical.
+ *
+ * Called by `POST /api/bot/dedup` (admin) to retroactively clean up any
+ * duplicate posts that were created before the botWorker's pre-insert
+ * similarity checks were in place.
+ *
+ * @returns Summary counts for the admin dashboard response.
+ */
+export async function deduplicatePosts(store: IStorage): Promise<DeduplicateResult> {
+  const result: DeduplicateResult = { total: 0, duplicatesFound: 0, removed: 0, errors: 0 };
+
+  // Fetch ALL posts (published + drafts)
+  const posts: BlogPost[] = await store.getBlogPosts(false);
+  result.total = posts.length;
+
+  // Group posts by normalised title.  Sort each group oldest-first so we
+  // always keep the original and remove the later copies.
+  const groups = new Map<string, BlogPost[]>();
+  for (const post of posts) {
+    const key = normalizeTitle(post.title);
+    const group = groups.get(key);
+    if (group) {
+      group.push(post);
+    } else {
+      groups.set(key, [post]);
+    }
+  }
+
+  for (const [, group] of Array.from(groups.entries())) {
+    if (group.length <= 1) continue;
+
+    // Keep the oldest (createdAt ascending), delete the rest
+    group.sort((a: BlogPost, b: BlogPost) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+    const [, ...dupes] = group;
+    result.duplicatesFound += dupes.length;
+
+    for (const dupe of dupes) {
+      try {
+        await store.deleteBlogPost(dupe.id);
+        result.removed++;
+        console.log(`[cleaner] 🗑 Removed duplicate post "${dupe.title}" (${dupe.id})`);
+      } catch (err) {
+        result.errors++;
+        const msg = err instanceof Error ? err.message : String(err);
+        console.error(`[cleaner] ❌ Failed to remove duplicate post ${dupe.id}: ${msg}`);
+      }
+    }
+  }
+
+  console.log(
+    `[cleaner] Dedup complete — total: ${result.total}, duplicates found: ${result.duplicatesFound}, removed: ${result.removed}, errors: ${result.errors}`
   );
 
   return result;

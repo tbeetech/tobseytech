@@ -14,7 +14,7 @@ import { storage } from "./storage.js";
 import { ADMIN_DASHBOARD_PASSWORD } from "./env.js";
 import { injectBlogMetaTags } from "./ogTags.js";
 import { getBotStatus, triggerBotCycle, pauseBotWorker, resumeBotWorker, startBotWorker as _startBotWorker, updateBotConfig } from "./botWorker.js";
-import { auditAndClean } from "./cleaner.js";
+import { auditAndClean, deduplicatePosts } from "./cleaner.js";
 import {
   insertContactSchema,
   insertProductSchema,
@@ -2089,6 +2089,16 @@ ENGAGEMENT PRINCIPLES:
       res.json({ ok: true, ...result });
     } catch {
       res.status(500).json({ message: "Audit failed — see server logs for details." });
+    }
+  });
+
+  // POST /api/bot/dedup — retroactively remove duplicate posts (admin or dashboard-verified)
+  app.post("/api/bot/dedup", authRateLimiter, requireDashboardAccess, async (_req, res) => {
+    try {
+      const result = await deduplicatePosts(storage);
+      res.json({ ok: true, ...result });
+    } catch {
+      res.status(500).json({ message: "Deduplication failed — see server logs for details." });
     }
   });
 
