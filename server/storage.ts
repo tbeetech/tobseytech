@@ -22,6 +22,7 @@ import {
   type InsertMessage,
   type Notification,
   type InsertNotification,
+  type VlogPost,
 } from "../shared/schema.js";
 import { randomUUID, randomBytes } from "crypto";
 
@@ -74,6 +75,9 @@ export interface IStorage {
   createBlogPost(data: InsertBlogPost): Promise<BlogPost>;
   updateBlogPost(id: string, updates: UpdateBlogPost): Promise<BlogPost | undefined>;
   deleteBlogPost(id: string): Promise<boolean>;
+
+  // Vlog post methods
+  getVlogPosts(publishedOnly?: boolean): Promise<VlogPost[]>;
 
   // Comment methods
   getComments(postId: string): Promise<Comment[]>;
@@ -490,6 +494,12 @@ export class MemStorage implements IStorage {
 
   async deleteBlogPost(id: string): Promise<boolean> {
     return this.blogPosts.delete(id);
+  }
+
+  // Vlog post methods
+  async getVlogPosts(_publishedOnly = true): Promise<VlogPost[]> {
+    // MemStorage has no vlog data; return empty array as a safe dev fallback
+    return [];
   }
 
   // Comment methods
