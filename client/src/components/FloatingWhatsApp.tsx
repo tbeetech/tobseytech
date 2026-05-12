@@ -4,7 +4,7 @@ export default function FloatingWhatsApp() {
   const message = encodeURIComponent(
     "Hi TOBSEYTECH, I'd like to learn more"
   );
-  const href = `https://wa.me/2348030000000?text=${message}`;
+  const href = `https://wa.me/2348122536647?text=${message}`;
   return (
     <a
       href={href}
