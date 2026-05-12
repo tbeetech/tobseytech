@@ -7,7 +7,7 @@ import {
   ExternalLink, Star, MapPin, Clock, TrendingUp,
   Brain, Target, Rocket, ArrowRight, Award,
   ChevronRight, Zap, Network, MessageSquare, GraduationCap,
-  BarChart2, Compass, Radio, RefreshCw
+  BarChart2, Compass, Radio, RefreshCw, Sparkles, Tag
 } from "lucide-react";
 
 // ─── Static curated data ────────────────────────────────────────────────────
@@ -23,6 +23,17 @@ const ROLE_OPTIONS = [
   { value: "fullstack", label: "Full-Stack Developer" },
   { value: "ai-engineer", label: "AI / Prompt Engineer" },
   { value: "data-analyst", label: "Data Analyst / BI Specialist" },
+  // Nigeria in-demand roles
+  { value: "backend-engineer", label: "Backend Engineer" },
+  { value: "mobile-engineer", label: "Mobile Engineer (iOS/Android)" },
+  { value: "systems-architect", label: "Systems Architect" },
+  { value: "tech-lead", label: "Tech Lead / Staff Engineer" },
+  { value: "engineering-manager", label: "Engineering Manager" },
+  { value: "founder-ceo", label: "Startup Founder / CEO" },
+  { value: "qa-engineer", label: "QA Engineer / SDET" },
+  { value: "database-admin", label: "Database Administrator" },
+  { value: "technical-writer", label: "Technical Writer" },
+  { value: "scrum-master", label: "Scrum Master / Agile Coach" },
 ];
 
 const COURSES_BY_ROLE: Record<string, { title: string; platform: string; url: string; level: string; free: boolean; description: string }[]> = {
@@ -244,9 +255,27 @@ interface HNHit {
   created_at: string;
 }
 
+interface NgMatchJob {
+  id: number;
+  url: string;
+  title: string;
+  company_name: string;
+  company_logo: string;
+  category: string;
+  candidate_required_location: string;
+  salary: string;
+  publication_date: string;
+  job_type: string;
+  tags: string[];
+  description: string;
+  _score: number;
+  _ngFriendly: boolean;
+}
+
 // ─── Tab definitions ─────────────────────────────────────────────────────────
 
 const TABS = [
+  { id: "ng-match", label: "🇳🇬 NG Match", icon: Sparkles },
   { id: "courses", label: "Courses", icon: BookOpen },
   { id: "jobs", label: "Live Jobs", icon: Briefcase },
   { id: "experts", label: "Experts", icon: Users },
@@ -277,6 +306,16 @@ const REMOTIVE_CATEGORIES: Record<string, string> = {
   "ai-engineer": "software-dev",
   "data-analyst": "data",
   "product-manager": "product",
+  "backend-engineer": "software-dev",
+  "mobile-engineer": "software-dev",
+  "systems-architect": "software-dev",
+  "tech-lead": "software-dev",
+  "engineering-manager": "management-finance",
+  "founder-ceo": "management-finance",
+  "qa-engineer": "qa",
+  "database-admin": "devops-sysadmin",
+  "technical-writer": "writing",
+  "scrum-master": "management-finance",
 };
 
 const DEV_TO_TAGS: Record<string, string> = {
@@ -290,19 +329,34 @@ const DEV_TO_TAGS: Record<string, string> = {
   "ai-engineer": "ai",
   "data-analyst": "dataanalysis",
   "product-manager": "productivity",
+  "backend-engineer": "backend",
+  "mobile-engineer": "mobile",
+  "systems-architect": "architecture",
+  "tech-lead": "leadership",
+  "engineering-manager": "management",
+  "founder-ceo": "entrepreneurship",
+  "qa-engineer": "testing",
+  "database-admin": "database",
+  "technical-writer": "documentation",
+  "scrum-master": "agile",
 };
 
 // ─── Page component ──────────────────────────────────────────────────────────
 
 export default function CareerHubPage() {
   const [selectedRole, setSelectedRole] = useState("software-engineer");
-  const [activeTab, setActiveTab] = useState("courses");
+  const [activeTab, setActiveTab] = useState("ng-match");
   const [jobSearch, setJobSearch] = useState("");
   const [articleSearch, setArticleSearch] = useState("");
   const [hnSearch, setHnSearch] = useState("");
   const [submittedJobSearch, setSubmittedJobSearch] = useState("");
   const [submittedArticleSearch, setSubmittedArticleSearch] = useState("");
   const [submittedHnSearch, setSubmittedHnSearch] = useState("");
+
+  // NG Match state
+  const [ngDescription, setNgDescription] = useState("");
+  const [ngRole, setNgRole] = useState("software-engineer");
+  const [ngSubmitted, setNgSubmitted] = useState(false);
 
   const remotiveCategory = REMOTIVE_CATEGORIES[selectedRole] ?? "software-dev";
   const devToTag = DEV_TO_TAGS[selectedRole] ?? "career";
@@ -317,6 +371,31 @@ export default function CareerHubPage() {
     },
     staleTime: 5 * 60 * 1000,
   });
+
+  // NG Match query — only fires when ngSubmitted is true
+  const {
+    data: ngMatchData,
+    isFetching: ngFetching,
+    refetch: runNgMatch,
+    isError: ngError,
+  } = useQuery<{ jobs: NgMatchJob[]; keywords: string[]; totalScanned: number; message?: string }>({
+    queryKey: ["/api/career/ng-match", ngRole, ngDescription],
+    queryFn: async () => {
+      const params = new URLSearchParams({ role: ngRole, description: ngDescription });
+      const res = await fetch(`/api/career/ng-match?${params}`);
+      return res.json();
+    },
+    enabled: ngSubmitted,
+    staleTime: 3 * 60 * 1000,
+  });
+
+  const handleNgMatch = () => {
+    if (ngSubmitted) {
+      runNgMatch();
+    } else {
+      setNgSubmitted(true);
+    }
+  };
 
   const { data: articlesData, isLoading: articlesLoading, refetch: refetchArticles } = useQuery<{ articles: DevToArticle[]; message?: string }>({
     queryKey: ["/api/career/articles", devToTag, submittedArticleSearch],
@@ -433,6 +512,219 @@ export default function CareerHubPage() {
 
       {/* Tab content */}
       <main className="container mx-auto px-6 py-10">
+
+        {/* ── 🇳🇬 NG Match tab ─────────────────────────────────────────────── */}
+        {activeTab === "ng-match" && (
+          <div>
+            <div className="mb-8">
+              <div className="flex items-center gap-3 mb-2">
+                <span className="text-2xl">🇳🇬</span>
+                <h2 className="font-orbitron font-bold text-2xl text-galactic-orange">Nigeria Job Match</h2>
+              </div>
+              <p className="text-gray-400 text-sm max-w-2xl">
+                Paste your job description or list your skills below. We'll scan live remote jobs and score each one
+                for Nigeria-friendliness — surfacing roles at companies that hire globally and across Africa.
+              </p>
+            </div>
+
+            {/* Input form */}
+            <div className="glass-effect rounded-2xl p-6 border border-galactic-orange/25 mb-8">
+              <div className="grid sm:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="text-xs font-orbitron text-galactic-orange mb-2 block">Your Role</label>
+                  <div className="relative">
+                    <GraduationCap className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-galactic-orange" />
+                    <select
+                      value={ngRole}
+                      onChange={e => { setNgRole(e.target.value); setNgSubmitted(false); }}
+                      className="w-full pl-10 pr-4 py-2.5 bg-white/5 border border-galactic-orange/30 rounded-xl font-orbitron text-sm text-white focus:outline-none focus:border-galactic-orange transition-colors appearance-none cursor-pointer"
+                    >
+                      {ROLE_OPTIONS.map(r => (
+                        <option key={r.value} value={r.value} className="bg-gray-900">{r.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+                <div className="flex items-end">
+                  <div className="w-full glass-effect rounded-xl border border-galactic-orange/15 p-3">
+                    <p className="text-xs text-gray-500 font-orbitron mb-1">How it works</p>
+                    <p className="text-xs text-gray-400 leading-relaxed">
+                      We extract your key skills, query live remote job APIs, then score each role by keyword match,
+                      worldwide/Africa location acceptance, and known Nigeria-hiring companies.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="mb-4">
+                <label className="text-xs font-orbitron text-galactic-orange mb-2 block">
+                  Job Description / Your Skills{" "}
+                  <span className="text-gray-600 font-normal">(paste a JD or describe what you do)</span>
+                </label>
+                <textarea
+                  value={ngDescription}
+                  onChange={e => { setNgDescription(e.target.value); setNgSubmitted(false); }}
+                  onKeyDown={e => { if (e.key === "Enter" && e.ctrlKey) handleNgMatch(); }}
+                  placeholder="e.g. Senior backend engineer with 4 years Node.js, PostgreSQL, Redis, REST APIs, AWS, Docker. Built fintech APIs handling 100k txns/day. Looking for remote roles in product companies..."
+                  rows={4}
+                  className="w-full px-4 py-3 bg-white/5 border border-galactic-orange/20 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none focus:border-galactic-orange transition-colors resize-none"
+                />
+              </div>
+              <div className="flex items-center gap-3">
+                <Button
+                  onClick={handleNgMatch}
+                  disabled={ngFetching}
+                  className="bg-galactic-orange hover:bg-galactic-orange/80 text-black font-orbitron font-bold text-sm px-6"
+                >
+                  {ngFetching ? (
+                    <><div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin mr-2" />Matching…</>
+                  ) : (
+                    <><Sparkles className="w-4 h-4 mr-2" />Find My Match</>
+                  )}
+                </Button>
+                {ngMatchData && (
+                  <span className="text-xs text-gray-500 font-orbitron">
+                    Scanned {ngMatchData.totalScanned} jobs · {ngMatchData.jobs.length} matches returned
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Keywords extracted */}
+            {ngMatchData?.keywords && ngMatchData.keywords.length > 0 && (
+              <div className="flex items-center gap-2 flex-wrap mb-6">
+                <Tag className="w-3.5 h-3.5 text-galactic-orange flex-shrink-0" />
+                <span className="text-xs text-gray-500 font-orbitron">Extracted skills:</span>
+                {ngMatchData.keywords.map(kw => (
+                  <span key={kw} className="px-2 py-0.5 bg-galactic-orange/10 text-galactic-orange border border-galactic-orange/20 rounded text-xs font-orbitron">
+                    {kw}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {/* Error state */}
+            {ngError && (
+              <div className="text-center py-10 glass-effect rounded-2xl border border-red-500/20 mb-6">
+                <p className="text-red-400 font-orbitron text-sm">{ngMatchData?.message ?? "Could not fetch matched jobs. Please try again."}</p>
+                <Button onClick={() => runNgMatch()} className="mt-4 text-xs font-orbitron" variant="outline">Retry</Button>
+              </div>
+            )}
+
+            {/* Results */}
+            {ngSubmitted && !ngFetching && (ngMatchData?.jobs ?? []).length > 0 && (
+              <div>
+                <h3 className="font-orbitron font-bold text-galactic-orange text-sm mb-4 flex items-center gap-2">
+                  <Briefcase className="w-4 h-4" /> Best-Matched Jobs for Nigerian Engineers
+                </h3>
+                <div className="grid sm:grid-cols-2 gap-4">
+                  {(ngMatchData?.jobs ?? []).map(job => (
+                    <a
+                      key={job.id}
+                      href={job.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="glass-effect rounded-xl p-5 border border-galactic-orange/15 hover:border-galactic-orange/45 transition-all group flex flex-col"
+                    >
+                      <div className="flex items-start gap-3 mb-3">
+                        {job.company_logo ? (
+                          <img src={job.company_logo} alt={job.company_name} className="w-10 h-10 rounded-lg object-contain bg-white/10 flex-shrink-0" />
+                        ) : (
+                          <div className="w-10 h-10 rounded-lg bg-galactic-orange/10 flex items-center justify-center flex-shrink-0">
+                            <Briefcase className="w-5 h-5 text-galactic-orange" />
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-orbitron font-bold text-sm text-white group-hover:text-galactic-orange transition-colors line-clamp-1">{job.title}</h3>
+                          <p className="text-gray-400 text-xs">{job.company_name}</p>
+                        </div>
+                        <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                          {job._ngFriendly && (
+                            <span className="text-xs px-2 py-0.5 bg-green-500/15 text-green-400 border border-green-500/25 rounded-full font-orbitron whitespace-nowrap">
+                              🇳🇬 NG-Friendly
+                            </span>
+                          )}
+                          <span className="text-xs text-gray-600 font-orbitron">score {job._score}</span>
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap gap-2 text-xs text-gray-500 mb-2">
+                        <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{job.candidate_required_location || "Worldwide"}</span>
+                        {job.job_type && (
+                          <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{job.job_type}</span>
+                        )}
+                        {job.salary && (
+                          <span className="text-galactic-green font-semibold">{job.salary}</span>
+                        )}
+                      </div>
+                      {job.tags?.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mb-2">
+                          {job.tags.slice(0, 4).map(tag => (
+                            <span key={tag} className="px-2 py-0.5 bg-galactic-orange/10 text-galactic-orange rounded text-xs">{tag}</span>
+                          ))}
+                        </div>
+                      )}
+                      <div className="flex items-center justify-between mt-auto pt-1">
+                        <span className="text-gray-600 text-xs">{timeAgo(job.publication_date)}</span>
+                        <ExternalLink className="w-3.5 h-3.5 text-gray-600 group-hover:text-galactic-orange" />
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Empty state */}
+            {ngSubmitted && !ngFetching && !ngError && (ngMatchData?.jobs ?? []).length === 0 && (
+              <div className="text-center py-12 glass-effect rounded-2xl border border-galactic-orange/10">
+                <Briefcase className="w-12 h-12 text-gray-700 mx-auto mb-3" />
+                <p className="text-gray-400 font-orbitron text-sm">No matched jobs found right now.</p>
+                <p className="text-gray-600 text-xs mt-1">Try adding more skills or changing your role above.</p>
+              </div>
+            )}
+
+            {/* Initial prompt */}
+            {!ngSubmitted && (
+              <div className="text-center py-14 glass-effect rounded-2xl border border-galactic-orange/10">
+                <span className="text-5xl mb-4 block">🇳🇬</span>
+                <p className="text-gray-300 font-orbitron text-sm mb-1">Ready to match Nigerian engineers with global roles</p>
+                <p className="text-gray-600 text-xs">Describe your skills above and hit <span className="text-galactic-orange">Find My Match</span></p>
+              </div>
+            )}
+
+            {/* LinkedIn Quick-search hints */}
+            <div className="mt-10 glass-effect rounded-2xl p-6 border border-neon-cyan/15">
+              <h3 className="font-orbitron font-bold text-neon-cyan text-sm mb-4 flex items-center gap-2">
+                <Network className="w-4 h-4" /> LinkedIn Fast-Track for Nigerian Engineers
+              </h3>
+              <p className="text-gray-400 text-xs mb-4">
+                Use these pre-built LinkedIn job search URLs — filtered for companies with a history of hiring Nigerian/Africa-based talent remotely.
+              </p>
+              <div className="grid sm:grid-cols-2 gap-3">
+                {[
+                  { label: "Remote SWE — Nigeria open", url: "https://www.linkedin.com/jobs/search/?keywords=software%20engineer&location=Nigeria&f_WT=2", desc: "Remote software engineer roles open to Nigeria" },
+                  { label: "Remote Backend — Africa", url: "https://www.linkedin.com/jobs/search/?keywords=backend%20engineer&location=Africa&f_WT=2", desc: "Backend roles open to Africa-based engineers" },
+                  { label: "Andela Network Jobs", url: "https://www.linkedin.com/company/andela/jobs/", desc: "Roles via Andela — Nigeria's largest talent network" },
+                  { label: "Remote Tech Lead — Worldwide", url: "https://www.linkedin.com/jobs/search/?keywords=tech%20lead&f_WT=2&f_TPR=r604800", desc: "Tech lead roles worldwide, posted last 7 days" },
+                  { label: "Systems Architect — Remote", url: "https://www.linkedin.com/jobs/search/?keywords=systems%20architect&f_WT=2", desc: "Remote systems architect openings" },
+                  { label: "Startup Founder roles — Africa", url: "https://www.linkedin.com/jobs/search/?keywords=CTO%20OR%20co-founder&location=Africa&f_WT=2", desc: "CTO / co-founder roles at Africa-focused startups" },
+                ].map((link, i) => (
+                  <a
+                    key={i}
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-start gap-3 p-3 rounded-xl border border-neon-cyan/10 hover:border-neon-cyan/35 bg-white/2 transition-all group"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5 text-neon-cyan flex-shrink-0 mt-0.5 group-hover:scale-110 transition-transform" />
+                    <div>
+                      <p className="text-xs font-orbitron font-bold text-neon-cyan group-hover:text-white transition-colors">{link.label}</p>
+                      <p className="text-xs text-gray-500 mt-0.5">{link.desc}</p>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* ── Courses tab ─────────────────────────────────────────────────── */}
         {activeTab === "courses" && (
