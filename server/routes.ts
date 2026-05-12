@@ -2970,6 +2970,465 @@ Only return valid JSON, no markdown fences.`;
     }
   });
 
+  // ═══════════════════════════════════════════════════════════════════════════
+  // ─── EMAIL MARKETING OS ──────────────────────────────────────────────────
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  const emailOsRateLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    max: 60,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { message: "Too many EmailOS requests, please wait." },
+  });
+
+  // Lazy-load models to avoid import-time mongoose registration issues
+  async function getEmailModels() {
+    const [{ EmailOrgModel, TIER_LIMITS }, { EmailListModel }, { EmailCampaignModel }] = await Promise.all([
+      import("./models/EmailOrg.js"),
+      import("./models/EmailList.js"),
+      import("./models/EmailCampaign.js"),
+    ]);
+    return { EmailOrgModel, EmailListModel, EmailCampaignModel, TIER_LIMITS };
+  }
+
+  // GET /api/emailos/org — get current user's org (or null if not onboarded)
+  app.get("/api/emailos/org", emailOsRateLimiter, requireAuth, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { EmailOrgModel } = await getEmailModels();
+      const org = await EmailOrgModel.findOne({ userId: user.id }).lean();
+      res.json(org ?? null);
+    } catch (err) {
+      console.error("[emailos/org GET]", err);
+      res.status(500).json({ message: "Failed to load organisation" });
+    }
+  });
+
+  // POST /api/emailos/onboard — create org & advance onboarding status
+  app.post("/api/emailos/onboard", emailOsRateLimiter, requireAuth, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { EmailOrgModel, TIER_LIMITS } = await getEmailModels();
+      const { orgName, orgDomain } = z.object({
+        orgName:   z.string().min(2).max(80),
+        orgDomain: z.string().min(2).max(120),
+      }).parse(req.body);
+
+      let org = await EmailOrgModel.findOne({ userId: user.id });
+      if (org) {
+        org.orgName   = orgName;
+        org.orgDomain = orgDomain;
+        if (org.onboardingStatus === "pending") org.onboardingStatus = "org_created";
+        await org.save();
+      } else {
+        const limits = TIER_LIMITS.starter;
+        org = new EmailOrgModel({
+          userId: user.id,
+          orgName,
+          orgDomain,
+          tier: "starter",
+          onboardingStatus: "org_created",
+          maxContacts:        limits.maxContacts,
+          maxEmailsPerMonth:  limits.maxEmailsPerMonth,
+          maxActiveCampaigns: limits.maxActiveCampaigns,
+          billingCycleStart:  new Date(),
+        });
+        await org.save();
+      }
+      res.status(201).json(org);
+    } catch (err) {
+      if (err instanceof z.ZodError) return res.status(400).json({ message: "Validation error", errors: err.errors });
+      console.error("[emailos/onboard POST]", err);
+      res.status(500).json({ message: "Failed to create organisation" });
+    }
+  });
+
+  // PATCH /api/emailos/org/tier — upgrade/downgrade tier
+  app.patch("/api/emailos/org/tier", emailOsRateLimiter, requireAuth, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { EmailOrgModel, TIER_LIMITS } = await getEmailModels();
+      const { tier } = z.object({
+        tier: z.enum(["starter", "pro", "enterprise"]),
+      }).parse(req.body);
+
+      const org = await EmailOrgModel.findOne({ userId: user.id });
+      if (!org) return res.status(404).json({ message: "Organisation not found" });
+
+      const limits = TIER_LIMITS[tier];
+      org.tier                = tier;
+      org.maxContacts         = limits.maxContacts;
+      org.maxEmailsPerMonth   = limits.maxEmailsPerMonth;
+      org.maxActiveCampaigns  = limits.maxActiveCampaigns;
+      if (org.onboardingStatus === "org_created") org.onboardingStatus = "tier_selected";
+      await org.save();
+      res.json(org);
+    } catch (err) {
+      if (err instanceof z.ZodError) return res.status(400).json({ message: "Validation error", errors: err.errors });
+      console.error("[emailos/org/tier PATCH]", err);
+      res.status(500).json({ message: "Failed to update tier" });
+    }
+  });
+
+  // PATCH /api/emailos/org/onboarding — advance onboarding status
+  app.patch("/api/emailos/org/onboarding", emailOsRateLimiter, requireAuth, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { EmailOrgModel } = await getEmailModels();
+      const { onboardingStatus } = z.object({
+        onboardingStatus: z.enum(["pending","org_created","tier_selected","list_created","campaign_created","complete"]),
+      }).parse(req.body);
+
+      const org = await EmailOrgModel.findOneAndUpdate(
+        { userId: user.id },
+        { $set: { onboardingStatus } },
+        { new: true }
+      );
+      if (!org) return res.status(404).json({ message: "Organisation not found" });
+      res.json(org);
+    } catch (err) {
+      if (err instanceof z.ZodError) return res.status(400).json({ message: "Validation error", errors: err.errors });
+      console.error("[emailos/org/onboarding PATCH]", err);
+      res.status(500).json({ message: "Failed to update onboarding status" });
+    }
+  });
+
+  // ─── Email Lists ──────────────────────────────────────────────────────────
+
+  // GET /api/emailos/lists — list email lists for current org
+  app.get("/api/emailos/lists", emailOsRateLimiter, requireAuth, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { EmailOrgModel, EmailListModel } = await getEmailModels();
+      const org = await EmailOrgModel.findOne({ userId: user.id }).lean();
+      if (!org) return res.status(404).json({ message: "Organisation not found" });
+      const lists = await EmailListModel.find({ orgId: String(org._id) }, { contacts: 0 }).lean();
+      res.json(lists);
+    } catch (err) {
+      console.error("[emailos/lists GET]", err);
+      res.status(500).json({ message: "Failed to load lists" });
+    }
+  });
+
+  // POST /api/emailos/lists — create a new email list
+  app.post("/api/emailos/lists", emailOsRateLimiter, requireAuth, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { EmailOrgModel, EmailListModel } = await getEmailModels();
+      const org = await EmailOrgModel.findOne({ userId: user.id });
+      if (!org) return res.status(404).json({ message: "Organisation not found" });
+
+      const { name, description } = z.object({
+        name:        z.string().min(2).max(100),
+        description: z.string().max(300).optional(),
+      }).parse(req.body);
+
+      const list = await EmailListModel.create({ orgId: String(org._id), name, description, contacts: [] });
+
+      // Advance onboarding if still at tier_selected
+      if (org.onboardingStatus === "tier_selected") {
+        org.onboardingStatus = "list_created";
+        await org.save();
+      }
+      res.status(201).json(list);
+    } catch (err) {
+      if (err instanceof z.ZodError) return res.status(400).json({ message: "Validation error", errors: err.errors });
+      console.error("[emailos/lists POST]", err);
+      res.status(500).json({ message: "Failed to create list" });
+    }
+  });
+
+  // POST /api/emailos/lists/:id/contacts — add contacts to a list
+  app.post("/api/emailos/lists/:id/contacts", emailOsRateLimiter, requireAuth, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { EmailOrgModel, EmailListModel } = await getEmailModels();
+      const org = await EmailOrgModel.findOne({ userId: user.id });
+      if (!org) return res.status(404).json({ message: "Organisation not found" });
+
+      const list = await EmailListModel.findOne({ _id: req.params.id, orgId: String(org._id) });
+      if (!list) return res.status(404).json({ message: "List not found" });
+
+      const { contacts } = z.object({
+        contacts: z.array(z.object({
+          email:     z.string().email(),
+          firstName: z.string().max(60).optional(),
+          lastName:  z.string().max(60).optional(),
+          tags:      z.array(z.string()).optional(),
+        })).min(1).max(500),
+      }).parse(req.body);
+
+      // Check org contact limit
+      const newTotal = org.contactsCount + contacts.length;
+      if (newTotal > org.maxContacts) {
+        return res.status(429).json({ message: `Contact limit reached (${org.maxContacts}). Please upgrade your plan.` });
+      }
+
+      // Deduplicate against existing contacts
+      const existingEmails = new Set(list.contacts.map((c) => c.email.toLowerCase()));
+      const newContacts = contacts
+        .filter((c) => !existingEmails.has(c.email.toLowerCase()))
+        .map((c) => ({ ...c, email: c.email.toLowerCase(), subscribedAt: new Date(), unsubscribed: false }));
+
+      list.contacts.push(...newContacts);
+      await list.save();
+
+      // Update org counter
+      org.contactsCount += newContacts.length;
+      await org.save();
+
+      res.json({ added: newContacts.length, total: list.contactCount });
+    } catch (err) {
+      if (err instanceof z.ZodError) return res.status(400).json({ message: "Validation error", errors: err.errors });
+      console.error("[emailos/lists/:id/contacts POST]", err);
+      res.status(500).json({ message: "Failed to add contacts" });
+    }
+  });
+
+  // ─── Email Campaigns ──────────────────────────────────────────────────────
+
+  // GET /api/emailos/campaigns — list campaigns for current org
+  app.get("/api/emailos/campaigns", emailOsRateLimiter, requireAuth, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { EmailOrgModel, EmailCampaignModel } = await getEmailModels();
+      const org = await EmailOrgModel.findOne({ userId: user.id }).lean();
+      if (!org) return res.status(404).json({ message: "Organisation not found" });
+      const campaigns = await EmailCampaignModel.find({ orgId: String(org._id) })
+        .sort({ createdAt: -1 })
+        .lean();
+      res.json(campaigns);
+    } catch (err) {
+      console.error("[emailos/campaigns GET]", err);
+      res.status(500).json({ message: "Failed to load campaigns" });
+    }
+  });
+
+  // POST /api/emailos/campaigns — create a new campaign
+  app.post("/api/emailos/campaigns", emailOsRateLimiter, requireAuth, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { EmailOrgModel, EmailCampaignModel } = await getEmailModels();
+      const org = await EmailOrgModel.findOne({ userId: user.id });
+      if (!org) return res.status(404).json({ message: "Organisation not found" });
+
+      const body = z.object({
+        listId:       z.string().min(1),
+        subject:      z.string().min(1).max(200),
+        previewText:  z.string().max(200).optional(),
+        fromName:     z.string().min(1).max(80),
+        fromEmail:    z.string().email(),
+        htmlBody:     z.string().min(1),
+        textBody:     z.string().optional(),
+        scheduledAt:  z.string().datetime().optional(),
+        abTestEnabled: z.boolean().optional(),
+        abSubjectB:   z.string().max(200).optional(),
+        customCronExpr: z.string().max(100).optional(),
+      }).parse(req.body);
+
+      // Tier guard: A/B test is Pro+
+      if (body.abTestEnabled && org.tier === "starter") {
+        return res.status(403).json({ message: "A/B testing is available on Pro and Enterprise plans." });
+      }
+      // Tier guard: custom cron is Enterprise only
+      if (body.customCronExpr && org.tier !== "enterprise") {
+        return res.status(403).json({ message: "Custom cron scheduling is available on the Enterprise plan only." });
+      }
+      // Tier guard: active campaign limit
+      if (org.activeCampaignsCount >= org.maxActiveCampaigns) {
+        return res.status(429).json({ message: `Active campaign limit reached (${org.maxActiveCampaigns}). Please upgrade your plan.` });
+      }
+
+      const campaign = await EmailCampaignModel.create({
+        orgId:           String(org._id),
+        listId:          body.listId,
+        subject:         body.subject,
+        previewText:     body.previewText,
+        fromName:        body.fromName,
+        fromEmail:       body.fromEmail,
+        htmlBody:        body.htmlBody,
+        textBody:        body.textBody,
+        status:          body.scheduledAt ? "scheduled" : "draft",
+        scheduledAt:     body.scheduledAt ? new Date(body.scheduledAt) : undefined,
+        abTestEnabled:   body.abTestEnabled ?? false,
+        abSubjectB:      body.abSubjectB,
+        customCronExpr:  body.customCronExpr,
+      });
+
+      if (campaign.status !== "draft") {
+        org.activeCampaignsCount += 1;
+        await org.save();
+      }
+
+      // Advance onboarding if needed
+      if (["pending", "list_created", "tier_selected", "org_created"].includes(org.onboardingStatus)) {
+        org.onboardingStatus = "campaign_created";
+        await org.save();
+      }
+
+      res.status(201).json(campaign);
+    } catch (err) {
+      if (err instanceof z.ZodError) return res.status(400).json({ message: "Validation error", errors: err.errors });
+      console.error("[emailos/campaigns POST]", err);
+      res.status(500).json({ message: "Failed to create campaign" });
+    }
+  });
+
+  // GET /api/emailos/campaigns/:id
+  app.get("/api/emailos/campaigns/:id", emailOsRateLimiter, requireAuth, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { EmailOrgModel, EmailCampaignModel } = await getEmailModels();
+      const org = await EmailOrgModel.findOne({ userId: user.id }).lean();
+      if (!org) return res.status(404).json({ message: "Organisation not found" });
+      const campaign = await EmailCampaignModel.findOne({ _id: req.params.id, orgId: String(org._id) }).lean();
+      if (!campaign) return res.status(404).json({ message: "Campaign not found" });
+      res.json(campaign);
+    } catch (err) {
+      console.error("[emailos/campaigns/:id GET]", err);
+      res.status(500).json({ message: "Failed to load campaign" });
+    }
+  });
+
+  // PATCH /api/emailos/campaigns/:id
+  app.patch("/api/emailos/campaigns/:id", emailOsRateLimiter, requireAuth, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { EmailOrgModel, EmailCampaignModel } = await getEmailModels();
+      const org = await EmailOrgModel.findOne({ userId: user.id }).lean();
+      if (!org) return res.status(404).json({ message: "Organisation not found" });
+
+      // Enforce tier restrictions on restricted fields
+      if (req.body.abTestEnabled === true && org.tier === "starter") {
+        return res.status(403).json({ message: "A/B testing is available on Pro and Enterprise plans." });
+      }
+      if (req.body.customCronExpr !== undefined && org.tier !== "enterprise") {
+        return res.status(403).json({ message: "Custom cron scheduling is available on the Enterprise plan only." });
+      }
+
+      const allowed = ["subject","previewText","fromName","fromEmail","htmlBody","textBody","status","scheduledAt","abTestEnabled","abSubjectB","customCronExpr"];
+      const updates: Record<string, unknown> = {};
+      for (const k of allowed) {
+        if (req.body[k] !== undefined) updates[k] = req.body[k];
+      }
+      const campaign = await EmailCampaignModel.findOneAndUpdate(
+        { _id: req.params.id, orgId: String(org._id) },
+        { $set: updates },
+        { new: true }
+      );
+      if (!campaign) return res.status(404).json({ message: "Campaign not found" });
+      res.json(campaign);
+    } catch (err) {
+      console.error("[emailos/campaigns/:id PATCH]", err);
+      res.status(500).json({ message: "Failed to update campaign" });
+    }
+  });
+
+  // DELETE /api/emailos/campaigns/:id
+  app.delete("/api/emailos/campaigns/:id", emailOsRateLimiter, requireAuth, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { EmailOrgModel, EmailCampaignModel } = await getEmailModels();
+      const org = await EmailOrgModel.findOne({ userId: user.id });
+      if (!org) return res.status(404).json({ message: "Organisation not found" });
+      const campaign = await EmailCampaignModel.findOneAndDelete({ _id: req.params.id, orgId: String(org._id) });
+      if (!campaign) return res.status(404).json({ message: "Campaign not found" });
+      if (campaign.status === "scheduled" || campaign.status === "sending") {
+        org.activeCampaignsCount = Math.max(0, org.activeCampaignsCount - 1);
+        await org.save();
+      }
+      res.json({ ok: true });
+    } catch (err) {
+      console.error("[emailos/campaigns/:id DELETE]", err);
+      res.status(500).json({ message: "Failed to delete campaign" });
+    }
+  });
+
+  // ─── Tracking ──────────────────────────────────────────────────────────────
+
+  // GET /api/emailos/track/open/:id — 1×1 pixel, logs an open event
+  app.get("/api/emailos/track/open/:id", async (req, res) => {
+    // Respond immediately with the transparent pixel
+    const PIXEL = Buffer.from(
+      "R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7",
+      "base64"
+    );
+    res.writeHead(200, {
+      "Content-Type": "image/gif",
+      "Content-Length": PIXEL.length,
+      "Cache-Control": "no-store, no-cache, must-revalidate, private",
+      Pragma: "no-cache",
+    });
+    res.end(PIXEL);
+
+    // Fire-and-forget atomic counter update
+    try {
+      const { EmailCampaignModel } = await getEmailModels();
+      await EmailCampaignModel.findByIdAndUpdate(req.params.id, {
+        $inc: { totalOpens: 1 },
+      });
+    } catch { /* non-critical */ }
+  });
+
+  // POST /api/emailos/track/click/:id — logs a click event, returns redirect URL
+  app.post("/api/emailos/track/click/:id", async (req, res) => {
+    try {
+      const { EmailCampaignModel } = await getEmailModels();
+      await EmailCampaignModel.findByIdAndUpdate(req.params.id, {
+        $inc: { totalClicks: 1 },
+      });
+      res.json({ ok: true });
+    } catch (err) {
+      console.error("[emailos/track/click]", err);
+      res.json({ ok: false });
+    }
+  });
+
+  // ─── Cron Dispatch ────────────────────────────────────────────────────────
+
+  // POST /api/emailos/cron/dispatch — triggered by Vercel Cron / GitHub Action
+  // Scans for scheduled campaigns due to send and marks them "sending".
+  // Requires CRON_SECRET header for security.
+  app.post("/api/emailos/cron/dispatch", async (req, res) => {
+    const cronSecret = process.env.EMAILOS_CRON_SECRET;
+    if (cronSecret) {
+      const provided = req.headers["x-cron-secret"] ?? req.headers.authorization?.replace("Bearer ", "");
+      if (provided !== cronSecret) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+    }
+
+    try {
+      const { EmailCampaignModel } = await getEmailModels();
+      const now = new Date();
+      const due = await EmailCampaignModel.find({
+        status: "scheduled",
+        scheduledAt: { $lte: now },
+      }).lean();
+
+      if (due.length === 0) {
+        return res.json({ dispatched: 0, message: "No campaigns due" });
+      }
+
+      // Mark as "sending" atomically
+      const ids = due.map((c) => c._id);
+      await EmailCampaignModel.updateMany(
+        { _id: { $in: ids }, status: "scheduled" },
+        { $set: { status: "sending" } }
+      );
+
+      // In production: enqueue to SES / email provider here.
+      // For now we log and return the dispatched count.
+      console.log(`[emailos/cron] Dispatching ${due.length} campaigns:`, ids);
+
+      res.json({ dispatched: due.length, campaignIds: ids });
+    } catch (err) {
+      console.error("[emailos/cron/dispatch]", err);
+      res.status(500).json({ message: "Cron dispatch failed" });
+    }
+  });
+
   // ─── Blog HTML with OG meta tags (Vercel SSR) ────────────────────────────
   // all non-API routes.  Social-media crawlers that hit /blog/:slug therefore
   // see only the default site-level OG tags.  This route lets Vercel rewrite

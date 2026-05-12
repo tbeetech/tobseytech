@@ -31,6 +31,8 @@ import FeatureServiceComparisonPage from "@/pages/feature-service-comparison";
 import FeatureStartupToolkitPage from "@/pages/feature-startup-toolkit";
 import FeatureSportaPage from "@/pages/feature-sporta";
 import SportaPage from "@/pages/sporta";
+import FeatureEmailOSPage from "@/pages/feature-emailos";
+import EmailOSPage from "@/pages/emailos";
 import ProphetChat from "@/components/ProphetChat";
 import TestDataPage from "@/pages/testdata";
 import VlogPage from "@/pages/vlog";
@@ -87,6 +89,9 @@ function Router() {
       <Route path="/feature/sporta" component={FeatureSportaPage} />
       {/* SPORTA — accessible to all authenticated users */}
       <Route path="/sporta" component={SportaPage} />
+      {/* EmailOS — Multi-Tenant Email Marketing OS (second SaaS after SPORTA) */}
+      <Route path="/feature/emailos" component={FeatureEmailOSPage} />
+      <Route path="/emailos" component={EmailOSPage} />
       <Route path="/testdata" component={TestDataPage} />
       {/* Vlog (public) */}
       <Route path="/vlog" component={VlogPage} />
