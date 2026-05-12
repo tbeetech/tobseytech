@@ -616,6 +616,109 @@ function CampaignWizard({ onComplete, onCancel }: { onComplete: () => void; onCa
   );
 }
 
+// ─── Share Popover ────────────────────────────────────────────────────────────
+
+function SharePopover({ item }: { item: SportaContent }) {
+  const [open, setOpen] = useState(false);
+  const { toast } = useToast();
+
+  const title = encodeURIComponent(item.aiRewrittenTitle ?? item.originalTitle ?? "Check this out");
+  const caption = item.aiRewrittenContent ?? item.originalContent ?? "";
+  const hashtags = item.aiGeneratedHashtags.map((t) => t.replace(/^#/, "")).join(",");
+  const sourceNote = `via ${item.sourcePlatform}`;
+  const shareText = encodeURIComponent(`${caption ? caption.slice(0, 200) + "… " : ""}${sourceNote}`);
+  const url = encodeURIComponent(item.sourceUrl);
+
+  const platforms = [
+    {
+      name: "X / Twitter",
+      color: "text-sky-400",
+      href: `https://twitter.com/intent/tweet?text=${shareText}&url=${url}&hashtags=${hashtags}`,
+    },
+    {
+      name: "Facebook",
+      color: "text-blue-500",
+      href: `https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${shareText}`,
+    },
+    {
+      name: "LinkedIn",
+      color: "text-blue-400",
+      href: `https://www.linkedin.com/shareArticle?mini=true&url=${url}&title=${title}&summary=${shareText}`,
+    },
+    {
+      name: "WhatsApp",
+      color: "text-green-400",
+      href: `https://wa.me/?text=${shareText}%20${url}`,
+    },
+    {
+      name: "Telegram",
+      color: "text-sky-300",
+      href: `https://t.me/share/url?url=${url}&text=${shareText}`,
+    },
+    {
+      name: "Pinterest",
+      color: "text-red-400",
+      href: `https://pinterest.com/pin/create/button/?url=${url}&description=${shareText}${item.originalThumbnail ? `&media=${encodeURIComponent(item.originalThumbnail)}` : ""}`,
+    },
+  ];
+
+  const copyCaption = () => {
+    const text = [
+      item.aiRewrittenTitle ?? item.originalTitle,
+      "",
+      item.aiRewrittenContent ?? item.originalContent ?? "",
+      "",
+      item.aiGeneratedHashtags.map((t) => (t.startsWith("#") ? t : `#${t}`)).join(" "),
+      "",
+      `Source: ${item.sourcePlatform} — ${item.sourceUrl}`,
+    ]
+      .filter((l) => l !== undefined)
+      .join("\n")
+      .trim();
+    navigator.clipboard.writeText(text).then(() => toast({ title: "Caption copied to clipboard!" }));
+    setOpen(false);
+  };
+
+  return (
+    <div className="relative">
+      <Button
+        size="sm"
+        onClick={() => setOpen((v) => !v)}
+        className="bg-galactic-orange/20 text-galactic-orange border border-galactic-orange/30 hover:bg-galactic-orange/30 h-7 px-2 text-xs font-orbitron"
+      >
+        <Share2 className="w-3 h-3 mr-1" /> Share
+      </Button>
+      {open && (
+        <div className="absolute right-0 top-9 z-50 w-52 bg-space-dark border border-white/10 rounded-xl shadow-xl p-2">
+          <p className="text-[10px] text-gray-500 px-2 mb-1.5 font-orbitron">Share to…</p>
+          {platforms.map((p) => (
+            <a
+              key={p.name}
+              href={p.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-white/5 text-xs ${p.color} transition-colors`}
+              onClick={() => setOpen(false)}
+            >
+              <Share2 className="w-3 h-3 opacity-70" />
+              {p.name}
+            </a>
+          ))}
+          <div className="border-t border-white/5 mt-1.5 pt-1.5">
+            <button
+              className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-white/5 text-xs text-gray-300 w-full transition-colors"
+              onClick={copyCaption}
+            >
+              <TrendingUp className="w-3 h-3 opacity-70" />
+              Copy caption + hashtags
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Content Queue Panel ──────────────────────────────────────────────────────
 
 function ContentQueuePanel({ campaignId, campaignName }: { campaignId: string; campaignName: string }) {
@@ -629,6 +732,23 @@ function ContentQueuePanel({ campaignId, campaignName }: { campaignId: string; c
       if (!res.ok) throw new Error("Failed");
       return res.json();
     },
+  });
+
+  const aggregateMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest("POST", `/api/sporta/campaigns/${campaignId}/aggregate`, {});
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error((body as any).message ?? "Aggregation failed");
+      }
+      return res.json();
+    },
+    onSuccess: (data: any) => {
+      queryClient.invalidateQueries({ queryKey: [`/api/sporta/campaigns/${campaignId}/content`] });
+      queryClient.invalidateQueries({ queryKey: ["/api/sporta/stats"] });
+      toast({ title: `Aggregated ${data.aggregated} new items!`, description: `${data.skipped} duplicates/filtered skipped.` });
+    },
+    onError: (err: any) => toast({ title: "Aggregation failed", description: err.message, variant: "destructive" }),
   });
 
   const statusMutation = useMutation({
@@ -682,112 +802,144 @@ function ContentQueuePanel({ campaignId, campaignName }: { campaignId: string; c
         <p className="text-gray-400 text-sm">
           Content queue for <span className="text-white font-semibold">{campaignName}</span>
         </p>
-        <Button size="sm" variant="ghost" onClick={() => refetch()} className="text-galactic-orange hover:text-galactic-gold h-7 w-7 p-0">
-          <RefreshCw className="w-3.5 h-3.5" />
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button size="sm" variant="ghost" onClick={() => refetch()} className="text-galactic-orange hover:text-galactic-gold h-7 w-7 p-0">
+            <RefreshCw className="w-3.5 h-3.5" />
+          </Button>
+          <Button
+            size="sm"
+            onClick={() => aggregateMutation.mutate()}
+            disabled={aggregateMutation.isPending}
+            className="bg-galactic-orange text-space-black font-orbitron text-xs hover:bg-galactic-gold h-7 px-3"
+          >
+            {aggregateMutation.isPending ? (
+              <><Loader2 className="w-3 h-3 animate-spin mr-1" /> Aggregating…</>
+            ) : (
+              <><Zap className="w-3 h-3 mr-1" /> Aggregate Now</>
+            )}
+          </Button>
+        </div>
       </div>
       {items.length === 0 ? (
         <div className="text-center py-12 text-gray-500">
           <AlertCircle className="w-10 h-10 mx-auto mb-3 text-galactic-orange/20" />
           <p className="text-sm">No content in queue yet.</p>
-          <p className="text-xs text-gray-600 mt-1">Content will appear here once SPORTA starts aggregating.</p>
+          <p className="text-xs text-gray-600 mt-1">Click <strong className="text-galactic-orange">Aggregate Now</strong> to pull up to 100 postable items.</p>
         </div>
       ) : (
         <div className="space-y-3">
           {items.map((item) => (
-            <div key={item.id} className="bg-space-dark rounded-xl p-4 border border-white/5 hover:border-galactic-orange/20 transition-all">
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1 flex-wrap">
-                    <Badge className="bg-white/10 text-gray-300 border-white/10 text-[10px]">{item.sourcePlatform}</Badge>
-                    <Badge className="bg-white/10 text-gray-300 border-white/10 text-[10px]">{item.mediaType}</Badge>
-                    <StatusBadge status={item.status} />
-                  </div>
-                  <p className="text-white text-sm font-semibold truncate">
-                    {item.aiRewrittenTitle ?? item.originalTitle ?? "Untitled"}
-                  </p>
-                  {item.aiRewrittenContent && (
-                    <p className="text-gray-500 text-xs mt-1 line-clamp-2">{item.aiRewrittenContent}</p>
-                  )}
-                  <div className="grid grid-cols-2 gap-x-6 gap-y-1 mt-2">
-                    <div>
-                      <p className="text-gray-600 text-[10px] mb-0.5">Quality</p>
-                      <ScoreBar value={item.aiQualityScore} color="bg-galactic-green" />
-                    </div>
-                    <div>
-                      <p className="text-gray-600 text-[10px] mb-0.5">Viral</p>
-                      <ScoreBar value={item.aiViralScore} color="bg-galactic-orange" />
-                    </div>
-                    <div>
-                      <p className="text-gray-600 text-[10px] mb-0.5">Engagement</p>
-                      <ScoreBar value={item.aiEngagementPrediction} color="bg-neon-cyan" />
-                    </div>
-                    <div>
-                      <p className="text-gray-600 text-[10px] mb-0.5">Confidence</p>
-                      <ScoreBar value={item.aiConfidenceScore} color="bg-neon-purple" />
-                    </div>
-                  </div>
-                  {item.aiGeneratedHashtags.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mt-2">
-                      {item.aiGeneratedHashtags.slice(0, 5).map((tag) => (
-                        <span key={tag} className="text-neon-cyan text-[10px]">#{tag}</span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-                <div className="flex flex-col gap-1.5 flex-shrink-0">
-                  {item.status === "pending" && (
-                    <>
-                      <Button
-                        size="sm"
-                        onClick={() => statusMutation.mutate({ id: item.id, status: "approved" })}
-                        disabled={statusMutation.isPending}
-                        className="bg-green-500/20 text-green-400 border border-green-500/30 hover:bg-green-500/30 h-7 px-2 text-xs font-orbitron"
-                      >
-                        <CheckCircle className="w-3 h-3 mr-1" /> Approve
-                      </Button>
-                      <Button
-                        size="sm"
-                        onClick={() => statusMutation.mutate({ id: item.id, status: "rejected" })}
-                        disabled={statusMutation.isPending}
-                        className="bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30 h-7 px-2 text-xs font-orbitron"
-                      >
-                        <XCircle className="w-3 h-3 mr-1" /> Reject
-                      </Button>
-                    </>
-                  )}
-                  {item.status === "approved" && (
-                    <Button
-                      size="sm"
-                      onClick={() => statusMutation.mutate({ id: item.id, status: "published" })}
-                      disabled={statusMutation.isPending}
-                      className="bg-blue-500/20 text-blue-400 border border-blue-500/30 hover:bg-blue-500/30 h-7 px-2 text-xs font-orbitron"
-                    >
-                      <Share2 className="w-3 h-3 mr-1" /> Publish
-                    </Button>
-                  )}
-                  {!item.aiRewrittenContent && (
-                    <Button
-                      size="sm"
-                      onClick={() => reshapeMutation.mutate(item.id)}
-                      disabled={reshapeMutation.isPending}
-                      className="bg-neon-purple/20 text-neon-purple border border-neon-purple/30 hover:bg-neon-purple/30 h-7 px-2 text-xs font-orbitron"
-                    >
-                      {reshapeMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3 mr-1" />}
-                      {reshapeMutation.isPending ? "" : "AI"}
-                    </Button>
-                  )}
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => {
-                      if (confirm("Delete this content item?")) deleteMutation.mutate(item.id);
+            <div key={item.id} className="bg-space-dark rounded-xl border border-white/5 hover:border-galactic-orange/20 transition-all overflow-hidden">
+              {/* Thumbnail strip */}
+              {item.originalThumbnail && (
+                <div className="w-full h-32 overflow-hidden bg-black/20 relative">
+                  <img
+                    src={item.originalThumbnail}
+                    alt={item.originalTitle ?? "thumbnail"}
+                    className="w-full h-full object-cover opacity-80"
+                    onError={(e) => {
+                      const target = e.currentTarget as HTMLImageElement;
+                      target.style.display = "none";
+                      const placeholder = target.nextElementSibling as HTMLElement | null;
+                      if (placeholder) placeholder.style.display = "flex";
                     }}
-                    disabled={deleteMutation.isPending}
-                    className="text-red-400 hover:text-red-300 h-7 px-2"
-                  >
-                    <Trash2 className="w-3 h-3" />
-                  </Button>
+                  />
+                  <div className="absolute inset-0 items-center justify-center bg-space-dark/80 text-gray-600 text-xs hidden">
+                    <Eye className="w-5 h-5 opacity-30 mr-1" /> Image unavailable
+                  </div>
+                </div>
+              )}
+              <div className="p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1 flex-wrap">
+                      <Badge className="bg-white/10 text-gray-300 border-white/10 text-[10px]">{item.sourcePlatform}</Badge>
+                      <Badge className="bg-white/10 text-gray-300 border-white/10 text-[10px]">{item.mediaType}</Badge>
+                      <StatusBadge status={item.status} />
+                    </div>
+                    <p className="text-white text-sm font-semibold truncate">
+                      {item.aiRewrittenTitle ?? item.originalTitle ?? "Untitled"}
+                    </p>
+                    {(item.aiRewrittenContent ?? item.originalContent) && (
+                      <p className="text-gray-500 text-xs mt-1 line-clamp-2">{item.aiRewrittenContent ?? item.originalContent}</p>
+                    )}
+                    {item.originalAuthor && (
+                      <p className="text-gray-600 text-[10px] mt-1">From: {item.originalAuthor}</p>
+                    )}
+                    <div className="grid grid-cols-2 gap-x-6 gap-y-1 mt-2">
+                      <div>
+                        <p className="text-gray-600 text-[10px] mb-0.5">Quality</p>
+                        <ScoreBar value={item.aiQualityScore} color="bg-galactic-green" />
+                      </div>
+                      <div>
+                        <p className="text-gray-600 text-[10px] mb-0.5">Viral</p>
+                        <ScoreBar value={item.aiViralScore} color="bg-galactic-orange" />
+                      </div>
+                      <div>
+                        <p className="text-gray-600 text-[10px] mb-0.5">Engagement</p>
+                        <ScoreBar value={item.aiEngagementPrediction} color="bg-neon-cyan" />
+                      </div>
+                      <div>
+                        <p className="text-gray-600 text-[10px] mb-0.5">Confidence</p>
+                        <ScoreBar value={item.aiConfidenceScore} color="bg-neon-purple" />
+                      </div>
+                    </div>
+                    {item.aiGeneratedHashtags.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {item.aiGeneratedHashtags.slice(0, 5).map((tag) => (
+                          <span key={tag} className="text-neon-cyan text-[10px]">#{tag}</span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex flex-col gap-1.5 flex-shrink-0">
+                    {item.status === "pending" && (
+                      <>
+                        <Button
+                          size="sm"
+                          onClick={() => statusMutation.mutate({ id: item.id, status: "approved" })}
+                          disabled={statusMutation.isPending}
+                          className="bg-green-500/20 text-green-400 border border-green-500/30 hover:bg-green-500/30 h-7 px-2 text-xs font-orbitron"
+                        >
+                          <CheckCircle className="w-3 h-3 mr-1" /> Approve
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={() => statusMutation.mutate({ id: item.id, status: "rejected" })}
+                          disabled={statusMutation.isPending}
+                          className="bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30 h-7 px-2 text-xs font-orbitron"
+                        >
+                          <XCircle className="w-3 h-3 mr-1" /> Reject
+                        </Button>
+                      </>
+                    )}
+                    {/* Share button — available for approved / published items */}
+                    {(item.status === "approved" || item.status === "published") && (
+                      <SharePopover item={item} />
+                    )}
+                    {!item.aiRewrittenContent && (
+                      <Button
+                        size="sm"
+                        onClick={() => reshapeMutation.mutate(item.id)}
+                        disabled={reshapeMutation.isPending}
+                        className="bg-neon-purple/20 text-neon-purple border border-neon-purple/30 hover:bg-neon-purple/30 h-7 px-2 text-xs font-orbitron"
+                      >
+                        {reshapeMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3 mr-1" />}
+                        {reshapeMutation.isPending ? "" : "AI"}
+                      </Button>
+                    )}
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => {
+                        if (confirm("Delete this content item?")) deleteMutation.mutate(item.id);
+                      }}
+                      disabled={deleteMutation.isPending}
+                      className="text-red-400 hover:text-red-300 h-7 px-2"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>

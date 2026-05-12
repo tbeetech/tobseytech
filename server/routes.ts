@@ -2395,6 +2395,50 @@ ENGAGEMENT PRINCIPLES:
     }
   });
 
+  // POST /api/sporta/campaigns/:id/aggregate — pull up to 100 content items
+  app.post("/api/sporta/campaigns/:id/aggregate", sportaRateLimiter, requireAuth, async (req, res) => {
+    try {
+      const ok = await assertCampaignOwner(req, res, req.params.id);
+      if (!ok) return;
+
+      const campaign = await (storage as any).getSportaCampaign(req.params.id);
+      if (!campaign) return res.status(404).json({ message: "Campaign not found" });
+
+      // Build the set of URLs already in this campaign's queue (for dedup)
+      const existing: any[] = await (storage as any).getSportaContentByCampaign(req.params.id);
+      const existingUrls = new Set<string>(existing.map((i: any) => i.sourceUrl));
+
+      const { aggregateCampaignContent } = await import("./sportaAggregator.js");
+      const result = await aggregateCampaignContent(campaign, existingUrls, 100);
+
+      // Persist new items
+      const saved: any[] = [];
+      for (const item of result.items) {
+        try {
+          const doc = await (storage as any).createSportaContent(item);
+          saved.push(doc);
+        } catch (saveErr: any) {
+          // Only silently skip MongoDB duplicate-key errors; log anything else
+          if (saveErr?.code !== 11000) {
+            console.warn("[sporta/aggregate] unexpected save error:", saveErr?.message ?? saveErr);
+          }
+        }
+      }
+
+      // Bump postsAggregated on the campaign
+      if (saved.length > 0) {
+        await (storage as any).updateSportaCampaign(req.params.id, {
+          postsAggregated: campaign.postsAggregated + saved.length,
+        });
+      }
+
+      res.json({ aggregated: saved.length, skipped: result.skipped });
+    } catch (err) {
+      console.error("[sporta/campaigns/:id/aggregate]", err);
+      res.status(500).json({ message: "Aggregation failed" });
+    }
+  });
+
   // POST /api/sporta/content/:id/reshape — AI-reshape a content item
   app.post("/api/sporta/content/:id/reshape", sportaRateLimiter, requireAuth, async (req, res) => {
     try {
