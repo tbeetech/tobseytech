@@ -1772,15 +1772,15 @@ async function _registerRouteHandlers(app: Express): Promise<void> {
     "flutterwave","paystack","andela","interswitch","kuda","piggyvest","cowrywise",
     "mono","termii","buypower","meltwater","microsoft","google","amazon","meta",
     "shopify","gitlab","automattic","close","remote","deel","toptal","crossover",
-    "andela","turing","lemon.io","scalacube","auth0","okta","hashicorp","netlify",
+    "turing","lemon.io","scalacube","auth0","okta","hashicorp","netlify",
     "vercel","cloudflare","datadog","elastic","confluent","mongodb","databricks",
     "hubspot","zendesk","twilio","sendgrid","stripe","braintree","square","paypal",
     "coinbase","binance","yellowcard","chipper","carbon","creditchek","nomba",
     "moniepoint","opay","paga","palmpay","mintyn","alat","vfd microfinance",
-    "techstars","ycombinator","future africa","future africa","ventures platform",
+    "techstars","ycombinator","future africa","ventures platform",
     "helios","consonance","talent plus","ingressive for good","semicolon africa",
-    "gebeya","andela","eden life","treepz","gricd","shuttlers","indicina","lendsqr",
-    "appzone","cellulant","parkway","remita","nibss","interswitch","etranzact",
+    "gebeya","eden life","treepz","gricd","shuttlers","indicina","lendsqr",
+    "appzone","cellulant","parkway","remita","nibss","etranzact",
     "korapay","squad","sudo africa","bloc","anchor","bankly","prospa",
   ]);
 
@@ -1805,7 +1805,7 @@ async function _registerRouteHandlers(app: Express): Promise<void> {
     const words = text.toLowerCase().replace(/[^a-z0-9+#.\s-]/g, " ").split(/\s+/);
     const freq: Record<string, number> = {};
     for (const w of words) {
-      const clean = w.replace(/^[-.]|[-.]$/g, "");
+      const clean = w.replace(/^[-.]|[-.]$/, "");
       if (clean.length < 2 || STOP_WORDS.has(clean)) continue;
       freq[clean] = (freq[clean] ?? 0) + 1;
     }
@@ -1872,7 +1872,7 @@ async function _registerRouteHandlers(app: Express): Promise<void> {
 
         // Nigeria/Africa-friendly location
         const loc = (job.candidate_required_location ?? "").toLowerCase();
-        if (!loc || loc === "") score += 20; // no restriction
+        if (!loc) score += 20; // no restriction
         else {
           for (const term of NG_LOCATION_TERMS) {
             if (loc.includes(term)) { score += 25; break; }

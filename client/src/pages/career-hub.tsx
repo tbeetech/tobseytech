@@ -647,9 +647,7 @@ export default function CareerHubPage() {
                         </div>
                       </div>
                       <div className="flex flex-wrap gap-2 text-xs text-gray-500 mb-2">
-                        {job.candidate_required_location && (
-                          <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{job.candidate_required_location || "Worldwide"}</span>
-                        )}
+                        <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{job.candidate_required_location || "Worldwide"}</span>
                         {job.job_type && (
                           <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{job.job_type}</span>
                         )}
