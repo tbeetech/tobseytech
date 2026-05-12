@@ -157,7 +157,7 @@ export default function Hero() {
         </h1>
 
         <p className="text-gray-300 text-base sm:text-lg md:text-xl max-w-2xl mx-auto mb-3 leading-relaxed">
-          Empowering businesses with AI-powered automation, 16 live platform features, and intelligent systems that scale with you.
+          Empowering businesses with AI-powered automation, 12 real-time features, and intelligent systems that scale with you.
         </p>
         <p className="text-galactic-gold text-sm sm:text-base max-w-xl mx-auto mb-10 font-orbitron leading-relaxed">
           Kingdom Enhancement Technology — Serving Churches & Organisations in Real Time
@@ -178,7 +178,7 @@ export default function Hero() {
               variant="outline"
               className="border-galactic-orange/40 text-galactic-orange hover:bg-galactic-orange/10 font-orbitron px-8"
             >
-              Explore 16 Features
+              Explore 12 Real-Time Features
             </Button>
           </Link>
         </div>

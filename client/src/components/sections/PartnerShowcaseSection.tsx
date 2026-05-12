@@ -38,7 +38,7 @@ export default function PartnerShowcaseSection() {
       <div className="container mx-auto px-6" ref={ref}>
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-galactic-orange/30 text-galactic-orange text-sm font-orbitron mb-4">
-            <Handshake className="w-4 h-4" /> Feature 12 of 16
+            <Handshake className="w-4 h-4" /> Feature 12 of 12
           </div>
           <h2 className="font-orbitron font-bold text-3xl md:text-4xl mb-4 gradient-text">
             Partner Network

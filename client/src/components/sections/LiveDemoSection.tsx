@@ -126,7 +126,7 @@ export default function LiveDemoSection() {
       <div className="container mx-auto px-6">
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-neon-cyan/30 text-neon-cyan text-sm font-orbitron mb-4">
-            <Play className="w-4 h-4" /> Feature 14 of 16
+            <Play className="w-4 h-4" /> Real-Time Feature
           </div>
           <h2 className="font-orbitron font-bold text-3xl md:text-4xl mb-4 gradient-text">
             Live Platform Demo
