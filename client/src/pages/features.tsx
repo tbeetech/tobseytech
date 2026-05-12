@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import {
   Calculator, Rocket, Brain, Activity, GraduationCap,
   BookOpen, TrendingUp, ArrowRight, Wrench, Award,
-  Play, Layers, Zap
+  Play, Layers, Zap, Mail
 } from "lucide-react";
 
 const features = [
@@ -128,12 +128,22 @@ const features = [
     border: "border-galactic-orange",
     anchor: "/feature/sporta",
   },
+  {
+    number: "13",
+    icon: Mail,
+    title: "EmailOS",
+    description: "Multi-tenant email marketing operating system. React-rendered campaigns, SES delivery, cron dispatch, open/click tracking, A/B testing, and 3-tier pricing.",
+    tags: ["Email", "Multi-Tenant", "SaaS", "Automation"],
+    color: "text-neon-cyan",
+    border: "border-neon-cyan",
+    anchor: "/feature/emailos",
+  },
 ];
 
 export default function FeaturesPage() {
   return (
     <div className="min-h-screen bg-space-black text-white">
-      <title>12 Interactive Features – TOBSEYTECH</title>
+      <title>13 Interactive Features – TOBSEYTECH</title>
       <Navigation />
 
       <main className="pt-24 pb-20">
@@ -143,15 +153,15 @@ export default function FeaturesPage() {
             <Layers className="w-4 h-4" /> Real-Time Features
           </div>
           <h1 className="font-orbitron font-bold text-4xl md:text-6xl gradient-text mb-6">
-            12 Investor-Ready Features
+            13 Investor-Ready Features
           </h1>
           <p className="text-gray-300 max-w-3xl mx-auto text-lg leading-relaxed mb-8">
             TOBSEYTECH isn't just a service agency — it's an interactive digital ecosystem. Every feature below is live, built, and designed to attract users, retain community, and demonstrate platform value to investors.
           </p>
           <div className="flex flex-wrap justify-center gap-4 mb-6">
             {[
-              { label: "Interactive Features", value: "12" },
-              { label: "Live Today", value: "12/12" },
+              { label: "Interactive Features", value: "13" },
+              { label: "Live Today", value: "13/13" },
               { label: "User-Facing", value: "✓" },
               { label: "Investor-Ready", value: "✓" },
             ].map(({ label, value }) => (
