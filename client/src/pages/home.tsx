@@ -33,7 +33,7 @@ export default function Home() {
         <ContactSection />
 
         {/* Discord Community Section */}
-        <section className="py-16 sm:py-20 bg-[#36393F] relative overflow-hidden">
+        <section className="dark-section py-16 sm:py-20 bg-[#36393F] relative overflow-hidden">
           <div className="absolute inset-0 opacity-10 pointer-events-none"
             style={{ backgroundImage: "radial-gradient(circle at 30% 50%, #5865F2 0%, transparent 60%), radial-gradient(circle at 70% 50%, #5865F2 0%, transparent 60%)" }}
           />

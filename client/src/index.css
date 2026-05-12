@@ -77,17 +77,17 @@
 
 .light {
   --background: hsl(150 20% 97%);
-  --foreground: hsl(220 25% 10%);
+  --foreground: hsl(220 25% 6%);
   --card: hsl(150 15% 100%);
-  --card-foreground: hsl(220 25% 10%);
+  --card-foreground: hsl(220 25% 6%);
   --popover: hsl(150 20% 97%);
-  --popover-foreground: hsl(220 25% 10%);
+  --popover-foreground: hsl(220 25% 6%);
   --primary: hsl(142 65% 28%);
   --primary-foreground: hsl(0 0% 100%);
   --secondary: hsl(142 55% 35%);
   --secondary-foreground: hsl(0 0% 100%);
   --muted: hsl(150 15% 90%);
-  --muted-foreground: hsl(220 12% 38%);
+  --muted-foreground: hsl(220 15% 22%);
   --accent: hsl(195 80% 28%);
   --accent-foreground: hsl(0 0% 100%);
   --destructive: hsl(0 72% 42%);
@@ -96,11 +96,11 @@
   --input: hsl(150 15% 91%);
   --ring: hsl(142 65% 28%);
   --sidebar: hsl(150 15% 94%);
-  --sidebar-foreground: hsl(220 25% 10%);
+  --sidebar-foreground: hsl(220 25% 6%);
   --sidebar-primary: hsl(142 65% 28%);
   --sidebar-primary-foreground: hsl(0 0% 100%);
   --sidebar-accent: hsl(150 15% 90%);
-  --sidebar-accent-foreground: hsl(220 25% 10%);
+  --sidebar-accent-foreground: hsl(220 25% 6%);
   --sidebar-border: hsl(142 35% 78%);
   --sidebar-ring: hsl(142 65% 28%);
   /* Brand colours — darkened for light backgrounds */
@@ -972,4 +972,38 @@
 .light .starfield {
   opacity: 0.15;
 }
+
+/* ── Light-mode: force very dark text on light backgrounds ─────── */
+/* Grey Tailwind utilities become near-black on the white/grey theme */
+.light .text-gray-50,
+.light .text-gray-100,
+.light .text-gray-200,
+.light .text-gray-300,
+.light .text-gray-400,
+.light .text-gray-500,
+.light .text-gray-600 {
+  color: hsl(220 20% 14%);
+}
+
+/* White text becomes near-black in light mode */
+.light .text-white {
+  color: hsl(220 25% 8%);
+}
+
+/* ── Intentionally dark sections preserve their own light text ─── */
+/* Add class="dark-section" to any section with a dark bg colour    */
+.dark-section .text-white,
+.light .dark-section .text-white {
+  color: #ffffff;
+}
+.dark-section .text-gray-100,
+.light .dark-section .text-gray-100 { color: #f3f4f6; }
+.dark-section .text-gray-200,
+.light .dark-section .text-gray-200 { color: #e5e7eb; }
+.dark-section .text-gray-300,
+.light .dark-section .text-gray-300 { color: #d1d5db; }
+.dark-section .text-gray-400,
+.light .dark-section .text-gray-400 { color: #9ca3af; }
+.dark-section .text-gray-500,
+.light .dark-section .text-gray-500 { color: #6b7280; }
 
