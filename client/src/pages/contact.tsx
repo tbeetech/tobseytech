@@ -168,7 +168,7 @@ export default function ContactPage() {
                     <p className="text-gray-200 text-sm group-hover:text-neon-yellow transition-colors break-all">{CONTACT_EMAIL}</p>
                   </div>
                 </a>
-                <a href="https://wa.me/2348000000000" target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 group">
+                <a href="https://wa.me/2348122536647" target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 group">
                   <div className="w-10 h-10 rounded-full bg-galactic-orange/20 flex items-center justify-center shrink-0 group-hover:bg-galactic-orange/40 transition-colors">
                     <MessageCircle className="w-5 h-5 text-neon-yellow" />
                   </div>
