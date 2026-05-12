@@ -3,7 +3,7 @@ import { Link } from "wouter";
 import { motion } from "framer-motion";
 import Navigation from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/hooks/use-auth";
 import {
   ArrowLeft,
   ArrowRight,
@@ -186,6 +186,10 @@ const techStack = [
 
 export default function FeatureEmailOSPage() {
   const [activeTier, setActiveTier] = useState(1);
+  const { user } = useAuth();
+
+  // Unauthenticated users are sent to register and redirected back to /emailos after auth
+  const launchHref = user ? "/emailos" : "/auth?redirect=/emailos&tab=register";
 
   return (
     <div className="min-h-screen bg-space-black text-white">
@@ -233,9 +237,9 @@ export default function FeatureEmailOSPage() {
                 ))}
               </div>
               <div className="flex justify-center gap-4">
-                <Link href="/emailos">
+                <Link href={launchHref}>
                   <Button className="bg-neon-cyan text-space-black font-orbitron font-bold px-8 h-12 text-sm hover:bg-neon-cyan/80 shadow-[0_0_30px_rgba(6,182,212,0.4)] transition-all">
-                    <Zap className="w-4 h-4 mr-2" /> Launch EmailOS
+                    <Zap className="w-4 h-4 mr-2" /> {user ? "Launch EmailOS" : "Create Free Account"}
                   </Button>
                 </Link>
                 <Link href="/features">
@@ -338,11 +342,11 @@ export default function FeatureEmailOSPage() {
                     ))}
                   </ul>
 
-                  <Link href="/emailos">
+                  <Link href={launchHref}>
                     <Button
                       className={`w-full font-orbitron text-sm bg-gradient-to-r ${tier.bg} border ${tier.border}/40 text-white hover:opacity-80 transition-all`}
                     >
-                      {tier.cta} <ArrowRight className="w-3 h-3 ml-1" />
+                      {user ? tier.cta : "Create Free Account"} <ArrowRight className="w-3 h-3 ml-1" />
                     </Button>
                   </Link>
                 </motion.div>
@@ -412,9 +416,9 @@ export default function FeatureEmailOSPage() {
                 Start free today. No credit card required. Build your first campaign in minutes.
               </p>
               <div className="flex flex-wrap justify-center gap-4">
-                <Link href="/emailos">
+                <Link href={launchHref}>
                   <Button size="lg" className="bg-gradient-to-r from-neon-cyan to-galactic-orange text-space-black font-orbitron font-bold">
-                    <Zap className="w-4 h-4 mr-2" /> Start for Free
+                    <Zap className="w-4 h-4 mr-2" /> {user ? "Launch EmailOS" : "Create Free Account"}
                   </Button>
                 </Link>
                 <Link href="/contact">

@@ -938,22 +938,89 @@ export default function EmailOSPage() {
     );
   }
 
-  // Not logged in
+  // Not logged in — prompt to create an account
   if (!user) {
     return (
       <div className="min-h-screen bg-space-black text-white">
         <Navigation />
-        <div className="container mx-auto px-6 pt-36 text-center">
-          <Mail className="w-16 h-16 text-neon-cyan mx-auto mb-6" />
-          <h1 className="text-3xl font-orbitron font-bold gradient-text mb-4">EmailOS</h1>
-          <p className="text-gray-400 mb-6 max-w-md mx-auto">
-            Multi-tenant email marketing operating system. Sign in to set up your organisation.
-          </p>
-          <Link href="/auth">
-            <Button className="bg-neon-cyan text-space-black font-orbitron hover:bg-neon-cyan/80">
-              <Zap className="w-4 h-4 mr-2" /> Sign In to Access EmailOS
-            </Button>
-          </Link>
+        <div className="container mx-auto px-6 pt-24 pb-20 max-w-2xl">
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="glass-effect rounded-3xl border border-neon-cyan/30 overflow-hidden"
+          >
+            {/* Top colour bar */}
+            <div className="h-1.5 bg-gradient-to-r from-neon-cyan via-galactic-orange to-neon-purple" />
+
+            <div className="p-10 text-center">
+              {/* Icon */}
+              <div className="w-20 h-20 rounded-full bg-neon-cyan/10 border border-neon-cyan/30 flex items-center justify-center mx-auto mb-6">
+                <Mail className="w-10 h-10 text-neon-cyan" />
+              </div>
+
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-neon-cyan/20 text-neon-cyan text-xs font-orbitron mb-4">
+                <Zap className="w-3 h-3" /> EmailOS — SaaS Product #2
+              </div>
+
+              <h1 className="font-orbitron font-black text-3xl md:text-4xl gradient-text mb-3">
+                Create a Free Account to Access EmailOS
+              </h1>
+              <p className="text-gray-300 max-w-lg mx-auto mb-2 leading-relaxed">
+                EmailOS is your personal multi-tenant email marketing operating system.
+                Every account gets its own isolated organisation in MongoDB — contacts, campaigns,
+                and analytics with <span className="text-neon-cyan font-semibold">zero data bleed</span>.
+              </p>
+              <p className="text-gray-500 text-sm max-w-md mx-auto mb-8">
+                Sign up in under 30 seconds. No credit card required. Your Starter plan is free forever.
+              </p>
+
+              {/* What you get */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-8 text-left">
+                {[
+                  { icon: Users,           label: "500 free contacts" },
+                  { icon: Send,            label: "1,000 emails/mo free" },
+                  { icon: MousePointerClick, label: "Open & click tracking" },
+                  { icon: Layers,          label: "Email list management" },
+                  { icon: RefreshCw,       label: "Cron-driven dispatch" },
+                  { icon: CheckCircle,     label: "MongoDB-synced org" },
+                ].map(({ icon: Icon, label }) => (
+                  <div key={label} className="flex items-center gap-2 px-3 py-2 glass-effect rounded-xl border border-white/10 text-sm text-gray-300">
+                    <Icon className="w-4 h-4 text-neon-cyan shrink-0" />
+                    <span className="font-orbitron text-xs">{label}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* CTA buttons */}
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Link href="/auth?redirect=/emailos&tab=register">
+                  <Button className="w-full sm:w-auto bg-neon-cyan text-space-black font-orbitron font-bold px-8 h-12 hover:bg-neon-cyan/80 shadow-[0_0_20px_rgba(6,182,212,0.3)] transition-all">
+                    <Zap className="w-4 h-4 mr-2" /> Create Free Account
+                  </Button>
+                </Link>
+                <Link href="/auth?redirect=/emailos">
+                  <Button variant="outline" className="w-full sm:w-auto border-neon-cyan/40 text-neon-cyan font-orbitron h-12 px-8 hover:bg-neon-cyan/10 transition-all">
+                    Sign In
+                  </Button>
+                </Link>
+              </div>
+
+              <p className="text-gray-600 text-xs mt-5 font-orbitron">
+                By creating an account you agree to our Terms of Service. Your EmailOS organisation
+                is created in MongoDB and linked exclusively to your user account.
+              </p>
+            </div>
+          </motion.div>
+
+          {/* Mini feature reminder */}
+          <div className="mt-6 text-center">
+            <Link href="/feature/emailos">
+              <span className="text-gray-500 text-xs font-orbitron hover:text-neon-cyan transition-colors underline underline-offset-2 cursor-pointer">
+                Learn more about EmailOS →
+              </span>
+            </Link>
+          </div>
         </div>
       </div>
     );

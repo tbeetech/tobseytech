@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useLocation } from "wouter";
+import { useLocation, useSearch } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { getApiErrorMessage } from "@/lib/queryClient";
@@ -12,7 +12,19 @@ import { Loader2, Zap, Users, BookOpen, Heart, Eye, EyeOff } from "lucide-react"
 export default function AuthPage() {
   const { login, register, user } = useAuth();
   const [, navigate] = useLocation();
+  const search = useSearch();
   const { toast } = useToast();
+
+  // Honour a ?redirect= param so deep-linked pages (e.g. /emailos) work after auth
+  const redirectTo = (() => {
+    try {
+      const params = new URLSearchParams(search);
+      const r = params.get("redirect");
+      // Only allow relative paths to prevent open-redirect attacks
+      if (r && r.startsWith("/") && !r.startsWith("//")) return r;
+    } catch { /* ignore */ }
+    return "/blog";
+  })();
 
   const [loginForm, setLoginForm] = useState({ username: "", password: "" });
   const [registerForm, setRegisterForm] = useState({ username: "", email: "", password: "", confirmPassword: "" });
@@ -25,7 +37,7 @@ export default function AuthPage() {
   const [showRegConfirmPassword, setShowRegConfirmPassword] = useState(false);
 
   if (user) {
-    navigate("/blog");
+    navigate(redirectTo);
     return null;
   }
 
@@ -34,7 +46,7 @@ export default function AuthPage() {
     setLoading(true);
     try {
       await login(loginForm.username, loginForm.password);
-      navigate("/blog");
+      navigate(redirectTo);
     } catch (err: any) {
       toast({ title: "Login failed", description: getApiErrorMessage(err, "Invalid username or password. Please try again."), variant: "destructive" });
     } finally {
@@ -53,7 +65,7 @@ export default function AuthPage() {
     setLoading(true);
     try {
       await register(registerForm.username, registerForm.email, registerForm.password);
-      navigate("/blog");
+      navigate(redirectTo);
     } catch (err: any) {
       toast({ title: "Registration failed", description: getApiErrorMessage(err, "Could not create your account. Please try again."), variant: "destructive" });
     } finally {
