@@ -341,15 +341,13 @@ export async function aggregateCampaignContent(
           if (post.is_video && !wantsVideos) { skipped++; continue; }
 
           if (post.is_video && wantsVideos) {
-            // Video: store link only
+            // Video: store link only — no content body, no thumbnail
             items.push({
               campaignId: campaign.id,
               sourceUrl: postUrl,
               sourcePlatform: "Reddit",
               originalTitle: post.title,
-              originalContent: null as any,
               originalAuthor: post.author,
-              originalThumbnail: null,
               mediaType: preferredVideoType,
             });
             continue;
@@ -397,16 +395,14 @@ export async function aggregateCampaignContent(
         const mediaType: SportaContentType = feed.defaultMediaType as SportaContentType;
 
         if (isVideoType(mediaType)) {
-          // Video: only store link, no content/embed
+          // Video: only store link — no content body or thumbnail
           if (!wantsVideos) { skipped++; continue; }
           items.push({
             campaignId: campaign.id,
             sourceUrl: item.link,
             sourcePlatform: feed.platform,
             originalTitle: item.title ?? undefined,
-            originalContent: undefined,          // no content for video items
             originalAuthor: item.creator ?? undefined,
-            originalThumbnail: null,             // no thumbnail for video links
             mediaType: preferredVideoType,
           });
           continue;

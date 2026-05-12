@@ -2417,8 +2417,11 @@ ENGAGEMENT PRINCIPLES:
         try {
           const doc = await (storage as any).createSportaContent(item);
           saved.push(doc);
-        } catch {
-          // skip duplicates that sneak in under concurrent requests
+        } catch (saveErr: any) {
+          // Only silently skip MongoDB duplicate-key errors; log anything else
+          if (saveErr?.code !== 11000) {
+            console.warn("[sporta/aggregate] unexpected save error:", saveErr?.message ?? saveErr);
+          }
         }
       }
 

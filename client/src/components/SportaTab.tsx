@@ -832,13 +832,21 @@ function ContentQueuePanel({ campaignId, campaignName }: { campaignId: string; c
             <div key={item.id} className="bg-space-dark rounded-xl border border-white/5 hover:border-galactic-orange/20 transition-all overflow-hidden">
               {/* Thumbnail strip */}
               {item.originalThumbnail && (
-                <div className="w-full h-32 overflow-hidden bg-black/20">
+                <div className="w-full h-32 overflow-hidden bg-black/20 relative">
                   <img
                     src={item.originalThumbnail}
                     alt={item.originalTitle ?? "thumbnail"}
                     className="w-full h-full object-cover opacity-80"
-                    onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+                    onError={(e) => {
+                      const target = e.currentTarget as HTMLImageElement;
+                      target.style.display = "none";
+                      const placeholder = target.nextElementSibling as HTMLElement | null;
+                      if (placeholder) placeholder.style.display = "flex";
+                    }}
                   />
+                  <div className="absolute inset-0 items-center justify-center bg-space-dark/80 text-gray-600 text-xs hidden">
+                    <Eye className="w-5 h-5 opacity-30 mr-1" /> Image unavailable
+                  </div>
                 </div>
               )}
               <div className="p-4">
