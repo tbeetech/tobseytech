@@ -15,13 +15,25 @@ export default function AuthPage() {
   const search = useSearch();
   const { toast } = useToast();
 
-  // Honour a ?redirect= param so deep-linked pages (e.g. /emailos) work after auth
+  // Honour a ?redirect= param so deep-linked pages (e.g. /emailos) work after auth.
+  // Security: only allow relative paths — must start with "/" and must not contain
+  // backslashes, protocol separators ("//"), or other characters that could be used
+  // to craft an open-redirect (e.g. "/\example.com", "/%2F...").
   const redirectTo = (() => {
     try {
       const params = new URLSearchParams(search);
       const r = params.get("redirect");
-      // Only allow relative paths to prevent open-redirect attacks
-      if (r && r.startsWith("/") && !r.startsWith("//")) return r;
+      if (
+        r &&
+        r.startsWith("/") &&
+        !r.startsWith("//") &&
+        !r.includes("\\") &&
+        !r.includes("\n") &&
+        !r.includes("\r") &&
+        !/^\/[^/].*:/.test(r) // rule out "/foo:bar" style schemes
+      ) {
+        return r;
+      }
     } catch { /* ignore */ }
     return "/blog";
   })();

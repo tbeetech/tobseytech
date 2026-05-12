@@ -950,7 +950,7 @@ export default function EmailOSPage() {
             transition={{ duration: 0.5 }}
             className="glass-effect rounded-3xl border border-neon-cyan/30 overflow-hidden"
           >
-            {/* Top colour bar */}
+            {/* Top color bar */}
             <div className="h-1.5 bg-gradient-to-r from-neon-cyan via-galactic-orange to-neon-purple" />
 
             <div className="p-10 text-center">
