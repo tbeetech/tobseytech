@@ -704,10 +704,10 @@ function EmailOSDashboard({ org: initialOrg }: { org: Org }) {
               <div className="space-y-6">
                 <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   {[
-                    { label: "Contacts",           value: org.contactsCount,         max: org.maxContacts,          icon: Users,           color: "text-galactic-green"  },
-                    { label: "Emails This Month",  value: org.emailsSentThisMonth,   max: org.maxEmailsPerMonth,    icon: Send,            color: "text-neon-cyan"       },
-                    { label: "Active Campaigns",   value: org.activeCampaignsCount, max: org.maxActiveCampaigns,   icon: RefreshCw,       color: "text-galactic-orange" },
-                    { label: "Total Lists",        value: lists.length,              max: null,                     icon: Layers,          color: "text-neon-purple"     },
+                    { label: "Contacts",           value: org.contactsCount,         max: org.maxContacts,          icon: Users,           color: "text-galactic-green",  barColor: "bg-galactic-green"  },
+                    { label: "Emails This Month",  value: org.emailsSentThisMonth,   max: org.maxEmailsPerMonth,    icon: Send,            color: "text-neon-cyan",       barColor: "bg-neon-cyan"       },
+                    { label: "Active Campaigns",   value: org.activeCampaignsCount, max: org.maxActiveCampaigns,   icon: RefreshCw,       color: "text-galactic-orange", barColor: "bg-galactic-orange" },
+                    { label: "Total Lists",        value: lists.length,              max: null,                     icon: Layers,          color: "text-neon-purple",     barColor: "bg-neon-purple"     },
                   ].map(stat => {
                     const Icon = stat.icon;
                     const pct = stat.max ? Math.min(100, Math.round((stat.value / stat.max) * 100)) : null;
@@ -726,7 +726,7 @@ function EmailOSDashboard({ org: initialOrg }: { org: Org }) {
                         {stat.max && (
                           <div className="mt-2 h-1 bg-white/5 rounded-full overflow-hidden">
                             <div
-                              className={`h-full rounded-full ${pct! > 80 ? "bg-red-500" : stat.color.replace("text-", "bg-")}`}
+                              className={`h-full rounded-full ${pct! > 80 ? "bg-red-500" : stat.barColor}`}
                               style={{ width: `${pct}%` }}
                             />
                           </div>
@@ -753,13 +753,13 @@ function EmailOSDashboard({ org: initialOrg }: { org: Org }) {
                   <div className="grid grid-cols-3 gap-4">
                     <div className="text-center">
                       <div className={`font-orbitron font-black text-lg ${tierDef.color}`}>
-                        {org.maxContacts >= 99999999 ? "∞" : org.maxContacts.toLocaleString()}
+                        {org.maxContacts >= 999_999_999 ? "∞" : org.maxContacts.toLocaleString()}
                       </div>
                       <div className="text-gray-500 text-xs font-orbitron">Max Contacts</div>
                     </div>
                     <div className="text-center">
                       <div className={`font-orbitron font-black text-lg ${tierDef.color}`}>
-                        {org.maxEmailsPerMonth >= 99999999 ? "∞" : org.maxEmailsPerMonth.toLocaleString()}
+                        {org.maxEmailsPerMonth >= 999_999_999 ? "∞" : org.maxEmailsPerMonth.toLocaleString()}
                       </div>
                       <div className="text-gray-500 text-xs font-orbitron">Emails / Month</div>
                     </div>

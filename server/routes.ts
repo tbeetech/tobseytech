@@ -3166,7 +3166,7 @@ Only return valid JSON, no markdown fences.`;
       }
 
       // Deduplicate against existing contacts
-      const existingEmails = new Set(list.contacts.map((c) => c.email));
+      const existingEmails = new Set(list.contacts.map((c) => c.email.toLowerCase()));
       const newContacts = contacts
         .filter((c) => !existingEmails.has(c.email.toLowerCase()))
         .map((c) => ({ ...c, email: c.email.toLowerCase(), subscribedAt: new Date(), unsubscribed: false }));
@@ -3262,7 +3262,7 @@ Only return valid JSON, no markdown fences.`;
       }
 
       // Advance onboarding if needed
-      if (["list_created", "tier_selected", "org_created"].includes(org.onboardingStatus)) {
+      if (["pending", "list_created", "tier_selected", "org_created"].includes(org.onboardingStatus)) {
         org.onboardingStatus = "campaign_created";
         await org.save();
       }
@@ -3298,6 +3298,15 @@ Only return valid JSON, no markdown fences.`;
       const { EmailOrgModel, EmailCampaignModel } = await getEmailModels();
       const org = await EmailOrgModel.findOne({ userId: user.id }).lean();
       if (!org) return res.status(404).json({ message: "Organisation not found" });
+
+      // Enforce tier restrictions on restricted fields
+      if (req.body.abTestEnabled === true && org.tier === "starter") {
+        return res.status(403).json({ message: "A/B testing is available on Pro and Enterprise plans." });
+      }
+      if (req.body.customCronExpr !== undefined && org.tier !== "enterprise") {
+        return res.status(403).json({ message: "Custom cron scheduling is available on the Enterprise plan only." });
+      }
+
       const allowed = ["subject","previewText","fromName","fromEmail","htmlBody","textBody","status","scheduledAt","abTestEnabled","abSubjectB","customCronExpr"];
       const updates: Record<string, unknown> = {};
       for (const k of allowed) {

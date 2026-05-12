@@ -27,9 +27,9 @@ export interface EmailOrgDocument extends Document {
 }
 
 const TIER_LIMITS: Record<EmailOrgTier, { maxContacts: number; maxEmailsPerMonth: number; maxActiveCampaigns: number }> = {
-  starter:    { maxContacts: 500,        maxEmailsPerMonth: 1_000,      maxActiveCampaigns: 1  },
-  pro:        { maxContacts: 10_000,     maxEmailsPerMonth: 50_000,     maxActiveCampaigns: 10 },
-  enterprise: { maxContacts: 999_999_99, maxEmailsPerMonth: 999_999_99, maxActiveCampaigns: 999 },
+  starter:    { maxContacts: 500,         maxEmailsPerMonth: 1_000,        maxActiveCampaigns: 1   },
+  pro:        { maxContacts: 10_000,      maxEmailsPerMonth: 50_000,       maxActiveCampaigns: 10  },
+  enterprise: { maxContacts: 999_999_999, maxEmailsPerMonth: 999_999_999,  maxActiveCampaigns: 999 },
 };
 
 export { TIER_LIMITS };
