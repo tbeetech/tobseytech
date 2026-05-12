@@ -113,7 +113,7 @@ export default function LearningPathPage() {
       <main className="pt-24 pb-20 container mx-auto px-6">
         <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-neon-yellow/30 text-neon-yellow text-sm font-orbitron mb-4">
-            <GraduationCap className="w-4 h-4" /> Feature 5 of 16
+            <GraduationCap className="w-4 h-4" /> Feature 5 of 12
           </div>
           <h1 className="font-orbitron font-bold text-3xl md:text-5xl gradient-text mb-4">
             Learning Path Recommender

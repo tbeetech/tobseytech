@@ -72,7 +72,7 @@ export default function Home() {
         <section className="py-16 bg-deep-space border-t border-galactic-orange/20">
           <div className="container mx-auto px-6 text-center">
             <h2 className="font-orbitron font-bold text-2xl md:text-3xl gradient-text mb-4">
-              Explore All 16 Platform Features
+              Explore All 12 Real-Time Features
             </h2>
             <p className="text-gray-300 max-w-xl mx-auto mb-6 text-sm">
               View our complete interactive feature showcase — built to demonstrate platform value to investors, partners, and users.

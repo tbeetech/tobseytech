@@ -140,7 +140,7 @@ export default function FeaturesPage() {
         {/* Hero */}
         <div className="container mx-auto px-6 text-center mb-16">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-galactic-orange/30 text-galactic-orange text-sm font-orbitron mb-6">
-            <Layers className="w-4 h-4" /> Platform Features
+            <Layers className="w-4 h-4" /> Real-Time Features
           </div>
           <h1 className="font-orbitron font-bold text-4xl md:text-6xl gradient-text mb-6">
             12 Investor-Ready Features
