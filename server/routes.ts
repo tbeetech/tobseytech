@@ -1765,6 +1765,139 @@ async function _registerRouteHandlers(app: Express): Promise<void> {
     }
   });
 
+  // ─── Nigeria Job Match endpoint ──────────────────────────────────────────
+
+  // Companies known to hire Nigerian / Africa-based remote engineers
+  const NG_FRIENDLY_COMPANIES = new Set([
+    "flutterwave","paystack","andela","interswitch","kuda","piggyvest","cowrywise",
+    "mono","termii","buypower","meltwater","microsoft","google","amazon","meta",
+    "shopify","gitlab","automattic","close","remote","deel","toptal","crossover",
+    "andela","turing","lemon.io","scalacube","auth0","okta","hashicorp","netlify",
+    "vercel","cloudflare","datadog","elastic","confluent","mongodb","databricks",
+    "hubspot","zendesk","twilio","sendgrid","stripe","braintree","square","paypal",
+    "coinbase","binance","yellowcard","chipper","carbon","creditchek","nomba",
+    "moniepoint","opay","paga","palmpay","mintyn","alat","vfd microfinance",
+    "techstars","ycombinator","future africa","future africa","ventures platform",
+    "helios","consonance","talent plus","ingressive for good","semicolon africa",
+    "gebeya","andela","eden life","treepz","gricd","shuttlers","indicina","lendsqr",
+    "appzone","cellulant","parkway","remita","nibss","interswitch","etranzact",
+    "korapay","squad","sudo africa","bloc","anchor","bankly","prospa",
+  ]);
+
+  // Stop words for keyword extraction
+  const STOP_WORDS = new Set([
+    "a","an","the","and","or","but","in","on","at","to","for","of","with","by",
+    "from","as","is","was","are","were","be","been","being","have","has","had",
+    "do","does","did","will","would","could","should","may","might","shall",
+    "can","need","must","am","this","that","these","those","we","you","they",
+    "he","she","it","i","my","your","our","their","its","who","what","which",
+    "when","where","why","how","all","each","every","both","either","any","some",
+    "no","not","more","most","other","such","into","than","then","so","up","out",
+    "about","above","after","also","back","between","during","if","like","over",
+    "per","than","through","under","until","use","via","well","work","working",
+    "experience","years","strong","good","great","excellent","ability","skills",
+    "looking","seeking","required","requirements","responsibilities","preferred",
+    "plus","bonus","minimum","maximum","including","role","position","team",
+    "company","opportunity","candidate","applicant","join","help","build","create",
+  ]);
+
+  function extractKeywords(text: string, topN = 8): string[] {
+    const words = text.toLowerCase().replace(/[^a-z0-9+#.\s-]/g, " ").split(/\s+/);
+    const freq: Record<string, number> = {};
+    for (const w of words) {
+      const clean = w.replace(/^[-.]|[-.]$/g, "");
+      if (clean.length < 2 || STOP_WORDS.has(clean)) continue;
+      freq[clean] = (freq[clean] ?? 0) + 1;
+    }
+    return Object.entries(freq)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, topN)
+      .map(([w]) => w);
+  }
+
+  interface RemotiveJobRaw {
+    id: number; url: string; title: string; company_name: string;
+    company_logo: string; category: string; candidate_required_location: string;
+    salary: string; publication_date: string; job_type: string; tags: string[];
+    description: string;
+  }
+
+  app.get("/api/career/ng-match", async (req, res) => {
+    try {
+      const { description = "", role = "" } = req.query as Record<string, string>;
+      const keywords = extractKeywords(description, 8);
+      // Fall back to role label words if description is very short
+      const searchTerms = keywords.length >= 2 ? keywords : role.replace(/-/g, " ").split(" ");
+      const searchQuery = searchTerms.slice(0, 4).join(" ");
+
+      // Map role to Remotive category
+      const ROLE_CATEGORY: Record<string, string> = {
+        "software-engineer": "software-dev", "data-scientist": "data",
+        "devops-engineer": "devops-sysadmin", "ux-designer": "design",
+        "cybersecurity": "software-dev", "blockchain-dev": "software-dev",
+        "fullstack": "software-dev", "ai-engineer": "software-dev",
+        "data-analyst": "data", "product-manager": "product",
+        "systems-architect": "software-dev", "backend-engineer": "software-dev",
+        "mobile-engineer": "software-dev", "engineering-manager": "management-finance",
+        "tech-lead": "software-dev", "founder-ceo": "management-finance",
+        "qa-engineer": "qa", "technical-writer": "writing",
+        "scrum-master": "management-finance", "database-admin": "devops-sysadmin",
+      };
+
+      const category = ROLE_CATEGORY[role] ?? "software-dev";
+      const params = new URLSearchParams({ category });
+      if (searchQuery) params.set("search", searchQuery);
+      const url = `https://remotive.com/api/remote-jobs?${params}`;
+
+      const response = await fetch(url, { signal: AbortSignal.timeout(CAREER_API_TIMEOUT_MS) });
+      if (!response.ok) throw new Error(`Remotive responded ${response.status}`);
+      const data = await response.json() as { jobs: RemotiveJobRaw[] };
+      const jobs: RemotiveJobRaw[] = data.jobs ?? [];
+
+      // Score each job for Nigeria-friendliness
+      const NG_LOCATION_TERMS = ["worldwide", "nigeria", "africa", "anywhere", "remote", "global", "all countries", "ng", "west africa"];
+      const keywordSet = new Set(keywords.map(k => k.toLowerCase()));
+
+      const scored = jobs.slice(0, 50).map(job => {
+        let score = 0;
+
+        // Keyword overlap with job title + description
+        const titleWords = job.title.toLowerCase().split(/\s+/);
+        const descSnippet = (job.description ?? "").toLowerCase().slice(0, 500);
+        for (const kw of keywordSet) {
+          if (job.title.toLowerCase().includes(kw)) score += 8;
+          else if (descSnippet.includes(kw)) score += 3;
+          if (job.tags?.some(t => t.toLowerCase().includes(kw))) score += 4;
+        }
+
+        // Nigeria/Africa-friendly location
+        const loc = (job.candidate_required_location ?? "").toLowerCase();
+        if (!loc || loc === "") score += 20; // no restriction
+        else {
+          for (const term of NG_LOCATION_TERMS) {
+            if (loc.includes(term)) { score += 25; break; }
+          }
+        }
+
+        // Known NG-friendly company
+        const companyLower = (job.company_name ?? "").toLowerCase();
+        for (const name of NG_FRIENDLY_COMPANIES) {
+          if (companyLower.includes(name)) { score += 15; break; }
+        }
+
+        const ngFriendly = score >= 25;
+        return { ...job, _score: score, _ngFriendly: ngFriendly };
+      });
+
+      scored.sort((a, b) => b._score - a._score);
+      const top = scored.slice(0, 15);
+
+      res.json({ jobs: top, keywords, totalScanned: jobs.length });
+    } catch (err) {
+      res.status(502).json({ jobs: [], keywords: [], totalScanned: 0, message: "Could not fetch matched jobs right now." });
+    }
+  });
+
   // ─── URL Shortener routes ─────────────────────────────────────────────────
 
   app.post("/api/shorten", authRateLimiter, requireAuth, async (req, res) => {
