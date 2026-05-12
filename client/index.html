@@ -1,7 +1,19 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
   <head>
     <meta charset="UTF-8" />
+    <!-- Apply saved theme before first paint to prevent flash -->
+    <script>
+      (function() {
+        try {
+          var t = localStorage.getItem('theme');
+          if (t === 'light') {
+            document.documentElement.classList.remove('dark');
+            document.documentElement.classList.add('light');
+          }
+        } catch(e) {}
+      })();
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
     <title>TOBSEYTECH - Future Digital Solutions</title>
     <meta name="description" content="Future-forward digital solutions, AI-powered innovation, and Kingdom Enhancement technology. Transform your business with cutting-edge web development, AI integration, and digital marketing." />
@@ -85,7 +97,7 @@
       "description": "Future-forward digital solutions, AI-powered innovation, and Kingdom Enhancement technology for SMEs, startups, and social-impact organizations.",
       "contactPoint": {
         "@type": "ContactPoint",
-        "email": "CEO@TOBSEYTECH.BIZ",
+        "email": "tobseytech@gmail.com",
         "contactType": "customer support",
         "areaServed": ["NG", "GH", "KE", "ZA", "GB", "US", "CA"],
         "availableLanguage": "English"

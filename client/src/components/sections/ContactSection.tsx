@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Mail, MessageCircle, Linkedin, Send } from "lucide-react";
 
-const CONTACT_EMAIL = "CEO@TOBSEYTECH.BIZ";
+const CONTACT_EMAIL = "tobseytech@gmail.com";
 
 const INQUIRY_TYPES = [
   "AI Automation Systems",

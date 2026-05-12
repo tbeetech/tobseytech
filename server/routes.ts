@@ -1346,7 +1346,7 @@ async function _registerRouteHandlers(app: Express): Promise<void> {
     if (mailer) {
       await mailer.sendMail({
         from: process.env.EMAIL_FROM,
-        to: process.env.EMAIL_TO || "CEO@TOBSEYTECH.BIZ",
+        to: process.env.EMAIL_TO || "tobseytech@gmail.com",
         replyTo: parsed.email,
         subject: "New TOBSEYTECH Contact",
         text: [
@@ -1977,7 +1977,7 @@ PERSONALITY & STYLE:
 - Use formatting (bullet points, numbered lists, code blocks) to make responses clear and scannable
 
 TOBSEYTECH CONTEXT (when relevant):
-TobseyTech is a tech platform offering AI automation, web/app development, marketing systems, training, and a suite of 16 interactive features. If users ask about TobseyTech services or platform features, provide helpful guidance. Contact: CEO@TOBSEYTECH.BIZ
+TobseyTech is a tech platform offering AI automation, web/app development, marketing systems, training, and a suite of 16 interactive features. If users ask about TobseyTech services or platform features, provide helpful guidance. Contact: tobseytech@gmail.com
 
 GUIDELINES:
 - Provide accurate, well-reasoned responses
