@@ -15,7 +15,7 @@ const INQUIRY_TYPES = [
   "Custom Inquiry",
 ];
 
-const CONTACT_EMAIL = "CEO@TOBSEYTECH.BIZ";
+const CONTACT_EMAIL = "tobseytech@gmail.com";
 
 export default function ContactPage() {
   const [status, setStatus] = useState<"idle" | "sent" | "error">("idle");
