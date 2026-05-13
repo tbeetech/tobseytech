@@ -66,7 +66,15 @@ export async function aggregateEmailLeads(
   } catch (err: any) {
     // Log the Python-side stderr for diagnosis but never let it surface as 500
     const stderr: string = err?.stderr ?? "";
-    console.error("[emailLeadAggregator] Python scraper error:", stderr || err?.message);
+    if (stderr.includes("No module named")) {
+      console.error(
+        "[emailLeadAggregator] Python dependency missing. " +
+        "Run: pip install -r server/requirements.txt\n",
+        stderr,
+      );
+    } else {
+      console.error("[emailLeadAggregator] Python scraper error:", stderr || err?.message);
+    }
     return [];
   }
 
