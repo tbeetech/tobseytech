@@ -26,6 +26,8 @@ const execFileAsync = promisify(execFile);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const SCRAPER_PATH = path.join(__dirname, "emailScraper.py");
 
+const SCRAPER_TIMEOUT_MS = 90_000; // 90-second hard ceiling for the scrape job
+
 // ─── Public type ─────────────────────────────────────────────────────────────
 
 export interface AggregatedLead {
@@ -57,7 +59,7 @@ export async function aggregateEmailLeads(
   try {
     const result = await execFileAsync("python3", [SCRAPER_PATH], {
       input: payload,
-      timeout: 90_000,          // 90-second hard ceiling for the scrape job
+      timeout: SCRAPER_TIMEOUT_MS,
       maxBuffer: 5 * 1024 * 1024, // 5 MB stdout buffer
     });
     stdout = result.stdout;

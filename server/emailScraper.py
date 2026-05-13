@@ -116,9 +116,21 @@ INDUSTRY_SEARCH_TERMS: dict[str, str] = {
 }
 
 REQUEST_TIMEOUT = 8          # seconds per HTTP request
+MAX_SCRAPE_TIMEOUT = 45      # seconds to wait for all parallel scraping futures
 MAX_DOMAINS_TO_SCRAPE = 25   # cap the number of domains we actively crawl
 MAX_BODY_BYTES = 60_000      # bytes of response body to parse
 PARALLEL_WORKERS = 6
+
+# Email local-part length bounds (RFC 5321 §4.5.3)
+MIN_LOCAL_LENGTH = 2
+MAX_LOCAL_LENGTH = 64
+
+# File-like suffixes that must not appear in email domains (e.g. accidentally
+# matched image or asset URLs parsed from raw HTML)
+ASSET_EXTENSIONS: list[str] = ['.png', '.jpg', '.gif', '.css', '.js']
+
+# Characters of surrounding text to search for a name hint near each email
+NAME_CONTEXT_CHARS = 200
 
 SESSION = requests.Session()
 SESSION.headers.update({
@@ -171,20 +183,20 @@ def _is_valid_email(email: str) -> bool:
         return False
     if local in BLOCKED_LOCAL_PARTS:
         return False
-    if len(local) < 2 or len(local) > 64:
+    if len(local) < MIN_LOCAL_LENGTH or len(local) > MAX_LOCAL_LENGTH:
         return False
     # Skip anything that looks like a filename/asset path
-    if any(domain.endswith(ext) for ext in ('.png', '.jpg', '.gif', '.css', '.js')):
+    if any(domain.endswith(ext) for ext in ASSET_EXTENSIONS):
         return False
     return True
 
 
 def _extract_name_near(text: str, email: str) -> tuple[str | None, str | None]:
-    """Try to find a FirstName LastName pair in the 300 chars around an email."""
+    """Try to find a FirstName LastName pair within NAME_CONTEXT_CHARS of an email."""
     idx = text.find(email)
     if idx < 0:
         return None, None
-    snippet = text[max(0, idx - 200): idx + 200]
+    snippet = text[max(0, idx - NAME_CONTEXT_CHARS): idx + NAME_CONTEXT_CHARS]
     m = re.search(r'\b([A-Z][a-z]{2,20})\s+([A-Z][a-z]{2,20})\b', snippet)
     if m:
         return m.group(1), m.group(2)
@@ -328,7 +340,7 @@ def aggregate_leads(industry: str, keywords: list[str], count: int) -> list[dict
                 executor.submit(scrape_domain, d): d
                 for d in to_scrape
             }
-            for future in as_completed(futures, timeout=45):
+            for future in as_completed(futures, timeout=MAX_SCRAPE_TIMEOUT):
                 if len(leads) >= count:
                     break
                 try:
