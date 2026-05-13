@@ -608,3 +608,122 @@ export interface SportaPreferences {
   createdAt: Date;
   updatedAt: Date;
 }
+
+// ─── Daily Dev Tips Bot ───────────────────────────────────────────────────────
+
+export const DEV_TIPS_PILLARS = [
+  "code-snippet",
+  "architecture",
+  "devops",
+  "performance",
+  "security",
+  "tool-discovery",
+  "career-mindset",
+  "frontend",
+  "api-design",
+] as const;
+export type DevTipsPillar = (typeof DEV_TIPS_PILLARS)[number];
+
+export const DEV_TIPS_PILLAR_LABELS: Record<DevTipsPillar, string> = {
+  "code-snippet":   "Code Snippet of the Day",
+  "architecture":   "Architecture Insight",
+  "devops":         "DevOps & CI/CD",
+  "performance":    "Performance Hack",
+  "security":       "Security Spotlight",
+  "tool-discovery": "Tool Discovery",
+  "career-mindset": "Career & Mindset",
+  "frontend":       "Frontend & CSS Mastery",
+  "api-design":     "API Design",
+};
+
+export const DEV_TIPS_FORMATS = [
+  "plain-text",
+  "code-card",
+  "infographic",
+  "thread",
+] as const;
+export type DevTipsFormat = (typeof DEV_TIPS_FORMATS)[number];
+
+export const DEV_TIPS_PLATFORMS = [
+  "twitter",
+  "linkedin",
+  "instagram",
+  "threads",
+] as const;
+export type DevTipsPlatform = (typeof DEV_TIPS_PLATFORMS)[number];
+
+export const DEV_TIPS_POST_STATUSES = [
+  "pending",
+  "approved",
+  "rejected",
+  "published",
+  "failed",
+] as const;
+export type DevTipsPostStatus = (typeof DEV_TIPS_POST_STATUSES)[number];
+
+export interface DevTipsPost {
+  id: string;
+  pillar: DevTipsPillar;
+  format: DevTipsFormat;
+  title: string;
+  caption: string;
+  thread: string[];
+  hashtags: string[];
+  svgCard?: string;
+  htmlCard?: string;
+  status: DevTipsPostStatus;
+  platforms: DevTipsPlatform[];
+  publishedPlatforms: DevTipsPlatform[];
+  scheduledAt?: Date;
+  publishedAt?: Date;
+  errorLog?: string;
+  generatedBy: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface DevTipsSocialAccount {
+  platform: DevTipsPlatform;
+  enabled: boolean;
+  /** OAuth access token or API key — stored in DB (admin-controlled) */
+  accessToken?: string;
+  /** OAuth refresh token */
+  refreshToken?: string;
+  /** Extra: LinkedIn org URN, Instagram business account ID, etc. */
+  accountId?: string;
+  /** Human-readable label shown in UI */
+  displayName?: string;
+  connectedAt?: Date;
+}
+
+export interface DevTipsBotConfig {
+  id: string;
+  /** Whether the bot scheduler is active */
+  running: boolean;
+  /** Whether the scheduler is paused (running but not firing cycles) */
+  paused: boolean;
+  /** Interval in milliseconds between posting cycles */
+  postIntervalMs: number;
+  /** Formats allowed for generation */
+  allowedFormats: DevTipsFormat[];
+  /** Platforms to post to by default */
+  defaultPlatforms: DevTipsPlatform[];
+  /** Pillar weights — determines how often each pillar is picked */
+  pillarWeights: Record<DevTipsPillar, number>;
+  /** Social account credentials */
+  socialAccounts: DevTipsSocialAccount[];
+  /** Auto-publish without approval */
+  autoPublish: boolean;
+  /** Gemini AI tone for generation */
+  tone: string;
+  /** Target developer seniority/audience */
+  audience: string;
+  /** Index of the last used pillar for round-robin rotation */
+  lastPillarIndex: number;
+  /** Total posts generated */
+  totalGenerated: number;
+  /** Total posts published */
+  totalPublished: number;
+  createdAt: Date;
+  updatedAt: Date;
+}

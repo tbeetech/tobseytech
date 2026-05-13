@@ -15,6 +15,20 @@ import { ADMIN_DASHBOARD_PASSWORD } from "./env.js";
 import { injectBlogMetaTags } from "./ogTags.js";
 import { getBotStatus, triggerBotCycle, pauseBotWorker, resumeBotWorker, startBotWorker as _startBotWorker, updateBotConfig } from "./botWorker.js";
 import {
+  startDevTipsBot,
+  pauseDevTipsBot,
+  resumeDevTipsBot,
+  stopDevTipsBot,
+  runGenerationCycle,
+  publishPost as devTipsPublishPost,
+  getDevTipsBotStatusFull,
+  generateSvgCard,
+  generateHtmlCard,
+} from "./devTipsBot.js";
+import { DevTipsPostModel } from "./models/DevTipsPost.js";
+import { DevTipsBotConfigModel } from "./models/DevTipsBotConfig.js";
+import { DEV_TIPS_PILLARS, DEV_TIPS_FORMATS, DEV_TIPS_PLATFORMS } from "../shared/schema.js";
+import {
   getVidAggregatorStatus,
   startVidAggregator,
   pauseVidAggregator,
@@ -3907,6 +3921,320 @@ Only return valid JSON, no markdown fences.`;
     } catch (err) {
       console.error("[blog-html]", err);
       serveFallbackHtml(req, res);
+    }
+  });
+
+  // ─── Daily Dev Tips Bot — Admin-only ────────────────────────────────────────
+  // All routes require role === "admin".
+
+  const devTipsRateLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    max: 60,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { message: "Too many Dev Tips requests, please slow down." },
+  });
+
+  // GET /api/admin/dev-tips/status
+  app.get("/api/admin/dev-tips/status", devTipsRateLimiter, requireAdmin, async (_req, res) => {
+    try {
+      const status = await getDevTipsBotStatusFull();
+      res.json(status);
+    } catch (err) {
+      console.error("[dev-tips/status]", err);
+      res.status(500).json({ message: "Failed to get bot status" });
+    }
+  });
+
+  // GET /api/admin/dev-tips/config
+  app.get("/api/admin/dev-tips/config", devTipsRateLimiter, requireAdmin, async (_req, res) => {
+    try {
+      let config = await DevTipsBotConfigModel.findOne().lean();
+      if (!config) {
+        const doc = new DevTipsBotConfigModel({});
+        await doc.save();
+        config = doc.toObject();
+      }
+      res.json(config);
+    } catch (err) {
+      console.error("[dev-tips/config GET]", err);
+      res.status(500).json({ message: "Failed to load config" });
+    }
+  });
+
+  // PATCH /api/admin/dev-tips/config
+  app.patch("/api/admin/dev-tips/config", devTipsRateLimiter, requireAdmin, async (req, res) => {
+    try {
+      const {
+        postIntervalMs,
+        allowedFormats,
+        defaultPlatforms,
+        pillarWeights,
+        autoPublish,
+        tone,
+        audience,
+      } = req.body;
+
+      const update: Record<string, unknown> = {};
+
+      if (postIntervalMs !== undefined) {
+        const v = Number(postIntervalMs);
+        if (!Number.isFinite(v) || v < 60_000 || v > 30 * 24 * 60 * 60 * 1000) {
+          return res.status(400).json({ message: "postIntervalMs must be between 60000 ms and 30 days" });
+        }
+        update.postIntervalMs = v;
+      }
+      if (allowedFormats !== undefined) {
+        if (!Array.isArray(allowedFormats) || !allowedFormats.every((f: unknown) => DEV_TIPS_FORMATS.includes(f as any))) {
+          return res.status(400).json({ message: "Invalid allowedFormats" });
+        }
+        update.allowedFormats = allowedFormats;
+      }
+      if (defaultPlatforms !== undefined) {
+        if (!Array.isArray(defaultPlatforms) || !defaultPlatforms.every((p: unknown) => DEV_TIPS_PLATFORMS.includes(p as any))) {
+          return res.status(400).json({ message: "Invalid defaultPlatforms" });
+        }
+        update.defaultPlatforms = defaultPlatforms;
+      }
+      if (pillarWeights !== undefined) update.pillarWeights = pillarWeights;
+      if (autoPublish !== undefined) update.autoPublish = Boolean(autoPublish);
+      if (tone !== undefined) update.tone = String(tone).slice(0, 80);
+      if (audience !== undefined) update.audience = String(audience).slice(0, 120);
+
+      let config = await DevTipsBotConfigModel.findOne();
+      if (!config) config = new DevTipsBotConfigModel({});
+      Object.assign(config, update);
+      await config.save();
+      res.json(config.toObject());
+    } catch (err) {
+      console.error("[dev-tips/config PATCH]", err);
+      res.status(500).json({ message: "Failed to update config" });
+    }
+  });
+
+  // PATCH /api/admin/dev-tips/social-accounts — upsert social account credentials
+  app.patch("/api/admin/dev-tips/social-accounts", devTipsRateLimiter, requireAdmin, async (req, res) => {
+    try {
+      const { platform, enabled, accessToken, refreshToken, accountId, displayName } = req.body;
+
+      if (!DEV_TIPS_PLATFORMS.includes(platform)) {
+        return res.status(400).json({ message: "Invalid platform" });
+      }
+
+      let config = await DevTipsBotConfigModel.findOne();
+      if (!config) config = new DevTipsBotConfigModel({});
+
+      const accounts: any[] = (config.socialAccounts as any[]) ?? [];
+      const idx = accounts.findIndex((a: any) => a.platform === platform);
+      const accountData: any = {
+        platform,
+        enabled: enabled !== undefined ? Boolean(enabled) : (idx >= 0 ? accounts[idx].enabled : false),
+        accessToken: accessToken ?? (idx >= 0 ? accounts[idx].accessToken : undefined),
+        refreshToken: refreshToken ?? (idx >= 0 ? accounts[idx].refreshToken : undefined),
+        accountId: accountId ?? (idx >= 0 ? accounts[idx].accountId : undefined),
+        displayName: displayName ?? (idx >= 0 ? accounts[idx].displayName : undefined),
+        connectedAt: new Date(),
+      };
+
+      if (idx >= 0) {
+        accounts[idx] = accountData;
+      } else {
+        accounts.push(accountData);
+      }
+
+      config.socialAccounts = accounts;
+      await config.save();
+      // Return without exposing raw tokens
+      const safeAccounts = accounts.map(({ accessToken: _at, refreshToken: _rt, ...rest }: any) => ({
+        ...rest,
+        hasToken: Boolean(_at),
+      }));
+      res.json({ socialAccounts: safeAccounts });
+    } catch (err) {
+      console.error("[dev-tips/social-accounts PATCH]", err);
+      res.status(500).json({ message: "Failed to update social account" });
+    }
+  });
+
+  // GET /api/admin/dev-tips/posts
+  app.get("/api/admin/dev-tips/posts", devTipsRateLimiter, requireAdmin, async (req, res) => {
+    try {
+      const page = Math.max(1, parseInt(String(req.query.page ?? "1"), 10));
+      const limit = Math.min(50, Math.max(1, parseInt(String(req.query.limit ?? "20"), 10)));
+      const status = typeof req.query.status === "string" ? req.query.status : undefined;
+      const pillar = typeof req.query.pillar === "string" ? req.query.pillar : undefined;
+
+      const filter: Record<string, unknown> = {};
+      if (status) filter.status = status;
+      if (pillar) filter.pillar = pillar;
+
+      const total = await DevTipsPostModel.countDocuments(filter);
+      const posts = await DevTipsPostModel.find(filter)
+        .sort({ createdAt: -1 })
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .select("-svgCard -htmlCard") // exclude heavy fields from list
+        .lean();
+
+      res.json({ posts, total, page, limit });
+    } catch (err) {
+      console.error("[dev-tips/posts GET]", err);
+      res.status(500).json({ message: "Failed to load posts" });
+    }
+  });
+
+  // GET /api/admin/dev-tips/posts/:id
+  app.get("/api/admin/dev-tips/posts/:id", devTipsRateLimiter, requireAdmin, async (req, res) => {
+    try {
+      const post = await DevTipsPostModel.findById(req.params.id).lean();
+      if (!post) return res.status(404).json({ message: "Post not found" });
+      res.json(post);
+    } catch (err) {
+      console.error("[dev-tips/posts/:id GET]", err);
+      res.status(500).json({ message: "Failed to load post" });
+    }
+  });
+
+  // GET /api/admin/dev-tips/posts/:id/preview.svg
+  app.get("/api/admin/dev-tips/posts/:id/preview.svg", devTipsRateLimiter, requireAdmin, async (req, res) => {
+    try {
+      const post = await DevTipsPostModel.findById(req.params.id).lean() as any;
+      if (!post) return res.status(404).json({ message: "Post not found" });
+      const svg = post.svgCard ?? generateSvgCard({
+        pillar: post.pillar,
+        title: post.title,
+        caption: post.caption,
+        hashtags: post.hashtags ?? [],
+        format: post.format,
+      });
+      res.set("Content-Type", "image/svg+xml").send(svg);
+    } catch (err) {
+      console.error("[dev-tips/preview.svg]", err);
+      res.status(500).json({ message: "Failed to render SVG" });
+    }
+  });
+
+  // GET /api/admin/dev-tips/posts/:id/preview.html
+  app.get("/api/admin/dev-tips/posts/:id/preview.html", devTipsRateLimiter, requireAdmin, async (req, res) => {
+    try {
+      const post = await DevTipsPostModel.findById(req.params.id).lean() as any;
+      if (!post) return res.status(404).json({ message: "Post not found" });
+      const html = post.htmlCard ?? generateHtmlCard({
+        pillar: post.pillar,
+        title: post.title,
+        caption: post.caption,
+        hashtags: post.hashtags ?? [],
+        format: post.format,
+      });
+      res.set("Content-Type", "text/html").send(html);
+    } catch (err) {
+      console.error("[dev-tips/preview.html]", err);
+      res.status(500).json({ message: "Failed to render HTML card" });
+    }
+  });
+
+  // POST /api/admin/dev-tips/posts/:id/approve
+  app.post("/api/admin/dev-tips/posts/:id/approve", devTipsRateLimiter, requireAdmin, async (req, res) => {
+    try {
+      const post = await DevTipsPostModel.findByIdAndUpdate(
+        req.params.id,
+        { status: "approved" },
+        { new: true }
+      ).lean();
+      if (!post) return res.status(404).json({ message: "Post not found" });
+      res.json(post);
+    } catch (err) {
+      console.error("[dev-tips/posts/:id/approve]", err);
+      res.status(500).json({ message: "Failed to approve post" });
+    }
+  });
+
+  // POST /api/admin/dev-tips/posts/:id/reject
+  app.post("/api/admin/dev-tips/posts/:id/reject", devTipsRateLimiter, requireAdmin, async (req, res) => {
+    try {
+      const post = await DevTipsPostModel.findByIdAndUpdate(
+        req.params.id,
+        { status: "rejected" },
+        { new: true }
+      ).lean();
+      if (!post) return res.status(404).json({ message: "Post not found" });
+      res.json(post);
+    } catch (err) {
+      console.error("[dev-tips/posts/:id/reject]", err);
+      res.status(500).json({ message: "Failed to reject post" });
+    }
+  });
+
+  // POST /api/admin/dev-tips/posts/:id/publish
+  app.post("/api/admin/dev-tips/posts/:id/publish", devTipsRateLimiter, requireAdmin, async (req, res) => {
+    try {
+      const result = await devTipsPublishPost(req.params.id);
+      res.json(result);
+    } catch (err) {
+      console.error("[dev-tips/posts/:id/publish]", err);
+      res.status(500).json({ message: err instanceof Error ? err.message : "Failed to publish post" });
+    }
+  });
+
+  // DELETE /api/admin/dev-tips/posts/:id
+  app.delete("/api/admin/dev-tips/posts/:id", devTipsRateLimiter, requireAdmin, async (req, res) => {
+    try {
+      const post = await DevTipsPostModel.findByIdAndDelete(req.params.id).lean();
+      if (!post) return res.status(404).json({ message: "Post not found" });
+      res.json({ message: "Post deleted" });
+    } catch (err) {
+      console.error("[dev-tips/posts/:id DELETE]", err);
+      res.status(500).json({ message: "Failed to delete post" });
+    }
+  });
+
+  // POST /api/admin/dev-tips/generate — trigger one generation cycle immediately
+  app.post("/api/admin/dev-tips/generate", devTipsRateLimiter, requireAdmin, async (_req, res) => {
+    try {
+      const result = await runGenerationCycle();
+      res.json(result);
+    } catch (err) {
+      console.error("[dev-tips/generate]", err);
+      res.status(500).json({ message: "Generation failed" });
+    }
+  });
+
+  // POST /api/admin/dev-tips/start
+  app.post("/api/admin/dev-tips/start", devTipsRateLimiter, requireAdmin, async (_req, res) => {
+    try {
+      await startDevTipsBot();
+      res.json({ message: "Dev Tips Bot started" });
+    } catch (err) {
+      console.error("[dev-tips/start]", err);
+      res.status(500).json({ message: "Failed to start bot" });
+    }
+  });
+
+  // POST /api/admin/dev-tips/pause
+  app.post("/api/admin/dev-tips/pause", devTipsRateLimiter, requireAdmin, (_req, res) => {
+    pauseDevTipsBot();
+    res.json({ message: "Dev Tips Bot paused" });
+  });
+
+  // POST /api/admin/dev-tips/resume
+  app.post("/api/admin/dev-tips/resume", devTipsRateLimiter, requireAdmin, async (_req, res) => {
+    try {
+      await resumeDevTipsBot();
+      res.json({ message: "Dev Tips Bot resumed" });
+    } catch (err) {
+      console.error("[dev-tips/resume]", err);
+      res.status(500).json({ message: "Failed to resume bot" });
+    }
+  });
+
+  // POST /api/admin/dev-tips/stop
+  app.post("/api/admin/dev-tips/stop", devTipsRateLimiter, requireAdmin, async (_req, res) => {
+    try {
+      await stopDevTipsBot();
+      res.json({ message: "Dev Tips Bot stopped" });
+    } catch (err) {
+      console.error("[dev-tips/stop]", err);
+      res.status(500).json({ message: "Failed to stop bot" });
     }
   });
 }
