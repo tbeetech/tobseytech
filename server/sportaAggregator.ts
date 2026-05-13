@@ -367,7 +367,7 @@ export async function aggregateCampaignContent(
               sourceUrl: postUrl,
               sourcePlatform: "Reddit",
               originalTitle: post.title,
-              originalContent: post.selftext ? post.selftext.slice(0, 1000) : undefined,
+              originalContent: post.selftext?.slice(0, 1000),
               originalAuthor: `u/${post.author} on r/${feed.url}`,
               originalThumbnail: thumb,
               mediaType: post.post_hint === "image" ? preferredImageType : preferredBlogType,
