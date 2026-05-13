@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Menu, X, LogIn, LogOut, User, MessageCircle, LayoutDashboard, Globe2, Sun, Moon } from "lucide-react";
+import { Menu, X, LogIn, LogOut, User, MessageCircle, LayoutDashboard, Globe2, Sun, Moon, Settings } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useTheme } from "@/hooks/use-theme";
 import NotificationBell from "@/components/NotificationBell";
@@ -127,6 +127,16 @@ export default function Navigation() {
                     <User className="w-3 h-3" /> {user.username}
                   </button>
                 </Link>
+                <Link href={`/profile/${user.id}#privacy-security`}>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label="Privacy & Security settings"
+                    className="text-galactic-orange/70 hover:text-galactic-gold h-8 w-8"
+                  >
+                    <Settings className="w-4 h-4" />
+                  </Button>
+                </Link>
                 <Button
                   size="sm"
                   variant="ghost"
@@ -218,6 +228,11 @@ export default function Navigation() {
                   <Link href={`/profile/${user.id}`} onClick={() => setIsOpen(false)}>
                     <button className="text-left text-galactic-orange font-orbitron hover:text-galactic-gold flex items-center gap-1">
                       <User className="w-3 h-3" /> {user.username}
+                    </button>
+                  </Link>
+                  <Link href={`/profile/${user.id}#privacy-security`} onClick={() => setIsOpen(false)}>
+                    <button className="text-left text-galactic-orange/70 font-orbitron hover:text-galactic-gold flex items-center gap-1 text-sm">
+                      <Settings className="w-3 h-3" /> Settings
                     </button>
                   </Link>
                   <Link href="/chat" onClick={() => setIsOpen(false)}>

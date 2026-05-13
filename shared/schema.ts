@@ -33,6 +33,11 @@ export const updateProfileSchema = z.object({
   avatarUrl: z.string().url().optional().nullable(),
 });
 
+export const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1),
+  newPassword: z.string().min(6),
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
 export type UpdateProfile = z.infer<typeof updateProfileSchema>;
