@@ -29,6 +29,7 @@ import {
   insertCommentSchema,
   insertEditSuggestionSchema,
   insertMessageSchema,
+  changePasswordSchema,
   type InsertNotification,
   SPORTA_CONTENT_STATUSES,
 } from "../shared/schema.js";
@@ -675,6 +676,25 @@ async function _registerRouteHandlers(app: Express): Promise<void> {
         return res.status(400).json({ message: "Invalid data", errors: error.errors });
       }
       res.status(500).json({ message: "Failed to update profile" });
+    }
+  });
+
+  app.post("/api/user/change-password", authRateLimiter, requireAuth, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { currentPassword, newPassword } = changePasswordSchema.parse(req.body);
+      const fullUser = await storage.getUser(user.id);
+      if (!fullUser) return res.status(404).json({ message: "User not found" });
+      const valid = await bcrypt.compare(currentPassword, fullUser.password);
+      if (!valid) return res.status(401).json({ message: "Current password is incorrect" });
+      const hashed = await bcrypt.hash(newPassword, 12);
+      await storage.updateUserPassword(user.id, hashed);
+      res.json({ ok: true });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to change password" });
     }
   });
 
