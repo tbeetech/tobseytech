@@ -13,14 +13,11 @@ import {
   Zap,
   Shield,
   Brain,
-  Target,
   TrendingUp,
   RefreshCw,
   CheckCircle,
   Clock,
-  Database,
   Globe2,
-  Cpu,
   Lock,
   Layers,
   FlaskConical,
@@ -35,64 +32,64 @@ const coreCapabilities = [
     icon: Mail,
     color: "text-neon-cyan",
     border: "border-neon-cyan",
-    title: "React-Rendered Email Templates",
-    desc: "High-fidelity, component-based email templates built with @react-email. Render pixel-perfect HTML emails server-side — no more broken Outlook layouts.",
+    title: "Beautiful Email Templates",
+    desc: "Pick from professionally designed templates and customise them in minutes. Every email looks stunning on phones, tablets, and desktops — no design skills needed.",
   },
   {
     icon: Users,
     color: "text-galactic-orange",
     border: "border-galactic-orange",
-    title: "Multi-Tenant Contact Lists",
-    desc: "Every organisation gets an isolated namespace. Contacts, lists, campaigns, and analytics are fully scoped to your organisation ID — zero data bleed.",
+    title: "Easy Contact Management",
+    desc: "Import your subscribers, organise them into groups, and keep your list clean. Unsubscribes are handled automatically so you stay compliant without lifting a finger.",
   },
   {
     icon: Brain,
     color: "text-neon-purple",
     border: "border-neon-purple",
-    title: "AI-Powered Subject Line & Body",
-    desc: "Generate, rewrite, and A/B test email subjects and body copy using Gemini AI. Tone selector, audience targeting, and spam-score analysis built in.",
+    title: "AI-Powered Writing Assistant",
+    desc: "Stuck on what to write? Let AI suggest subject lines and body copy tailored to your audience. Refine the tone, test different versions, and send with confidence.",
   },
   {
     icon: Clock,
     color: "text-galactic-gold",
     border: "border-galactic-gold",
-    title: "Cron-Driven Dispatch Engine",
-    desc: "Schedule campaigns down to the minute. The /api/cron/dispatch endpoint is triggered by Vercel Cron or GitHub Actions and processes your campaign queue atomically.",
+    title: "Smart Email Scheduling",
+    desc: "Write your email now, send it later. Schedule campaigns to land in inboxes at exactly the right time — whether that's tomorrow morning or next Monday.",
   },
   {
     icon: MousePointerClick,
     color: "text-galactic-green",
     border: "border-galactic-green",
-    title: "Open & Click Tracking Pixel",
-    desc: "Lightweight 1×1 GIF tracking pixel and click-wrap API. All events are logged back to MongoDB using atomic $inc updates — zero performance hit.",
+    title: "Real-Time Open & Click Tracking",
+    desc: "See who opened your email, which links they clicked, and when. Use these live insights to improve every campaign you send.",
   },
   {
     icon: FlaskConical,
     color: "text-neon-cyan",
     border: "border-neon-cyan",
-    title: "A/B Split Testing (Pro+)",
-    desc: "Split your audience automatically between two subject lines. The winning variant (by open rate) is auto-selected after a configurable test window.",
-  },
-  {
-    icon: Database,
-    color: "text-galactic-orange",
-    border: "border-galactic-orange",
-    title: "MongoDB Source of Truth",
-    desc: "Organisations, lists, campaigns and events all live in the same MongoDB Atlas cluster as your main app. One database — one source of truth.",
+    title: "A/B Subject Line Testing (Pro+)",
+    desc: "Try two subject lines at once. EmailOS automatically sends the winner to the rest of your list — more opens, zero guesswork.",
   },
   {
     icon: Shield,
     color: "text-galactic-green",
     border: "border-galactic-green",
-    title: "JWT Bridge Authentication",
-    desc: "The Next.js sidecar validates your existing Express JWTs automatically. Users stay logged in across both stacks — no duplicate logins.",
+    title: "Private & Secure",
+    desc: "Your subscriber list, campaigns, and analytics are completely private to your account. No one else can see your data — ever.",
+  },
+  {
+    icon: BarChart3,
+    color: "text-galactic-orange",
+    border: "border-galactic-orange",
+    title: "Campaign Analytics Dashboard",
+    desc: "A clear overview of every campaign — opens, clicks, bounces, and unsubscribes — so you always know what's working and what to improve.",
   },
   {
     icon: Webhook,
     color: "text-neon-purple",
     border: "border-neon-purple",
-    title: "Custom Cron Expressions (Enterprise)",
-    desc: "Enterprise teams can set per-campaign custom cron schedules (down to 1-minute intervals) for time-critical newsletters and transactional sequences.",
+    title: "Custom Send Schedules (Enterprise)",
+    desc: "Enterprise accounts can set precise, recurring send schedules for time-sensitive newsletters, promotions, and automated sequences.",
   },
 ];
 
@@ -162,7 +159,7 @@ const tiers = [
       analytics: "Full analytics + export",
       support: "Dedicated SLA support (99.9% uptime)",
       abTesting: "Advanced A/B + multivariate testing",
-      customCron: "Custom cron (1-min intervals)",
+      customCron: "Custom send schedules (1-min intervals)",
       whiteLabel: "White-label & custom domain",
       api: "Full REST API + webhooks",
     },
@@ -171,15 +168,15 @@ const tiers = [
   },
 ];
 
-const techStack = [
-  { label: "Next.js Route Handlers", icon: Cpu },
-  { label: "Amazon SES Delivery", icon: Mail },
-  { label: "MongoDB Atlas", icon: Database },
-  { label: "@react-email Components", icon: Layers },
-  { label: "JWT Auth Bridge", icon: Lock },
-  { label: "Vercel Cron / GitHub Actions", icon: RefreshCw },
-  { label: "Atomic $inc Tracking", icon: MousePointerClick },
-  { label: "Multi-Tenant orgId Scope", icon: Globe2 },
+const whyEmailOS = [
+  { label: "No technical skills needed", icon: CheckCircle },
+  { label: "Works on any device", icon: Globe2 },
+  { label: "Fast, reliable delivery", icon: Mail },
+  { label: "Beautiful ready-made templates", icon: Layers },
+  { label: "Your data stays private", icon: Lock },
+  { label: "Scheduled sending", icon: RefreshCw },
+  { label: "Track every open & click", icon: MousePointerClick },
+  { label: "Exclusive to TOBSEYTECH", icon: Shield },
 ];
 
 // ─── Component ───────────────────────────────────────────────────────────────
@@ -193,7 +190,7 @@ export default function FeatureEmailOSPage() {
 
   return (
     <div className="min-h-screen bg-space-black text-white">
-      <title>EmailOS – Multi-Tenant Email Marketing Platform | TOBSEYTECH</title>
+      <title>EmailOS – Email Marketing for Everyone | TOBSEYTECH</title>
       <Navigation />
 
       <main className="pt-20">
@@ -214,21 +211,21 @@ export default function FeatureEmailOSPage() {
                 EmailOS
               </h1>
               <p className="text-xl md:text-2xl text-neon-cyan font-orbitron font-semibold mb-6">
-                Multi-Tenant Email Marketing Operating System
+                Email Marketing Made Simple
               </p>
               <p className="text-gray-300 max-w-3xl mx-auto text-lg leading-relaxed mb-10">
-                A Next.js 15 sidecar module that plugs directly into your MERN stack. Manage contacts,
-                design AI-rendered campaigns, schedule delivery via SES, and track every open and click —
-                all scoped to your organisation with zero data bleed.
+                Send beautiful emails to thousands of people, grow your audience, and see your results in real time.
+                No technical skills needed — if you can type, you can run a campaign.
+                EmailOS is exclusively available on TOBSEYTECH.
               </p>
               <div className="flex flex-wrap justify-center gap-3 mb-8">
                 {[
-                  { label: "Contacts (Free)", value: "500" },
-                  { label: "Contacts (Pro)", value: "10K" },
-                  { label: "Dispatch Engine", value: "Cron" },
-                  { label: "Tracking", value: "Pixel" },
-                  { label: "Email Provider", value: "SES" },
-                  { label: "Auth", value: "JWT Bridge" },
+                  { label: "Free Contacts", value: "500" },
+                  { label: "Pro Contacts", value: "10K" },
+                  { label: "Smart Scheduling", value: "✓" },
+                  { label: "Open Tracking", value: "Live" },
+                  { label: "A/B Testing", value: "Pro+" },
+                  { label: "Exclusive to", value: "TOBSEYTECH" },
                 ].map(({ label, value }) => (
                   <div key={label} className="px-4 py-3 glass-effect rounded-xl border border-neon-cyan/20 text-center">
                     <div className="font-orbitron font-black text-neon-cyan text-2xl">{value}</div>
@@ -239,7 +236,7 @@ export default function FeatureEmailOSPage() {
               <div className="flex justify-center gap-4">
                 <Link href={launchHref}>
                   <Button className="bg-neon-cyan text-space-black font-orbitron font-bold px-8 h-12 text-sm hover:bg-neon-cyan/80 shadow-[0_0_30px_rgba(6,182,212,0.4)] transition-all">
-                    <Zap className="w-4 h-4 mr-2" /> {user ? "Launch EmailOS" : "Create Free Account"}
+                    <Zap className="w-4 h-4 mr-2" /> {user ? "Open EmailOS" : "Start for Free"}
                   </Button>
                 </Link>
                 <Link href="/features">
@@ -257,13 +254,13 @@ export default function FeatureEmailOSPage() {
           <div className="container mx-auto max-w-7xl">
             <div className="text-center mb-14">
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-galactic-orange/30 text-galactic-orange text-sm font-orbitron mb-4">
-                <Brain className="w-4 h-4" /> Platform Capabilities
+                <Brain className="w-4 h-4" /> What You Can Do
               </div>
               <h2 className="font-orbitron font-bold text-4xl gradient-text mb-4">
-                Enterprise Email Infrastructure
+                Everything You Need to Grow
               </h2>
               <p className="text-gray-400 max-w-2xl mx-auto">
-                EmailOS is not a basic newsletter tool — it's a full-stack email operating system designed for multi-tenant SaaS.
+                EmailOS gives you all the tools to reach your audience, nurture your subscribers, and grow your business — without any technical know-how.
               </p>
             </div>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -355,22 +352,22 @@ export default function FeatureEmailOSPage() {
           </div>
         </section>
 
-        {/* ── Tech Stack ── */}
+        {/* ── Why EmailOS ── */}
         <section className="py-20 px-6">
           <div className="container mx-auto max-w-5xl">
             <div className="text-center mb-12">
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-neon-purple/30 text-neon-purple text-sm font-orbitron mb-4">
-                <Cpu className="w-4 h-4" /> Under the Hood
+                <CheckCircle className="w-4 h-4" /> Why EmailOS
               </div>
               <h2 className="font-orbitron font-bold text-4xl gradient-text mb-4">
-                The Technical Architecture
+                Built for Everyone, Not Just Tech People
               </h2>
               <p className="text-gray-400 max-w-2xl mx-auto">
-                EmailOS is a Next.js 15 "sidecar" that shares your MongoDB Atlas cluster and validates your existing Express JWTs — zero duplicate infrastructure.
+                EmailOS is exclusive to TOBSEYTECH. It's designed so anyone — from first-time senders to seasoned marketers — can run powerful email campaigns with confidence.
               </p>
             </div>
             <div className="flex flex-wrap justify-center gap-3">
-              {techStack.map((item, i) => {
+              {whyEmailOS.map((item, i) => {
                 const Icon = item.icon;
                 return (
                   <motion.div
@@ -390,16 +387,17 @@ export default function FeatureEmailOSPage() {
           </div>
         </section>
 
-        {/* ── Architecture Principle ── */}
+        {/* ── Exclusive Platform Note ── */}
         <section className="py-16 px-6 bg-space-dark/40">
           <div className="container mx-auto max-w-3xl text-center">
             <div className="glass-effect p-10 rounded-3xl border border-neon-cyan/20">
-              <Brain className="w-12 h-12 text-neon-cyan mx-auto mb-5" />
+              <Mail className="w-12 h-12 text-neon-cyan mx-auto mb-5" />
               <blockquote className="font-orbitron font-bold text-2xl gradient-text mb-4">
-                "Decouple the UI, Unify the Data."
+                "Your Audience. Your Campaigns. Your Results."
               </blockquote>
               <p className="text-gray-400 leading-relaxed">
-                React components live in different stacks — MERN handles the community, Next.js handles the email engine — but both talk to the <span className="text-neon-cyan font-semibold">same MongoDB source of truth</span>. Your community members get a seamless, unified experience.
+                EmailOS lives exclusively inside TOBSEYTECH. Your contacts, campaigns, and analytics are private to your account and protected at all times.
+                Whether you're sending your first newsletter or your ten-thousandth, EmailOS keeps it simple.
               </p>
             </div>
           </div>
@@ -410,20 +408,20 @@ export default function FeatureEmailOSPage() {
           <div className="container mx-auto max-w-3xl text-center">
             <div className="glass-effect p-10 rounded-3xl border border-galactic-orange/30">
               <h2 className="font-orbitron font-bold text-3xl gradient-text mb-4">
-                Ready to Launch Your Email Engine?
+                Ready to Send Your First Campaign?
               </h2>
               <p className="text-gray-300 mb-6 max-w-xl mx-auto">
-                Start free today. No credit card required. Build your first campaign in minutes.
+                Start free today. No credit card. No technical setup. Create your account and send your first email in minutes.
               </p>
               <div className="flex flex-wrap justify-center gap-4">
                 <Link href={launchHref}>
                   <Button size="lg" className="bg-gradient-to-r from-neon-cyan to-galactic-orange text-space-black font-orbitron font-bold">
-                    <Zap className="w-4 h-4 mr-2" /> {user ? "Launch EmailOS" : "Create Free Account"}
+                    <Zap className="w-4 h-4 mr-2" /> {user ? "Open EmailOS" : "Start for Free"}
                   </Button>
                 </Link>
                 <Link href="/contact">
                   <Button size="lg" variant="outline" className="border-neon-cyan/40 text-neon-cyan hover:bg-neon-cyan/10 font-orbitron">
-                    Talk to Sales
+                    Talk to Us
                   </Button>
                 </Link>
               </div>

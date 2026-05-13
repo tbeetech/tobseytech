@@ -113,7 +113,7 @@ const TIER_DEFS = [
     border: "border-galactic-orange",
     bg: "from-galactic-orange/10 to-galactic-orange/5",
     badge: "Unlimited",
-    features: ["Unlimited contacts", "Unlimited emails/month", "Unlimited campaigns", "Custom AI templates", "Full tracking & dedup", "Custom cron (1-min)", "White-label & API", "Dedicated SLA support"],
+    features: ["Unlimited contacts", "Unlimited emails/month", "Unlimited campaigns", "Custom AI templates", "Full tracking & dedup", "Custom send schedules", "White-label & API", "Dedicated SLA support"],
   },
 ];
 
@@ -341,20 +341,20 @@ function OnboardingWizard({ onComplete }: { onComplete: (org: Org) => void }) {
               <div className="w-20 h-20 rounded-full bg-neon-cyan/10 border border-neon-cyan/40 flex items-center justify-center mx-auto mb-6">
                 <Mail className="w-10 h-10 text-neon-cyan" />
               </div>
-              <h1 className="font-orbitron font-black text-3xl gradient-text mb-3">Welcome to EmailOS</h1>
+              <h1 className="font-orbitron font-black text-3xl gradient-text mb-3">Welcome to EmailOS 👋</h1>
               <p className="text-gray-300 mb-2 max-w-lg mx-auto">
-                Your <span className="text-neon-cyan font-semibold">multi-tenant email marketing operating system</span> is ready. Let's set up your organisation in under 2 minutes.
+                You're about to set up your very own <span className="text-neon-cyan font-semibold">email marketing account</span>. It takes less than 2 minutes and no technical knowledge is required.
               </p>
               <p className="text-gray-500 text-sm mb-8 max-w-lg mx-auto">
-                Contacts, campaigns, lists, and analytics — all scoped to your org with zero data bleed.
+                Manage your contacts, design campaigns, schedule sends, and track who opens your emails — all in one place.
               </p>
               <div className="flex flex-wrap gap-3 justify-center mb-8">
-                {["MongoDB-native","JWT Auth Bridge","SES Delivery","Cron Dispatch","A/B Testing"].map(tag => (
+                {["Grow Your Audience","Send Bulk Emails","Track Opens & Clicks","AI Writing Help","Schedule Campaigns"].map(tag => (
                   <span key={tag} className="px-3 py-1 rounded-full text-xs font-orbitron border border-neon-cyan/20 text-neon-cyan/70">{tag}</span>
                 ))}
               </div>
               <Button onClick={() => setStep(1)} className="bg-neon-cyan text-space-black font-orbitron font-bold px-10 h-12 hover:bg-neon-cyan/80">
-                Get Started <ArrowRight className="w-4 h-4 ml-2" />
+                Let's Get Started <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </motion.div>
           )}
@@ -365,29 +365,29 @@ function OnboardingWizard({ onComplete }: { onComplete: (org: Org) => void }) {
               <div className="flex items-center gap-3 mb-6">
                 <Building2 className="w-8 h-8 text-galactic-orange" />
                 <div>
-                  <h2 className="font-orbitron font-bold text-2xl gradient-text">Set Up Your Organisation</h2>
-                  <p className="text-gray-400 text-sm">This creates your isolated tenant namespace in MongoDB.</p>
+                  <h2 className="font-orbitron font-bold text-2xl gradient-text">Name Your Email Account</h2>
+                  <p className="text-gray-400 text-sm">This is just for you — so you can find your account easily.</p>
                 </div>
               </div>
               <div className="space-y-4 mb-8">
                 <div>
-                  <label className="block text-sm font-orbitron text-gray-300 mb-2">Organisation Name *</label>
+                  <label className="block text-sm font-orbitron text-gray-300 mb-2">Account Name *</label>
                   <input
                     value={orgName}
                     onChange={e => setOrgName(e.target.value)}
-                    placeholder="e.g. Acme Corp Newsletter"
+                    placeholder="e.g. My Newsletter, Acme Marketing, Sarah's Shop"
                     className="w-full bg-space-dark border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-galactic-orange/60 font-orbitron text-sm"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-orbitron text-gray-300 mb-2">Sending Domain *</label>
+                  <label className="block text-sm font-orbitron text-gray-300 mb-2">Your Website or Brand Domain *</label>
                   <input
                     value={orgDomain}
                     onChange={e => setOrgDomain(e.target.value)}
-                    placeholder="e.g. mail.acmecorp.com"
+                    placeholder="e.g. yourbusiness.com or mystore.co"
                     className="w-full bg-space-dark border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-galactic-orange/60 font-orbitron text-sm"
                   />
-                  <p className="text-gray-500 text-xs mt-1">Used as the sending domain for your campaigns via Amazon SES.</p>
+                  <p className="text-gray-500 text-xs mt-1">Your emails will be sent on behalf of this domain so recipients recognise you.</p>
                 </div>
               </div>
               <div className="flex gap-3">
@@ -523,7 +523,7 @@ function OnboardingWizard({ onComplete }: { onComplete: (org: Org) => void }) {
                   <input
                     value={campaignSubject}
                     onChange={e => setCampaignSubject(e.target.value)}
-                    placeholder="e.g. 🚀 Your Weekly Dev Tips — Issue #1"
+                    placeholder="e.g. 🎉 Our Big Summer Sale — Don't Miss It!"
                     className="w-full bg-space-dark border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-neon-purple/60 font-orbitron text-sm"
                   />
                 </div>
@@ -568,13 +568,13 @@ function OnboardingWizard({ onComplete }: { onComplete: (org: Org) => void }) {
               </div>
               <h2 className="font-orbitron font-black text-3xl gradient-text mb-3">You're All Set! 🎉</h2>
               <p className="text-gray-300 mb-2 max-w-md mx-auto">
-                Your EmailOS organisation is live. Head to your dashboard to manage contacts, design campaigns, and track performance.
+                Your EmailOS account is ready. Head to your dashboard to add contacts, create beautiful campaigns, and start sending!
               </p>
               <p className="text-gray-500 text-sm mb-8 max-w-md mx-auto">
-                All data is securely scoped to your organisation ID in MongoDB.
+                Everything is private and secure — only you have access to your account.
               </p>
               <div className="flex flex-wrap gap-3 justify-center mb-8">
-                {["Contacts Ready","Campaigns Ready","Tracking Active","SES Connected"].map(tag => (
+                {["Contacts Ready","Campaigns Ready","Tracking Active","Sending Enabled"].map(tag => (
                   <span key={tag} className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-orbitron border border-galactic-green/30 text-galactic-green">
                     <CheckCircle className="w-3 h-3" /> {tag}
                   </span>
@@ -582,7 +582,7 @@ function OnboardingWizard({ onComplete }: { onComplete: (org: Org) => void }) {
               </div>
               <Button onClick={handleLaunch} disabled={loading} className="bg-gradient-to-r from-galactic-orange to-galactic-gold text-space-black font-orbitron font-bold px-10 h-12 hover:opacity-90">
                 {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Zap className="w-4 h-4 mr-2" />}
-                Enter Dashboard
+                Go to My Dashboard
               </Button>
             </motion.div>
           )}
@@ -960,19 +960,18 @@ export default function EmailOSPage() {
               </div>
 
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-neon-cyan/20 text-neon-cyan text-xs font-orbitron mb-4">
-                <Zap className="w-3 h-3" /> EmailOS — SaaS Product #2
+                <Zap className="w-3 h-3" /> EmailOS — Email Marketing
               </div>
 
               <h1 className="font-orbitron font-black text-3xl md:text-4xl gradient-text mb-3">
-                Create a Free Account to Access EmailOS
+                Send Beautiful Emails to Thousands of People
               </h1>
               <p className="text-gray-300 max-w-lg mx-auto mb-2 leading-relaxed">
-                EmailOS is your personal multi-tenant email marketing operating system.
-                Every account gets its own isolated organisation in MongoDB — contacts, campaigns,
-                and analytics with <span className="text-neon-cyan font-semibold">zero data bleed</span>.
+                EmailOS is your personal email marketing tool, available exclusively on TOBSEYTECH.
+                Grow your audience, design stunning campaigns, and track every open and click — no technical skills needed.
               </p>
               <p className="text-gray-500 text-sm max-w-md mx-auto mb-8">
-                Sign up in under 30 seconds. No credit card required. Your Starter plan is free forever.
+                Create a free account in under 30 seconds. No credit card required. Your Starter plan is free forever.
               </p>
 
               {/* What you get */}
@@ -982,8 +981,8 @@ export default function EmailOSPage() {
                   { icon: Send,            label: "1,000 emails/mo free" },
                   { icon: MousePointerClick, label: "Open & click tracking" },
                   { icon: Layers,          label: "Email list management" },
-                  { icon: RefreshCw,       label: "Cron-driven dispatch" },
-                  { icon: CheckCircle,     label: "MongoDB-synced org" },
+                  { icon: RefreshCw,       label: "Scheduled sending" },
+                  { icon: CheckCircle,     label: "Private & secure" },
                 ].map(({ icon: Icon, label }) => (
                   <div key={label} className="flex items-center gap-2 px-3 py-2 glass-effect rounded-xl border border-white/10 text-sm text-gray-300">
                     <Icon className="w-4 h-4 text-neon-cyan shrink-0" />
@@ -1007,8 +1006,7 @@ export default function EmailOSPage() {
               </div>
 
               <p className="text-gray-600 text-xs mt-5 font-orbitron">
-                By creating an account you agree to our Terms of Service. Your EmailOS organisation
-                is created in MongoDB and linked exclusively to your user account.
+                By creating an account you agree to our Terms of Service. EmailOS is exclusively available on TOBSEYTECH and is linked to your personal account.
               </p>
             </div>
           </motion.div>
