@@ -2893,6 +2893,106 @@ Only return valid JSON, no markdown fences.`;
 
   // ─── Vlog CRUD (admin) ───────────────────────────────────────────────────
 
+  // POST /api/speed-cracker/vlogs/generate-meta — AI-generate title/description/tags from a video URL
+  app.post("/api/speed-cracker/vlogs/generate-meta", scRateLimiter, requireAdmin, async (req, res) => {
+    try {
+      const { url } = z.object({ url: z.string().url() }).parse(req.body);
+
+      // Detect platform from URL
+      let platform = "YouTube";
+      try {
+        const u = new URL(url);
+        const host = u.hostname.replace(/^www\./, "");
+        if (host === "youtu.be" || host === "youtube.com" || host.endsWith(".youtube.com")) platform = "YouTube";
+        else if (host === "tiktok.com" || host.endsWith(".tiktok.com")) platform = "TikTok";
+        else if (host === "vimeo.com" || host.endsWith(".vimeo.com")) platform = "Vimeo";
+        else if (host === "instagram.com" || host.endsWith(".instagram.com")) platform = "Instagram";
+        else if (host === "facebook.com" || host.endsWith(".facebook.com") || host === "fb.watch") platform = "Facebook";
+        else if (host === "dailymotion.com" || host.endsWith(".dailymotion.com")) platform = "Dailymotion";
+        else if (host === "twitter.com" || host.endsWith(".twitter.com") || host === "x.com" || host.endsWith(".x.com")) platform = "Twitter";
+        else if (host === "linkedin.com" || host.endsWith(".linkedin.com")) platform = "LinkedIn";
+      } catch { /* keep default */ }
+
+      // Try YouTube oEmbed for title + thumbnail
+      let ytTitle: string | null = null;
+      let thumbnail: string | null = null;
+      if (platform === "YouTube") {
+        try {
+          const oEmbedRes = await fetch(
+            `https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`,
+            { signal: AbortSignal.timeout(5000) }
+          );
+          if (oEmbedRes.ok) {
+            const oEmbed = await oEmbedRes.json() as { title?: string; thumbnail_url?: string };
+            ytTitle = oEmbed.title ?? null;
+            thumbnail = oEmbed.thumbnail_url ?? null;
+          }
+        } catch { /* non-critical */ }
+      }
+
+      // AI-generate description and metadata
+      const hasGemini = Boolean(getGeminiApiKeyConfig());
+      const hasOpenAI = Boolean(process.env.OPENAI_API_KEY);
+
+      let title = ytTitle ?? "";
+      let description = "";
+      let category = "Technology";
+      let tags: string[] = [];
+
+      if (hasGemini || hasOpenAI) {
+        const prompt = `You are a tech video content curator. A video has been shared from ${platform}.
+URL: ${url}
+${ytTitle ? `Video title: ${ytTitle}` : ""}
+
+Generate metadata for this video to feature on a tech video hub. Return valid JSON only (no markdown) with these keys:
+- "title": concise, engaging title (string, max 100 chars${ytTitle ? "; you can use or refine the provided title" : ""})
+- "description": 2-3 sentence summary describing what viewers will learn or experience (string, min 50 chars)
+- "category": one of: Technology, AI, Programming, Web Development, DevOps, Startup, Design, Career, General (string)
+- "tags": array of 3-6 relevant lowercase tags (string[])`;
+
+        try {
+          let raw: string;
+          if (hasGemini) {
+            const { client: gemini } = getGemini();
+            const result = await generateGeminiChatReply({
+              gemini,
+              systemInstruction: "You are a concise JSON metadata generator. Return only valid JSON with no extra text.",
+              messages: [{ role: "user", content: prompt }],
+              maxOutputTokens: 512,
+              temperature: 0.5,
+            });
+            raw = result.reply;
+          } else {
+            const openai = getOpenAI();
+            const completion = await openai.chat.completions.create({
+              model: "gpt-4o-mini",
+              messages: [
+                { role: "system", content: "You are a concise JSON metadata generator. Return only valid JSON with no extra text." },
+                { role: "user", content: prompt },
+              ],
+              max_tokens: 512,
+              temperature: 0.5,
+            });
+            raw = completion.choices[0]?.message?.content ?? "{}";
+          }
+
+          const cleaned = raw.replace(/```(?:json)?/gi, "").replace(/```/g, "").trim();
+          const parsed = JSON.parse(cleaned);
+          title = (typeof parsed.title === "string" && parsed.title) ? parsed.title : (ytTitle ?? "");
+          description = typeof parsed.description === "string" ? parsed.description : "";
+          category = typeof parsed.category === "string" ? parsed.category : "Technology";
+          tags = Array.isArray(parsed.tags) ? parsed.tags.filter((t: unknown) => typeof t === "string") : [];
+        } catch { /* fallback to ytTitle only */ }
+      }
+
+      res.json({ title, description, category, tags, thumbnail, platform });
+    } catch (err) {
+      if (err instanceof z.ZodError) return res.status(400).json({ message: "Invalid URL" });
+      console.error("[speed-cracker/vlogs/generate-meta]", err);
+      res.status(500).json({ message: "Failed to generate metadata" });
+    }
+  });
+
   // GET /api/speed-cracker/vlogs — list all vlogs (admin sees all, public sees published)
   app.get("/api/speed-cracker/vlogs", scRateLimiter, requireAdmin, async (_req, res) => {
     try {
@@ -2970,6 +3070,7 @@ Only return valid JSON, no markdown fences.`;
       const PLATFORM_MAP: Record<string, string> = {
         YouTube: "YouTube", TikTok: "TikTok", Vimeo: "Vimeo",
         Instagram: "Instagram", Facebook: "Facebook", Dailymotion: "Dailymotion",
+        Twitter: "Twitter", LinkedIn: "LinkedIn",
       };
       const embedPlatform = PLATFORM_MAP[item.sourcePlatform] ?? "YouTube";
       const slug = generateContentSlug(item.aiRewrittenTitle || item.originalTitle || "untitled");

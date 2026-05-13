@@ -44,8 +44,19 @@ function getEmbedSrc(embedUrl: string, platform: string): string | null {
       const id = url.pathname.split("/").filter(Boolean).pop() ?? "";
       return `https://www.dailymotion.com/embed/video/${id}`;
     }
+    if (platform === "TikTok") {
+      // https://www.tiktok.com/@user/video/1234567890
+      const parts = url.pathname.split("/").filter(Boolean);
+      const videoIdx = parts.indexOf("video");
+      const videoId = videoIdx !== -1 ? parts[videoIdx + 1] : parts[parts.length - 1];
+      return videoId ? `https://www.tiktok.com/embed/v2/${videoId}` : null;
+    }
+    if (platform === "Facebook") {
+      return `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(embedUrl)}&show_text=0&width=560`;
+    }
   } catch { /* ignore */ }
-  return embedUrl;
+  // Twitter, LinkedIn, Instagram — no reliable iframe embed; return null to show external link
+  return null;
 }
 
 export default function VlogPostPage() {

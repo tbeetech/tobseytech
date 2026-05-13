@@ -19,7 +19,7 @@ const NAV_ITEMS = [
   { path: "/admin/speed-cracker", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { path: "/admin/speed-cracker/workflows", label: "Workflows", icon: GitBranch },
   { path: "/admin/speed-cracker/approval-center", label: "Approval Center", icon: CheckSquare },
-  { path: "/admin/speed-cracker/vlog-manager", label: "Vlog Manager", icon: Video },
+  { path: "/admin/speed-cracker/vlog", label: "Vlog", icon: Video },
   { path: "/admin/speed-cracker/blog-manager", label: "Blog Manager", icon: FileText },
   { path: "/admin/speed-cracker/analytics", label: "Analytics", icon: BarChart3 },
   { path: "/admin/speed-cracker/settings", label: "Settings", icon: Settings },
