@@ -14,11 +14,11 @@ Strategy:
      domains where no explicit addresses are found.
   4. Deduplicate, validate, and return JSON to stdout.
 
-Dependencies (standard + open-source):
+Dependencies (stdlib only — no third-party packages required):
   - requests      — HTTP fetching
-  - beautifulsoup4— HTML parsing
   - re            — regex email extraction
   - urllib        — URL normalisation
+  - html.parser   — stdlib HTML parsing (replaces beautifulsoup4)
   - concurrent.futures — parallel page fetching
   - xml.etree     — RSS/XML parsing
 
@@ -34,9 +34,63 @@ import re
 import urllib.parse
 from concurrent.futures import ThreadPoolExecutor, as_completed, TimeoutError as ConcurrentFuturesTimeout
 from xml.etree import ElementTree
+from html.parser import HTMLParser
 
 import requests
-from bs4 import BeautifulSoup
+
+# ---------------------------------------------------------------------------
+# Stdlib HTML parser utilities (replaces beautifulsoup4)
+# ---------------------------------------------------------------------------
+
+class _LinkAndTextParser(HTMLParser):
+    """Minimal HTMLParser that collects href attributes and visible text.
+
+    Skips <script> and <style> tag content so that JS/CSS strings do not
+    pollute the visible-text buffer used for email/name extraction.
+    """
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.hrefs: list[str] = []
+        self._text_parts: list[str] = []
+        self._skip_depth: int = 0   # depth inside script/style blocks
+
+    # --- tag handlers -------------------------------------------------------
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        tag_lower = tag.lower()
+        if tag_lower in ('script', 'style'):
+            self._skip_depth += 1
+            return
+        attr_dict = {k.lower(): (v or '') for k, v in attrs}
+        href = attr_dict.get('href', '')
+        if href:
+            self.hrefs.append(href)
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag.lower() in ('script', 'style') and self._skip_depth > 0:
+            self._skip_depth -= 1
+
+    def handle_data(self, data: str) -> None:
+        if self._skip_depth == 0:
+            self._text_parts.append(data)
+
+    # --- convenience --------------------------------------------------------
+
+    @property
+    def text(self) -> str:
+        return ' '.join(self._text_parts)
+
+
+def _parse_html(raw: str) -> _LinkAndTextParser:
+    """Parse raw HTML bytes/string and return a populated _LinkAndTextParser."""
+    parser = _LinkAndTextParser()
+    try:
+        parser.feed(raw)
+    except Exception:
+        pass
+    return parser
+
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -270,10 +324,10 @@ def _extract_company_domains_from_article(article_url: str) -> list[str]:
         ct = resp.headers.get('Content-Type', '')
         if 'html' not in ct and 'text' not in ct:
             return []
-        soup = BeautifulSoup(resp.content[:MAX_BODY_BYTES], 'html.parser')
+        raw_html = resp.content[:MAX_BODY_BYTES].decode('utf-8', errors='ignore')
+        parsed = _parse_html(raw_html)
         domains: dict[str, None] = {}
-        for a in soup.find_all('a', href=True):
-            href: str = a['href']
+        for href in parsed.hrefs:
             if not href.startswith('http'):
                 continue
             d = _extract_domain(href)   # news sites filtered out here
@@ -328,21 +382,20 @@ def scrape_page_for_emails(url: str) -> list[dict]:
 
         raw = resp.content[:MAX_BODY_BYTES].decode('utf-8', errors='ignore')
 
-        # Use BeautifulSoup to extract visible text + mailto hrefs
-        soup = BeautifulSoup(raw, 'html.parser')
+        # Use stdlib html.parser to extract visible text + mailto hrefs
+        parsed = _parse_html(raw)
+        text = parsed.text
 
         collected: set[str] = set()
 
         # 1. Grab all mailto: links — most reliable source
-        for tag in soup.find_all('a', href=True):
-            href: str = tag['href']
+        for href in parsed.hrefs:
             if href.lower().startswith('mailto:'):
                 addr = href[7:].split('?')[0].strip().lower()
                 if addr and _is_valid_email(addr):
                     collected.add(addr)
 
         # 2. Scan visible text for email patterns
-        text = soup.get_text(separator=' ')
         for m in EMAIL_RE.finditer(text):
             addr = m.group(0).lower()
             if _is_valid_email(addr):
