@@ -74,7 +74,7 @@ function formatProphetMessage(content: string): ReactNode {
       {lines.map((line, li) => {
         const trimmed = line.trimStart();
 
-        if (trimmed === "") return <div key={li} className="h-1.5" />;
+        if (trimmed === "") return <div key={li} className="h-1.5" aria-hidden="true" />;
 
         // Headings
         if (trimmed.startsWith("### ")) {

@@ -2593,7 +2593,7 @@ ENGAGEMENT PRINCIPLES:
           userId: user.id,
           type: "sporta_content_aggregated",
           title: "Content Aggregated",
-          message: `${saved.length} new content item${saved.length === 1 ? "" : "s"} added to your SPORTA campaign.`,
+          message: `${saved.length} new post${saved.length === 1 ? "" : "s"} aggregated into your SPORTA campaign.`,
           link: `/sporta`,
           entityId: req.params.id,
         });
