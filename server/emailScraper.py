@@ -3,10 +3,13 @@
 emailScraper.py — Pure Python email scraper for EmailOS lead aggregation.
 
 Strategy:
-  1. Discover real business domains via Google News RSS for the requested
-     industry / keywords.  (No API key required — plain RSS feed.)
+  1. Discover real business domains via Bing News RSS.  Each Bing RSS item
+     embeds the actual article URL in a `url=` query-string parameter; we
+     extract that URL, fetch the article, and harvest external company links
+     from the article body.  This sidesteps the Google News RSS problem where
+     all links resolve to news.google.com (a blocked domain).
   2. For each discovered domain try to fetch common contact/about pages
-     and extract real email addresses using regex.
+     and extract real email addresses using regex + mailto: parsing.
   3. Fall back to generic business-email prefixes (info@, hello@, …) for
      domains where no explicit addresses are found.
   4. Deduplicate, validate, and return JSON to stdout.
@@ -67,6 +70,16 @@ BLOCKED_HOST_FRAGMENTS: list[str] = [
     'amazon', 'ebay', 'apple', 'microsoft',
 ]
 
+# News/media sites — we USE their articles for link-discovery but never treat
+# them as lead-generation targets (their contact emails are editorial, not B2B).
+NEWS_SITE_FRAGMENTS: list[str] = [
+    'techcrunch', 'siliconangle', 'bizjournals', 'reuters', 'bloomberg',
+    'wsj', 'cnbc', 'cnn', 'bbc', 'theverge', 'wired', 'forbes', 'fortune',
+    'mashable', 'engadget', 'gizmodo', 'venturebeat', 'businesswire',
+    'prnewswire', 'globenewswire', 'apnews', 'theregister', 'zdnet',
+    'infoworld', 'pcmag', 'cnet', 'arstechnica', 'thenextweb',
+]
+
 # Local parts that are not real inboxes
 BLOCKED_LOCAL_PARTS: set[str] = {
     'noreply', 'no-reply', 'donotreply', 'do-not-reply',
@@ -120,6 +133,7 @@ MAX_SCRAPE_TIMEOUT = 45      # seconds to wait for all parallel scraping futures
 MAX_DOMAINS_TO_SCRAPE = 25   # cap the number of domains we actively crawl
 MAX_BODY_BYTES = 60_000      # bytes of response body to parse
 PARALLEL_WORKERS = 6
+MAX_ARTICLES_TO_PARSE = 6    # max news articles to fetch for link extraction
 
 # Email local-part length bounds (RFC 5321 §4.5.3)
 MIN_LOCAL_LENGTH = 2
@@ -135,8 +149,9 @@ NAME_CONTEXT_CHARS = 200
 SESSION = requests.Session()
 SESSION.headers.update({
     'User-Agent': (
-        'Mozilla/5.0 (compatible; TobseyTechEmailOS/1.0; '
-        '+https://tobseytech.biz)'
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
+        'AppleWebKit/537.36 (KHTML, like Gecko) '
+        'Chrome/120.0.0.0 Safari/537.36'
     ),
     'Accept': 'text/html,application/xhtml+xml,*/*',
     'Accept-Language': 'en-US,en;q=0.9',
@@ -146,16 +161,13 @@ SESSION.headers.update({
 # Helpers
 # ---------------------------------------------------------------------------
 
-def _google_news_feed_url(query: str) -> str:
-    q = urllib.parse.quote(query)
-    return (
-        f'https://news.google.com/rss/search?q={q}'
-        '&hl=en-US&gl=US&ceid=US:en'
-    )
 
+def _extract_domain(url: str, allow_news: bool = False) -> str | None:
+    """Return clean hostname or None if it should be excluded.
 
-def _extract_domain(url: str) -> str | None:
-    """Return clean hostname or None if it should be excluded."""
+    When allow_news=True, news/media sites are not filtered out (we still
+    need to visit them to harvest company links from their articles).
+    """
     try:
         parsed = urllib.parse.urlparse(url)
         host: str = parsed.hostname or ''
@@ -165,6 +177,8 @@ def _extract_domain(url: str) -> str | None:
         if not host:
             return None
         if any(frag in host for frag in BLOCKED_HOST_FRAGMENTS):
+            return None
+        if not allow_news and any(frag in host for frag in NEWS_SITE_FRAGMENTS):
             return None
         if not re.match(r'^[a-z0-9.\-]+\.[a-z]{2,}$', host):
             return None
@@ -204,30 +218,93 @@ def _extract_name_near(text: str, email: str) -> tuple[str | None, str | None]:
 
 
 # ---------------------------------------------------------------------------
-# Step 1 — Domain discovery via Google News RSS
+# Step 1 — Domain discovery via Bing News RSS + article link harvesting
 # ---------------------------------------------------------------------------
 
-def fetch_google_news_domains(query: str) -> list[str]:
-    """Parse Google News RSS and extract unique business domains."""
-    url = _google_news_feed_url(query)
+def _bing_news_feed_url(query: str) -> str:
+    return f'https://www.bing.com/news/search?q={urllib.parse.quote(query)}&format=rss'
+
+
+def _parse_bing_rss_article_urls(query: str) -> list[str]:
+    """
+    Fetch Bing News RSS for the given query and return the actual article URLs.
+
+    Bing News RSS embeds the real destination inside a redirect URL of the form:
+      http://www.bing.com/news/apiclick.aspx?...&url=<encoded_url>&...
+    We decode that `url=` parameter to get the genuine article URL.
+    """
+    rss_url = _bing_news_feed_url(query)
     try:
-        resp = SESSION.get(url, timeout=REQUEST_TIMEOUT)
+        resp = SESSION.get(rss_url, timeout=REQUEST_TIMEOUT)
         resp.raise_for_status()
         root = ElementTree.fromstring(resp.content)
-        domains: dict[str, None] = {}   # ordered set
+        article_urls: list[str] = []
+        seen: set[str] = set()
         for item in root.findall('.//item'):
             link_el = item.find('link')
-            link_text = (link_el.text or '').strip() if link_el is not None else ''
-            if not link_text:
-                # Google News encodes links differently — try <guid>
-                guid_el = item.find('guid')
-                link_text = (guid_el.text or '').strip() if guid_el is not None else ''
-            d = _extract_domain(link_text)
-            if d and d not in domains:
+            raw_link = (link_el.text or '').strip() if link_el is not None else ''
+            if not raw_link:
+                continue
+            # Extract the actual URL from the Bing redirect
+            parsed = urllib.parse.urlparse(raw_link)
+            qs = urllib.parse.parse_qs(parsed.query)
+            actual = qs.get('url', [''])[0] or raw_link
+            if actual and actual not in seen:
+                seen.add(actual)
+                article_urls.append(actual)
+        return article_urls
+    except Exception:
+        return []
+
+
+def _extract_company_domains_from_article(article_url: str) -> list[str]:
+    """
+    Fetch a news article and return the external company domains linked from it.
+    We skip the article's own domain and any news/blocked sites.
+    """
+    article_host = _extract_domain(article_url, allow_news=True) or ''
+    try:
+        resp = SESSION.get(article_url, timeout=REQUEST_TIMEOUT, allow_redirects=True)
+        if not resp.ok:
+            return []
+        ct = resp.headers.get('Content-Type', '')
+        if 'html' not in ct and 'text' not in ct:
+            return []
+        soup = BeautifulSoup(resp.content[:MAX_BODY_BYTES], 'html.parser')
+        domains: dict[str, None] = {}
+        for a in soup.find_all('a', href=True):
+            href: str = a['href']
+            if not href.startswith('http'):
+                continue
+            d = _extract_domain(href)   # news sites filtered out here
+            if d and d != article_host and d not in domains:
                 domains[d] = None
         return list(domains.keys())
     except Exception:
         return []
+
+
+def fetch_business_domains(query: str, fallback_query: str) -> list[str]:
+    """
+    Discover real business domains by:
+      1. Fetching Bing News RSS article URLs for `query`
+      2. Visiting each article and harvesting external company links
+      3. Falling back to `fallback_query` if we found nothing
+    Returns a deduplicated, ordered list of business domain strings.
+    """
+    def _run(q: str) -> list[str]:
+        article_urls = _parse_bing_rss_article_urls(q)
+        domains: dict[str, None] = {}
+        for art_url in article_urls[:MAX_ARTICLES_TO_PARSE]:
+            for d in _extract_company_domains_from_article(art_url):
+                if d not in domains:
+                    domains[d] = None
+        return list(domains.keys())
+
+    domains = _run(query)
+    if not domains:
+        domains = _run(fallback_query)
+    return domains
 
 
 # ---------------------------------------------------------------------------
@@ -320,11 +397,10 @@ def aggregate_leads(industry: str, keywords: list[str], count: int) -> list[dict
     base_tags = ['aggregated-lead', industry.lower().replace(' ', '-')]
 
     # ── Step 1: Domain discovery ──────────────────────────────────────────────
-    domains = fetch_google_news_domains(search_term)
-    if not domains:
-        domains = fetch_google_news_domains(
-            f'{industry} company business'
-        )
+    domains = fetch_business_domains(
+        search_term,
+        fallback_query=f'{industry} company business',
+    )
 
     if not domains:
         return []
