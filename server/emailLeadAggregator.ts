@@ -236,16 +236,17 @@ export async function aggregateEmailLeads(
     if (leads.length >= clampedCount) break;
   }
 
-  // ── Strategy 3: Person names with person.lastName@firstName.lastName format -
-  // Fill any remaining slots when domain pool is small
-  for (let i = 0; i < persons.length && leads.length < clampedCount; i++) {
-    const { firstName, lastName } = persons[i];
-    // Use a plausible generic domain pattern for overflow
-    const overflowDomain = allDomains[i % Math.max(allDomains.length, 1)] ?? "gmail.com";
-    const email = `${firstName.toLowerCase()}${lastName.toLowerCase().slice(0, 1)}@${overflowDomain}`;
-    if (!seenEmails.has(email)) {
-      seenEmails.add(email);
-      leads.push({ email, firstName, lastName, tags: [...baseTags] });
+  // ── Strategy 3: Fill remaining slots using person names paired with
+  // already-discovered industry domains. Skip if no business domains found.
+  if (allDomains.length > 0) {
+    for (let i = 0; i < persons.length && leads.length < clampedCount; i++) {
+      const { firstName, lastName } = persons[i];
+      const overflowDomain = allDomains[i % allDomains.length];
+      const email = `${firstName.toLowerCase()}${lastName.toLowerCase().slice(0, 1)}@${overflowDomain}`;
+      if (!seenEmails.has(email)) {
+        seenEmails.add(email);
+        leads.push({ email, firstName, lastName, tags: [...baseTags] });
+      }
     }
   }
 

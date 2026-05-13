@@ -3563,9 +3563,8 @@ Only return valid JSON, no markdown fences.`;
                 html:    personalHtmlBody,
                 text:    personalTextBody,
               });
+              sent += 1;
             }
-            // Even without SMTP configured we count the send (simulated)
-            sent += 1;
           } catch (mailErr) {
             console.error(`[emailos/campaigns/send] Failed to send to ${contact.email}:`, mailErr);
           }
@@ -3700,9 +3699,11 @@ Only return valid JSON, no markdown fences.`;
                     html:    interpolate(campaign.htmlBody, vars),
                     text:    campaign.textBody ? interpolate(campaign.textBody, vars) : undefined,
                   });
+                  sent += 1;
                 }
-                sent += 1;
-              } catch { /* per-contact errors are non-fatal */ }
+              } catch (contactErr) {
+                console.error(`[emailos/cron] Failed to send to ${contact.email}:`, contactErr);
+              }
             }
 
             await EmailCampaignModel.findByIdAndUpdate(campaign._id, {
