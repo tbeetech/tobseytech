@@ -621,8 +621,8 @@ export default function ProfilePage() {
                       <ul className="space-y-2 text-sm text-gray-400">
                         {[
                           "We do not sell your personal data to third parties",
-                          "We do not use behavioural advertising or tracking pixels",
-                          "We do not share your email with outside organisations",
+                          "We do not use behavioral advertising or tracking pixels",
+                          "We do not share your email with outside organizations",
                           "Passwords are hashed with bcrypt — we never store them in plain text",
                         ].map((item) => (
                           <li key={item} className="flex items-start gap-2">
