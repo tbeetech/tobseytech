@@ -76,6 +76,18 @@ const authLenientLimiter = rateLimit({
   message: { message: "Too many requests, please try again later" },
 });
 
+// High-limit rate limiter for status/polling endpoints that are called
+// frequently by dashboard components (e.g. every 30 s via refetchInterval).
+// 200 requests per 15-minute window allows continuous polling without
+// hitting the stricter authRateLimiter limit.
+const pollRateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 200,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: "Too many requests, please try again later" },
+});
+
 /** Type guard for MongoDB duplicate-key errors (E11000). */
 function isMongoDBDuplicateKeyError(err: unknown): err is { code: number; keyPattern: Record<string, unknown> } {
   return (
@@ -1333,7 +1345,7 @@ async function _registerRouteHandlers(app: Express): Promise<void> {
     }
   });
 
-  app.get("/api/notifications/unread/count", authRateLimiter, requireAuth, async (req, res) => {
+  app.get("/api/notifications/unread/count", pollRateLimiter, requireAuth, async (req, res) => {
     try {
       const user = req.user as any;
       const count = await storage.getUnreadNotificationCount(user.id);
@@ -1994,7 +2006,7 @@ async function _registerRouteHandlers(app: Express): Promise<void> {
   let prophetEnabled = true;
 
   // Public: check whether Prophet AI is currently enabled
-  app.get("/api/prophet/status", (req, res) => {
+  app.get("/api/prophet/status", pollRateLimiter, (req, res) => {
     res.json({ enabled: prophetEnabled });
   });
 
@@ -2282,7 +2294,7 @@ ENGAGEMENT PRINCIPLES:
   // ─── Bot Worker routes ────────────────────────────────────────────────────
 
   // GET /api/bot/status — read-only status (admin or dashboard-verified)
-  app.get("/api/bot/status", authRateLimiter, requireDashboardAccess, (_req, res) => {
+  app.get("/api/bot/status", pollRateLimiter, requireDashboardAccess, (_req, res) => {
     try {
       res.json(getBotStatus());
     } catch {
@@ -2391,26 +2403,26 @@ ENGAGEMENT PRINCIPLES:
 
   // ─── Vid Aggregator ──────────────────────────────────────────────────────
 
-  app.get("/api/vid-aggregator/status", authRateLimiter, requireDashboardAccess, (_req, res) => {
+  app.get("/api/vid-aggregator/status", pollRateLimiter, requireDashboardAccess, (_req, res) => {
     res.json(getVidAggregatorStatus());
   });
 
-  app.post("/api/vid-aggregator/start", authRateLimiter, requireDashboardAccess, (_req, res) => {
+  app.post("/api/vid-aggregator/start", pollRateLimiter, requireDashboardAccess, (_req, res) => {
     startVidAggregator();
     res.json({ message: "Vid Aggregator started" });
   });
 
-  app.post("/api/vid-aggregator/pause", authRateLimiter, requireDashboardAccess, (_req, res) => {
+  app.post("/api/vid-aggregator/pause", pollRateLimiter, requireDashboardAccess, (_req, res) => {
     pauseVidAggregator();
     res.json({ message: "Vid Aggregator paused" });
   });
 
-  app.post("/api/vid-aggregator/resume", authRateLimiter, requireDashboardAccess, (_req, res) => {
+  app.post("/api/vid-aggregator/resume", pollRateLimiter, requireDashboardAccess, (_req, res) => {
     resumeVidAggregator();
     res.json({ message: "Vid Aggregator resumed" });
   });
 
-  app.post("/api/vid-aggregator/trigger", authRateLimiter, requireDashboardAccess, async (_req, res) => {
+  app.post("/api/vid-aggregator/trigger", pollRateLimiter, requireDashboardAccess, async (_req, res) => {
     try {
       await triggerVidAggregatorCycle();
       res.json({ message: "Vid Aggregator cycle triggered" });
@@ -2420,7 +2432,7 @@ ENGAGEMENT PRINCIPLES:
     }
   });
 
-  app.patch("/api/vid-aggregator/config", authRateLimiter, requireDashboardAccess, (req, res) => {
+  app.patch("/api/vid-aggregator/config", pollRateLimiter, requireDashboardAccess, (req, res) => {
     try {
       const { pollIntervalMs, maxVideosPerChannel } = req.body;
       if (pollIntervalMs !== undefined) {
