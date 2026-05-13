@@ -2903,14 +2903,14 @@ Only return valid JSON, no markdown fences.`;
       try {
         const u = new URL(url);
         const host = u.hostname.replace(/^www\./, "");
-        if (host === "youtu.be" || host.includes("youtube.com")) platform = "YouTube";
-        else if (host.includes("tiktok.com")) platform = "TikTok";
-        else if (host.includes("vimeo.com")) platform = "Vimeo";
-        else if (host.includes("instagram.com")) platform = "Instagram";
-        else if (host.includes("facebook.com") || host === "fb.watch") platform = "Facebook";
-        else if (host.includes("dailymotion.com")) platform = "Dailymotion";
-        else if (host.includes("twitter.com") || host === "x.com") platform = "Twitter";
-        else if (host.includes("linkedin.com")) platform = "LinkedIn";
+        if (host === "youtu.be" || host === "youtube.com" || host.endsWith(".youtube.com")) platform = "YouTube";
+        else if (host === "tiktok.com" || host.endsWith(".tiktok.com")) platform = "TikTok";
+        else if (host === "vimeo.com" || host.endsWith(".vimeo.com")) platform = "Vimeo";
+        else if (host === "instagram.com" || host.endsWith(".instagram.com")) platform = "Instagram";
+        else if (host === "facebook.com" || host.endsWith(".facebook.com") || host === "fb.watch") platform = "Facebook";
+        else if (host === "dailymotion.com" || host.endsWith(".dailymotion.com")) platform = "Dailymotion";
+        else if (host === "twitter.com" || host.endsWith(".twitter.com") || host === "x.com" || host.endsWith(".x.com")) platform = "Twitter";
+        else if (host === "linkedin.com" || host.endsWith(".linkedin.com")) platform = "LinkedIn";
       } catch { /* keep default */ }
 
       // Try YouTube oEmbed for title + thumbnail
