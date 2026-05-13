@@ -3393,6 +3393,89 @@ Only return valid JSON, no markdown fences.`;
     }
   });
 
+  // POST /api/emailos/lists/:id/aggregate — aggregate public email leads into a list
+  app.post("/api/emailos/lists/:id/aggregate", emailOsRateLimiter, requireAuth, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { EmailOrgModel, EmailListModel } = await getEmailModels();
+      const org = await EmailOrgModel.findOne({ userId: user.id });
+      if (!org) return res.status(404).json({ message: "Organisation not found" });
+
+      const list = await EmailListModel.findOne({ _id: req.params.id, orgId: String(org._id) });
+      if (!list) return res.status(404).json({ message: "List not found" });
+
+      const { industry, keywords, count } = z.object({
+        industry: z.string().min(1).max(60).default("General"),
+        keywords: z.array(z.string().max(60)).max(10).default([]),
+        count:    z.number().int().min(1).max(500).default(50),
+      }).parse(req.body);
+
+      // Check org contact limit before aggregating
+      const available = org.maxContacts - org.contactsCount;
+      if (available <= 0) {
+        return res.status(429).json({ message: `Contact limit reached (${org.maxContacts}). Please upgrade your plan.` });
+      }
+      const safeCount = Math.min(count, available);
+
+      const { aggregateEmailLeads } = await import("./emailLeadAggregator.js");
+      const leads = await aggregateEmailLeads(industry, keywords, safeCount);
+
+      if (leads.length === 0) {
+        return res.status(200).json({ added: 0, total: list.contactCount, message: "No new leads found for this industry/keywords" });
+      }
+
+      // Deduplicate against existing contacts
+      const existingEmails = new Set(list.contacts.map((c: any) => c.email.toLowerCase()));
+      const newContacts = leads
+        .filter((l) => !existingEmails.has(l.email.toLowerCase()))
+        .slice(0, safeCount)
+        .map((l) => ({
+          email:       l.email.toLowerCase(),
+          firstName:   l.firstName,
+          lastName:    l.lastName,
+          tags:        l.tags ?? [],
+          subscribedAt: new Date(),
+          unsubscribed: false,
+        }));
+
+      if (newContacts.length > 0) {
+        list.contacts.push(...newContacts);
+        await list.save();
+        org.contactsCount += newContacts.length;
+        await org.save();
+      }
+
+      res.json({ added: newContacts.length, total: list.contactCount });
+    } catch (err) {
+      if (err instanceof z.ZodError) return res.status(400).json({ message: "Validation error", errors: err.errors });
+      console.error("[emailos/lists/:id/aggregate POST]", err);
+      res.status(500).json({ message: "Failed to aggregate leads" });
+    }
+  });
+
+  // DELETE /api/emailos/lists/:id — delete a list
+  app.delete("/api/emailos/lists/:id", emailOsRateLimiter, requireAuth, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { EmailOrgModel, EmailListModel } = await getEmailModels();
+      const org = await EmailOrgModel.findOne({ userId: user.id });
+      if (!org) return res.status(404).json({ message: "Organisation not found" });
+
+      const list = await EmailListModel.findOneAndDelete({ _id: req.params.id, orgId: String(org._id) });
+      if (!list) return res.status(404).json({ message: "List not found" });
+
+      // Update org contact counter
+      const activeContacts = list.contacts.filter((c: any) => !c.unsubscribed).length;
+      org.contactsCount = Math.max(0, org.contactsCount - activeContacts);
+      await org.save();
+
+      res.json({ ok: true });
+    } catch (err) {
+      console.error("[emailos/lists/:id DELETE]", err);
+      res.status(500).json({ message: "Failed to delete list" });
+    }
+  });
+
   // ─── Email Campaigns ──────────────────────────────────────────────────────
 
   // GET /api/emailos/campaigns — list campaigns for current org
@@ -3565,6 +3648,102 @@ Only return valid JSON, no markdown fences.`;
     }
   });
 
+  // POST /api/emailos/campaigns/:id/send — manually trigger campaign dispatch
+  // Sends to all active contacts in the campaign's list via SMTP (nodemailer).
+  // Supports dynamic template variables: {{firstName}}, {{lastName}}, {{email}}.
+  app.post("/api/emailos/campaigns/:id/send", emailOsRateLimiter, requireAuth, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { EmailOrgModel, EmailCampaignModel, EmailListModel } = await getEmailModels();
+      const org = await EmailOrgModel.findOne({ userId: user.id });
+      if (!org) return res.status(404).json({ message: "Organisation not found" });
+
+      const campaign = await EmailCampaignModel.findOne({ _id: req.params.id, orgId: String(org._id) });
+      if (!campaign) return res.status(404).json({ message: "Campaign not found" });
+
+      if (!["draft", "scheduled"].includes(campaign.status)) {
+        return res.status(409).json({ message: `Campaign cannot be sent — current status: ${campaign.status}` });
+      }
+
+      // Load list
+      const list = await EmailListModel.findOne({ _id: campaign.listId, orgId: String(org._id) });
+      if (!list) return res.status(404).json({ message: "Campaign list not found" });
+
+      const activeContacts = list.contacts.filter((c: any) => !c.unsubscribed);
+      if (activeContacts.length === 0) {
+        return res.status(400).json({ message: "No active contacts in the list to send to" });
+      }
+
+      // Check monthly email limit
+      const remaining = org.maxEmailsPerMonth - org.emailsSentThisMonth;
+      if (remaining <= 0) {
+        return res.status(429).json({ message: `Monthly email limit reached (${org.maxEmailsPerMonth}). Please upgrade your plan.` });
+      }
+      const batchContacts = activeContacts.slice(0, remaining);
+
+      // Mark as sending immediately
+      campaign.status = "sending";
+      await campaign.save();
+
+      // Respond immediately so the UI doesn't hang; actual sending is async
+      res.json({ queued: batchContacts.length, message: "Campaign dispatch started" });
+
+      // ── Fire-and-forget: send emails ──────────────────────────────────────
+      (async () => {
+        const mailer = getMailer();
+        let sent = 0;
+
+        for (const contact of batchContacts) {
+          try {
+            // Substitute dynamic context variables in subject and body
+            const vars: Record<string, string> = {
+              firstName: contact.firstName ?? "",
+              lastName:  contact.lastName  ?? "",
+              email:     contact.email,
+            };
+            const interpolate = (tpl: string): string =>
+              tpl.replace(/\{\{(\w+)\}\}/g, (_, k) => vars[k] ?? "");
+
+            const personalSubject  = interpolate(campaign.subject);
+            const personalHtmlBody = interpolate(campaign.htmlBody);
+            const personalTextBody = campaign.textBody ? interpolate(campaign.textBody) : undefined;
+
+            if (mailer) {
+              await mailer.sendMail({
+                from:    `"${campaign.fromName}" <${campaign.fromEmail}>`,
+                to:      contact.email,
+                subject: personalSubject,
+                html:    personalHtmlBody,
+                text:    personalTextBody,
+              });
+              sent += 1;
+            }
+          } catch (mailErr) {
+            console.error(`[emailos/campaigns/send] Failed to send to ${contact.email}:`, mailErr);
+          }
+        }
+
+        // Update campaign stats
+        try {
+          await EmailCampaignModel.findByIdAndUpdate(campaign._id, {
+            $inc:  { totalSent: sent },
+            $set:  { status: "sent", sentAt: new Date() },
+          });
+          await EmailOrgModel.findByIdAndUpdate(org._id, {
+            $inc: { emailsSentThisMonth: sent },
+          });
+          console.log(`[emailos/campaigns/send] Campaign ${campaign._id} sent ${sent}/${batchContacts.length} emails`);
+        } catch (statsErr) {
+          console.error("[emailos/campaigns/send] Failed to update stats:", statsErr);
+        }
+      })().catch((err) => console.error("[emailos/campaigns/send] Unhandled error:", err));
+
+    } catch (err) {
+      console.error("[emailos/campaigns/:id/send POST]", err);
+      res.status(500).json({ message: "Failed to dispatch campaign" });
+    }
+  });
+
   // ─── Tracking ──────────────────────────────────────────────────────────────
 
   // GET /api/emailos/track/open/:id — 1×1 pixel, logs an open event
@@ -3638,8 +3817,62 @@ Only return valid JSON, no markdown fences.`;
         { $set: { status: "sending" } }
       );
 
-      // In production: enqueue to SES / email provider here.
-      // For now we log and return the dispatched count.
+      // Dispatch emails via SMTP if configured (fire-and-forget per campaign)
+      const mailer = getMailer();
+      const { EmailListModel, EmailOrgModel } = await getEmailModels();
+
+      for (const campaign of due) {
+        (async () => {
+          try {
+            const list = await EmailListModel.findOne({ _id: campaign.listId }).lean();
+            if (!list) return;
+            const org = await EmailOrgModel.findOne({ _id: campaign.orgId }).lean();
+            if (!org) return;
+
+            const activeContacts = list.contacts.filter((c: any) => !c.unsubscribed);
+            const remaining = (org as any).maxEmailsPerMonth - (org as any).emailsSentThisMonth;
+            const batch = activeContacts.slice(0, Math.max(0, remaining));
+            let sent = 0;
+
+            const interpolate = (tpl: string, vars: Record<string, string>): string =>
+              tpl.replace(/\{\{(\w+)\}\}/g, (_, k) => vars[k] ?? "");
+
+            for (const contact of batch) {
+              try {
+                const vars: Record<string, string> = {
+                  firstName: (contact as any).firstName ?? "",
+                  lastName:  (contact as any).lastName  ?? "",
+                  email:     contact.email,
+                };
+                if (mailer) {
+                  await mailer.sendMail({
+                    from:    `"${campaign.fromName}" <${campaign.fromEmail}>`,
+                    to:      contact.email,
+                    subject: interpolate(campaign.subject, vars),
+                    html:    interpolate(campaign.htmlBody, vars),
+                    text:    campaign.textBody ? interpolate(campaign.textBody, vars) : undefined,
+                  });
+                  sent += 1;
+                }
+              } catch (contactErr) {
+                console.error(`[emailos/cron] Failed to send to ${contact.email}:`, contactErr);
+              }
+            }
+
+            await EmailCampaignModel.findByIdAndUpdate(campaign._id, {
+              $inc: { totalSent: sent },
+              $set: { status: "sent", sentAt: new Date() },
+            });
+            await EmailOrgModel.findByIdAndUpdate(campaign.orgId, {
+              $inc: { emailsSentThisMonth: sent },
+            });
+            console.log(`[emailos/cron] Campaign ${campaign._id} sent ${sent}/${batch.length} emails`);
+          } catch (dispatchErr) {
+            console.error(`[emailos/cron] Campaign ${campaign._id} dispatch error:`, dispatchErr);
+          }
+        })();
+      }
+
       console.log(`[emailos/cron] Dispatching ${due.length} campaigns:`, ids);
 
       res.json({ dispatched: due.length, campaignIds: ids });
