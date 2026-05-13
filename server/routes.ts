@@ -14,6 +14,14 @@ import { storage } from "./storage.js";
 import { ADMIN_DASHBOARD_PASSWORD } from "./env.js";
 import { injectBlogMetaTags } from "./ogTags.js";
 import { getBotStatus, triggerBotCycle, pauseBotWorker, resumeBotWorker, startBotWorker as _startBotWorker, updateBotConfig } from "./botWorker.js";
+import {
+  getVidAggregatorStatus,
+  startVidAggregator,
+  pauseVidAggregator,
+  resumeVidAggregator,
+  triggerVidAggregatorCycle,
+  updateVidAggregatorConfig,
+} from "./vidAggregator.js";
 import { auditAndClean, deduplicatePosts } from "./cleaner.js";
 import {
   insertContactSchema,
@@ -2367,6 +2375,59 @@ ENGAGEMENT PRINCIPLES:
     }
   });
 
+  // ─── Vid Aggregator ──────────────────────────────────────────────────────
+
+  app.get("/api/vid-aggregator/status", authRateLimiter, requireDashboardAccess, (_req, res) => {
+    res.json(getVidAggregatorStatus());
+  });
+
+  app.post("/api/vid-aggregator/start", authRateLimiter, requireDashboardAccess, (_req, res) => {
+    startVidAggregator();
+    res.json({ message: "Vid Aggregator started" });
+  });
+
+  app.post("/api/vid-aggregator/pause", authRateLimiter, requireDashboardAccess, (_req, res) => {
+    pauseVidAggregator();
+    res.json({ message: "Vid Aggregator paused" });
+  });
+
+  app.post("/api/vid-aggregator/resume", authRateLimiter, requireDashboardAccess, (_req, res) => {
+    resumeVidAggregator();
+    res.json({ message: "Vid Aggregator resumed" });
+  });
+
+  app.post("/api/vid-aggregator/trigger", authRateLimiter, requireDashboardAccess, async (_req, res) => {
+    try {
+      await triggerVidAggregatorCycle();
+      res.json({ message: "Vid Aggregator cycle triggered" });
+    } catch (err) {
+      console.error("[vid-aggregator trigger]", err);
+      res.status(500).json({ message: "Failed to trigger cycle" });
+    }
+  });
+
+  app.patch("/api/vid-aggregator/config", authRateLimiter, requireDashboardAccess, (req, res) => {
+    try {
+      const { pollIntervalMs, maxVideosPerChannel } = req.body;
+      if (pollIntervalMs !== undefined) {
+        const v = Number(pollIntervalMs);
+        if (!Number.isFinite(v) || v < 60_000 || v > 86_400_000) {
+          return res.status(400).json({ message: "pollIntervalMs must be between 60000 and 86400000 ms" });
+        }
+      }
+      if (maxVideosPerChannel !== undefined) {
+        const v = Number(maxVideosPerChannel);
+        if (!Number.isFinite(v) || v < 1 || v > 50) {
+          return res.status(400).json({ message: "maxVideosPerChannel must be between 1 and 50" });
+        }
+      }
+      updateVidAggregatorConfig({ pollIntervalMs, maxVideosPerChannel });
+      res.json(getVidAggregatorStatus());
+    } catch {
+      res.status(500).json({ message: "Failed to update vid-aggregator configuration" });
+    }
+  });
+
   // ─── SPORTA – AI Agentic Social Media Aggregator ────────────────────────
 
   const sportaRateLimiter = rateLimit({
@@ -3021,6 +3082,98 @@ Only return valid JSON, no markdown fences.`;
     } catch (err) {
       console.error("[vlog/:slug GET]", err);
       res.status(500).json({ message: "Failed to load vlog" });
+    }
+  });
+
+  // ── Vlog Social Interactions ──────────────────────────────────────────────
+
+  app.get("/api/vlog/:id/likes", authRateLimiter, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const count = await storage.getLikeCount(req.params.id);
+      const liked = user ? await storage.hasLiked(req.params.id, user.id) : false;
+      res.json({ count, liked });
+    } catch (err) {
+      console.error("[vlog/:id/likes GET]", err);
+      res.status(500).json({ message: "Failed" });
+    }
+  });
+
+  app.post("/api/vlog/:id/likes", authRateLimiter, requireAuth, async (req, res) => {
+    const user = req.user as any;
+    try {
+      await storage.addLike(req.params.id, user.id);
+      res.json({ liked: true });
+    } catch (err) {
+      console.error("[vlog/:id/likes POST]", err);
+      res.status(500).json({ message: "Failed" });
+    }
+  });
+
+  app.delete("/api/vlog/:id/likes", authRateLimiter, requireAuth, async (req, res) => {
+    const user = req.user as any;
+    try {
+      await storage.removeLike(req.params.id, user.id);
+      res.json({ liked: false });
+    } catch (err) {
+      console.error("[vlog/:id/likes DELETE]", err);
+      res.status(500).json({ message: "Failed" });
+    }
+  });
+
+  app.get("/api/vlog/:id/bookmark", authRateLimiter, requireAuth, async (req, res) => {
+    const user = req.user as any;
+    try {
+      const bookmarked = await storage.hasBookmarked(req.params.id, user.id);
+      res.json({ bookmarked });
+    } catch (err) {
+      console.error("[vlog/:id/bookmark GET]", err);
+      res.status(500).json({ message: "Failed" });
+    }
+  });
+
+  app.post("/api/vlog/:id/bookmark", authRateLimiter, requireAuth, async (req, res) => {
+    const user = req.user as any;
+    try {
+      await storage.addBookmark(req.params.id, user.id);
+      res.json({ bookmarked: true });
+    } catch (err) {
+      console.error("[vlog/:id/bookmark POST]", err);
+      res.status(500).json({ message: "Failed" });
+    }
+  });
+
+  app.delete("/api/vlog/:id/bookmark", authRateLimiter, requireAuth, async (req, res) => {
+    const user = req.user as any;
+    try {
+      await storage.removeBookmark(req.params.id, user.id);
+      res.json({ bookmarked: false });
+    } catch (err) {
+      console.error("[vlog/:id/bookmark DELETE]", err);
+      res.status(500).json({ message: "Failed" });
+    }
+  });
+
+  app.get("/api/vlog/:id/comments", authRateLimiter, async (req, res) => {
+    try {
+      const comments = await storage.getComments(req.params.id);
+      res.json(comments);
+    } catch (err) {
+      console.error("[vlog/:id/comments GET]", err);
+      res.status(500).json({ message: "Failed" });
+    }
+  });
+
+  app.post("/api/vlog/:id/comments", authRateLimiter, requireAuth, async (req, res) => {
+    const user = req.user as any;
+    const { content } = req.body;
+    if (!content?.trim()) return res.status(400).json({ message: "Comment content required" });
+    try {
+      const comment = await storage.createComment({ postId: req.params.id, content: content.trim(), userId: user.id, username: user.username });
+      res.status(201).json(comment);
+    } catch (err) {
+      console.error("[vlog/:id/comments POST]", err);
+      res.status(500).json({ message: "Failed" });
     }
   });
 

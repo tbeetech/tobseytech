@@ -76,6 +76,7 @@ export default {
         "galactic-red": "var(--galactic-red)",
         "neon-cyan": "var(--neon-cyan)",
         "neon-purple": "var(--neon-purple)",
+        "neon-yellow": "var(--neon-yellow)",
         "electric-blue": "var(--electric-blue)",
       },
       fontFamily: {
