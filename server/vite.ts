@@ -6,7 +6,7 @@ import { type Server } from "http";
 import viteConfig from "../vite.config.js";
 import { nanoid } from "nanoid";
 import { storage } from "./storage.js";
-import { injectBlogMetaTags } from "./ogTags.js";
+import { injectBlogMetaTags, injectVlogMetaTags } from "./ogTags.js";
 
 const viteLogger = createLogger();
 
@@ -75,6 +75,20 @@ export async function setupVite(app: Express, server: Server) {
         }
       }
 
+      // Inject vlog-specific OG meta tags for social media crawlers
+      const vlogSlug = extractVlogSlug(url);
+      if (vlogSlug) {
+        try {
+          const vlog = await (storage as any).getVlogPostBySlug(vlogSlug);
+          if (vlog && vlog.published) {
+            const baseUrl = `${req.protocol}://${req.get("host")}`;
+            template = injectVlogMetaTags(template, vlog, baseUrl);
+          }
+        } catch {
+          // non-fatal — serve template with default meta tags
+        }
+      }
+
       const page = await vite.transformIndexHtml(url, template);
       res.status(200).set({ "Content-Type": "text/html" }).end(page);
     } catch (e) {
@@ -115,6 +129,22 @@ export function serveStatic(app: Express) {
       }
     }
 
+    // Inject vlog-specific OG meta tags for social media crawlers
+    const vlogSlug = extractVlogSlug(req.originalUrl);
+    if (vlogSlug) {
+      try {
+        const vlog = await (storage as any).getVlogPostBySlug(vlogSlug);
+        if (vlog && vlog.published) {
+          let html = await fs.promises.readFile(htmlPath, "utf-8");
+          const baseUrl = `${req.protocol}://${req.get("host")}`;
+          html = injectVlogMetaTags(html, vlog, baseUrl);
+          return res.status(200).set({ "Content-Type": "text/html" }).end(html);
+        }
+      } catch {
+        // non-fatal — serve default index.html
+      }
+    }
+
     res.sendFile(htmlPath);
   });
 }
@@ -126,5 +156,12 @@ function extractBlogSlug(url: string): string | null {
   if (!match || match[1] === "new" || match[1] === "edit" || match[1] === "slug") {
     return null;
   }
+  return decodeURIComponent(match[1]);
+}
+
+/** Extract the vlog slug from a URL path like /vlog/my-vlog-slug */
+function extractVlogSlug(url: string): string | null {
+  const match = url.match(/^\/vlog\/([^/?#]+)/);
+  if (!match) return null;
   return decodeURIComponent(match[1]);
 }

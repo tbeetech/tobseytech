@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -8,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import {
   Video, Play, Pause, Zap, RefreshCw, AlertCircle, CheckCircle2,
-  Clock, Activity, Loader2, Settings, Rss, ExternalLink,
+  Clock, Activity, Loader2, Settings, Rss, ExternalLink, PlusCircle,
 } from "lucide-react";
 
 interface ChannelState {
@@ -74,7 +75,7 @@ export default function VidAggregatorTab() {
       if (!res.ok) throw new Error("Failed to load vid-aggregator status");
       return res.json();
     },
-    refetchInterval: 10_000,
+    refetchInterval: 30_000,
   });
 
   const [pollMinutes, setPollMinutes] = useState<number>(30);
@@ -181,6 +182,11 @@ export default function VidAggregatorTab() {
           <a href="/vlog" target="_blank" rel="noopener noreferrer" className="ml-2 text-neon-cyan hover:underline inline-flex items-center gap-1">
             View Vlog <ExternalLink className="w-3 h-3" />
           </a>
+          <Link href="/admin/speed-cracker/vlog">
+            <span className="ml-4 text-yellow-400 hover:text-yellow-300 hover:underline inline-flex items-center gap-1 cursor-pointer">
+              <PlusCircle className="w-3 h-3" /> Create Manually
+            </span>
+          </Link>
         </div>
 
         <div className="flex flex-wrap gap-2">

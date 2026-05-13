@@ -168,7 +168,7 @@ export default function BlogPage() {
                         className="w-full h-full min-h-[220px] flex items-center justify-center"
                         style={{ background: "linear-gradient(135deg, rgba(34,197,94,0.15), rgba(0,212,255,0.08))" }}
                       >
-                        <span className="text-6xl font-orbitron text-galactic-orange/30">TST</span>
+                        <img src="/favicon.svg" alt="TOBSEYTECH" className="w-20 h-20 opacity-60" />
                       </div>
                     )}
                   </div>
@@ -221,7 +221,7 @@ export default function BlogPage() {
                           className="w-full h-full flex items-center justify-center"
                           style={{ background: "linear-gradient(135deg, rgba(34,197,94,0.1), rgba(0,212,255,0.05))" }}
                         >
-                          <span className="text-3xl font-orbitron text-galactic-orange/25">TST</span>
+                          <img src="/favicon.svg" alt="TOBSEYTECH" className="w-12 h-12 opacity-50" />
                         </div>
                       )}
                     </div>
