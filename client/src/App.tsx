@@ -102,7 +102,8 @@ function Router() {
       <Route path="/admin/speed-cracker" component={AdminSpeedCrackerPage} />
       <Route path="/admin/speed-cracker/workflows" component={AdminSpeedCrackerWorkflowsPage} />
       <Route path="/admin/speed-cracker/approval-center" component={AdminSpeedCrackerApprovalPage} />
-      <Route path="/admin/speed-cracker/vlog-manager" component={AdminSpeedCrackerVlogPage} />
+      <Route path="/admin/speed-cracker/vlog" component={AdminSpeedCrackerVlogPage} />
+      <Route path="/admin/speed-cracker/vlog-manager"><Redirect to="/admin/speed-cracker/vlog" /></Route>
       <Route path="/admin/speed-cracker/blog-manager" component={AdminSpeedCrackerBlogPage} />
       <Route path="/admin/speed-cracker/analytics" component={AdminSpeedCrackerAnalyticsPage} />
       <Route path="/admin/speed-cracker/settings" component={AdminSpeedCrackerSettingsPage} />

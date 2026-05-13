@@ -469,7 +469,7 @@ export interface SportaContent {
 // ─── Vlog Posts ───────────────────────────────────────────────────────────────
 
 export const VLOG_EMBED_PLATFORMS = [
-  "YouTube", "TikTok", "Vimeo", "Instagram", "Facebook", "Dailymotion",
+  "YouTube", "TikTok", "Vimeo", "Instagram", "Facebook", "Dailymotion", "Twitter", "LinkedIn",
 ] as const;
 export type VlogEmbedPlatform = (typeof VLOG_EMBED_PLATFORMS)[number];
 
