@@ -58,7 +58,7 @@ import {
 import { z } from "zod";
 import nodemailer from "nodemailer";
 import { EmailOrgModel, TIER_LIMITS } from "./models/EmailOrg.js";
-import { EmailListModel } from "./models/EmailList.js";
+import { EmailListModel, type EmailContact } from "./models/EmailList.js";
 import { EmailCampaignModel } from "./models/EmailCampaign.js";
 
 const authRateLimiter = rateLimit({
@@ -3501,7 +3501,7 @@ Generate metadata for this video to feature on a tech video hub. Return valid JS
       }
 
       // Deduplicate against existing contacts
-      const existingEmails = new Set(list.contacts.map((c) => c.email.toLowerCase()));
+      const existingEmails = new Set(list.contacts.map((c: EmailContact) => c.email.toLowerCase()));
       const newContacts = contacts
         .filter((c) => !existingEmails.has(c.email.toLowerCase()))
         .map((c) => ({ ...c, email: c.email.toLowerCase(), subscribedAt: new Date(), unsubscribed: false }));

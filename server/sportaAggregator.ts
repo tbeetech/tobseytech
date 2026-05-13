@@ -349,6 +349,7 @@ export async function aggregateCampaignContent(
               originalTitle: post.title,
               originalAuthor: post.author,
               mediaType: preferredVideoType,
+              aiGeneratedHashtags: [],
             });
             continue;
           }
@@ -366,10 +367,11 @@ export async function aggregateCampaignContent(
               sourceUrl: postUrl,
               sourcePlatform: "Reddit",
               originalTitle: post.title,
-              originalContent: post.selftext ? post.selftext.slice(0, 1000) : null,
+              originalContent: post.selftext?.slice(0, 1000),
               originalAuthor: `u/${post.author} on r/${feed.url}`,
               originalThumbnail: thumb,
               mediaType: post.post_hint === "image" ? preferredImageType : preferredBlogType,
+              aiGeneratedHashtags: [],
             });
           }
         }
@@ -404,6 +406,7 @@ export async function aggregateCampaignContent(
             originalTitle: item.title ?? undefined,
             originalAuthor: item.creator ?? undefined,
             mediaType: preferredVideoType,
+            aiGeneratedHashtags: [],
           });
           continue;
         }
@@ -421,6 +424,7 @@ export async function aggregateCampaignContent(
             originalAuthor: item.creator ?? undefined,
             originalThumbnail: image,
             mediaType: preferredBlogType,
+            aiGeneratedHashtags: [],
           });
           continue;
         }
@@ -438,6 +442,7 @@ export async function aggregateCampaignContent(
             originalAuthor: item.creator ?? undefined,
             originalThumbnail: image,
             mediaType: preferredImageType,
+            aiGeneratedHashtags: [],
           });
           continue;
         }
@@ -455,6 +460,7 @@ export async function aggregateCampaignContent(
           originalAuthor: item.creator ?? undefined,
           originalThumbnail: image ?? null,
           mediaType,
+          aiGeneratedHashtags: [],
         });
       }
 

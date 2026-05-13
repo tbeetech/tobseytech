@@ -15,12 +15,18 @@
  * (CAN-SPAM, GDPR, etc.) before sending to aggregated addresses.
  */
 
-import { execFile } from "child_process";
+import { execFile, type ExecFileOptions } from "child_process";
 import { promisify } from "util";
 import path from "path";
 import { fileURLToPath } from "url";
 
 const execFileAsync = promisify(execFile);
+
+// ExecFile doesn't expose `input` in its TS types, but Node.js supports piping
+// stdin via this option at runtime (same as exec/spawn).
+interface ExecFileOptionsWithInput extends ExecFileOptions {
+  input?: string;
+}
 
 // Resolve the absolute path to emailScraper.py at the same directory level
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -61,8 +67,8 @@ export async function aggregateEmailLeads(
       input: payload,
       timeout: SCRAPER_TIMEOUT_MS,
       maxBuffer: 5 * 1024 * 1024, // 5 MB stdout buffer
-    });
-    stdout = result.stdout;
+    } as ExecFileOptionsWithInput);
+    stdout = result.stdout as string;
   } catch (err: any) {
     // Log the Python-side stderr for diagnosis but never let it surface as 500
     const stderr: string = err?.stderr ?? "";
