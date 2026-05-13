@@ -3501,10 +3501,10 @@ Generate metadata for this video to feature on a tech video hub. Return valid JS
       }
 
       // Deduplicate against existing contacts
-      const existingEmails = new Set(list.contacts.map((c) => c.email.toLowerCase()));
+      const existingEmails = new Set(list.contacts.map((c: any) => c.email.toLowerCase()));
       const newContacts = contacts
-        .filter((c) => !existingEmails.has(c.email.toLowerCase()))
-        .map((c) => ({ ...c, email: c.email.toLowerCase(), subscribedAt: new Date(), unsubscribed: false }));
+        .filter((c: any) => !existingEmails.has(c.email.toLowerCase()))
+        .map((c: any) => ({ ...c, email: c.email.toLowerCase(), subscribedAt: new Date(), unsubscribed: false }));
 
       list.contacts.push(...newContacts);
       await list.save();

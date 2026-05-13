@@ -61,8 +61,9 @@ export async function aggregateEmailLeads(
       input: payload,
       timeout: SCRAPER_TIMEOUT_MS,
       maxBuffer: 5 * 1024 * 1024, // 5 MB stdout buffer
-    });
-    stdout = result.stdout;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any);
+    stdout = result.stdout as unknown as string;
   } catch (err: any) {
     // Log the Python-side stderr for diagnosis but never let it surface as 500
     const stderr: string = err?.stderr ?? "";
