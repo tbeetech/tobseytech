@@ -57,6 +57,9 @@ import {
 } from "../shared/schema.js";
 import { z } from "zod";
 import nodemailer from "nodemailer";
+import { EmailOrgModel, TIER_LIMITS } from "./models/EmailOrg.js";
+import { EmailListModel } from "./models/EmailList.js";
+import { EmailCampaignModel } from "./models/EmailCampaign.js";
 
 const authRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -3203,13 +3206,7 @@ Only return valid JSON, no markdown fences.`;
     message: { message: "Too many EmailOS requests, please wait." },
   });
 
-  // Lazy-load models to avoid import-time mongoose registration issues
-  async function getEmailModels() {
-    const [{ EmailOrgModel, TIER_LIMITS }, { EmailListModel }, { EmailCampaignModel }] = await Promise.all([
-      import("./models/EmailOrg.js"),
-      import("./models/EmailList.js"),
-      import("./models/EmailCampaign.js"),
-    ]);
+  function getEmailModels() {
     return { EmailOrgModel, EmailListModel, EmailCampaignModel, TIER_LIMITS };
   }
 
