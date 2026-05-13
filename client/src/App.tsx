@@ -44,6 +44,8 @@ import AdminSpeedCrackerVlogPage from "@/pages/admin-speed-cracker-vlog";
 import AdminSpeedCrackerBlogPage from "@/pages/admin-speed-cracker-blog";
 import AdminSpeedCrackerAnalyticsPage from "@/pages/admin-speed-cracker-analytics";
 import AdminSpeedCrackerSettingsPage from "@/pages/admin-speed-cracker-settings";
+import AdminDevTipsPage from "@/pages/admin-dev-tips";
+import AdminDevTipsSettingsPage from "@/pages/admin-dev-tips-settings";
 
 function Router() {
   return (
@@ -104,6 +106,9 @@ function Router() {
       <Route path="/admin/speed-cracker/blog-manager" component={AdminSpeedCrackerBlogPage} />
       <Route path="/admin/speed-cracker/analytics" component={AdminSpeedCrackerAnalyticsPage} />
       <Route path="/admin/speed-cracker/settings" component={AdminSpeedCrackerSettingsPage} />
+      {/* Daily Dev Tips Bot — admin-only */}
+      <Route path="/admin/dev-tips" component={AdminDevTipsPage} />
+      <Route path="/admin/dev-tips/settings" component={AdminDevTipsSettingsPage} />
       <Route component={NotFound} />
     </Switch>
   );
