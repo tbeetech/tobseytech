@@ -160,6 +160,8 @@ export default function Navigation() {
             >
               {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </Button>
+            {/* Notification bell (mobile) */}
+            {user && <NotificationBell />}
             <Button
               variant="ghost"
               size="icon"
@@ -223,9 +225,6 @@ export default function Navigation() {
                       <MessageCircle className="w-3 h-3" /> Talk
                     </button>
                   </Link>
-                  <div onClick={() => setIsOpen(false)}>
-                    <NotificationBell />
-                  </div>
                   {user.role === "admin" && (
                     <Link href="/dashboard" onClick={() => setIsOpen(false)}>
                       <button className="text-left text-galactic-orange font-orbitron hover:text-galactic-gold flex items-center gap-1">

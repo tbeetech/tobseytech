@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import type { ReactNode } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Send, Loader2, ChevronDown, Maximize2, Minimize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,6 +9,126 @@ import { useQuery } from "@tanstack/react-query";
 interface ChatMessage {
   role: "user" | "assistant";
   content: string;
+}
+
+// ── Inline markdown parser ────────────────────────────────────────────────────
+function parseInline(text: string, baseKey: string): ReactNode[] {
+  const nodes: ReactNode[] = [];
+  let buf = "";
+  let i = 0;
+  let k = 0;
+
+  const flush = () => {
+    if (buf) {
+      nodes.push(<span key={`${baseKey}-t${k++}`}>{buf}</span>);
+      buf = "";
+    }
+  };
+
+  while (i < text.length) {
+    if (text[i] === "*" && text[i + 1] === "*") {
+      const end = text.indexOf("**", i + 2);
+      if (end !== -1) {
+        flush();
+        nodes.push(<strong key={`${baseKey}-b${k++}`}>{text.slice(i + 2, end)}</strong>);
+        i = end + 2;
+        continue;
+      }
+    }
+    if (text[i] === "*") {
+      const end = text.indexOf("*", i + 1);
+      if (end !== -1) {
+        flush();
+        nodes.push(<em key={`${baseKey}-i${k++}`}>{text.slice(i + 1, end)}</em>);
+        i = end + 1;
+        continue;
+      }
+    }
+    if (text[i] === "`") {
+      const end = text.indexOf("`", i + 1);
+      if (end !== -1) {
+        flush();
+        nodes.push(
+          <code
+            key={`${baseKey}-c${k++}`}
+            style={{ background: "rgba(34,197,94,0.12)", borderRadius: "3px", padding: "0 3px", fontFamily: "monospace" }}
+          >
+            {text.slice(i + 1, end)}
+          </code>
+        );
+        i = end + 1;
+        continue;
+      }
+    }
+    buf += text[i];
+    i++;
+  }
+  flush();
+  return nodes;
+}
+
+function formatProphetMessage(content: string): ReactNode {
+  const lines = content.split("\n");
+  return (
+    <>
+      {lines.map((line, li) => {
+        const trimmed = line.trimStart();
+
+        if (trimmed === "") return <div key={li} className="h-1.5" />;
+
+        // Headings
+        if (trimmed.startsWith("### ")) {
+          return (
+            <p key={li} className="font-semibold mt-1.5 mb-0.5" style={{ color: "var(--galactic-gold)", fontSize: "11px" }}>
+              {parseInline(trimmed.slice(4), `${li}`)}
+            </p>
+          );
+        }
+        if (trimmed.startsWith("## ")) {
+          return (
+            <p key={li} className="font-bold mt-2 mb-0.5" style={{ color: "var(--galactic-gold)", fontSize: "11px" }}>
+              {parseInline(trimmed.slice(3), `${li}`)}
+            </p>
+          );
+        }
+        if (trimmed.startsWith("# ")) {
+          return (
+            <p key={li} className="font-bold mt-2 mb-1" style={{ color: "var(--galactic-gold)", fontSize: "12px" }}>
+              {parseInline(trimmed.slice(2), `${li}`)}
+            </p>
+          );
+        }
+
+        // Bullet lists (- or *)
+        const bulletMatch = trimmed.match(/^[-*]\s+(.*)/);
+        if (bulletMatch) {
+          return (
+            <div key={li} className="flex gap-1.5 items-start ml-1">
+              <span className="mt-0.5 shrink-0 text-[10px]" style={{ color: "var(--galactic-orange)" }}>•</span>
+              <span>{parseInline(bulletMatch[1], `${li}`)}</span>
+            </div>
+          );
+        }
+
+        // Numbered lists
+        const numMatch = trimmed.match(/^(\d+)\.\s+(.*)/);
+        if (numMatch) {
+          return (
+            <div key={li} className="flex gap-1.5 items-start ml-1">
+              <span className="shrink-0 text-[10px]" style={{ color: "var(--galactic-orange)" }}>{numMatch[1]}.</span>
+              <span>{parseInline(numMatch[2], `${li}`)}</span>
+            </div>
+          );
+        }
+
+        return (
+          <p key={li} className={li > 0 ? "mt-0.5" : ""}>
+            {parseInline(line, `${li}`)}
+          </p>
+        );
+      })}
+    </>
+  );
 }
 
 const OPENING_LINES = [
@@ -329,7 +450,7 @@ export default function ProphetChat() {
                             }
                       }
                     >
-                      {msg.content}
+                      {msg.role === "assistant" ? formatProphetMessage(msg.content) : msg.content}
                     </div>
                   </div>
                 ))}
