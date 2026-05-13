@@ -603,6 +603,32 @@ function EmailOSDashboard({ org: initialOrg }: { org: Org }) {
   const [loadingData, setLoadingData] = useState(true);
   const [activeTab, setActiveTab]     = useState<"overview" | "campaigns" | "lists" | "settings">("overview");
 
+  // ── Create List modal state ──
+  const [showCreateList, setShowCreateList]   = useState(false);
+  const [newListName, setNewListName]         = useState("");
+  const [newListDesc, setNewListDesc]         = useState("");
+  const [creatingList, setCreatingList]       = useState(false);
+
+  // ── Aggregate Leads modal state ──
+  const [aggregateListId, setAggregateListId]       = useState<string | null>(null);
+  const [aggIndustry, setAggIndustry]               = useState("General");
+  const [aggKeywords, setAggKeywords]               = useState("");
+  const [aggCount, setAggCount]                     = useState(50);
+  const [aggregating, setAggregating]               = useState(false);
+
+  // ── Create Campaign modal state ──
+  const [showCreateCampaign, setShowCreateCampaign] = useState(false);
+  const [campSubject, setCampSubject]               = useState("");
+  const [campFromName, setCampFromName]             = useState("");
+  const [campFromEmail, setCampFromEmail]           = useState("");
+  const [campHtmlBody, setCampHtmlBody]             = useState("");
+  const [campListId, setCampListId]                 = useState("");
+  const [campScheduledAt, setCampScheduledAt]       = useState("");
+  const [creatingCampaign, setCreatingCampaign]     = useState(false);
+
+  // ── Campaign send state ──
+  const [sendingCampaignId, setSendingCampaignId]   = useState<string | null>(null);
+
   useEffect(() => {
     async function load() {
       setLoadingData(true);
@@ -613,7 +639,9 @@ function EmailOSDashboard({ org: initialOrg }: { org: Org }) {
         ]);
         setCampaigns(campsData);
         setLists(listsData);
-      } catch { /* silently ignore */ }
+      } catch (err: any) {
+        toast({ title: "Error loading data", description: err.message || "Failed to fetch lists and campaigns", variant: "destructive" });
+      }
       setLoadingData(false);
     }
     load();
@@ -651,6 +679,110 @@ function EmailOSDashboard({ org: initialOrg }: { org: Org }) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
     }
   }
+
+  async function handleSendCampaign(id: string) {
+    setSendingCampaignId(id);
+    try {
+      const data = await apiFetch(`/api/emailos/campaigns/${id}/send`, { method: "POST" });
+      setCampaigns(prev => prev.map(c => c._id === id ? { ...c, status: "sending" } : c));
+      toast({ title: "Campaign dispatched!", description: `Sending to ${data.queued} contacts…` });
+    } catch (err: any) {
+      toast({ title: "Send failed", description: err.message, variant: "destructive" });
+    } finally {
+      setSendingCampaignId(null);
+    }
+  }
+
+  async function handleCreateList() {
+    if (!newListName.trim()) {
+      toast({ title: "Please enter a list name", variant: "destructive" });
+      return;
+    }
+    setCreatingList(true);
+    try {
+      const data = await apiFetch("/api/emailos/lists", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: newListName.trim(), description: newListDesc.trim() || undefined }),
+      });
+      setLists(prev => [data, ...prev]);
+      setNewListName("");
+      setNewListDesc("");
+      setShowCreateList(false);
+      toast({ title: "List created!", description: `"${data.name}" is ready to use.` });
+    } catch (err: any) {
+      toast({ title: "Error creating list", description: err.message, variant: "destructive" });
+    } finally {
+      setCreatingList(false);
+    }
+  }
+
+  async function handleDeleteList(id: string) {
+    try {
+      await apiFetch(`/api/emailos/lists/${id}`, { method: "DELETE" });
+      setLists(prev => prev.filter(l => l._id !== id));
+      toast({ title: "List deleted" });
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    }
+  }
+
+  async function handleAggregateLeads() {
+    if (!aggregateListId) return;
+    setAggregating(true);
+    try {
+      const keywords = aggKeywords.split(",").map(k => k.trim()).filter(Boolean);
+      const data = await apiFetch(`/api/emailos/lists/${aggregateListId}/aggregate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ industry: aggIndustry, keywords, count: aggCount }),
+      });
+      setLists(prev => prev.map(l => l._id === aggregateListId ? { ...l, contactCount: data.total } : l));
+      toast({ title: "Leads aggregated!", description: `Added ${data.added} new contacts.` });
+      setAggregateListId(null);
+    } catch (err: any) {
+      toast({ title: "Aggregation failed", description: err.message, variant: "destructive" });
+    } finally {
+      setAggregating(false);
+    }
+  }
+
+  async function handleCreateCampaign() {
+    if (!campSubject.trim() || !campFromName.trim() || !campFromEmail.trim() || !campHtmlBody.trim()) {
+      toast({ title: "Please fill in all required fields", variant: "destructive" });
+      return;
+    }
+    if (!campListId) {
+      toast({ title: "Please select a list", variant: "destructive" });
+      return;
+    }
+    setCreatingCampaign(true);
+    try {
+      const body: Record<string, unknown> = {
+        listId:   campListId,
+        subject:  campSubject.trim(),
+        fromName: campFromName.trim(),
+        fromEmail: campFromEmail.trim(),
+        htmlBody: campHtmlBody.trim(),
+      };
+      if (campScheduledAt) body.scheduledAt = campScheduledAt;
+      const data = await apiFetch("/api/emailos/campaigns", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      setCampaigns(prev => [data, ...prev]);
+      setCampSubject(""); setCampFromName(""); setCampFromEmail(""); setCampHtmlBody(""); setCampListId(""); setCampScheduledAt("");
+      setShowCreateCampaign(false);
+      toast({ title: "Campaign created!", description: campScheduledAt ? "Scheduled for delivery." : "Saved as draft." });
+    } catch (err: any) {
+      toast({ title: "Error creating campaign", description: err.message, variant: "destructive" });
+    } finally {
+      setCreatingCampaign(false);
+    }
+  }
+
+  const INDUSTRIES = ["General","Technology","Marketing","Ecommerce","Finance","Health","Education","SaaS","Retail","Travel","Food","Fashion","Real Estate","Fitness","Beauty","B2B","Crypto","AI","Gaming","Media","Consulting"];
 
   return (
     <div className="min-h-screen bg-space-black text-white">
@@ -779,16 +911,74 @@ function EmailOSDashboard({ org: initialOrg }: { org: Org }) {
               <div>
                 <div className="flex items-center justify-between mb-5">
                   <h2 className="font-orbitron font-bold text-lg text-white">Campaigns ({campaigns.length})</h2>
-                  <Link href="/emailos">
-                    <Button size="sm" className="bg-neon-cyan/20 border border-neon-cyan/40 text-neon-cyan font-orbitron text-xs hover:bg-neon-cyan/30">
-                      <Plus className="w-3 h-3 mr-1" /> New Campaign
-                    </Button>
-                  </Link>
+                  <Button size="sm" onClick={() => setShowCreateCampaign(true)} className="bg-neon-cyan/20 border border-neon-cyan/40 text-neon-cyan font-orbitron text-xs hover:bg-neon-cyan/30">
+                    <Plus className="w-3 h-3 mr-1" /> New Campaign
+                  </Button>
                 </div>
+
+                {/* Create Campaign Modal */}
+                {showCreateCampaign && (
+                  <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+                    <div className="glass-effect w-full max-w-lg rounded-2xl border border-neon-cyan/30 p-6">
+                      <h3 className="font-orbitron font-bold text-lg text-neon-cyan mb-4">Create Campaign</h3>
+                      <p className="text-gray-400 text-xs font-orbitron mb-4">
+                        Use <span className="text-neon-cyan">{"{{firstName}}"}</span>, <span className="text-neon-cyan">{"{{lastName}}"}</span>, <span className="text-neon-cyan">{"{{email}}"}</span> in subject or body for dynamic personalisation.
+                      </p>
+                      <div className="space-y-3 mb-5">
+                        <div>
+                          <label className="block text-xs font-orbitron text-gray-400 mb-1">List *</label>
+                          <select
+                            value={campListId}
+                            onChange={e => setCampListId(e.target.value)}
+                            className="w-full bg-space-dark border border-white/10 rounded-xl px-3 py-2 text-white font-orbitron text-sm focus:outline-none focus:border-neon-cyan/60"
+                          >
+                            <option value="">— Select a list —</option>
+                            {lists.map(l => (
+                              <option key={l._id} value={l._id}>{l.name} ({l.contactCount.toLocaleString()} contacts)</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-xs font-orbitron text-gray-400 mb-1">Subject Line *</label>
+                          <input value={campSubject} onChange={e => setCampSubject(e.target.value)} placeholder="e.g. Hey {{firstName}}, check this out!" className="w-full bg-space-dark border border-white/10 rounded-xl px-3 py-2 text-white placeholder-gray-600 font-orbitron text-sm focus:outline-none focus:border-neon-cyan/60" />
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-xs font-orbitron text-gray-400 mb-1">From Name *</label>
+                            <input value={campFromName} onChange={e => setCampFromName(e.target.value)} placeholder="Your Name" className="w-full bg-space-dark border border-white/10 rounded-xl px-3 py-2 text-white placeholder-gray-600 font-orbitron text-sm focus:outline-none focus:border-neon-cyan/60" />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-orbitron text-gray-400 mb-1">From Email *</label>
+                            <input value={campFromEmail} onChange={e => setCampFromEmail(e.target.value)} placeholder="you@example.com" className="w-full bg-space-dark border border-white/10 rounded-xl px-3 py-2 text-white placeholder-gray-600 font-orbitron text-sm focus:outline-none focus:border-neon-cyan/60" />
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-xs font-orbitron text-gray-400 mb-1">Email Body (HTML) *</label>
+                          <textarea value={campHtmlBody} onChange={e => setCampHtmlBody(e.target.value)} rows={4} placeholder="<p>Hello {{firstName}}, welcome to our campaign!</p>" className="w-full bg-space-dark border border-white/10 rounded-xl px-3 py-2 text-white placeholder-gray-600 font-orbitron text-sm focus:outline-none focus:border-neon-cyan/60 resize-y" />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-orbitron text-gray-400 mb-1">Schedule (optional — leave blank to save as draft)</label>
+                          <input type="datetime-local" value={campScheduledAt} onChange={e => setCampScheduledAt(e.target.value)} className="w-full bg-space-dark border border-white/10 rounded-xl px-3 py-2 text-white font-orbitron text-sm focus:outline-none focus:border-neon-cyan/60" />
+                        </div>
+                      </div>
+                      <div className="flex gap-3">
+                        <Button variant="outline" onClick={() => setShowCreateCampaign(false)} className="border-white/10 text-gray-400 font-orbitron text-sm">Cancel</Button>
+                        <Button onClick={handleCreateCampaign} disabled={creatingCampaign} className="flex-1 bg-neon-cyan text-space-black font-orbitron font-bold text-sm">
+                          {creatingCampaign ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Send className="w-4 h-4 mr-2" />}
+                          {campScheduledAt ? "Schedule Campaign" : "Save as Draft"}
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {campaigns.length === 0 ? (
                   <div className="glass-effect p-10 rounded-2xl border border-white/10 text-center">
                     <Send className="w-10 h-10 text-gray-600 mx-auto mb-3" />
-                    <p className="text-gray-500 font-orbitron text-sm">No campaigns yet. Create your first one!</p>
+                    <p className="text-gray-500 font-orbitron text-sm mb-4">No campaigns yet. Create your first one!</p>
+                    <Button size="sm" onClick={() => setShowCreateCampaign(true)} className="bg-neon-cyan/20 border border-neon-cyan/40 text-neon-cyan font-orbitron text-xs hover:bg-neon-cyan/30">
+                      <Plus className="w-3 h-3 mr-1" /> New Campaign
+                    </Button>
                   </div>
                 ) : (
                   <div className="space-y-3">
@@ -798,15 +988,26 @@ function EmailOSDashboard({ org: initialOrg }: { org: Org }) {
                           <p className="font-orbitron font-bold text-sm text-white truncate">{c.subject}</p>
                           <p className="text-gray-500 text-xs font-orbitron">{c.fromName} &lt;{c.fromEmail}&gt;</p>
                         </div>
-                        <div className="flex items-center gap-4 text-xs font-orbitron text-gray-400">
+                        <div className="flex items-center gap-3 text-xs font-orbitron text-gray-400 flex-wrap">
                           <span className={`px-2 py-0.5 rounded-full border ${
                             c.status === "sent" ? "border-galactic-green/40 text-galactic-green" :
                             c.status === "scheduled" ? "border-neon-cyan/40 text-neon-cyan" :
-                            c.status === "sending" ? "border-galactic-orange/40 text-galactic-orange" :
+                            c.status === "sending" ? "border-galactic-orange/40 text-galactic-orange animate-pulse" :
                             "border-white/10 text-gray-500"
                           }`}>{c.status}</span>
+                          <span><Send className="w-3 h-3 inline mr-1" />{c.totalSent.toLocaleString()} sent</span>
                           <span><MousePointerClick className="w-3 h-3 inline mr-1" />{c.totalOpens} opens</span>
                           <span><TrendingUp className="w-3 h-3 inline mr-1" />{c.totalClicks} clicks</span>
+                          {(c.status === "draft" || c.status === "scheduled") && (
+                            <button
+                              onClick={() => handleSendCampaign(c._id)}
+                              disabled={sendingCampaignId === c._id}
+                              className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-galactic-green/20 border border-galactic-green/40 text-galactic-green hover:bg-galactic-green/30 transition-colors disabled:opacity-50"
+                            >
+                              {sendingCampaignId === c._id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Zap className="w-3 h-3" />}
+                              Send Now
+                            </button>
+                          )}
                           <button onClick={() => handleDeleteCampaign(c._id)} className="text-red-500/60 hover:text-red-400 transition-colors">
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -823,23 +1024,105 @@ function EmailOSDashboard({ org: initialOrg }: { org: Org }) {
               <div>
                 <div className="flex items-center justify-between mb-5">
                   <h2 className="font-orbitron font-bold text-lg text-white">Email Lists ({lists.length})</h2>
+                  <Button size="sm" onClick={() => setShowCreateList(true)} className="bg-galactic-green/20 border border-galactic-green/40 text-galactic-green font-orbitron text-xs hover:bg-galactic-green/30">
+                    <Plus className="w-3 h-3 mr-1" /> New List
+                  </Button>
                 </div>
+
+                {/* Create List Modal */}
+                {showCreateList && (
+                  <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+                    <div className="glass-effect w-full max-w-md rounded-2xl border border-galactic-green/30 p-6">
+                      <h3 className="font-orbitron font-bold text-lg text-galactic-green mb-4">Create Email List</h3>
+                      <div className="space-y-3 mb-5">
+                        <div>
+                          <label className="block text-xs font-orbitron text-gray-400 mb-1">List Name *</label>
+                          <input value={newListName} onChange={e => setNewListName(e.target.value)} placeholder="e.g. Newsletter Subscribers" className="w-full bg-space-dark border border-white/10 rounded-xl px-3 py-2 text-white placeholder-gray-600 font-orbitron text-sm focus:outline-none focus:border-galactic-green/60" />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-orbitron text-gray-400 mb-1">Description (optional)</label>
+                          <input value={newListDesc} onChange={e => setNewListDesc(e.target.value)} placeholder="e.g. Opted-in blog subscribers" className="w-full bg-space-dark border border-white/10 rounded-xl px-3 py-2 text-white placeholder-gray-600 font-orbitron text-sm focus:outline-none focus:border-galactic-green/60" />
+                        </div>
+                      </div>
+                      <div className="flex gap-3">
+                        <Button variant="outline" onClick={() => setShowCreateList(false)} className="border-white/10 text-gray-400 font-orbitron text-sm">Cancel</Button>
+                        <Button onClick={handleCreateList} disabled={creatingList} className="flex-1 bg-galactic-green text-space-black font-orbitron font-bold text-sm">
+                          {creatingList ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
+                          Create List
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Aggregate Leads Modal */}
+                {aggregateListId && (
+                  <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+                    <div className="glass-effect w-full max-w-md rounded-2xl border border-neon-cyan/30 p-6">
+                      <h3 className="font-orbitron font-bold text-lg text-neon-cyan mb-2">Fetch Public Leads</h3>
+                      <p className="text-gray-400 text-xs font-orbitron mb-4">
+                        Aggregates prospective contacts from publicly available marketing sources — Clearbit company directory, Google News RSS, and RandomUser.me. Leads are tagged "aggregated-lead" for easy filtering.
+                      </p>
+                      <div className="space-y-3 mb-5">
+                        <div>
+                          <label className="block text-xs font-orbitron text-gray-400 mb-1">Industry / Niche</label>
+                          <select value={aggIndustry} onChange={e => setAggIndustry(e.target.value)} className="w-full bg-space-dark border border-white/10 rounded-xl px-3 py-2 text-white font-orbitron text-sm focus:outline-none focus:border-neon-cyan/60">
+                            {INDUSTRIES.map(ind => <option key={ind} value={ind}>{ind}</option>)}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-xs font-orbitron text-gray-400 mb-1">Keywords (comma-separated, optional)</label>
+                          <input value={aggKeywords} onChange={e => setAggKeywords(e.target.value)} placeholder="e.g. email marketing, newsletter, B2B" className="w-full bg-space-dark border border-white/10 rounded-xl px-3 py-2 text-white placeholder-gray-600 font-orbitron text-sm focus:outline-none focus:border-neon-cyan/60" />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-orbitron text-gray-400 mb-1">Number of Leads (max 500)</label>
+                          <input type="number" min={1} max={500} value={aggCount} onChange={e => setAggCount(Math.min(500, Math.max(1, Number(e.target.value))))} className="w-full bg-space-dark border border-white/10 rounded-xl px-3 py-2 text-white font-orbitron text-sm focus:outline-none focus:border-neon-cyan/60" />
+                        </div>
+                      </div>
+                      <div className="flex gap-3">
+                        <Button variant="outline" onClick={() => setAggregateListId(null)} className="border-white/10 text-gray-400 font-orbitron text-sm">Cancel</Button>
+                        <Button onClick={handleAggregateLeads} disabled={aggregating} className="flex-1 bg-neon-cyan text-space-black font-orbitron font-bold text-sm">
+                          {aggregating ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <RefreshCw className="w-4 h-4 mr-2" />}
+                          {aggregating ? "Fetching Leads…" : "Fetch Leads"}
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {lists.length === 0 ? (
                   <div className="glass-effect p-10 rounded-2xl border border-white/10 text-center">
                     <Users className="w-10 h-10 text-gray-600 mx-auto mb-3" />
-                    <p className="text-gray-500 font-orbitron text-sm">No lists yet.</p>
+                    <p className="text-gray-500 font-orbitron text-sm mb-4">No lists yet. Create your first list to get started.</p>
+                    <Button size="sm" onClick={() => setShowCreateList(true)} className="bg-galactic-green/20 border border-galactic-green/40 text-galactic-green font-orbitron text-xs hover:bg-galactic-green/30">
+                      <Plus className="w-3 h-3 mr-1" /> New List
+                    </Button>
                   </div>
                 ) : (
                   <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {lists.map(list => (
-                      <div key={list._id} className="glass-effect p-5 rounded-2xl border border-white/10">
-                        <Users className="w-5 h-5 text-galactic-green mb-3" />
-                        <h3 className="font-orbitron font-bold text-sm text-white mb-1">{list.name}</h3>
-                        {list.description && <p className="text-gray-500 text-xs mb-3">{list.description}</p>}
+                      <div key={list._id} className="glass-effect p-5 rounded-2xl border border-white/10 flex flex-col gap-3">
+                        <div className="flex items-start justify-between">
+                          <Users className="w-5 h-5 text-galactic-green mt-0.5" />
+                          <button onClick={() => handleDeleteList(list._id)} className="text-red-500/50 hover:text-red-400 transition-colors">
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                        <div>
+                          <h3 className="font-orbitron font-bold text-sm text-white mb-1">{list.name}</h3>
+                          {list.description && <p className="text-gray-500 text-xs">{list.description}</p>}
+                        </div>
                         <div className="font-orbitron font-black text-galactic-green text-xl">
                           {list.contactCount.toLocaleString()}
                           <span className="text-gray-500 text-xs ml-1">contacts</span>
                         </div>
+                        <Button
+                          size="sm"
+                          onClick={() => { setAggregateListId(list._id); setAggIndustry("General"); setAggKeywords(""); setAggCount(50); }}
+                          className="w-full bg-neon-cyan/10 border border-neon-cyan/30 text-neon-cyan font-orbitron text-xs hover:bg-neon-cyan/20"
+                        >
+                          <RefreshCw className="w-3 h-3 mr-1" /> Fetch Public Leads
+                        </Button>
                       </div>
                     ))}
                   </div>
