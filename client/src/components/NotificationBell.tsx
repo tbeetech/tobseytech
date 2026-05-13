@@ -22,6 +22,10 @@ const TYPE_ICONS: Record<string, string> = {
   post_comment: "🗨️",
   edit_suggestion_received: "🔍",
   edit_suggestion_reviewed: "✅",
+  sporta_campaign_created: "📡",
+  sporta_content_aggregated: "⚡",
+  emailos_campaign_created: "📧",
+  emailos_campaign_scheduled: "🗓️",
 };
 
 function timeAgo(date: string | Date): string {

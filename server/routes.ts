@@ -926,6 +926,21 @@ async function _registerRouteHandlers(app: Express): Promise<void> {
       const user = req.user as any;
       const data = insertCommentSchema.parse({ ...req.body, postId: req.params.id });
       const comment = await storage.createComment({ ...data, userId: user.id, username: user.displayName || user.username });
+      // Notify the post author about the new comment (skip self-comments)
+      const post = await storage.getBlogPost(req.params.id);
+      if (post && post.authorId !== user.id) {
+        const actorName = user.displayName || user.username;
+        await notify({
+          userId: post.authorId,
+          type: "post_comment",
+          title: "New Comment",
+          message: `${actorName} commented on your post "${post.title}".`,
+          link: post.published ? `/blog/slug/${post.slug}` : `/blog/${post.id}`,
+          actorId: user.id,
+          actorName,
+          entityId: comment.id,
+        });
+      }
       res.status(201).json(comment);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -2385,6 +2400,15 @@ ENGAGEMENT PRINCIPLES:
       const user = req.user as any;
       const data = insertSportaCampaignSchema.parse({ ...req.body, creatorId: user.id });
       const campaign = await (storage as any).createSportaCampaign(data);
+      // Notify the user that their SPORTA campaign was created
+      await notify({
+        userId: user.id,
+        type: "sporta_campaign_created",
+        title: "SPORTA Campaign Created",
+        message: `Your campaign "${campaign.name || campaign.industry}" is ready. Run aggregation to start pulling content.`,
+        link: `/sporta`,
+        entityId: campaign.id ?? campaign._id?.toString(),
+      });
       res.status(201).json(campaign);
     } catch (err) {
       if (err instanceof z.ZodError) return res.status(400).json({ message: "Validation error", errors: err.errors });
@@ -2562,6 +2586,16 @@ ENGAGEMENT PRINCIPLES:
       if (saved.length > 0) {
         await (storage as any).updateSportaCampaign(req.params.id, {
           postsAggregated: campaign.postsAggregated + saved.length,
+        });
+        // Notify user about aggregation results
+        const user = req.user as any;
+        await notify({
+          userId: user.id,
+          type: "sporta_content_aggregated",
+          title: "Content Aggregated",
+          message: `${saved.length} new post${saved.length === 1 ? "" : "s"} aggregated into your SPORTA campaign.`,
+          link: `/sporta`,
+          entityId: req.params.id,
         });
       }
 
@@ -3266,6 +3300,19 @@ Only return valid JSON, no markdown fences.`;
         org.onboardingStatus = "campaign_created";
         await org.save();
       }
+
+      // Notify the user about the campaign
+      const isScheduled = campaign.status === "scheduled";
+      await notify({
+        userId: user.id,
+        type: isScheduled ? "emailos_campaign_scheduled" : "emailos_campaign_created",
+        title: isScheduled ? "Email Campaign Scheduled" : "Email Campaign Created",
+        message: isScheduled
+          ? `Your campaign "${body.subject}" has been scheduled for delivery.`
+          : `Your email campaign "${body.subject}" has been saved as a draft.`,
+        link: `/emailos`,
+        entityId: String(campaign._id),
+      });
 
       res.status(201).json(campaign);
     } catch (err) {
