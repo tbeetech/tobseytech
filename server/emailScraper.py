@@ -14,8 +14,8 @@ Strategy:
      domains where no explicit addresses are found.
   4. Deduplicate, validate, and return JSON to stdout.
 
-Dependencies (stdlib only — no third-party packages required):
-  - requests      — HTTP fetching
+Dependencies (stdlib + requests):
+  - requests      — HTTP fetching (third-party; already required by server)
   - re            — regex email extraction
   - urllib        — URL normalisation
   - html.parser   — stdlib HTML parsing (replaces beautifulsoup4)
@@ -83,7 +83,7 @@ class _LinkAndTextParser(HTMLParser):
 
 
 def _parse_html(raw: str) -> _LinkAndTextParser:
-    """Parse raw HTML bytes/string and return a populated _LinkAndTextParser."""
+    """Parse a raw HTML string and return a populated _LinkAndTextParser."""
     parser = _LinkAndTextParser()
     try:
         parser.feed(raw)
