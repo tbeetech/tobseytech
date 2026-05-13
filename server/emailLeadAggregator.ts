@@ -85,7 +85,8 @@ export async function aggregateEmailLeads(
   }
 
   // Normalise each item, discarding anything that lacks a valid email
-  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  // Same pattern as emailScraper.py EMAIL_RE — aligned for consistent validation
+  const EMAIL_RE = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
   const leads: AggregatedLead[] = [];
   for (const item of raw as any[]) {
     const email = String(item?.email ?? "").toLowerCase().trim();

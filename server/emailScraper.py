@@ -29,7 +29,7 @@ import sys
 import json
 import re
 import urllib.parse
-from concurrent.futures import ThreadPoolExecutor, as_completed, TimeoutError as FuturesTimeout
+from concurrent.futures import ThreadPoolExecutor, as_completed, TimeoutError as ConcurrentFuturesTimeout
 from xml.etree import ElementTree
 
 import requests
@@ -360,7 +360,7 @@ def aggregate_leads(industry: str, keywords: list[str], count: int) -> list[dict
                             'lastName': lead.get('lastName'),
                             'tags': list(base_tags),
                         })
-    except FuturesTimeout:
+    except ConcurrentFuturesTimeout:
         pass  # use whatever we gathered so far
 
     # ── Step 3: Prefix fill-up for remaining quota ────────────────────────────
