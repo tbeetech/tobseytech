@@ -43,9 +43,8 @@ const emailListSchema = new Schema<EmailListDocument>(
 );
 
 // Keep contactCount in sync automatically
-emailListSchema.pre("save", function (next) {
+emailListSchema.pre("save", function () {
   this.contactCount = this.contacts.filter((c) => !c.unsubscribed).length;
-  next();
 });
 
 export const EmailListModel =
