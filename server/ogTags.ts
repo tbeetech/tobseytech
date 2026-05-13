@@ -30,8 +30,8 @@ export function injectVlogMetaTags(
   baseUrl: string,
 ): string {
   const vlogUrl = `${baseUrl}/vlog/${vlog.slug}`;
-  const title = escapeHtml(vlog.seoTitle ?? vlog.title);
-  const description = escapeHtml(vlog.seoDescription ?? vlog.description);
+  const title = escapeHtml(vlog.seoTitle ?? vlog.title ?? "Untitled Vlog");
+  const description = escapeHtml(vlog.seoDescription ?? vlog.description ?? "");
   const image = vlog.thumbnail ?? `${baseUrl}/og-image.svg`;
 
   return injectMetaTags(html, { title, description, image, url: vlogUrl, type: "video.other" });
