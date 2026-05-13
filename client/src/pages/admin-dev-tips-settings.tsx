@@ -306,15 +306,12 @@ export default function AdminDevTipsSettingsPage() {
     if (config.tone) setTone(config.tone);
     if (config.audience) setAudience(config.audience);
     if (config.pillarWeights) {
-      const w: Record<string, number> = {};
-      for (const p of PILLARS) {
-        w[p.key] = (config.pillarWeights as Record<string, number>)[p.key] ?? 1;
-      }
+      const w = Object.fromEntries(
+        PILLARS.map((p) => [p.key, (config.pillarWeights as Record<string, number>)[p.key] ?? 1])
+      );
       setPillarWeights(w);
     } else {
-      const w: Record<string, number> = {};
-      PILLARS.forEach((p) => { w[p.key] = 1; });
-      setPillarWeights(w);
+      setPillarWeights(Object.fromEntries(PILLARS.map((p) => [p.key, 1])));
     }
   }, [config]);
 

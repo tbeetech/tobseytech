@@ -661,7 +661,7 @@ export async function publishPost(postId: string): Promise<{ published: DevTipsP
   if (published.length > 0) {
     post.publishedPlatforms = published;
     post.publishedAt = new Date();
-    post.status = Object.keys(errors).length === 0 ? "published" : "published";
+    post.status = Object.keys(errors).length === 0 ? "published" : "failed";
     if (Object.keys(errors).length > 0) {
       post.errorLog = JSON.stringify(errors);
     }

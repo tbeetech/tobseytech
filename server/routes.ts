@@ -3985,13 +3985,17 @@ Only return valid JSON, no markdown fences.`;
         update.postIntervalMs = v;
       }
       if (allowedFormats !== undefined) {
-        if (!Array.isArray(allowedFormats) || !allowedFormats.every((f: unknown) => DEV_TIPS_FORMATS.includes(f as any))) {
+        const isValidFormat = (f: unknown): f is typeof DEV_TIPS_FORMATS[number] =>
+          DEV_TIPS_FORMATS.includes(f as typeof DEV_TIPS_FORMATS[number]);
+        if (!Array.isArray(allowedFormats) || !allowedFormats.every(isValidFormat)) {
           return res.status(400).json({ message: "Invalid allowedFormats" });
         }
         update.allowedFormats = allowedFormats;
       }
       if (defaultPlatforms !== undefined) {
-        if (!Array.isArray(defaultPlatforms) || !defaultPlatforms.every((p: unknown) => DEV_TIPS_PLATFORMS.includes(p as any))) {
+        const isValidPlatform = (p: unknown): p is typeof DEV_TIPS_PLATFORMS[number] =>
+          DEV_TIPS_PLATFORMS.includes(p as typeof DEV_TIPS_PLATFORMS[number]);
+        if (!Array.isArray(defaultPlatforms) || !defaultPlatforms.every(isValidPlatform)) {
           return res.status(400).json({ message: "Invalid defaultPlatforms" });
         }
         update.defaultPlatforms = defaultPlatforms;
@@ -4024,9 +4028,19 @@ Only return valid JSON, no markdown fences.`;
       let config = await DevTipsBotConfigModel.findOne();
       if (!config) config = new DevTipsBotConfigModel({});
 
-      const accounts: any[] = (config.socialAccounts as any[]) ?? [];
-      const idx = accounts.findIndex((a: any) => a.platform === platform);
-      const accountData: any = {
+      type SocialAccountEntry = {
+        platform: string;
+        enabled: boolean;
+        accessToken?: string;
+        refreshToken?: string;
+        accountId?: string;
+        displayName?: string;
+        connectedAt?: Date;
+      };
+
+      const accounts: SocialAccountEntry[] = (config.socialAccounts as SocialAccountEntry[]) ?? [];
+      const idx = accounts.findIndex((a) => a.platform === platform);
+      const accountData: SocialAccountEntry = {
         platform,
         enabled: enabled !== undefined ? Boolean(enabled) : (idx >= 0 ? accounts[idx].enabled : false),
         accessToken: accessToken ?? (idx >= 0 ? accounts[idx].accessToken : undefined),
@@ -4042,10 +4056,10 @@ Only return valid JSON, no markdown fences.`;
         accounts.push(accountData);
       }
 
-      config.socialAccounts = accounts;
+      config.socialAccounts = accounts as any;
       await config.save();
       // Return without exposing raw tokens
-      const safeAccounts = accounts.map(({ accessToken: _at, refreshToken: _rt, ...rest }: any) => ({
+      const safeAccounts = accounts.map(({ accessToken: _at, refreshToken: _rt, ...rest }) => ({
         ...rest,
         hasToken: Boolean(_at),
       }));

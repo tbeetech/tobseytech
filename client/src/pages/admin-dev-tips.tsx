@@ -65,8 +65,7 @@ interface PostsResponse {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-const PILLAR_COLORS: Record<string, string> = {
-  "code-snippet":   "bg-cyan-500/20 text-cyan-400 border-cyan-500/30",
+const PILLAR_COLORS: Record<string, string> = {  "code-snippet":   "bg-cyan-500/20 text-cyan-400 border-cyan-500/30",
   "architecture":   "bg-purple-500/20 text-purple-400 border-purple-500/30",
   "devops":         "bg-green-500/20 text-green-400 border-green-500/30",
   "performance":    "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
@@ -102,6 +101,14 @@ function msToHuman(ms: number): string {
   if (hours < 1) return `${Math.round(ms / 60000)} min`;
   if (hours < 24) return `${hours.toFixed(1)} hr`;
   return `${(hours / 24).toFixed(1)} days`;
+}
+
+function formatErrorLog(log: string): string {
+  try {
+    return JSON.stringify(JSON.parse(log));
+  } catch {
+    return log;
+  }
 }
 
 async function apiCall(url: string, method = "GET", body?: unknown) {
@@ -412,7 +419,7 @@ export default function AdminDevTipsPage() {
                     {post.errorLog && (
                       <div className="mt-1 flex items-center gap-1 text-[10px] text-red-400">
                         <AlertCircle className="w-3 h-3" />
-                        <span className="truncate">{(() => { try { return JSON.stringify(JSON.parse(post.errorLog)); } catch { return post.errorLog; } })()}</span>
+                        <span className="truncate">{formatErrorLog(post.errorLog)}</span>
                       </div>
                     )}
                   </div>
