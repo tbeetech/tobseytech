@@ -142,7 +142,7 @@ export default function AuthPage() {
                 >
                   <Icon className="w-4 h-4 text-galactic-orange" />
                 </div>
-                <span className="text-white/80 text-sm">{text}</span>
+                <span className="text-foreground/80 text-sm">{text}</span>
               </div>
             ))}
           </div>
@@ -168,7 +168,7 @@ export default function AuthPage() {
 
           <div className="glass-effect-strong rounded-2xl p-7">
             <Tabs defaultValue="login">
-              <TabsList className="grid w-full grid-cols-2 mb-6 rounded-xl p-1" style={{ background: "rgba(0,0,0,0.5)" }}>
+              <TabsList className="grid w-full grid-cols-2 mb-6 rounded-xl p-1 bg-muted">
                 <TabsTrigger
                   value="login"
                   className="font-orbitron text-xs rounded-lg data-[state=active]:bg-galactic-orange data-[state=active]:text-space-black"

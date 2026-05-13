@@ -31,6 +31,7 @@ import {
   Sparkles,
   Zap,
   Globe2,
+  Video,
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { format } from "date-fns";
@@ -39,6 +40,7 @@ import PostFetcherTab from "@/components/PostFetcherTab";
 import BotWorkerTab from "@/components/BotWorkerTab";
 import CleanerTab from "@/components/CleanerTab";
 import SportaTab from "@/components/SportaTab";
+import VidAggregatorTab from "@/components/VidAggregatorTab";
 
 interface SafeUser {
   id: string;
@@ -399,6 +401,9 @@ export default function DashboardPage() {
             </TabsTrigger>
             <TabsTrigger value="sporta" className="font-orbitron text-sm rounded-lg">
               <Globe2 className="w-4 h-4 mr-1" /> SPORTA
+            </TabsTrigger>
+            <TabsTrigger value="vid-aggregator" className="font-orbitron text-sm rounded-lg">
+              <Video className="w-4 h-4 mr-1" /> Vid Aggregator
             </TabsTrigger>
           </TabsList>
 
@@ -885,6 +890,11 @@ export default function DashboardPage() {
           {/* ── SPORTA Tab ── */}
           <TabsContent value="sporta">
             <SportaTab />
+          </TabsContent>
+
+          {/* ── Vid Aggregator Tab ── */}
+          <TabsContent value="vid-aggregator">
+            <VidAggregatorTab />
           </TabsContent>
         </Tabs>
       </div>

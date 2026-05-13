@@ -8,7 +8,7 @@ import bcrypt from "bcryptjs";
 import { registerRoutes } from "./routes.js";
 import { setupVite, serveStatic, log } from "./vite.js";
 import { initStorage, storage } from "./storage.js";
-import { ensureAdminUser, promoteAdminByEmail } from "./seed.js";
+import { ensureAdminUser, promoteAdminByEmail, seedDefaultVlogs } from "./seed.js";
 import { getClientPromise } from "./mongodb.js";
 import { startBotWorker, stopBotWorker } from "./botWorker.js";
 import {
@@ -180,6 +180,7 @@ app.use((req, res, next) => {
   if (ADMIN_SEED_EMAIL) {
     await promoteAdminByEmail(ADMIN_SEED_EMAIL);
   }
+  await seedDefaultVlogs();
 
   // Start the background bot worker that auto-fetches tech news from RSS feeds
   // and publishes them to the blog in real-time.
