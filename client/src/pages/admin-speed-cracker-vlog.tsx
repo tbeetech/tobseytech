@@ -343,11 +343,14 @@ export default function AdminSpeedCrackerVlogPage() {
             </div>
           </div>
 
-          {!canPost && form.embedUrl && (
-            <p className="text-[11px] text-gray-500 mt-2">
-              {!form.title ? "Add a title" : !form.description ? "Add a description" : ""} — or click <strong className="text-yellow-400">AI Fill</strong> to auto-generate
-            </p>
-          )}
+          {(() => {
+            const missingField = !form.title ? "Add a title" : !form.description ? "Add a description" : "";
+            return !canPost && form.embedUrl && missingField ? (
+              <p className="text-[11px] text-gray-500 mt-2">
+                {missingField} — or click <strong className="text-yellow-400">AI Fill</strong> to auto-generate
+              </p>
+            ) : null;
+          })()}
         </div>
       )}
 
