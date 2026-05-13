@@ -3347,10 +3347,14 @@ Only return valid JSON, no markdown fences.`;
 
       const list = await EmailListModel.create({ orgId: String(org._id), name, description, contacts: [] });
 
-      // Advance onboarding if still at tier_selected
+      // Advance onboarding status — non-critical: failure must not affect the 201 response
       if (org.onboardingStatus === "tier_selected") {
-        org.onboardingStatus = "list_created";
-        await org.save();
+        try {
+          org.onboardingStatus = "list_created";
+          await org.save();
+        } catch (onboardingErr) {
+          console.error("[emailos/lists POST] onboarding status update failed:", onboardingErr);
+        }
       }
       res.status(201).json(list);
     } catch (err) {

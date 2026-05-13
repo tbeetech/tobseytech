@@ -1,157 +1,30 @@
 /**
  * emailLeadAggregator.ts
  *
- * Aggregates prospective email leads from publicly accessible marketing sources.
+ * Aggregates prospective email leads using a pure Python web-scraping engine.
  *
- * Sources (all free, no API keys required):
- *  1. Clearbit Autocomplete API  — company names + domains by keyword
- *  2. Google News RSS            — industry-specific company/domain discovery
- *  3. RandomUser.me API          — realistic person name generation
+ * The heavy lifting is done by emailScraper.py (same directory) which uses
+ * only standard / open-source Python libraries:
+ *   requests, beautifulsoup4, re, urllib, concurrent.futures, xml.etree
  *
- * Strategy:
- *  - Discover real business domains via Clearbit + Google News RSS for the
- *    requested industry / keywords.
- *  - Pair each domain with a realistic person name from RandomUser.me to
- *    construct likely business email addresses (firstname.lastname@domain).
- *  - Fall back to generic business-email prefixes (hello@, info@, …) when
- *    more contacts are needed.
+ * No third-party API keys are required.  All email discovery is performed
+ * by scraping publicly accessible web pages (Google News RSS for domain
+ * discovery, then contact/about pages for actual addresses).
  *
- * All returned contacts are tagged "aggregated-lead" so recipients can
- * distinguish them from manually added subscribers.
- *
- * IMPORTANT: Callers should comply with applicable email-marketing laws
- * (CAN-SPAM, GDPR, etc.) before sending to these addresses.
+ * IMPORTANT: Callers must comply with applicable email-marketing laws
+ * (CAN-SPAM, GDPR, etc.) before sending to aggregated addresses.
  */
 
-import Parser from "rss-parser";
+import { execFile } from "child_process";
+import { promisify } from "util";
+import path from "path";
+import { fileURLToPath } from "url";
 
-// ─── RSS parser ───────────────────────────────────────────────────────────────
+const execFileAsync = promisify(execFile);
 
-const rssParser = new Parser({
-  timeout: 10_000,
-  headers: {
-    "User-Agent": "TobseyTechEmailOS/1.0",
-    Accept: "application/rss+xml, application/xml, text/xml, */*",
-  },
-});
-
-// ─── Industry → search-term mapping ──────────────────────────────────────────
-
-const INDUSTRY_SEARCH_TERMS: Record<string, string> = {
-  Technology:    "tech startup company",
-  Marketing:     "digital marketing agency",
-  Ecommerce:     "ecommerce online store",
-  Finance:       "fintech financial services",
-  Health:        "health wellness brand",
-  Education:     "edtech learning platform",
-  SaaS:          "SaaS software company",
-  Retail:        "retail brand",
-  Travel:        "travel tourism company",
-  Food:          "food beverage brand",
-  Fashion:       "fashion clothing brand",
-  "Real Estate": "real estate company",
-  Fitness:       "fitness gym wellness",
-  Beauty:        "beauty skincare brand",
-  B2B:           "B2B services",
-  Crypto:        "crypto blockchain startup",
-  AI:            "artificial intelligence company",
-  Gaming:        "gaming company studio",
-  Media:         "media publisher",
-  Consulting:    "consulting firm",
-  General:       "business company brand",
-};
-
-// Common business-email prefixes used when we only have a domain
-const BIZ_EMAIL_PREFIXES = ["hello", "info", "contact", "marketing", "sales", "team", "support"];
-
-// Blocked top-level domains for news aggregators / search engines
-const BLOCKED_HOSTNAME_PATTERNS = [
-  "google", "bing", "yahoo", "facebook", "twitter", "x.com",
-  "linkedin", "instagram", "tiktok", "reddit", "wikipedia",
-];
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function googleNewsFeedUrl(query: string): string {
-  return `https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=en-US&gl=US&ceid=US:en`;
-}
-
-function extractDomain(url: string): string | null {
-  try {
-    const host = new URL(url).hostname.replace(/^www\./, "");
-    if (BLOCKED_HOSTNAME_PATTERNS.some((p) => host.includes(p))) return null;
-    // Only accept clean-looking domains (letters, numbers, hyphens, dots)
-    if (!/^[a-z0-9.-]+\.[a-z]{2,}$/i.test(host)) return null;
-    return host.toLowerCase();
-  } catch {
-    return null;
-  }
-}
-
-// ─── External-source fetchers ─────────────────────────────────────────────────
-
-interface ClearbitCompany {
-  name: string;
-  domain: string;
-}
-
-async function fetchClearbitCompanies(query: string): Promise<ClearbitCompany[]> {
-  const url = `https://autocomplete.clearbit.com/v1/companies/suggest?query=${encodeURIComponent(query)}`;
-  try {
-    const resp = await fetch(url, {
-      headers: { "User-Agent": "TobseyTechEmailOS/1.0" },
-      signal: AbortSignal.timeout(8_000),
-    });
-    if (!resp.ok) return [];
-    const data = (await resp.json()) as ClearbitCompany[];
-    return Array.isArray(data) ? data.filter((c) => c.domain) : [];
-  } catch {
-    return [];
-  }
-}
-
-async function fetchGoogleNewsDomains(query: string): Promise<string[]> {
-  try {
-    const feed = await rssParser.parseURL(googleNewsFeedUrl(query));
-    const domains = new Set<string>();
-    for (const item of feed.items.slice(0, 40)) {
-      const d = item.link ? extractDomain(item.link) : null;
-      if (d) domains.add(d);
-    }
-    return Array.from(domains);
-  } catch {
-    return [];
-  }
-}
-
-interface RandomUserApiResult {
-  name: { first: string; last: string };
-  login: { username: string };
-}
-
-interface RandomUserApiResponse {
-  results: RandomUserApiResult[];
-}
-
-async function fetchRandomPersons(
-  count: number,
-  seed: string,
-): Promise<{ firstName: string; lastName: string }[]> {
-  const url =
-    `https://randomuser.me/api/?results=${Math.min(count, 100)}&inc=name,login` +
-    `&seed=${encodeURIComponent(seed.slice(0, 24))}`;
-  try {
-    const resp = await fetch(url, { signal: AbortSignal.timeout(10_000) });
-    if (!resp.ok) return [];
-    const data = (await resp.json()) as RandomUserApiResponse;
-    return (data.results ?? []).map((r) => ({
-      firstName: r.name.first,
-      lastName: r.name.last,
-    }));
-  } catch {
-    return [];
-  }
-}
+// Resolve the absolute path to emailScraper.py at the same directory level
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const SCRAPER_PATH = path.join(__dirname, "emailScraper.py");
 
 // ─── Public type ─────────────────────────────────────────────────────────────
 
@@ -166,7 +39,7 @@ export interface AggregatedLead {
 
 /**
  * Aggregates up to `count` prospective email leads for the given industry
- * and optional keyword list.
+ * and optional keyword list by delegating to the Python web-scraping engine.
  *
  * @param industry  Industry/niche label (e.g. "Technology", "Marketing")
  * @param keywords  Additional keyword refinements (e.g. ["email", "B2B"])
@@ -178,76 +51,49 @@ export async function aggregateEmailLeads(
   count: number,
 ): Promise<AggregatedLead[]> {
   const clampedCount = Math.min(Math.max(1, count), 500);
-  const searchTerm = keywords.length
-    ? keywords.join(" ")
-    : (INDUSTRY_SEARCH_TERMS[industry] ?? industry);
+  const payload = JSON.stringify({ industry, keywords, count: clampedCount });
 
-  // Fetch all sources concurrently
-  const [clearbitCompanies, newsDomains, persons] = await Promise.all([
-    fetchClearbitCompanies(searchTerm),
-    fetchGoogleNewsDomains(searchTerm),
-    fetchRandomPersons(clampedCount, `${industry}-${searchTerm}`),
-  ]);
-
-  // Build deduplicated domain list (Clearbit first, then News RSS)
-  const allDomains: string[] = [];
-  const seenDomains = new Set<string>();
-
-  for (const c of clearbitCompanies) {
-    if (!seenDomains.has(c.domain)) {
-      seenDomains.add(c.domain);
-      allDomains.push(c.domain);
-    }
-  }
-  for (const d of newsDomains) {
-    if (!seenDomains.has(d)) {
-      seenDomains.add(d);
-      allDomains.push(d);
-    }
+  let stdout: string;
+  try {
+    const result = await execFileAsync("python3", [SCRAPER_PATH], {
+      input: payload,
+      timeout: 90_000,          // 90-second hard ceiling for the scrape job
+      maxBuffer: 5 * 1024 * 1024, // 5 MB stdout buffer
+    });
+    stdout = result.stdout;
+  } catch (err: any) {
+    // Log the Python-side stderr for diagnosis but never let it surface as 500
+    const stderr: string = err?.stderr ?? "";
+    console.error("[emailLeadAggregator] Python scraper error:", stderr || err?.message);
+    return [];
   }
 
+  // Parse and validate the JSON output from the Python script
+  let raw: unknown;
+  try {
+    raw = JSON.parse(stdout.trim());
+  } catch {
+    console.error("[emailLeadAggregator] Could not parse Python output:", stdout.slice(0, 200));
+    return [];
+  }
+
+  if (!Array.isArray(raw)) {
+    console.error("[emailLeadAggregator] Unexpected Python output shape:", typeof raw);
+    return [];
+  }
+
+  // Normalise each item, discarding anything that lacks a valid email
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const leads: AggregatedLead[] = [];
-  const seenEmails = new Set<string>();
-  const baseTags = ["aggregated-lead", industry.toLowerCase().replace(/\s+/g, "-")];
-
-  // ── Strategy 1: Person-name + industry domain (e.g. john.doe@company.com) ──
-  const domainCount = allDomains.length;
-  for (let i = 0; i < persons.length && leads.length < clampedCount; i++) {
-    const { firstName, lastName } = persons[i];
-    if (!domainCount) break;
-    const domain = allDomains[i % domainCount];
-    const email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}@${domain}`;
-    if (!seenEmails.has(email)) {
-      seenEmails.add(email);
-      leads.push({ email, firstName, lastName, tags: [...baseTags] });
-    }
-  }
-
-  // ── Strategy 2: Generic prefix emails for discovered domains ──────────────
-  for (const domain of allDomains) {
-    for (const prefix of BIZ_EMAIL_PREFIXES) {
-      if (leads.length >= clampedCount) break;
-      const email = `${prefix}@${domain}`;
-      if (!seenEmails.has(email)) {
-        seenEmails.add(email);
-        leads.push({ email, tags: [...baseTags, "business-contact"] });
-      }
-    }
-    if (leads.length >= clampedCount) break;
-  }
-
-  // ── Strategy 3: Fill remaining slots using person names paired with
-  // already-discovered industry domains. Skip if no business domains found.
-  if (allDomains.length > 0) {
-    for (let i = 0; i < persons.length && leads.length < clampedCount; i++) {
-      const { firstName, lastName } = persons[i];
-      const overflowDomain = allDomains[i % allDomains.length];
-      const email = `${firstName.toLowerCase()}${lastName.toLowerCase().slice(0, 1)}@${overflowDomain}`;
-      if (!seenEmails.has(email)) {
-        seenEmails.add(email);
-        leads.push({ email, firstName, lastName, tags: [...baseTags] });
-      }
-    }
+  for (const item of raw as any[]) {
+    const email = String(item?.email ?? "").toLowerCase().trim();
+    if (!email || !EMAIL_RE.test(email)) continue;
+    leads.push({
+      email,
+      firstName: item.firstName ? String(item.firstName) : undefined,
+      lastName:  item.lastName  ? String(item.lastName)  : undefined,
+      tags:      Array.isArray(item.tags) ? (item.tags as string[]) : [],
+    });
   }
 
   return leads.slice(0, clampedCount);
