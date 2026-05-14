@@ -17,13 +17,7 @@ export function validateRuntimeEnv(): void {
   const errors: string[] = [];
 
   if (!MONGODB_URI) {
-    const message =
-      "MONGODB_URI is not configured. Development will fall back to in-memory storage; production must configure MongoDB to avoid data and session loss.";
-    if (isProduction) {
-      errors.push(message);
-    } else {
-      warnings.push(message);
-    }
+    errors.push("MONGODB_URI is not configured. Configure your MongoDB Atlas connection string before starting the server.");
   }
 
   if (!process.env.SESSION_SECRET?.trim()) {

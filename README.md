@@ -92,7 +92,7 @@ tobseytech/
 
 - **Node.js** ≥ 20
 - **npm** ≥ 10
-- A **MongoDB Atlas** cluster (free M0 tier is fine) — or skip it to use the in-memory fallback
+- A **MongoDB Atlas** cluster (free M0 tier is fine)
 
 ### 1. Clone & install
 
@@ -109,8 +109,8 @@ cp .env.example .env
 # Edit .env and fill in MONGODB_URI, SESSION_SECRET, etc.
 ```
 
-The only truly required variable for local development is `MONGODB_URI`.  
-Without it the server falls back to in-memory storage (data is lost on restart).
+The only truly required variable for local development is `MONGODB_URI`.
+Without it the server will fail fast at startup.
 
 ### 3. Start the dev server
 
@@ -152,6 +152,7 @@ Key variables:
 | `npm run build` | Build frontend + bundle server for production |
 | `npm start` | Run the production build (`dist/index.js`) |
 | `npm run check` | TypeScript type-check (no emit) |
+| `npm run test:e2e` | Run Playwright end-to-end tests |
 | `npm run db:push` | Push Drizzle schema to PostgreSQL (legacy / optional) |
 
 ---

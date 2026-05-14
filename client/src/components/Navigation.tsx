@@ -88,6 +88,11 @@ export default function Navigation() {
                 Career Hub
               </button>
             </Link>
+            <Link href="/doc">
+              <button className="nav-link text-neon-cyan/90 hover:text-neon-cyan font-orbitron text-xs tracking-wide transition-colors">
+                Docs
+              </button>
+            </Link>
             <Link href="/features">
               <button className="nav-link text-galactic-orange/90 hover:text-galactic-gold font-orbitron text-xs tracking-wide transition-colors" data-testid="nav-powerhub-trigger">
                 PowerHub
@@ -211,6 +216,11 @@ export default function Navigation() {
               <Link href="/career-hub" onClick={() => setIsOpen(false)}>
                 <button className="text-left nav-link text-neon-cyan/90 hover:text-neon-cyan font-orbitron text-sm transition-colors">
                   Career Hub
+                </button>
+              </Link>
+              <Link href="/doc" onClick={() => setIsOpen(false)}>
+                <button className="text-left nav-link text-neon-cyan/90 hover:text-neon-cyan font-orbitron text-sm transition-colors">
+                  Docs
                 </button>
               </Link>
 

@@ -769,22 +769,15 @@ import { connectToDatabase } from "./mongodb.js";
 import { isProduction, MONGODB_URI } from "./env.js";
 
 async function createStorage(): Promise<IStorage> {
-  if (!MONGODB_URI) {
-    if (isProduction) {
-      throw new Error("MONGODB_URI is required in production");
-    }
-    return new MemStorage();
-  }
-
   try {
     await connectToDatabase();
     return new MongoStorage();
   } catch (err) {
-    if (isProduction) {
+    if (isProduction || MONGODB_URI) {
       throw err;
     }
     console.error(
-      "[storage] MongoDB connection failed — falling back to in-memory storage. " +
+      "[storage] MongoDB connection unavailable — falling back to in-memory storage. " +
         "Data will not persist across restarts.",
       (err as Error).message
     );

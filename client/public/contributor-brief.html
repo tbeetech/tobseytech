@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TOBSEYTECH Contributor Brief</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        background: #0b1118;
+        color: #eef2f6;
+      }
+      main {
+        max-width: 920px;
+        margin: 0 auto;
+        padding: 40px 24px 64px;
+      }
+      h1, h2, h3 {
+        margin: 0 0 12px;
+      }
+      h1 {
+        font-size: 34px;
+      }
+      h2 {
+        font-size: 22px;
+        margin-top: 28px;
+      }
+      p, li {
+        color: #c9d3dd;
+        line-height: 1.6;
+      }
+      .card {
+        background: #111a24;
+        border: 1px solid #233242;
+        border-radius: 16px;
+        padding: 18px;
+        margin-top: 16px;
+      }
+      .meta {
+        color: #65d6ff;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+      code, pre {
+        background: #071017;
+        color: #dff5ff;
+        border-radius: 10px;
+      }
+      pre {
+        padding: 14px;
+        overflow-x: auto;
+      }
+      @media print {
+        body {
+          background: white;
+          color: black;
+        }
+        p, li {
+          color: #222;
+        }
+        .card {
+          border-color: #ddd;
+          background: #fff;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <p class="meta">TOBSEYTECH Open Source Brief</p>
+      <h1>Contributor Project Brief</h1>
+      <p>
+        This brief is for external contributors who want a predictable understanding of the TOBSEYTECH codebase before forking.
+        It complements the in-app docs route at <strong>/doc</strong> and can be printed to PDF directly from the browser.
+      </p>
+
+      <div class="card">
+        <h2>Stack</h2>
+        <ul>
+          <li>Frontend: React 18, TypeScript, Vite, Tailwind, Radix UI</li>
+          <li>Backend: Node.js, Express, TypeScript</li>
+          <li>Database: MongoDB Atlas via Mongoose</li>
+          <li>Testing: TypeScript checks and Playwright E2E</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>Required Local Setup</h2>
+        <pre>npm install
+npm run dev
+npm run check
+npx playwright install chromium
+npm run test:e2e</pre>
+        <p>MONGODB_URI is required. The project now runs Atlas-only and fails fast if the URI is missing.</p>
+      </div>
+
+      <div class="card">
+        <h2>Important Backend Entry Points</h2>
+        <ul>
+          <li>server/routes.ts: API routes and EmailOS endpoints</li>
+          <li>server/emailLeadAggregator.ts: business lead aggregation logic and fallbacks</li>
+          <li>server/index.ts: server boot and middleware wiring</li>
+          <li>server/env.ts: runtime environment validation</li>
+          <li>server/mongodb.ts: Atlas connection and startup requirements</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>Recently Shipped Changes</h2>
+        <ul>
+          <li>EmailOS aggregation moved from Python subprocess logic to JavaScript-native server code.</li>
+          <li>Local/in-memory MongoDB fallback was removed; Atlas is mandatory.</li>
+          <li>Global motion was reduced to improve responsiveness.</li>
+          <li>Playwright E2E coverage was added for EmailOS fetch-leads flow.</li>
+          <li>Business lead requests are no longer limited by the old 500-request cap.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>Good First Issues</h2>
+        <ul>
+          <li>Add focused Playwright coverage around auth redirects and onboarding edge cases.</li>
+          <li>Improve docs for environment setup and deployment caveats.</li>
+          <li>Reduce bundle size with route-level chunking.</li>
+          <li>Add backend tests for aggregation dedupe and limit behavior.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>How to Share as PDF</h2>
+        <p>Open this page or the in-app /doc route and use the browser print dialog, then choose “Save as PDF”.</p>
+      </div>
+    </main>
+  </body>
+</html>

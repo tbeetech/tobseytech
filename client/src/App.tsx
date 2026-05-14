@@ -1,6 +1,7 @@
 import { Switch, Route, Redirect } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
+import { MotionConfig } from "framer-motion";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/hooks/use-auth";
@@ -22,6 +23,7 @@ import DashboardPage from "@/pages/dashboard";
 import FeaturesPage from "@/pages/features";
 import LearningPathPage from "@/pages/learning-path";
 import CareerHubPage from "@/pages/career-hub";
+import DocPage from "@/pages/doc";
 import FeatureROICalculatorPage from "@/pages/feature-roi-calculator";
 import FeatureInnovationRoadmapPage from "@/pages/feature-innovation-roadmap";
 import FeatureSkillsQuizPage from "@/pages/feature-skills-quiz";
@@ -71,6 +73,7 @@ function Router() {
       <Route path="/chat" component={ChatPage} />
       <Route path="/dashboard" component={DashboardPage} />
       <Route path="/features" component={FeaturesPage} />
+      <Route path="/doc" component={DocPage} />
       <Route path="/learning-path" component={LearningPathPage} />
       <Route path="/career-hub" component={CareerHubPage} />
       <Route path="/feature/roi-calculator" component={FeatureROICalculatorPage} />
@@ -121,9 +124,11 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <AuthProvider>
-            <Toaster />
-            <Router />
-            <ProphetChat />
+            <MotionConfig reducedMotion="always">
+              <Toaster />
+              <Router />
+              <ProphetChat />
+            </MotionConfig>
           </AuthProvider>
         </TooltipProvider>
       </QueryClientProvider>

@@ -1075,8 +1075,8 @@ function EmailOSDashboard({ org: initialOrg }: { org: Org }) {
                           <input value={aggKeywords} onChange={e => setAggKeywords(e.target.value)} placeholder="e.g. email marketing, newsletter, B2B" className="w-full bg-space-dark border border-white/10 rounded-xl px-3 py-2 text-white placeholder-gray-600 font-orbitron text-sm focus:outline-none focus:border-neon-cyan/60" />
                         </div>
                         <div>
-                          <label className="block text-xs font-orbitron text-gray-400 mb-1">Number of Leads (max 500)</label>
-                          <input type="number" min={1} max={500} value={aggCount} onChange={e => setAggCount(Math.min(500, Math.max(1, Number(e.target.value))))} className="w-full bg-space-dark border border-white/10 rounded-xl px-3 py-2 text-white font-orbitron text-sm focus:outline-none focus:border-neon-cyan/60" />
+                          <label className="block text-xs font-orbitron text-gray-400 mb-1">Number of Leads (up to your plan capacity)</label>
+                          <input type="number" min={1} value={aggCount} onChange={e => setAggCount(Math.max(1, Number(e.target.value) || 1))} className="w-full bg-space-dark border border-white/10 rounded-xl px-3 py-2 text-white font-orbitron text-sm focus:outline-none focus:border-neon-cyan/60" />
                         </div>
                       </div>
                       <div className="flex gap-3">

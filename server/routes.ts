@@ -3535,7 +3535,7 @@ Generate metadata for this video to feature on a tech video hub. Return valid JS
       const { industry, keywords, count } = z.object({
         industry: z.string().min(1).max(60).default("General"),
         keywords: z.array(z.string().max(60)).max(10).default([]),
-        count:    z.number().int().min(1).max(500).default(50),
+        count:    z.number().int().min(1).max(250000).default(50),
       }).parse(req.body);
 
       // Check org contact limit before aggregating
