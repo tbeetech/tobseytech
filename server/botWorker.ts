@@ -224,6 +224,17 @@ function buildExcerpt(raw: string): string {
   return plain.length > 300 ? plain.slice(0, 297) + "…" : plain || "Read the full article at the source link.";
 }
 
+/** Count words in a text string */
+function countWords(text: string): number {
+  return text.trim().split(/\s+/).filter(Boolean).length;
+}
+
+/** Validate that content has sufficient length (minimum 20 words) */
+function hasMinimumContent(content: string): boolean {
+  const wordCount = countWords(content);
+  return wordCount >= 20;
+}
+
 // Extended RSS item type that includes non-standard fields exposed by rss-parser
 interface RssItem extends Parser.Item {
   "media:content"?: { $: { url: string } } | Array<{ $: { url: string } }>;
@@ -356,7 +367,7 @@ async function fetchAndPostFeed(feed: BotFeed, feedIndex: number): Promise<void>
       const slug = toSlug(title, slugSuffix);
 
       const coverImage = extractImage(item);
-      const rawExcerpt = buildExcerpt(item.contentSnippet || item.summary || item.content || "");
+      const rawExcerpt = buildExcerpt(item.contentSnippet || item.summary || item.content || item["content:encoded"] || "");
       const rawContent = buildContent(item);
       const tags = [
         ...feed.tags,
@@ -365,8 +376,34 @@ async function fetchAndPostFeed(feed: BotFeed, feedIndex: number): Promise<void>
         ),
       ].filter(Boolean);
 
-      // ── Synchronous Gate: clean all text fields before they reach the DB ──
-      const cleaned = cleanPost({ title, excerpt: rawExcerpt, content: rawContent });
+      // ── Synchronous Gate: clean all text fields using every scraped candidate ──
+      const cleaned = cleanPost(
+        { title, excerpt: rawExcerpt, content: rawContent },
+        {
+          titleCandidates: [item.title || ""],
+          excerptCandidates: [
+            item.contentSnippet || "",
+            item.summary || "",
+            item.content || "",
+            item["content:encoded"] || "",
+          ],
+          contentCandidates: [
+            item["content:encoded"] || "",
+            item.content || "",
+            item.summary || "",
+            item.contentSnippet || "",
+          ],
+          sourceUrl: item.link,
+          sourceName: feed.name,
+        }
+      );
+
+      // Skip malformed/too-short items that are likely feed stubs or broken snippets.
+      if (!hasMinimumContent(cleaned.content)) {
+        seenGuids.add(guid);
+        console.log(`[botWorker] ⏭ Skipping short-content item: "${title}"`);
+        continue;
+      }
 
       await storage.createBlogPost({
         title:   cleaned.title,

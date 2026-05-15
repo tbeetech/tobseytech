@@ -2913,7 +2913,7 @@ Only return valid JSON, no markdown fences.`;
         else if (host === "linkedin.com" || host.endsWith(".linkedin.com")) platform = "LinkedIn";
       } catch { /* keep default */ }
 
-      // Try YouTube oEmbed for title + thumbnail
+      // Try platform-specific oEmbed endpoints when available.
       let ytTitle: string | null = null;
       let thumbnail: string | null = null;
       if (platform === "YouTube") {
@@ -2928,6 +2928,35 @@ Only return valid JSON, no markdown fences.`;
             thumbnail = oEmbed.thumbnail_url ?? null;
           }
         } catch { /* non-critical */ }
+      } else if (platform === "Vimeo") {
+        try {
+          const oEmbedRes = await fetch(
+            `https://vimeo.com/api/oembed.json?url=${encodeURIComponent(url)}`,
+            { signal: AbortSignal.timeout(5000) }
+          );
+          if (oEmbedRes.ok) {
+            const oEmbed = await oEmbedRes.json() as { title?: string; thumbnail_url?: string };
+            ytTitle = oEmbed.title ?? null;
+            thumbnail = oEmbed.thumbnail_url ?? null;
+          }
+        } catch { /* non-critical */ }
+      } else if (platform === "Dailymotion") {
+        try {
+          const oEmbedRes = await fetch(
+            `https://www.dailymotion.com/services/oembed?url=${encodeURIComponent(url)}`,
+            { signal: AbortSignal.timeout(5000) }
+          );
+          if (oEmbedRes.ok) {
+            const oEmbed = await oEmbedRes.json() as { title?: string; thumbnail_url?: string };
+            ytTitle = oEmbed.title ?? null;
+            thumbnail = oEmbed.thumbnail_url ?? null;
+          }
+        } catch { /* non-critical */ }
+      }
+
+      if (!ytTitle) {
+        const fallbackTitle = url.split("/").pop()?.replace(/[?_#].*$/, "").replace(/[-_]+/g, " ").trim();
+        ytTitle = fallbackTitle ? fallbackTitle.slice(0, 90) : null;
       }
 
       // AI-generate description and metadata
@@ -3442,6 +3471,24 @@ Generate metadata for this video to feature on a tech video hub. Return valid JS
     }
   });
 
+  // GET /api/emailos/lists/:id — fetch a single list with contacts for viewing
+  app.get("/api/emailos/lists/:id", emailOsRateLimiter, requireAuth, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { EmailOrgModel, EmailListModel } = await getEmailModels();
+      const org = await EmailOrgModel.findOne({ userId: user.id }).lean();
+      if (!org) return res.status(404).json({ message: "Organisation not found" });
+
+      const list = await EmailListModel.findOne({ _id: req.params.id, orgId: String(org._id) }).lean();
+      if (!list) return res.status(404).json({ message: "List not found" });
+
+      res.json(list);
+    } catch (err) {
+      console.error("[emailos/lists/:id GET]", err);
+      res.status(500).json({ message: "Failed to load list" });
+    }
+  });
+
   // POST /api/emailos/lists — create a new email list
   app.post("/api/emailos/lists", emailOsRateLimiter, requireAuth, async (req, res) => {
     try {
@@ -3573,7 +3620,7 @@ Generate metadata for this video to feature on a tech video hub. Return valid JS
         await org.save();
       }
 
-      res.json({ added: newContacts.length, total: list.contactCount });
+      res.json({ added: newContacts.length, total: list.contactCount, listId: String(list._id) });
     } catch (err) {
       if (err instanceof z.ZodError) return res.status(400).json({ message: "Validation error", errors: err.errors });
       console.error("[emailos/lists/:id/aggregate POST]", err);

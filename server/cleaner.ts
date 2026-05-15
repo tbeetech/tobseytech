@@ -194,19 +194,54 @@ export interface PostTextFields {
   content: string;
 }
 
+export interface PostSourceReference {
+  excerptCandidates?: string[];
+  contentCandidates?: string[];
+  titleCandidates?: string[];
+  sourceUrl?: string;
+  sourceName?: string;
+}
+
+function countWords(text: string): number {
+  return text.trim().split(/\s+/).filter(Boolean).length;
+}
+
+function buildExcerptFromContent(content: string): string {
+  if (!content) return "Read the full article at the source link.";
+  return content.length > 300 ? `${content.slice(0, 297).trimEnd()}...` : content;
+}
+
+function pickBestCleanedText(primary: string, candidates: string[] | undefined, minimumWordCount: number): string {
+  const cleanedCandidates = [primary, ...(candidates ?? [])]
+    .map((candidate) => stripSourceAttribution(cleanTextField(candidate)))
+    .filter(Boolean);
+
+  const candidatesMeetingThreshold = cleanedCandidates.filter((candidate) => countWords(candidate) >= minimumWordCount);
+  const rankedCandidates = (candidatesMeetingThreshold.length > 0 ? candidatesMeetingThreshold : cleanedCandidates)
+    .sort((left, right) => right.length - left.length);
+
+  return rankedCandidates[0] ?? "";
+}
+
 /**
  * Synchronous filter applied to every new post before it is written to the DB.
  *
  * - title   → full HTML strip + entity decode + whitespace normalise
  * - excerpt → same as title (excerpt is always plain text)
  * - content → HTML strip + entity decode + source-attribution removal
+ * - source references → optional raw scraped fields used to recover from
+ *   feed stubs by choosing the best cleaned candidate text
  */
-export function cleanPost<T extends PostTextFields>(post: T): T {
+export function cleanPost<T extends PostTextFields>(post: T, source?: PostSourceReference): T {
+  const cleanedTitle = pickBestCleanedText(post.title, source?.titleCandidates, 1);
+  const cleanedContent = pickBestCleanedText(post.content, source?.contentCandidates, 20);
+  const cleanedExcerpt = pickBestCleanedText(post.excerpt, source?.excerptCandidates, 8);
+
   return {
     ...post,
-    title: cleanTextField(post.title),
-    excerpt: cleanTextField(post.excerpt),
-    content: stripSourceAttribution(cleanTextField(post.content)),
+    title: cleanedTitle,
+    excerpt: cleanedExcerpt || buildExcerptFromContent(cleanedContent),
+    content: cleanedContent,
   };
 }
 
