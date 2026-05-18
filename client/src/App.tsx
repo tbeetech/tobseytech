@@ -43,6 +43,7 @@ import AdminSpeedCrackerPage from "@/pages/admin-speed-cracker";
 import AdminSpeedCrackerWorkflowsPage from "@/pages/admin-speed-cracker-workflows";
 import AdminSpeedCrackerApprovalPage from "@/pages/admin-speed-cracker-approval";
 import AdminSpeedCrackerVlogPage from "@/pages/admin-speed-cracker-vlog";
+import AdminSpeedCrackerPostVideoPage from "@/pages/admin-speed-cracker-post-video";
 import AdminSpeedCrackerBlogPage from "@/pages/admin-speed-cracker-blog";
 import AdminSpeedCrackerAnalyticsPage from "@/pages/admin-speed-cracker-analytics";
 import AdminSpeedCrackerSettingsPage from "@/pages/admin-speed-cracker-settings";
@@ -80,7 +81,7 @@ function Router() {
       <Route path="/feature/innovation-roadmap" component={FeatureInnovationRoadmapPage} />
       <Route path="/feature/skills-quiz" component={FeatureSkillsQuizPage} />
       <Route path="/feature/tech-trends" component={FeatureTechTrendsPage} />
-      {/* Removed features — redirect to features hub */}
+      {/* Removed features, redirect to features hub */}
       <Route path="/feature/challenges"><Redirect to="/features" /></Route>
       <Route path="/feature/investor-metrics"><Redirect to="/features" /></Route>
       <Route path="/feature/mentorship"><Redirect to="/features" /></Route>
@@ -92,25 +93,26 @@ function Router() {
       <Route path="/feature/service-comparison" component={FeatureServiceComparisonPage} />
       <Route path="/feature/startup-toolkit" component={FeatureStartupToolkitPage} />
       <Route path="/feature/sporta" component={FeatureSportaPage} />
-      {/* SPORTA — accessible to all authenticated users */}
+      {/* SPORTA, accessible to all authenticated users */}
       <Route path="/sporta" component={SportaPage} />
-      {/* EmailOS — Multi-Tenant Email Marketing OS (second SaaS after SPORTA) */}
+      {/* EmailOS, Multi-Tenant Email Marketing OS (second SaaS after SPORTA) */}
       <Route path="/feature/emailos" component={FeatureEmailOSPage} />
       <Route path="/emailos" component={EmailOSPage} />
       <Route path="/testdata" component={TestDataPage} />
       {/* Vlog (public) */}
       <Route path="/vlog" component={VlogPage} />
       <Route path="/vlog/:slug" component={VlogPostPage} />
-      {/* Speed Cracker — admin-only routes */}
+      {/* Speed Cracker, admin-only routes */}
       <Route path="/admin/speed-cracker" component={AdminSpeedCrackerPage} />
       <Route path="/admin/speed-cracker/workflows" component={AdminSpeedCrackerWorkflowsPage} />
       <Route path="/admin/speed-cracker/approval-center" component={AdminSpeedCrackerApprovalPage} />
       <Route path="/admin/speed-cracker/vlog" component={AdminSpeedCrackerVlogPage} />
+      <Route path="/admin/speed-cracker/post-video" component={AdminSpeedCrackerPostVideoPage} />
       <Route path="/admin/speed-cracker/vlog-manager"><Redirect to="/admin/speed-cracker/vlog" /></Route>
       <Route path="/admin/speed-cracker/blog-manager" component={AdminSpeedCrackerBlogPage} />
       <Route path="/admin/speed-cracker/analytics" component={AdminSpeedCrackerAnalyticsPage} />
       <Route path="/admin/speed-cracker/settings" component={AdminSpeedCrackerSettingsPage} />
-      {/* Daily Dev Tips Bot — admin-only */}
+      {/* Daily Dev Tips Bot, admin-only */}
       <Route path="/admin/dev-tips" component={AdminDevTipsPage} />
       <Route path="/admin/dev-tips/settings" component={AdminDevTipsSettingsPage} />
       <Route component={NotFound} />

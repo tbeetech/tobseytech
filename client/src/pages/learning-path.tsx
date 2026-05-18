@@ -20,7 +20,7 @@ const questions = [
     id: 2,
     question: "What best describes your technical background?",
     options: [
-      { text: "Non-technical — I focus on strategy & people", path: "nontech" },
+      { text: "Non-technical, I focus on strategy & people", path: "nontech" },
       { text: "Some tech knowledge, can use tools", path: "midtech" },
       { text: "Developer or engineer", path: "tech" },
       { text: "Designer or creative professional", path: "creative" },
@@ -30,9 +30,9 @@ const questions = [
     id: 3,
     question: "How urgent is your transformation need?",
     options: [
-      { text: "Immediate — I need results in 30 days", path: "urgent" },
-      { text: "Short-term — 3 to 6 months", path: "shortterm" },
-      { text: "Long-term investment — 6 to 12 months", path: "longterm" },
+      { text: "Immediate, I need results in 30 days", path: "urgent" },
+      { text: "Short-term, 3 to 6 months", path: "shortterm" },
+      { text: "Long-term investment, 6 to 12 months", path: "longterm" },
     ],
   },
 ];

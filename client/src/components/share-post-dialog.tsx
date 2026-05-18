@@ -135,7 +135,7 @@ export function SharePostDialog({ postSlug, postTitle, trigger }: SharePostDialo
       setShortUrl(postUrl);
       toast({
         title: "Note",
-        description: "Using full URL — could not generate short link.",
+        description: "Using full URL, could not generate short link.",
       });
     } finally {
       setLoading(false);

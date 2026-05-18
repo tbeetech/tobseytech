@@ -104,7 +104,7 @@ export default function BotWorkerTab() {
     refetchInterval: 8000,
   });
 
-  // Local config form state — kept in sync with server on load
+  // Local config form state, kept in sync with server on load
   const [pollMinutes, setPollMinutes] = useState<number>(5);
   const [maxArticles, setMaxArticles] = useState<number>(5);
   const [feedToggles, setFeedToggles] = useState<Record<string, boolean>>({});
@@ -289,7 +289,7 @@ export default function BotWorkerTab() {
               onClick={() => pauseMutation.mutate()}
               disabled={anyMutating || cycleRunning}
               className="bg-yellow-500 hover:bg-yellow-400 text-space-black font-orbitron text-xs h-8"
-              title={cycleRunning ? "Cycle in progress — wait for it to finish" : undefined}
+              title={cycleRunning ? "Cycle in progress, wait for it to finish" : undefined}
             >
               {pauseMutation.isPending ? (
                 <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" />
@@ -317,7 +317,7 @@ export default function BotWorkerTab() {
             </Button>
           )}
 
-          {/* Trigger now — disabled when paused, cycling, or any mutation in flight */}
+          {/* Trigger now, disabled when paused, cycling, or any mutation in flight */}
           <Button
             size="sm"
             onClick={() => triggerMutation.mutate()}

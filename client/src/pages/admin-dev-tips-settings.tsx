@@ -190,7 +190,7 @@ function SocialAccountRow({
                 type={showToken ? "text" : "password"}
                 value={token}
                 onChange={(e) => setToken(e.target.value)}
-                placeholder={account?.hasToken ? "Token saved — paste new token to update" : "Paste API token or OAuth access token"}
+                placeholder={account?.hasToken ? "Token saved, paste new token to update" : "Paste API token or OAuth access token"}
                 className="bg-gray-900 border-gray-700 text-white text-xs h-8"
               />
               <Button

@@ -85,7 +85,7 @@ export default function AdminSpeedCrackerSettingsPage() {
           <div className="flex items-center justify-between">
             <div>
               <Label className="text-white text-sm">Auto-Approve Content</Label>
-              <p className="text-xs text-red-300">⚠ Bypasses manual review — use with caution</p>
+              <p className="text-xs text-red-300">⚠ Bypasses manual review, use with caution</p>
             </div>
             <Switch
               checked={settings.autoApprove}
@@ -176,9 +176,9 @@ export default function AdminSpeedCrackerSettingsPage() {
               onChange={(e) => set("defaultApprovalMode", e.target.value)}
               className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 mt-1 text-sm"
             >
-              <option value="manual">Manual — admin reviews each item</option>
-              <option value="semi_automatic">Semi-automatic — AI scores, admin approves above threshold</option>
-              <option value="fully_automatic">Fully automatic — AI approves immediately</option>
+              <option value="manual">Manual, admin reviews each item</option>
+              <option value="semi_automatic">Semi-automatic, AI scores, admin approves above threshold</option>
+              <option value="fully_automatic">Fully automatic, AI approves immediately</option>
             </select>
           </div>
         </div>

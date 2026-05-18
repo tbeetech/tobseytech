@@ -160,7 +160,7 @@ export default function Hero() {
           Empowering businesses with AI-powered automation, 12 real-time features, and intelligent systems that scale with you.
         </p>
         <p className="text-galactic-gold text-sm sm:text-base max-w-xl mx-auto mb-10 font-orbitron leading-relaxed">
-          Kingdom Enhancement Technology — Serving Churches & Organisations in Real Time
+          Kingdom Enhancement Technology, Serving Churches & Organisations in Real Time
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">

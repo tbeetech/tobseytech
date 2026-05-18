@@ -83,7 +83,7 @@ export default function CosmoResearchPanel() {
 
   return (
     <>
-      {/* ── Trigger button — fixed bottom-left ── */}
+      {/* ── Trigger button, fixed bottom-left ── */}
       <AnimatePresence>
         {!open && (
           <motion.button

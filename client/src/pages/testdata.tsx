@@ -206,7 +206,7 @@ export default function TestDataPage() {
                 <div>
                   <p className="text-white/40 text-xs mb-1">Collections</p>
                   <span className="font-mono text-white/80">
-                    {result.collections !== null ? result.collections : "—"}
+                    {result.collections !== null ? result.collections : ""}
                   </span>
                 </div>
               </CardContent>
@@ -237,7 +237,7 @@ export default function TestDataPage() {
                 <div>
                   <p className="text-white/40 text-xs mb-1">Latency</p>
                   <span className="font-mono text-white/80">
-                    {result.ping.latencyMs !== null ? `${result.ping.latencyMs} ms` : "—"}
+                    {result.ping.latencyMs !== null ? `${result.ping.latencyMs} ms` : ""}
                   </span>
                 </div>
                 {result.ping.error && (
@@ -261,13 +261,13 @@ export default function TestDataPage() {
                 <div>
                   <p className="text-white/40 text-xs mb-1">Host</p>
                   <span className="font-mono text-white/80 text-xs break-all">
-                    {result.database.host ?? "—"}
+                    {result.database.host ?? ""}
                   </span>
                 </div>
                 <div>
                   <p className="text-white/40 text-xs mb-1">Database</p>
                   <span className="font-mono text-white/80 text-xs">
-                    {result.database.name ?? "—"}
+                    {result.database.name ?? ""}
                   </span>
                 </div>
                 <div className="col-span-2">

@@ -33,7 +33,7 @@ const resources = [
     id: 3,
     icon: Code2,
     title: "AI Prompt Playbook for SMEs",
-    description: "50 battle-tested prompts for marketing, HR, sales, support, and operations — copy, paste, profit.",
+    description: "50 battle-tested prompts for marketing, HR, sales, support, and operations, copy, paste, profit.",
     category: "Cheat Sheet",
     downloads: "3.7K",
     color: "text-neon-yellow",
@@ -60,7 +60,7 @@ const resources = [
     id: 5,
     icon: FileText,
     title: "Investor Pitch Deck Framework",
-    description: "A 12-slide pitch deck structure used by funded African tech startups — editable Canva template.",
+    description: "A 12-slide pitch deck structure used by funded African tech startups, editable Canva template.",
     category: "Template",
     downloads: "1.8K",
     color: "text-galactic-green",
@@ -102,7 +102,7 @@ export default function ResourceLibrarySection() {
             Free Resource Library
           </h2>
           <p className="text-gray-300 max-w-2xl mx-auto">
-            Practical guides, templates, and courses — completely free. Because education is the foundation of transformation.
+            Practical guides, templates, and courses, completely free. Because education is the foundation of transformation.
           </p>
         </div>
 

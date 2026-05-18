@@ -33,7 +33,7 @@ const coreCapabilities = [
     color: "text-neon-cyan",
     border: "border-neon-cyan",
     title: "Beautiful Email Templates",
-    desc: "Pick from professionally designed templates and customise them in minutes. Every email looks stunning on phones, tablets, and desktops — no design skills needed.",
+    desc: "Pick from professionally designed templates and customise them in minutes. Every email looks stunning on phones, tablets, and desktops, no design skills needed.",
   },
   {
     icon: Users,
@@ -54,7 +54,7 @@ const coreCapabilities = [
     color: "text-galactic-gold",
     border: "border-galactic-gold",
     title: "Smart Email Scheduling",
-    desc: "Write your email now, send it later. Schedule campaigns to land in inboxes at exactly the right time — whether that's tomorrow morning or next Monday.",
+    desc: "Write your email now, send it later. Schedule campaigns to land in inboxes at exactly the right time, whether that's tomorrow morning or next Monday.",
   },
   {
     icon: MousePointerClick,
@@ -68,21 +68,21 @@ const coreCapabilities = [
     color: "text-neon-cyan",
     border: "border-neon-cyan",
     title: "A/B Subject Line Testing (Pro+)",
-    desc: "Try two subject lines at once. EmailOS automatically sends the winner to the rest of your list — more opens, zero guesswork.",
+    desc: "Try two subject lines at once. EmailOS automatically sends the winner to the rest of your list, more opens, zero guesswork.",
   },
   {
     icon: Shield,
     color: "text-galactic-green",
     border: "border-galactic-green",
     title: "Private & Secure",
-    desc: "Your subscriber list, campaigns, and analytics are completely private to your account. No one else can see your data — ever.",
+    desc: "Your subscriber list, campaigns, and analytics are completely private to your account. No one else can see your data, ever.",
   },
   {
     icon: BarChart3,
     color: "text-galactic-orange",
     border: "border-galactic-orange",
     title: "Campaign Analytics Dashboard",
-    desc: "A clear overview of every campaign — opens, clicks, bounces, and unsubscribes — so you always know what's working and what to improve.",
+    desc: "A clear overview of every campaign, opens, clicks, bounces, and unsubscribes, so you always know what's working and what to improve.",
   },
   {
     icon: Webhook,
@@ -205,7 +205,7 @@ export default function FeatureEmailOSPage() {
               transition={{ duration: 0.6 }}
             >
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-neon-cyan/30 text-neon-cyan text-sm font-orbitron mb-6">
-                <Mail className="w-4 h-4" /> Feature 13 — EmailOS
+                <Mail className="w-4 h-4" /> Feature 13, EmailOS
               </div>
               <h1 className="font-orbitron font-black text-5xl md:text-7xl gradient-text mb-4 leading-tight">
                 EmailOS
@@ -215,7 +215,7 @@ export default function FeatureEmailOSPage() {
               </p>
               <p className="text-gray-300 max-w-3xl mx-auto text-lg leading-relaxed mb-10">
                 Send beautiful emails to thousands of people, grow your audience, and see your results in real time.
-                No technical skills needed — if you can type, you can run a campaign.
+                No technical skills needed, if you can type, you can run a campaign.
                 EmailOS is exclusively available on TOBSEYTECH.
               </p>
               <div className="flex flex-wrap justify-center gap-3 mb-8">
@@ -260,7 +260,7 @@ export default function FeatureEmailOSPage() {
                 Everything You Need to Grow
               </h2>
               <p className="text-gray-400 max-w-2xl mx-auto">
-                EmailOS gives you all the tools to reach your audience, nurture your subscribers, and grow your business — without any technical know-how.
+                EmailOS gives you all the tools to reach your audience, nurture your subscribers, and grow your business, without any technical know-how.
               </p>
             </div>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -363,7 +363,7 @@ export default function FeatureEmailOSPage() {
                 Built for Everyone, Not Just Tech People
               </h2>
               <p className="text-gray-400 max-w-2xl mx-auto">
-                EmailOS is exclusive to TOBSEYTECH. It's designed so anyone — from first-time senders to seasoned marketers — can run powerful email campaigns with confidence.
+                EmailOS is exclusive to TOBSEYTECH. It's designed so anyone, from first-time senders to seasoned marketers, can run powerful email campaigns with confidence.
               </p>
             </div>
             <div className="flex flex-wrap justify-center gap-3">

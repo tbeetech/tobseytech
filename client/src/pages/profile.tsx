@@ -363,7 +363,7 @@ export default function ProfilePage() {
               </div>
               {avatarPreview && (
                 <p className="text-green-400 text-xs flex items-center gap-1">
-                  <Camera className="w-3 h-3" /> New photo selected — click Save Changes to apply
+                  <Camera className="w-3 h-3" /> New photo selected, click Save Changes to apply
                 </p>
               )}
               <Button
@@ -385,7 +385,7 @@ export default function ProfilePage() {
         {/* ──────────── Privacy & Security (own profile only) ──────────── */}
         {isOwnProfile && (
           <div id="privacy-security" className="glass-effect rounded-xl mb-8 overflow-hidden">
-            {/* Section header — acts as collapsible toggle */}
+            {/* Section header, acts as collapsible toggle */}
             <button
               onClick={() => setPrivacyOpen((v) => !v)}
               className="w-full flex items-center justify-between p-6 text-left group"
@@ -507,7 +507,7 @@ export default function ProfilePage() {
                       <div className="flex items-center justify-between p-3 rounded-lg bg-green-500/5 border border-green-500/20 mb-4">
                         <div className="flex items-center gap-2">
                           <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                          <span className="text-green-400 text-xs font-orbitron">Current session — active now</span>
+                          <span className="text-green-400 text-xs font-orbitron">Current session, active now</span>
                         </div>
                         <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">This device</Badge>
                       </div>
@@ -518,7 +518,7 @@ export default function ProfilePage() {
                         className={`font-orbitron text-xs border-red-500/40 hover:bg-red-500/10 transition-colors ${signOutConfirm ? "text-red-400 border-red-500" : "text-galactic-orange/70"}`}
                       >
                         <LogOut className="w-3 h-3 mr-1" />
-                        {signOutConfirm ? "Confirm — Sign Out Now?" : "Sign Out of All Devices"}
+                        {signOutConfirm ? "Confirm, Sign Out Now?" : "Sign Out of All Devices"}
                       </Button>
                       {signOutConfirm && (
                         <button
@@ -605,7 +605,7 @@ export default function ProfilePage() {
                           { label: "Account info", detail: "Username, email, display name, bio, avatar" },
                           { label: "Content you create", detail: "Blog posts, comments, messages you send" },
                           { label: "Platform activity", detail: "Likes, bookmarks, friend connections" },
-                          { label: "Session data", detail: "Temporary session cookie to keep you signed in — cleared on logout" },
+                          { label: "Session data", detail: "Temporary session cookie to keep you signed in, cleared on logout" },
                         ].map(({ label, detail }) => (
                           <li key={label} className="flex items-start gap-2">
                             <Check className="w-4 h-4 text-galactic-orange shrink-0 mt-0.5" />
@@ -623,7 +623,7 @@ export default function ProfilePage() {
                           "We do not sell your personal data to third parties",
                           "We do not use behavioral advertising or tracking pixels",
                           "We do not share your email with outside organizations",
-                          "Passwords are hashed with bcrypt — we never store them in plain text",
+                          "Passwords are hashed with bcrypt, we never store them in plain text",
                         ].map((item) => (
                           <li key={item} className="flex items-start gap-2">
                             <span className="text-galactic-orange shrink-0 mt-0.5">✕</span>

@@ -149,7 +149,7 @@ async function runCycle(): Promise<void> {
           if (allVlogs.some((v: any) => v.embedUrl.includes(entry.videoId))) continue;
 
           const description =
-            `${entry.title} — aggregated from ${channel.name}. ` +
+            `${entry.title}, aggregated from ${channel.name}. ` +
             `This video covers topics related to developer tools, tech gadgets, and coding insights. ` +
             `Published on ${new Date(entry.published).toLocaleDateString()}.`;
 
@@ -163,7 +163,7 @@ async function runCycle(): Promise<void> {
               thumbnail:   `https://img.youtube.com/vi/${entry.videoId}/mqdefault.jpg`,
               category:    channel.name,
               tags:        ["tech", "youtube", channel.name.toLowerCase().replace(/[^a-z0-9]/g, "-")],
-              published:   false, // admin reviews before publishing
+              published:   process.env.VID_AGGREGATOR_PUBLISH_DRAFTS === "true" ? false : true,
               authorId,
               authorName:  `${authorName} (Vid Aggregator)`,
             });

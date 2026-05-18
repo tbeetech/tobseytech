@@ -10,7 +10,7 @@ export default function CTASection() {
         Ready to Build Something Kingdom-Aligned?
       </h2>
       <p className="text-sm opacity-70 mb-4 max-w-md mx-auto">
-        Let's automate your workflow, enhance your church's digital presence, and scale with purpose — in real time.
+        Let's automate your workflow, enhance your church's digital presence, and scale with purpose, in real time.
       </p>
       <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
         <a

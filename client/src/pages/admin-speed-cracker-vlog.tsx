@@ -100,7 +100,7 @@ export default function AdminSpeedCrackerVlogPage() {
       }));
       toast({ title: "Metadata generated ✓" });
     } catch {
-      toast({ title: "Could not generate metadata — fill in manually", variant: "destructive" });
+      toast({ title: "Could not generate metadata, fill in manually", variant: "destructive" });
     } finally {
       setGeneratingMeta(false);
     }
@@ -154,7 +154,7 @@ export default function AdminSpeedCrackerVlogPage() {
   const canPost = !!(form.embedUrl && form.title && form.description);
 
   return (
-    <SpeedCrackerLayout title="Vlog" subtitle="Tech video central — paste any link, AI does the rest">
+    <SpeedCrackerLayout title="Vlog" subtitle="Tech video central, paste any link, AI does the rest">
       <div className="flex items-center justify-between mb-6">
         <p className="text-sm text-gray-400">{vlogs.length} vlog post{vlogs.length !== 1 ? "s" : ""}</p>
         <Button
@@ -183,7 +183,7 @@ export default function AdminSpeedCrackerVlogPage() {
           {/* Step 1: URL */}
           <div className="mb-4">
             <Label className="text-gray-300 text-xs mb-1 block">
-              Step 1 — Paste your video link *
+              Step 1, Paste your video link *
             </Label>
             <div className="flex gap-2">
               <Input
@@ -217,7 +217,7 @@ export default function AdminSpeedCrackerVlogPage() {
           {/* Step 2: Title & Description */}
           <div className="mb-4 grid grid-cols-1 gap-4">
             <div>
-              <Label className="text-gray-300 text-xs mb-1 block">Step 2 — Title *</Label>
+              <Label className="text-gray-300 text-xs mb-1 block">Step 2, Title *</Label>
               <Input
                 value={form.title}
                 onChange={(e) => setForm((p) => ({ ...p, title: e.target.value, slug: generateSlug(e.target.value) }))}
@@ -226,7 +226,7 @@ export default function AdminSpeedCrackerVlogPage() {
               />
             </div>
             <div>
-              <Label className="text-gray-300 text-xs mb-1 block">Step 2 — Description * <span className="text-gray-500">(AI-generated or write your own)</span></Label>
+              <Label className="text-gray-300 text-xs mb-1 block">Step 2, Description * <span className="text-gray-500">(AI-generated or write your own)</span></Label>
               <textarea
                 value={form.description}
                 onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))}
@@ -347,7 +347,7 @@ export default function AdminSpeedCrackerVlogPage() {
             const missingField = !form.title ? "Add a title" : !form.description ? "Add a description" : "";
             return !canPost && form.embedUrl && missingField ? (
               <p className="text-[11px] text-gray-500 mt-2">
-                {missingField} — or click <strong className="text-yellow-400">AI Fill</strong> to auto-generate
+                {missingField}, or click <strong className="text-yellow-400">AI Fill</strong> to auto-generate
               </p>
             ) : null;
           })()}

@@ -62,7 +62,7 @@ const features = [
     number: "06",
     icon: BookOpen,
     title: "Free Resource Library",
-    description: "Curated e-books, templates, cheat sheets, and video guides — all free, all actionable.",
+    description: "Curated e-books, templates, cheat sheets, and video guides, all free, all actionable.",
     tags: ["Education", "Free", "Resources"],
     color: "text-galactic-green",
     border: "border-galactic-green",
@@ -92,7 +92,7 @@ const features = [
     number: "09",
     icon: Award,
     title: "Achievement Badges",
-    description: "Gamification system rewarding community participation — from first post to platform mastery.",
+    description: "Gamification system rewarding community participation, from first post to platform mastery.",
     tags: ["Gamification", "Community", "Rewards"],
     color: "text-neon-yellow",
     border: "border-neon-yellow",
@@ -102,7 +102,7 @@ const features = [
     number: "10",
     icon: Play,
     title: "Career Intelligence Hub",
-    description: "Live job listings, curated courses, industry expert recommender, and career strategy cheat codes — all in one place.",
+    description: "Live job listings, curated courses, industry expert recommender, and career strategy cheat codes, all in one place.",
     tags: ["Career", "Jobs", "Education", "AI"],
     color: "text-neon-cyan",
     border: "border-neon-cyan",
@@ -112,7 +112,7 @@ const features = [
     number: "11",
     icon: Layers,
     title: "Features Hub",
-    description: "This page — a unified, filterable showcase of all platform features for investors and prospects.",
+    description: "This page, a unified, filterable showcase of all platform features for investors and prospects.",
     tags: ["Showcase", "Overview"],
     color: "text-galactic-gold",
     border: "border-galactic-gold",
@@ -156,7 +156,7 @@ export default function FeaturesPage() {
             13 Investor-Ready Features
           </h1>
           <p className="text-gray-300 max-w-3xl mx-auto text-lg leading-relaxed mb-8">
-            TOBSEYTECH isn't just a service agency — it's an interactive digital ecosystem. Every feature below is live, built, and designed to attract users, retain community, and demonstrate platform value to investors.
+            TOBSEYTECH isn't just a service agency, it's an interactive digital ecosystem. Every feature below is live, built, and designed to attract users, retain community, and demonstrate platform value to investors.
           </p>
           <div className="flex flex-wrap justify-center gap-4 mb-6">
             {[

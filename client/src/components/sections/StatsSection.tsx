@@ -61,7 +61,7 @@ export default function StatsSection() {
             By the Numbers
           </h2>
           <p className="text-gray-300 max-w-2xl mx-auto">
-            Real results from real systems — proof over promises.
+            Real results from real systems, proof over promises.
           </p>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-6">

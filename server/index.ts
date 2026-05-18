@@ -19,6 +19,8 @@ import { initStorage, storage } from "./storage.js";
 import { ensureAdminUser, promoteAdminByEmail, seedDefaultVlogs } from "./seed.js";
 import { getClientPromise } from "./mongodb.js";
 import { startBotWorker, stopBotWorker } from "./botWorker.js";
+import { startVidAggregator } from "./vidAggregator.js";
+import { startSportaScheduler } from "./sportaScheduler.js";
 import {
   ADMIN_SEED_EMAIL,
   getSessionSecret,
@@ -196,6 +198,19 @@ app.use((req, res, next) => {
     startBotWorker().catch((err) => {
       console.error("[startup] Bot worker failed to start (blog auto-posting disabled):", err);
     });
+  }
+
+  // Auto-start the vid aggregator so new YouTube tech videos are continuously
+  // fetched into the Vlog as published posts (drafts need admin review only
+  // when VID_AGGREGATOR_PUBLISH_DRAFTS is explicitly "false").
+  if (process.env.VID_AGGREGATOR_ENABLED !== "false") {
+    startVidAggregator();
+  }
+
+  // Auto-start the SPORTA scheduler that runs content aggregation for all
+  // active SPORTA campaigns according to their postingFrequency setting.
+  if (process.env.SPORTA_SCHEDULER_ENABLED !== "false") {
+    startSportaScheduler();
   }
 
   const server = await registerRoutes(app);
