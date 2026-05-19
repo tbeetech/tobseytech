@@ -39,6 +39,10 @@ import {
   TrendingUp,
   Eye,
   Plus,
+  ChevronDown,
+  ChevronUp,
+  ExternalLink,
+  Film,
 } from "lucide-react";
 import type {
   SportaCampaign,
@@ -179,6 +183,96 @@ function ScoreBar({ value, color }: { value?: number; color: string }) {
   );
 }
 
+// Detect YouTube video ID from a URL
+function extractYouTubeId(url: string): string | null {
+  const m = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+  return m?.[1] ?? null;
+}
+
+// Detect TikTok video URL (we can just open the link; embeds require SDK)
+function isTikTokUrl(url: string): boolean {
+  return /tiktok\.com\/@[^/]+\/video\//.test(url);
+}
+
+// Detect Vimeo video ID
+function extractVimeoId(url: string): string | null {
+  const m = url.match(/vimeo\.com\/(\d+)/);
+  return m?.[1] ?? null;
+}
+
+// Media type → color class
+function mediaTypeColor(mediaType: string): string {
+  const map: Record<string, string> = {
+    Videos: "bg-red-500/20 text-red-400 border-red-500/30",
+    Shorts: "bg-pink-500/20 text-pink-400 border-pink-500/30",
+    Reels: "bg-purple-500/20 text-purple-400 border-purple-500/30",
+    Articles: "bg-blue-500/20 text-blue-400 border-blue-500/30",
+    Tutorials: "bg-cyan-500/20 text-cyan-400 border-cyan-500/30",
+    Reviews: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
+    Threads: "bg-gray-500/20 text-gray-300 border-gray-500/30",
+    Podcasts: "bg-green-500/20 text-green-400 border-green-500/30",
+    Memes: "bg-orange-500/20 text-orange-400 border-orange-500/30",
+    Images: "bg-teal-500/20 text-teal-400 border-teal-500/30",
+    Quotes: "bg-indigo-500/20 text-indigo-400 border-indigo-500/30",
+  };
+  return map[mediaType] ?? "bg-white/10 text-gray-300 border-white/10";
+}
+
+// Inline video preview component
+function VideoPreview({ url, embedCode }: { url: string; embedCode?: string }) {
+  const ytId = extractYouTubeId(url);
+  const vimeoId = extractVimeoId(url);
+
+  if (ytId) {
+    return (
+      <div className="w-full aspect-video rounded-lg overflow-hidden bg-black/40 mt-3">
+        <iframe
+          src={`https://www.youtube.com/embed/${ytId}`}
+          title="YouTube video"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+          className="w-full h-full"
+        />
+      </div>
+    );
+  }
+
+  if (vimeoId) {
+    return (
+      <div className="w-full aspect-video rounded-lg overflow-hidden bg-black/40 mt-3">
+        <iframe
+          src={`https://player.vimeo.com/video/${vimeoId}`}
+          title="Vimeo video"
+          allow="autoplay; fullscreen; picture-in-picture"
+          allowFullScreen
+          className="w-full h-full"
+        />
+      </div>
+    );
+  }
+
+  if (embedCode) {
+    return (
+      <div
+        className="w-full mt-3 rounded-lg overflow-hidden"
+        dangerouslySetInnerHTML={{ __html: embedCode }}
+      />
+    );
+  }
+
+  // TikTok or other video links — just show a link button
+  return (
+    <a
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="inline-flex items-center gap-2 mt-3 px-3 py-2 rounded-lg bg-pink-500/10 border border-pink-500/30 text-pink-400 text-xs font-orbitron hover:bg-pink-500/20 transition-colors"
+    >
+      <Film className="w-3.5 h-3.5" /> Watch Video <ExternalLink className="w-3 h-3" />
+    </a>
+  );
+}
+
 function MultiSelectGrid<T extends string>({
   label,
   options,
@@ -216,7 +310,7 @@ function MultiSelectGrid<T extends string>({
   );
 }
 
-// ─── Wizard Component ─────────────────────────────────────────────────────────
+// ─── Wizard Component (5-step simplified) ────────────────────────────────────
 
 function CampaignWizard({ onComplete, onCancel }: { onComplete: () => void; onCancel: () => void }) {
   const { toast } = useToast();
@@ -242,7 +336,7 @@ function CampaignWizard({ onComplete, onCancel }: { onComplete: () => void; onCa
         contentTypes: data.contentTypes,
         sourcePlatforms: data.sourcePlatforms,
         publishingDestinations: data.publishingDestinations,
-        aiMode: data.aiMode,
+        aiMode: data.aiMode || "Social Caption",
         approvalMode: data.approvalMode,
         timelinePreference: data.timelinePreference,
         postingFrequency: data.postingFrequency,
@@ -271,289 +365,86 @@ function CampaignWizard({ onComplete, onCancel }: { onComplete: () => void; onCa
     },
   });
 
+  // Step validation
   const canNext = () => {
-    if (step === 1) return !!data.industry;
-    if (step === 2) return data.contentTypes.length > 0;
-    if (step === 3) return data.sourcePlatforms.length > 0;
-    if (step === 5) return data.publishingDestinations.length > 0;
-    if (step === 6) return !!data.aiMode;
+    if (step === 1) return !!data.industry && data.contentTypes.length > 0;
+    if (step === 2) return data.sourcePlatforms.length > 0;
+    if (step === 3) return data.publishingDestinations.length > 0;
     return true;
   };
 
-  const stepLabels = [
-    "Industry", "Content Types", "Source Platforms", "Timeline",
-    "Destinations", "AI Mode", "Frequency", "Approval", "Review", "Launch",
-  ];
+  const TOTAL_STEPS = 5;
+  const stepLabels = ["Industry & Content", "Sources", "Publish & AI", "Schedule", "Launch"];
 
   return (
-    <div className="glass-effect rounded-2xl p-6">
-      {/* Progress */}
-      <div className="flex items-center justify-between mb-6">
+    <div className="glass-effect rounded-2xl p-6 max-w-2xl mx-auto">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-2">
           <Zap className="w-5 h-5 text-galactic-orange" />
-          <h2 className="text-lg font-orbitron font-bold text-galactic-orange">
-            Campaign Wizard
-          </h2>
+          <h2 className="text-lg font-orbitron font-bold text-galactic-orange">New Campaign</h2>
         </div>
-        <span className="text-xs text-gray-400 font-orbitron">Step {step} of 10</span>
+        <span className="text-xs text-gray-400 font-orbitron">Step {step}/{TOTAL_STEPS}</span>
       </div>
 
-      {/* Step pills */}
-      <div className="flex gap-1 mb-8 overflow-x-auto pb-1">
+      {/* Progress bar */}
+      <div className="flex gap-1 mb-7">
         {stepLabels.map((label, i) => (
-          <div
-            key={label}
-            className={`flex-shrink-0 px-2 py-1 rounded-md text-[10px] font-orbitron font-semibold transition-all ${
-              i + 1 === step
-                ? "bg-galactic-orange text-space-black"
-                : i + 1 < step
-                ? "bg-galactic-orange/30 text-galactic-orange"
-                : "bg-white/5 text-gray-500"
-            }`}
-          >
-            {i + 1}. {label}
+          <div key={label} className="flex-1">
+            <div className={`h-1 rounded-full transition-all ${i + 1 <= step ? "bg-galactic-orange" : "bg-white/10"}`} />
+            <p className={`text-[9px] font-orbitron mt-1 truncate ${i + 1 === step ? "text-galactic-orange" : "text-gray-600"}`}>{label}</p>
           </div>
         ))}
       </div>
 
       {/* Step content */}
-      <div className="min-h-[220px]">
+      <div className="min-h-[240px]">
+
+        {/* Step 1: Industry + Content Types */}
         {step === 1 && (
-          <div>
-            <h3 className="font-orbitron font-bold text-white mb-1">Select Your Industry</h3>
-            <p className="text-gray-400 text-sm mb-4">SPORTA will optimise content discovery and AI reshaping for your niche.</p>
-            <div className="flex flex-wrap gap-2">
-              {INDUSTRIES.map((ind) => (
-                <button
-                  key={ind}
-                  type="button"
-                  onClick={() => set("industry", ind)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-orbitron font-semibold border transition-all ${
-                    data.industry === ind
-                      ? "bg-galactic-orange text-space-black border-galactic-orange shadow-[0_0_12px_rgba(34,197,94,0.3)]"
-                      : "border-galactic-orange/20 text-gray-400 hover:border-galactic-orange/50 glass-effect"
-                  }`}
-                >
-                  {ind}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {step === 2 && (
-          <div>
-            <h3 className="font-orbitron font-bold text-white mb-1">Select Content Types</h3>
-            <p className="text-gray-400 text-sm mb-4">What kinds of content should SPORTA look for and republish?</p>
-            <MultiSelectGrid
-              label="Choose all that apply"
-              options={CONTENT_TYPES}
-              selected={data.contentTypes}
-              onToggle={(v) => toggle("contentTypes", v)}
-            />
-          </div>
-        )}
-
-        {step === 3 && (
-          <div>
-            <h3 className="font-orbitron font-bold text-white mb-1">Select Source Platforms</h3>
-            <p className="text-gray-400 text-sm mb-4">Which platforms should SPORTA aggregate public content from?</p>
-            <MultiSelectGrid
-              label="Select source platforms"
-              options={PLATFORMS}
-              selected={data.sourcePlatforms}
-              onToggle={(v) => toggle("sourcePlatforms", v)}
-            />
-          </div>
-        )}
-
-        {step === 4 && (
-          <div>
-            <h3 className="font-orbitron font-bold text-white mb-1">Timeline Preference</h3>
-            <p className="text-gray-400 text-sm mb-4">How recent should aggregated content be?</p>
-            <div className="flex flex-wrap gap-2">
-              {TIMELINE_OPTIONS.map((opt) => (
-                <button
-                  key={opt}
-                  type="button"
-                  onClick={() => set("timelinePreference", opt)}
-                  className={`px-3 py-2 rounded-xl text-xs font-orbitron font-semibold border transition-all ${
-                    data.timelinePreference === opt
-                      ? "bg-neon-cyan text-space-black border-neon-cyan"
-                      : "border-neon-cyan/20 text-gray-400 hover:border-neon-cyan/50 glass-effect"
-                  }`}
-                >
-                  {opt}
-                </button>
-              ))}
-            </div>
-            <div className="mt-6 space-y-3">
-              <div>
-                <Label className="text-gray-400 font-orbitron text-xs mb-1 block">Keywords to target (comma-separated)</Label>
-                <Input
-                  value={data.keywords}
-                  onChange={(e) => set("keywords", e.target.value)}
-                  placeholder="AI, automation, startup..."
-                  className="bg-space-dark border-galactic-orange/20 text-white text-sm h-9"
-                />
+          <div className="space-y-5">
+            <div>
+              <h3 className="font-orbitron font-bold text-white mb-0.5 text-sm">Your Industry</h3>
+              <p className="text-gray-500 text-xs mb-3">Pick the niche SPORTA should focus on.</p>
+              <div className="flex flex-wrap gap-1.5">
+                {INDUSTRIES.map((ind) => (
+                  <button
+                    key={ind}
+                    type="button"
+                    onClick={() => set("industry", ind)}
+                    className={`px-2.5 py-1 rounded-lg text-[11px] font-orbitron font-semibold border transition-all ${
+                      data.industry === ind
+                        ? "bg-galactic-orange text-space-black border-galactic-orange"
+                        : "border-galactic-orange/20 text-gray-400 hover:border-galactic-orange/50 glass-effect"
+                    }`}
+                  >
+                    {ind}
+                  </button>
+                ))}
               </div>
-              <div>
-                <Label className="text-gray-400 font-orbitron text-xs mb-1 block">Banned keywords (comma-separated)</Label>
-                <Input
-                  value={data.bannedKeywords}
-                  onChange={(e) => set("bannedKeywords", e.target.value)}
-                  placeholder="spam, nsfw..."
-                  className="bg-space-dark border-galactic-orange/20 text-white text-sm h-9"
-                />
-              </div>
-            </div>
-          </div>
-        )}
-
-        {step === 5 && (
-          <div>
-            <h3 className="font-orbitron font-bold text-white mb-1">Publishing Destinations</h3>
-            <p className="text-gray-400 text-sm mb-4">Where should SPORTA publish the reshaped content?</p>
-            <MultiSelectGrid
-              label="Select publishing destinations"
-              options={PUBLISHING_DESTINATIONS}
-              selected={data.publishingDestinations}
-              onToggle={(v) => toggle("publishingDestinations", v)}
-            />
-          </div>
-        )}
-
-        {step === 6 && (
-          <div>
-            <h3 className="font-orbitron font-bold text-white mb-1">AI Transformation Mode</h3>
-            <p className="text-gray-400 text-sm mb-4">How should the AI reshape and republish content?</p>
-            <div className="flex flex-wrap gap-2 mb-6">
-              {AI_MODES.map((mode) => (
-                <button
-                  key={mode}
-                  type="button"
-                  onClick={() => set("aiMode", mode)}
-                  className={`px-3 py-2 rounded-xl text-xs font-orbitron font-semibold border transition-all ${
-                    data.aiMode === mode
-                      ? "bg-neon-purple text-white border-neon-purple shadow-[0_0_12px_rgba(139,92,246,0.4)]"
-                      : "border-neon-purple/20 text-gray-400 hover:border-neon-purple/50 glass-effect"
-                  }`}
-                >
-                  {mode}
-                </button>
-              ))}
-            </div>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <Label className="text-gray-400 font-orbitron text-xs">SEO Optimisation</Label>
-                <Switch checked={data.enableSeo} onCheckedChange={(v) => set("enableSeo", v)} className="data-[state=checked]:bg-galactic-orange" />
-              </div>
-              <div className="flex items-center justify-between">
-                <Label className="text-gray-400 font-orbitron text-xs">Viral Optimisation</Label>
-                <Switch checked={data.enableViral} onCheckedChange={(v) => set("enableViral", v)} className="data-[state=checked]:bg-galactic-orange" />
-              </div>
-            </div>
-          </div>
-        )}
-
-        {step === 7 && (
-          <div>
-            <h3 className="font-orbitron font-bold text-white mb-1">Posting Frequency</h3>
-            <p className="text-gray-400 text-sm mb-4">How often should SPORTA publish content?</p>
-            <div className="flex flex-wrap gap-2 mb-6">
-              {FREQUENCY_OPTIONS.map((opt) => (
-                <button
-                  key={opt}
-                  type="button"
-                  onClick={() => set("postingFrequency", opt)}
-                  className={`px-3 py-2 rounded-xl text-xs font-orbitron font-semibold border transition-all ${
-                    data.postingFrequency === opt
-                      ? "bg-galactic-green text-space-black border-galactic-green"
-                      : "border-galactic-green/20 text-gray-400 hover:border-galactic-green/50 glass-effect"
-                  }`}
-                >
-                  {opt}
-                </button>
-              ))}
             </div>
             <div>
-              <Label className="text-gray-400 font-orbitron text-xs mb-1 block">Preferred Hashtags (comma-separated)</Label>
-              <Input
-                value={data.hashtags}
-                onChange={(e) => set("hashtags", e.target.value)}
-                placeholder="#tech, #ai, #startup..."
-                className="bg-space-dark border-galactic-orange/20 text-white text-sm h-9"
-              />
+              <h3 className="font-orbitron font-bold text-white mb-0.5 text-sm">Content Types</h3>
+              <p className="text-gray-500 text-xs mb-3">What types of content should SPORTA find? (select all that apply)</p>
+              <div className="flex flex-wrap gap-1.5">
+                {CONTENT_TYPES.map((ct) => (
+                  <button
+                    key={ct}
+                    type="button"
+                    onClick={() => toggle("contentTypes", ct)}
+                    className={`px-2.5 py-1 rounded-lg text-[11px] font-orbitron font-semibold border transition-all ${
+                      data.contentTypes.includes(ct)
+                        ? "bg-galactic-orange text-space-black border-galactic-orange"
+                        : "border-galactic-orange/20 text-gray-400 hover:border-galactic-orange/50 glass-effect"
+                    }`}
+                  >
+                    {ct}
+                  </button>
+                ))}
+              </div>
             </div>
-            <div className="mt-3 flex items-center justify-between">
-              <Label className="text-gray-400 font-orbitron text-xs">NSFW Filter</Label>
-              <Switch checked={data.enableNsfwFilter} onCheckedChange={(v) => set("enableNsfwFilter", v)} className="data-[state=checked]:bg-galactic-orange" />
-            </div>
-            <div className="mt-3 flex items-center justify-between">
-              <Label className="text-gray-400 font-orbitron text-xs">Duplicate Content Filter</Label>
-              <Switch checked={data.enableDuplicateFilter} onCheckedChange={(v) => set("enableDuplicateFilter", v)} className="data-[state=checked]:bg-galactic-orange" />
-            </div>
-          </div>
-        )}
-
-        {step === 8 && (
-          <div>
-            <h3 className="font-orbitron font-bold text-white mb-1">Approval Mode</h3>
-            <p className="text-gray-400 text-sm mb-4">How much human oversight should SPORTA require before publishing?</p>
-            <div className="space-y-3">
-              {APPROVAL_MODES.map(({ value, label }) => (
-                <label
-                  key={value}
-                  className={`flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-all ${
-                    data.approvalMode === value
-                      ? "border-galactic-orange bg-galactic-orange/10"
-                      : "border-white/10 hover:border-galactic-orange/30 glass-effect"
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    value={value}
-                    checked={data.approvalMode === value}
-                    onChange={() => set("approvalMode", value)}
-                    className="accent-galactic-orange"
-                  />
-                  <div>
-                    <p className="text-white font-orbitron font-semibold text-sm">{label}</p>
-                    <p className="text-gray-500 text-xs mt-0.5">
-                      {value === "manual" && "Every post requires your manual approval before publishing."}
-                      {value === "semi_automatic" && "High-quality posts (AI score ≥ 80) are auto-approved; others queued for review."}
-                      {value === "fully_automatic" && "All posts are published automatically. Fastest option, use with care."}
-                    </p>
-                  </div>
-                </label>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {step === 9 && (
-          <div>
-            <h3 className="font-orbitron font-bold text-white mb-4">Campaign Summary</h3>
-            <div className="space-y-2 text-sm">
-              {[
-                { label: "Name", value: data.name || `SPORTA – ${data.industry}` },
-                { label: "Industry", value: data.industry },
-                { label: "Content Types", value: data.contentTypes.join(", ") || "" },
-                { label: "Source Platforms", value: data.sourcePlatforms.slice(0, 4).join(", ") + (data.sourcePlatforms.length > 4 ? "..." : "") || "" },
-                { label: "Publishing To", value: data.publishingDestinations.slice(0, 4).join(", ") + (data.publishingDestinations.length > 4 ? "..." : "") || "" },
-                { label: "AI Mode", value: data.aiMode || "" },
-                { label: "Timeline", value: data.timelinePreference },
-                { label: "Frequency", value: data.postingFrequency },
-                { label: "Approval", value: APPROVAL_MODES.find((m) => m.value === data.approvalMode)?.label ?? "" },
-              ].map(({ label, value }) => (
-                <div key={label} className="flex items-start gap-3">
-                  <span className="text-gray-500 font-orbitron text-xs w-32 flex-shrink-0">{label}:</span>
-                  <span className="text-white text-xs flex-1">{value}</span>
-                </div>
-              ))}
-            </div>
-            <div className="mt-4">
-              <Label className="text-gray-400 font-orbitron text-xs mb-1 block">Campaign Name (optional)</Label>
+            <div>
+              <Label className="text-gray-400 font-orbitron text-xs mb-1 block">Campaign name (optional)</Label>
               <Input
                 value={data.name}
                 onChange={(e) => set("name", e.target.value)}
@@ -564,25 +455,208 @@ function CampaignWizard({ onComplete, onCancel }: { onComplete: () => void; onCa
           </div>
         )}
 
-        {step === 10 && (
-          <div className="text-center py-6">
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-galactic-orange to-galactic-gold flex items-center justify-center mx-auto mb-4 shadow-[0_0_30px_rgba(34,197,94,0.4)]">
-              <Zap className="w-10 h-10 text-space-black" />
+        {/* Step 2: Source Platforms + Keywords */}
+        {step === 2 && (
+          <div className="space-y-5">
+            <div>
+              <h3 className="font-orbitron font-bold text-white mb-0.5 text-sm">Source Platforms</h3>
+              <p className="text-gray-500 text-xs mb-3">Where should SPORTA pull content from?</p>
+              <MultiSelectGrid
+                label=""
+                options={PLATFORMS}
+                selected={data.sourcePlatforms}
+                onToggle={(v) => toggle("sourcePlatforms", v)}
+              />
             </div>
-            <h3 className="font-orbitron font-bold text-white text-xl mb-2">Ready to Launch!</h3>
-            <p className="text-gray-400 text-sm mb-6">
-              Your SPORTA campaign "<strong className="text-white">{data.name || `SPORTA – ${data.industry}`}</strong>" is configured and ready.
-              Click <strong className="text-galactic-orange">Launch</strong> to activate it.
-            </p>
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-galactic-orange/10 border border-galactic-orange/30 text-galactic-orange text-sm font-orbitron">
-              <CheckCircle className="w-4 h-4" /> All systems go
+            <div className="grid sm:grid-cols-2 gap-3">
+              <div>
+                <Label className="text-gray-400 font-orbitron text-xs mb-1 block">Target keywords (comma-separated)</Label>
+                <Input
+                  value={data.keywords}
+                  onChange={(e) => set("keywords", e.target.value)}
+                  placeholder="AI, startup, innovation…"
+                  className="bg-space-dark border-galactic-orange/20 text-white text-sm h-9"
+                />
+              </div>
+              <div>
+                <Label className="text-gray-400 font-orbitron text-xs mb-1 block">Banned keywords (optional)</Label>
+                <Input
+                  value={data.bannedKeywords}
+                  onChange={(e) => set("bannedKeywords", e.target.value)}
+                  placeholder="spam, nsfw…"
+                  className="bg-space-dark border-galactic-orange/20 text-white text-sm h-9"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Step 3: Publishing Destinations + AI Mode + Approval */}
+        {step === 3 && (
+          <div className="space-y-5">
+            <div>
+              <h3 className="font-orbitron font-bold text-white mb-0.5 text-sm">Publishing Destinations</h3>
+              <p className="text-gray-500 text-xs mb-3">Where should reshaped content be posted?</p>
+              <MultiSelectGrid
+                label=""
+                options={PUBLISHING_DESTINATIONS}
+                selected={data.publishingDestinations}
+                onToggle={(v) => toggle("publishingDestinations", v)}
+              />
+            </div>
+            <div>
+              <h3 className="font-orbitron font-bold text-white mb-0.5 text-sm">AI Transformation Mode</h3>
+              <p className="text-gray-500 text-xs mb-3">How should SPORTA reshape the content?</p>
+              <div className="flex flex-wrap gap-1.5">
+                {AI_MODES.map((mode) => (
+                  <button
+                    key={mode}
+                    type="button"
+                    onClick={() => set("aiMode", mode)}
+                    className={`px-2.5 py-1 rounded-lg text-[11px] font-orbitron font-semibold border transition-all ${
+                      data.aiMode === mode
+                        ? "bg-neon-purple text-white border-neon-purple"
+                        : "border-neon-purple/20 text-gray-400 hover:border-neon-purple/50 glass-effect"
+                    }`}
+                  >
+                    {mode}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h3 className="font-orbitron font-bold text-white mb-2 text-sm">Approval Mode</h3>
+              <div className="space-y-2">
+                {APPROVAL_MODES.map(({ value, label }) => (
+                  <label
+                    key={value}
+                    className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
+                      data.approvalMode === value
+                        ? "border-galactic-orange bg-galactic-orange/10"
+                        : "border-white/10 hover:border-galactic-orange/30 glass-effect"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      value={value}
+                      checked={data.approvalMode === value}
+                      onChange={() => set("approvalMode", value)}
+                      className="accent-galactic-orange"
+                    />
+                    <div>
+                      <p className="text-white font-orbitron font-semibold text-xs">{label}</p>
+                      <p className="text-gray-500 text-[10px] mt-0.5">
+                        {value === "manual" && "Every post needs your approval."}
+                        {value === "semi_automatic" && "High-scoring posts auto-approved; others need review."}
+                        {value === "fully_automatic" && "All posts publish automatically."}
+                      </p>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Step 4: Schedule + Hashtags + Filters */}
+        {step === 4 && (
+          <div className="space-y-5">
+            <div>
+              <h3 className="font-orbitron font-bold text-white mb-0.5 text-sm">Posting Frequency</h3>
+              <div className="flex flex-wrap gap-1.5 mt-2">
+                {FREQUENCY_OPTIONS.map((opt) => (
+                  <button
+                    key={opt}
+                    type="button"
+                    onClick={() => set("postingFrequency", opt)}
+                    className={`px-2.5 py-1 rounded-lg text-[11px] font-orbitron font-semibold border transition-all ${
+                      data.postingFrequency === opt
+                        ? "bg-galactic-green text-space-black border-galactic-green"
+                        : "border-galactic-green/20 text-gray-400 hover:border-galactic-green/50 glass-effect"
+                    }`}
+                  >
+                    {opt}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="grid sm:grid-cols-2 gap-3">
+              <div>
+                <Label className="text-gray-400 font-orbitron text-xs mb-1 block">Content freshness</Label>
+                <div className="flex flex-wrap gap-1.5">
+                  {TIMELINE_OPTIONS.map((opt) => (
+                    <button
+                      key={opt}
+                      type="button"
+                      onClick={() => set("timelinePreference", opt)}
+                      className={`px-2 py-1 rounded-md text-[10px] font-orbitron border transition-all ${
+                        data.timelinePreference === opt
+                          ? "bg-neon-cyan text-space-black border-neon-cyan"
+                          : "border-neon-cyan/20 text-gray-400 hover:border-neon-cyan/50 glass-effect"
+                      }`}
+                    >
+                      {opt}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <Label className="text-gray-400 font-orbitron text-xs mb-1 block">Hashtags (optional)</Label>
+                <Input
+                  value={data.hashtags}
+                  onChange={(e) => set("hashtags", e.target.value)}
+                  placeholder="#tech, #ai…"
+                  className="bg-space-dark border-galactic-orange/20 text-white text-sm h-9"
+                />
+              </div>
+            </div>
+            <div className="grid sm:grid-cols-2 gap-x-6 gap-y-2">
+              {[
+                { key: "enableSeo" as const, label: "SEO Optimisation" },
+                { key: "enableViral" as const, label: "Viral Optimisation" },
+                { key: "enableNsfwFilter" as const, label: "NSFW Filter" },
+                { key: "enableDuplicateFilter" as const, label: "Duplicate Filter" },
+              ].map(({ key, label }) => (
+                <div key={key} className="flex items-center justify-between">
+                  <Label className="text-gray-400 font-orbitron text-xs">{label}</Label>
+                  <Switch checked={data[key] as boolean} onCheckedChange={(v) => set(key, v)} className="data-[state=checked]:bg-galactic-orange" />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Step 5: Review + Launch */}
+        {step === 5 && (
+          <div>
+            <h3 className="font-orbitron font-bold text-white mb-4 text-sm">Review & Launch</h3>
+            <div className="grid sm:grid-cols-2 gap-x-6 gap-y-1.5 text-xs mb-5">
+              {[
+                { label: "Name", value: data.name || `SPORTA – ${data.industry}` },
+                { label: "Industry", value: data.industry },
+                { label: "Content Types", value: data.contentTypes.join(", ") || "—" },
+                { label: "Sources", value: data.sourcePlatforms.slice(0, 4).join(", ") + (data.sourcePlatforms.length > 4 ? `+${data.sourcePlatforms.length - 4}` : "") || "—" },
+                { label: "Publish to", value: data.publishingDestinations.slice(0, 3).join(", ") + (data.publishingDestinations.length > 3 ? `+${data.publishingDestinations.length - 3}` : "") || "—" },
+                { label: "AI Mode", value: data.aiMode || "Social Caption" },
+                { label: "Frequency", value: data.postingFrequency },
+                { label: "Approval", value: APPROVAL_MODES.find((m) => m.value === data.approvalMode)?.label ?? "" },
+              ].map(({ label, value }) => (
+                <div key={label} className="flex items-start gap-2">
+                  <span className="text-gray-500 font-orbitron text-[10px] w-24 flex-shrink-0">{label}:</span>
+                  <span className="text-white text-[11px] flex-1">{value}</span>
+                </div>
+              ))}
+            </div>
+            <div className="flex items-center gap-3 p-4 rounded-xl bg-galactic-orange/5 border border-galactic-orange/20">
+              <CheckCircle className="w-5 h-5 text-galactic-orange flex-shrink-0" />
+              <p className="text-gray-300 text-xs">Everything looks good! Click <strong className="text-galactic-orange">Launch</strong> to activate your campaign.</p>
             </div>
           </div>
         )}
       </div>
 
       {/* Navigation */}
-      <div className="flex items-center justify-between mt-8 pt-4 border-t border-white/10">
+      <div className="flex items-center justify-between mt-7 pt-4 border-t border-white/10">
         <Button
           variant="ghost"
           size="sm"
@@ -591,7 +665,7 @@ function CampaignWizard({ onComplete, onCancel }: { onComplete: () => void; onCa
         >
           <ArrowLeft className="w-3 h-3 mr-1" /> {step === 1 ? "Cancel" : "Back"}
         </Button>
-        {step < 10 ? (
+        {step < TOTAL_STEPS ? (
           <Button
             size="sm"
             onClick={() => setStep((s) => s + 1)}
@@ -622,13 +696,25 @@ function SharePopover({ item, publishingDestinations = [] }: { item: SportaConte
   const [open, setOpen] = useState(false);
   const { toast } = useToast();
 
-  const title = encodeURIComponent(item.aiRewrittenTitle ?? item.originalTitle ?? "Check this out");
-  const caption = item.aiRewrittenContent ?? item.originalContent ?? "";
+  // Clean helper — strip HTML tags so share text is plain
+  const stripTags = (s: string) => s.replace(/<[^>]+>/g, " ").replace(/\s{2,}/g, " ").trim();
+
+  const rawTitle = item.aiRewrittenTitle ?? item.originalTitle ?? "Check this out";
+  const rawCaption = item.aiRewrittenContent ?? item.originalContent ?? "";
+  const cleanTitle = stripTags(rawTitle);
+  const cleanCaption = stripTags(rawCaption);
+
+  const title = encodeURIComponent(cleanTitle);
   const hashtags = item.aiGeneratedHashtags.map((t) => t.replace(/^#/, "")).join(",");
   const tagStr = item.aiGeneratedHashtags.map((t) => (t.startsWith("#") ? t : `#${t}`)).join(" ");
   const sourceNote = `via ${item.sourcePlatform}`;
-  const shareText = encodeURIComponent(`${caption ? caption.slice(0, 200) + "... " : ""}${sourceNote}${tagStr ? " " + tagStr : ""}`);
+  const shareBody = `${cleanCaption ? cleanCaption.slice(0, 200) + "… " : ""}${sourceNote}${tagStr ? " " + tagStr : ""}`;
+  const shareText = encodeURIComponent(shareBody);
   const url = encodeURIComponent(item.sourceUrl);
+  const imageUrl = item.originalThumbnail ? encodeURIComponent(item.originalThumbnail) : "";
+
+  // Full share text with title for platforms that need it
+  const fullShareText = encodeURIComponent(`${cleanTitle}\n\n${shareBody}`);
 
   // All supported sharing destinations with their web share URLs
   const ALL_PLATFORMS: Array<{ key: string; name: string; color: string; href: string }> = [
@@ -636,37 +722,37 @@ function SharePopover({ item, publishingDestinations = [] }: { item: SportaConte
       key: "X",
       name: "X / Twitter",
       color: "text-sky-400",
-      href: `https://twitter.com/intent/tweet?text=${shareText}&url=${url}${hashtags ? `&hashtags=${hashtags}` : ""}`,
+      href: `https://twitter.com/intent/tweet?text=${fullShareText}&url=${url}${hashtags ? `&hashtags=${hashtags}` : ""}`,
     },
     {
       key: "Facebook",
       name: "Facebook",
       color: "text-blue-500",
-      href: `https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${shareText}`,
+      href: `https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${fullShareText}`,
     },
     {
       key: "LinkedIn",
       name: "LinkedIn",
       color: "text-blue-400",
-      href: `https://www.linkedin.com/shareArticle?mini=true&url=${url}&title=${title}&summary=${shareText}`,
+      href: `https://www.linkedin.com/sharing/share-offsite/?url=${url}&title=${title}&summary=${shareText}${imageUrl ? `&source=${imageUrl}` : ""}`,
     },
     {
       key: "WhatsApp",
       name: "WhatsApp",
       color: "text-green-400",
-      href: `https://wa.me/?text=${shareText}%20${url}`,
+      href: `https://wa.me/?text=${encodeURIComponent(`${cleanTitle}\n\n${shareBody}\n${item.sourceUrl}`)}`,
     },
     {
       key: "Telegram",
       name: "Telegram",
       color: "text-sky-300",
-      href: `https://t.me/share/url?url=${url}&text=${shareText}`,
+      href: `https://t.me/share/url?url=${url}&text=${encodeURIComponent(`${cleanTitle}\n\n${shareBody}`)}`,
     },
     {
       key: "Pinterest",
       name: "Pinterest",
       color: "text-red-400",
-      href: `https://pinterest.com/pin/create/button/?url=${url}&description=${shareText}${item.originalThumbnail ? `&media=${encodeURIComponent(item.originalThumbnail)}` : ""}`,
+      href: `https://pinterest.com/pin/create/button/?url=${url}&description=${fullShareText}${imageUrl ? `&media=${imageUrl}` : ""}`,
     },
     {
       key: "TikTok",
@@ -684,7 +770,7 @@ function SharePopover({ item, publishingDestinations = [] }: { item: SportaConte
       key: "Threads",
       name: "Threads",
       color: "text-white",
-      href: `https://www.threads.net/intent/post?text=${shareText}%20${url}`,
+      href: `https://www.threads.net/intent/post?text=${fullShareText}%20${url}`,
     },
   ];
 
@@ -698,9 +784,9 @@ function SharePopover({ item, publishingDestinations = [] }: { item: SportaConte
 
   const copyCaption = () => {
     const text = [
-      item.aiRewrittenTitle ?? item.originalTitle,
+      cleanTitle,
       "",
-      item.aiRewrittenContent ?? item.originalContent ?? "",
+      cleanCaption,
       "",
       tagStr,
       "",
@@ -789,6 +875,7 @@ function ContentQueuePanel({ campaignId, campaignName, publishingDestinations = 
       if (!res.ok) throw new Error("Failed");
       return res.json();
     },
+    refetchInterval: 10_000,
   });
 
   const aggregateMutation = useMutation({
@@ -816,6 +903,7 @@ function ContentQueuePanel({ campaignId, campaignName, publishingDestinations = 
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/sporta/campaigns/${campaignId}/content`] });
       queryClient.invalidateQueries({ queryKey: ["/api/sporta/stats"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/sporta/campaigns"] });
       toast({ title: "Content status updated" });
     },
     onError: () => toast({ title: "Failed to update status", variant: "destructive" }),
@@ -844,6 +932,16 @@ function ContentQueuePanel({ campaignId, campaignName, publishingDestinations = 
     },
     onError: () => toast({ title: "Failed to delete", variant: "destructive" }),
   });
+
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+  const toggleExpand = (id: string) =>
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+
+  const isVideoType = (mt: string) => ["Videos", "Shorts", "Reels"].includes(mt);
 
   if (isLoading) {
     return (
@@ -885,94 +983,125 @@ function ContentQueuePanel({ campaignId, campaignName, publishingDestinations = 
         </div>
       ) : (
         <div className="space-y-3">
-          {items.map((item) => (
-            <div key={item.id} className="bg-space-dark rounded-xl border border-white/5 hover:border-galactic-orange/20 transition-all overflow-hidden">
-              {/* Thumbnail strip */}
-              {item.originalThumbnail && (
-                <div className="w-full h-32 overflow-hidden bg-black/20 relative">
-                  <img
-                    src={item.originalThumbnail}
-                    alt={item.originalTitle ?? "thumbnail"}
-                    className="w-full h-full object-cover opacity-80"
-                    onError={(e) => {
-                      const target = e.currentTarget as HTMLImageElement;
-                      target.style.display = "none";
-                      const placeholder = target.nextElementSibling as HTMLElement | null;
-                      if (placeholder) placeholder.style.display = "flex";
-                    }}
-                  />
-                  <div className="absolute inset-0 items-center justify-center bg-space-dark/80 text-gray-600 text-xs hidden">
-                    <Eye className="w-5 h-5 opacity-30 mr-1" /> Image unavailable
-                  </div>
-                </div>
-              )}
-              <div className="p-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1 flex-wrap">
-                      <Badge className="bg-white/10 text-gray-300 border-white/10 text-[10px]">{item.sourcePlatform}</Badge>
-                      <Badge className="bg-white/10 text-gray-300 border-white/10 text-[10px]">{item.mediaType}</Badge>
-                      <StatusBadge status={item.status} />
+          {items.map((item) => {
+            const expanded = expandedIds.has(item.id);
+            const isVideo = isVideoType(item.mediaType);
+            const displayTitle = item.aiRewrittenTitle ?? item.originalTitle ?? "Untitled";
+            const displayContent = item.aiRewrittenContent ?? item.originalContent;
+            return (
+              <div key={item.id} className="bg-space-dark rounded-xl border border-white/5 hover:border-galactic-orange/20 transition-all overflow-hidden">
+                {/* Thumbnail strip — shown for non-video or collapsed video */}
+                {item.originalThumbnail && !isVideo && (
+                  <div className="w-full h-32 overflow-hidden bg-black/20 relative">
+                    <img
+                      src={item.originalThumbnail}
+                      alt={item.originalTitle ?? "thumbnail"}
+                      className="w-full h-full object-cover opacity-80"
+                      onError={(e) => {
+                        const target = e.currentTarget as HTMLImageElement;
+                        target.style.display = "none";
+                        const placeholder = target.nextElementSibling as HTMLElement | null;
+                        if (placeholder) placeholder.style.display = "flex";
+                      }}
+                    />
+                    <div className="absolute inset-0 items-center justify-center bg-space-dark/80 text-gray-600 text-xs hidden">
+                      <Eye className="w-5 h-5 opacity-30 mr-1" /> Image unavailable
                     </div>
-                    <p className="text-white text-sm font-semibold truncate">
-                      {item.aiRewrittenTitle ?? item.originalTitle ?? "Untitled"}
-                    </p>
-                    {(item.aiRewrittenContent ?? item.originalContent) && (
-                      <p className="text-gray-500 text-xs mt-1 line-clamp-2">{item.aiRewrittenContent ?? item.originalContent}</p>
-                    )}
-                    {item.originalAuthor && (
-                      <p className="text-gray-600 text-[10px] mt-1">From: {item.originalAuthor}</p>
-                    )}
-                    <div className="grid grid-cols-2 gap-x-6 gap-y-1 mt-2">
-                      <div>
-                        <p className="text-gray-600 text-[10px] mb-0.5">Quality</p>
-                        <ScoreBar value={item.aiQualityScore} color="bg-galactic-green" />
-                      </div>
-                      <div>
-                        <p className="text-gray-600 text-[10px] mb-0.5">Viral</p>
-                        <ScoreBar value={item.aiViralScore} color="bg-galactic-orange" />
-                      </div>
-                      <div>
-                        <p className="text-gray-600 text-[10px] mb-0.5">Engagement</p>
-                        <ScoreBar value={item.aiEngagementPrediction} color="bg-neon-cyan" />
-                      </div>
-                      <div>
-                        <p className="text-gray-600 text-[10px] mb-0.5">Confidence</p>
-                        <ScoreBar value={item.aiConfidenceScore} color="bg-neon-purple" />
-                      </div>
-                    </div>
-                    {item.aiGeneratedHashtags.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mt-2">
-                        {item.aiGeneratedHashtags.slice(0, 5).map((tag) => (
-                          <span key={tag} className="text-neon-cyan text-[10px]">#{tag}</span>
-                        ))}
-                      </div>
-                    )}
                   </div>
-                  <div className="flex flex-col gap-1.5 flex-shrink-0">
-                    {item.status === "pending" && (
-                      <>
-                        <Button
-                          size="sm"
-                          onClick={() => statusMutation.mutate({ id: item.id, status: "approved" })}
-                          disabled={statusMutation.isPending}
-                          className="bg-green-500/20 text-green-400 border border-green-500/30 hover:bg-green-500/30 h-7 px-2 text-xs font-orbitron"
-                        >
-                          <CheckCircle className="w-3 h-3 mr-1" /> Approve
-                        </Button>
-                        <Button
-                          size="sm"
-                          onClick={() => statusMutation.mutate({ id: item.id, status: "rejected" })}
-                          disabled={statusMutation.isPending}
-                          className="bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30 h-7 px-2 text-xs font-orbitron"
-                        >
-                          <XCircle className="w-3 h-3 mr-1" /> Reject
-                        </Button>
-                      </>
-                    )}
-                    {/* Share button, available for all content items */}
-                    <SharePopover item={item} publishingDestinations={publishingDestinations} />
-                    {!item.aiRewrittenContent && (
+                )}
+                <div className="p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        <Badge className="bg-white/10 text-gray-300 border-white/10 text-[10px]">{item.sourcePlatform}</Badge>
+                        <Badge className={`text-[10px] ${mediaTypeColor(item.mediaType)}`}>
+                          {isVideo && <Film className="w-2.5 h-2.5 mr-0.5 inline" />}
+                          {item.mediaType}
+                        </Badge>
+                        <StatusBadge status={item.status} />
+                      </div>
+                      <p className="text-white text-sm font-semibold line-clamp-2">{displayTitle}</p>
+                      {displayContent && (
+                        <p className={`text-gray-500 text-xs mt-1 ${expanded ? "" : "line-clamp-2"}`}>{displayContent}</p>
+                      )}
+                      {item.originalAuthor && (
+                        <p className="text-gray-600 text-[10px] mt-1">From: {item.originalAuthor}</p>
+                      )}
+                      <div className="grid grid-cols-2 gap-x-6 gap-y-1 mt-2">
+                        <div>
+                          <p className="text-gray-600 text-[10px] mb-0.5">Quality</p>
+                          <ScoreBar value={item.aiQualityScore} color="bg-galactic-green" />
+                        </div>
+                        <div>
+                          <p className="text-gray-600 text-[10px] mb-0.5">Viral</p>
+                          <ScoreBar value={item.aiViralScore} color="bg-galactic-orange" />
+                        </div>
+                        <div>
+                          <p className="text-gray-600 text-[10px] mb-0.5">Engagement</p>
+                          <ScoreBar value={item.aiEngagementPrediction} color="bg-neon-cyan" />
+                        </div>
+                        <div>
+                          <p className="text-gray-600 text-[10px] mb-0.5">Confidence</p>
+                          <ScoreBar value={item.aiConfidenceScore} color="bg-neon-purple" />
+                        </div>
+                      </div>
+                      {item.aiGeneratedHashtags.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {item.aiGeneratedHashtags.slice(0, expanded ? undefined : 5).map((tag) => (
+                            <span key={tag} className="text-neon-cyan text-[10px]">#{tag}</span>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Expanded details */}
+                      {expanded && (
+                        <div className="mt-3 space-y-3 border-t border-white/5 pt-3">
+                          {/* Video embed */}
+                          {isVideo && (
+                            <VideoPreview url={item.sourceUrl} embedCode={item.embedCode} />
+                          )}
+                          {/* Source link */}
+                          <a
+                            href={item.sourceUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 text-[11px] text-galactic-orange hover:underline"
+                          >
+                            <ExternalLink className="w-3 h-3" /> View original source
+                          </a>
+                          {/* Full AI hashtags if many */}
+                          {item.aiGeneratedHashtags.length > 5 && (
+                            <p className="text-neon-cyan text-[11px]">
+                              {item.aiGeneratedHashtags.map((t) => `#${t.replace(/^#/, "")}`).join(" ")}
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex flex-col gap-1.5 flex-shrink-0">
+                      {item.status === "pending" && (
+                        <>
+                          <Button
+                            size="sm"
+                            onClick={() => statusMutation.mutate({ id: item.id, status: "approved" })}
+                            disabled={statusMutation.isPending}
+                            className="bg-green-500/20 text-green-400 border border-green-500/30 hover:bg-green-500/30 h-7 px-2 text-xs font-orbitron"
+                          >
+                            <CheckCircle className="w-3 h-3 mr-1" /> Approve
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={() => statusMutation.mutate({ id: item.id, status: "rejected" })}
+                            disabled={statusMutation.isPending}
+                            className="bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30 h-7 px-2 text-xs font-orbitron"
+                          >
+                            <XCircle className="w-3 h-3 mr-1" /> Reject
+                          </Button>
+                        </>
+                      )}
+                      {/* Share button */}
+                      <SharePopover item={item} publishingDestinations={publishingDestinations} />
+                      {/* AI reshape — always available so user can re-run */}
                       <Button
                         size="sm"
                         onClick={() => reshapeMutation.mutate(item.id)}
@@ -982,23 +1111,33 @@ function ContentQueuePanel({ campaignId, campaignName, publishingDestinations = 
                         {reshapeMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3 mr-1" />}
                         {reshapeMutation.isPending ? "" : "AI"}
                       </Button>
-                    )}
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => {
-                        if (confirm("Delete this content item?")) deleteMutation.mutate(item.id);
-                      }}
-                      disabled={deleteMutation.isPending}
-                      className="text-red-400 hover:text-red-300 h-7 px-2"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </Button>
+                      {/* Expand / collapse */}
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => toggleExpand(item.id)}
+                        className="text-gray-400 hover:text-white h-7 px-2"
+                        title={expanded ? "Collapse" : "Expand details"}
+                      >
+                        {expanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                          if (confirm("Delete this content item?")) deleteMutation.mutate(item.id);
+                        }}
+                        disabled={deleteMutation.isPending}
+                        className="text-red-400 hover:text-red-300 h-7 px-2"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
@@ -1013,7 +1152,7 @@ export default function SportaTab() {
   const [showWizard, setShowWizard] = useState(false);
   const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null);
 
-  // Stats
+  // Stats — poll every 10 s for real-time updates
   const { data: stats, refetch: refetchStats } = useQuery<SportaStats>({
     queryKey: ["/api/sporta/stats"],
     queryFn: async () => {
@@ -1021,10 +1160,10 @@ export default function SportaTab() {
       if (!res.ok) throw new Error("Failed");
       return res.json();
     },
-    refetchInterval: 30_000,
+    refetchInterval: 10_000,
   });
 
-  // Campaigns
+  // Campaigns — poll every 15 s so aggregated/published counts stay fresh
   const { data: campaigns = [], isLoading: campaignsLoading, refetch: refetchCampaigns } = useQuery<SportaCampaign[]>({
     queryKey: ["/api/sporta/campaigns"],
     queryFn: async () => {
@@ -1032,6 +1171,7 @@ export default function SportaTab() {
       if (!res.ok) throw new Error("Failed");
       return res.json();
     },
+    refetchInterval: 15_000,
   });
 
   const toggleStatusMutation = useMutation({
