@@ -6,6 +6,7 @@ import bcrypt from "bcryptjs";
 import { randomBytes, timingSafeEqual } from "crypto";
 import fs from "fs";
 import path from "path";
+import archiver from "archiver";
 import rateLimit from "express-rate-limit";
 import OpenAI from "openai";
 import { GoogleGenerativeAI } from "@google/generative-ai";
@@ -2808,6 +2809,95 @@ Only return valid JSON, no markdown fences.`;
       if (err instanceof z.ZodError) return res.status(400).json({ message: "Validation error", errors: err.errors });
       console.error("[sporta/content/:id/reshape]", err);
       res.status(500).json({ message: "AI reshaping failed" });
+    }
+  });
+
+  // GET /api/sporta/campaigns/:id/batch-folders — download a ZIP of organised content folders
+  app.get("/api/sporta/campaigns/:id/batch-folders", sportaRateLimiter, requireAuth, async (req, res) => {
+    try {
+      const ok = await assertCampaignOwner(req, res, req.params.id);
+      if (!ok) return;
+
+      const campaign = await (storage as any).getSportaCampaign(req.params.id);
+      if (!campaign) return res.status(404).json({ message: "Campaign not found" });
+
+      const items: any[] = await (storage as any).getSportaContentByCampaign(req.params.id);
+      if (!items.length) {
+        return res.status(400).json({ message: "No content in this campaign yet. Run aggregation first." });
+      }
+
+      // Sanitise a string for use as a folder/file name component
+      const sanitise = (s: string) =>
+        s.replace(/[/\\:*?"<>|]/g, "_").replace(/\s+/g, "_").slice(0, 80);
+
+      const campaignFolderName = sanitise(campaign.name || `campaign_${campaign.id}`);
+
+      res.setHeader("Content-Type", "application/zip");
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="${campaignFolderName}_batch_folders.zip"`,
+      );
+
+      const archive = archiver("zip", { zlib: { level: 6 } });
+      archive.on("error", (err: Error) => {
+        console.error("[sporta/batch-folders] archiver error:", err);
+        if (!res.headersSent) res.status(500).json({ message: "Failed to build archive" });
+      });
+      archive.pipe(res);
+
+      items.forEach((item: any, idx: number) => {
+        const num = String(idx + 1).padStart(2, "0");
+        const rawTitle = item.aiRewrittenTitle ?? item.originalTitle ?? `Content_${num}`;
+        const folderName = `${campaignFolderName}/Content_${num}_${sanitise(rawTitle)}`;
+
+        // caption.txt — the human-readable caption / article text
+        const captionLines: string[] = [];
+        captionLines.push(`TITLE: ${item.aiRewrittenTitle ?? item.originalTitle ?? "(untitled)"}`);
+        captionLines.push("");
+        const body = item.aiRewrittenContent ?? item.originalContent ?? "";
+        if (body) captionLines.push(body);
+        if (item.aiGeneratedHashtags?.length) {
+          captionLines.push("");
+          captionLines.push(
+            item.aiGeneratedHashtags.map((t: string) => (t.startsWith("#") ? t : `#${t}`)).join(" "),
+          );
+        }
+        archive.append(captionLines.join("\n"), { name: `${folderName}/caption.txt` });
+
+        // metadata.json — structured source info
+        const metadata = {
+          title: item.originalTitle ?? null,
+          aiTitle: item.aiRewrittenTitle ?? null,
+          sourcePlatform: item.sourcePlatform,
+          sourceUrl: item.sourceUrl,
+          author: item.originalAuthor ?? null,
+          mediaType: item.mediaType,
+          status: item.status,
+          hashtags: item.aiGeneratedHashtags ?? [],
+          scores: {
+            quality: item.aiQualityScore ?? null,
+            viral: item.aiViralScore ?? null,
+            engagement: item.aiEngagementPrediction ?? null,
+            confidence: item.aiConfidenceScore ?? null,
+          },
+          aggregatedAt: item.createdAt ?? null,
+          campaignId: item.campaignId,
+          campaignName: campaign.name,
+          campaignIndustry: campaign.industry,
+        };
+        archive.append(JSON.stringify(metadata, null, 2), { name: `${folderName}/metadata.json` });
+
+        // links.txt — quick-access URLs
+        const linkLines: string[] = [`Source URL: ${item.sourceUrl}`];
+        if (item.originalThumbnail) linkLines.push(`Thumbnail: ${item.originalThumbnail}`);
+        if (item.embedCode) linkLines.push(`Embed: ${item.embedCode}`);
+        archive.append(linkLines.join("\n"), { name: `${folderName}/links.txt` });
+      });
+
+      await archive.finalize();
+    } catch (err) {
+      console.error("[sporta/batch-folders]", err);
+      if (!res.headersSent) res.status(500).json({ message: "Failed to build batch folders" });
     }
   });
 
