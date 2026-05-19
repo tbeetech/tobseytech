@@ -43,6 +43,7 @@ import {
   ChevronUp,
   ExternalLink,
   Film,
+  FolderDown,
 } from "lucide-react";
 import type {
   SportaCampaign,
@@ -647,9 +648,15 @@ function CampaignWizard({ onComplete, onCancel }: { onComplete: () => void; onCa
                 </div>
               ))}
             </div>
-            <div className="flex items-center gap-3 p-4 rounded-xl bg-galactic-orange/5 border border-galactic-orange/20">
+            <div className="flex items-center gap-3 p-4 rounded-xl bg-galactic-orange/5 border border-galactic-orange/20 mb-3">
               <CheckCircle className="w-5 h-5 text-galactic-orange flex-shrink-0" />
               <p className="text-gray-300 text-xs">Everything looks good! Click <strong className="text-galactic-orange">Launch</strong> to activate your campaign.</p>
+            </div>
+            <div className="flex items-center gap-3 p-3 rounded-xl bg-neon-cyan/5 border border-neon-cyan/20">
+              <FolderDown className="w-4 h-4 text-neon-cyan flex-shrink-0" />
+              <p className="text-gray-400 text-xs">
+                After launching, open the campaign and click <strong className="text-neon-cyan">Build Batch Folders</strong> in the content queue to download all aggregated items as organised folders (ZIP).
+              </p>
             </div>
           </div>
         )}
@@ -895,6 +902,36 @@ function ContentQueuePanel({ campaignId, campaignName, publishingDestinations = 
     onError: (err: any) => toast({ title: "Aggregation failed", description: err.message, variant: "destructive" }),
   });
 
+  const [batchDownloading, setBatchDownloading] = useState(false);
+  const buildBatchFolders = async () => {
+    if (!items.length) {
+      toast({ title: "No content yet", description: "Run aggregation first to populate the queue.", variant: "destructive" });
+      return;
+    }
+    setBatchDownloading(true);
+    try {
+      const res = await fetch(`/api/sporta/campaigns/${campaignId}/batch-folders`, { credentials: "include" });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error((body as any).message ?? "Failed to build batch folders");
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${campaignName.replace(/\s+/g, "_")}_batch_folders.zip`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast({ title: "Batch folders downloaded!", description: `${items.length} content folder${items.length === 1 ? "" : "s"} packaged into a ZIP.` });
+    } catch (err: any) {
+      toast({ title: "Download failed", description: err.message, variant: "destructive" });
+    } finally {
+      setBatchDownloading(false);
+    }
+  };
+
   const statusMutation = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
       const res = await apiRequest("PATCH", `/api/sporta/content/${id}/status`, { status });
@@ -960,6 +997,19 @@ function ContentQueuePanel({ campaignId, campaignName, publishingDestinations = 
         <div className="flex items-center gap-2">
           <Button size="sm" variant="ghost" onClick={() => refetch()} className="text-galactic-orange hover:text-galactic-gold h-7 w-7 p-0">
             <RefreshCw className="w-3.5 h-3.5" />
+          </Button>
+          <Button
+            size="sm"
+            onClick={buildBatchFolders}
+            disabled={batchDownloading || items.length === 0}
+            className="bg-neon-cyan/20 text-neon-cyan border border-neon-cyan/30 hover:bg-neon-cyan/30 h-7 px-3 font-orbitron text-xs disabled:opacity-40"
+            title="Download all content as organised folders (ZIP)"
+          >
+            {batchDownloading ? (
+              <><Loader2 className="w-3 h-3 animate-spin mr-1" /> Building…</>
+            ) : (
+              <><FolderDown className="w-3 h-3 mr-1" /> Build Batch Folders</>
+            )}
           </Button>
           <Button
             size="sm"
@@ -1441,6 +1491,7 @@ export default function SportaTab() {
             { icon: Filter, label: "16 Advanced Filters", color: "text-neon-yellow" },
             { icon: Shield, label: "Full Approval Oversight", color: "text-galactic-green" },
             { icon: BarChart3, label: "Real-time Analytics", color: "text-galactic-gold" },
+            { icon: FolderDown, label: "Batch Content Folders (ZIP)", color: "text-neon-cyan" },
           ].map(({ icon: Icon, label, color }) => (
             <div key={label} className="flex items-center gap-2 text-sm text-gray-400">
               <Icon className={`w-4 h-4 ${color} flex-shrink-0`} />
