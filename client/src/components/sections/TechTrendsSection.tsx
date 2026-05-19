@@ -24,7 +24,7 @@ const trendCards = [
   { label: "No-Code Tools", score: 80, color: "#22c55e", insight: "No-code automation reduces time-to-market by 60%. We pair no-code with custom dev for optimal speed." },
   { label: "Cybersecurity", score: 88, color: "#00E5FF", insight: "Cyber threats grew 38% YoY. Every TOBSEYTECH solution includes security-by-design principles." },
   { label: "Cloud Native", score: 85, color: "#9C27B0", insight: "Cloud-native architecture cuts infrastructure costs up to 40% while delivering infinite scalability." },
-  { label: "Edge Computing", score: 68, color: "#4CAF50", insight: "Processing data closer to the source reduces latency — key for real-time AI decision-making." },
+  { label: "Edge Computing", score: 68, color: "#4CAF50", insight: "Processing data closer to the source reduces latency, key for real-time AI decision-making." },
   { label: "IoT", score: 55, color: "#2196F3", insight: "Connected devices generating actionable business data. We design IoT data pipelines for smart operations." },
 ];
 
@@ -53,7 +53,7 @@ export default function TechTrendsSection() {
             Tech Trends Radar
           </h2>
           <p className="text-gray-300 max-w-2xl mx-auto">
-            Stay ahead of the curve. Here's where the digital world is heading — and how TOBSEYTECH helps you ride every wave.
+            Stay ahead of the curve. Here's where the digital world is heading, and how TOBSEYTECH helps you ride every wave.
           </p>
         </div>
 

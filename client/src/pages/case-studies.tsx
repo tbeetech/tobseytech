@@ -52,7 +52,7 @@ const cases: CaseStudy[] = [
     metricValue: "95%",
     metricLabel: "Time Saved",
     overview:
-      "A leading radio station needed to turn each broadcast script into platform-ready social-media posts across Twitter, Instagram, Facebook, LinkedIn, and WhatsApp — without hiring extra content staff.",
+      "A leading radio station needed to turn each broadcast script into platform-ready social-media posts across Twitter, Instagram, Facebook, LinkedIn, and WhatsApp, without hiring extra content staff.",
     solution:
       "Built a Python-based automation pipeline that ingests a broadcast script, uses an AI rewriting model to produce 10 distinct post formats tailored per platform, then pushes them to a content calendar and social scheduler automatically.",
     results: [
@@ -75,7 +75,7 @@ const cases: CaseStudy[] = [
     metricValue: "15+",
     metricLabel: "Products Listed",
     overview:
-      "Maktaris Herbals needed a professional online presence to showcase and sell their chemical-free herbal products — including herbs for arthritis, high blood pressure, endometriosis, and more — while building trust through real customer testimonials.",
+      "Maktaris Herbals needed a professional online presence to showcase and sell their chemical-free herbal products, including herbs for arthritis, high blood pressure, endometriosis, and more, while building trust through real customer testimonials.",
     solution:
       "Designed and developed a fully responsive e-commerce website featuring a product catalogue with pricing, featured product sections, detailed product modals, customer testimonial carousel, ambassador profiles, and a streamlined ordering flow with cheap shipping and easy payment options.",
     results: [
@@ -98,7 +98,7 @@ const cases: CaseStudy[] = [
     metricValue: "398+",
     metricLabel: "Success Reports",
     overview:
-      "Compassionate Backers, a financial services company established in 2019, needed a professional landing page to showcase their loan, asset acquisition, and investment services — while building credibility with potential clients and streamlining enquiry submissions.",
+      "Compassionate Backers, a financial services company established in 2019, needed a professional landing page to showcase their loan, asset acquisition, and investment services, while building credibility with potential clients and streamlining enquiry submissions.",
     solution:
       "Built a clean, professional landing page featuring service showcases for loans, asset acquisition, and investment, an about section highlighting mission and vision, success metrics display (398+ success reports, 3K+ happy clients), and an integrated contact form for service requests.",
     results: [
@@ -121,14 +121,14 @@ const cases: CaseStudy[] = [
     metricValue: "500+",
     metricLabel: "Leads/Month",
     overview:
-      "The sales team was manually copying leads from Facebook Ads, Google Forms, and website inquiries into a spreadsheet — a 3-hour-per-day bottleneck.",
+      "The sales team was manually copying leads from Facebook Ads, Google Forms, and website inquiries into a spreadsheet, a 3-hour-per-day bottleneck.",
     solution:
       "Built a Zapier-based multi-source lead capture pipeline that routes, deduplicates, scores, and tags leads from 4 sources directly into HubSpot CRM with automatic follow-up task creation.",
     results: [
       "500+ leads processed monthly, fully automated",
       "Eliminated 3 hours of daily data-entry work",
       "Lead response time reduced from 48h to 2h",
-      "Pipeline visibility improved — no leads dropped",
+      "Pipeline visibility improved, no leads dropped",
     ],
     tech: ["Zapier", "HubSpot CRM", "Google Sheets", "Meta Ads API"],
     link: null,
@@ -169,7 +169,7 @@ const cases: CaseStudy[] = [
     overview:
       "A mid-sized company wanted to equip their team with practical AI and automation skills to improve departmental productivity without replacing existing staff.",
     solution:
-      "Designed and delivered a 4-week blended learning program covering AI prompting, no-code automation, and data visualization — with live workshops, assignments, and a final capstone project.",
+      "Designed and delivered a 4-week blended learning program covering AI prompting, no-code automation, and data visualization, with live workshops, assignments, and a final capstone project.",
     results: [
       "30+ team members completed the program",
       "Measurable productivity improvements within 30 days",
@@ -192,7 +192,7 @@ const cases: CaseStudy[] = [
     overview:
       "Glow FM needed a dedicated mobile application to extend their reach beyond the website, allowing loyal listeners to tune in on the go with live streaming, episode replays, and real-time updates.",
     solution:
-      "Created a feature-rich mobile application for Glow FM delivering live radio streaming, episode replays, news updates, and push notifications to thousands of listeners on Android — ensuring a seamless listening experience anywhere, anytime.",
+      "Created a feature-rich mobile application for Glow FM delivering live radio streaming, episode replays, news updates, and push notifications to thousands of listeners on Android, ensuring a seamless listening experience anywhere, anytime.",
     results: [
       "Live radio streaming directly from mobile devices",
       "Episode replay and on-demand content access",
@@ -215,7 +215,7 @@ export default function CaseStudiesPage() {
           <div className="text-center mb-16">
             <h1 className="font-orbitron font-bold text-4xl md:text-5xl mb-4 gradient-text">Case Studies</h1>
             <p className="text-gray-300 max-w-2xl mx-auto text-lg">
-              Real systems, real results — proof over promises.
+              Real systems, real results, proof over promises.
             </p>
           </div>
 

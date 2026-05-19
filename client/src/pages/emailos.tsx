@@ -29,6 +29,8 @@ import {
   Star,
   Crown,
   Sparkles,
+  Eye,
+  X,
 } from "lucide-react";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -57,11 +59,21 @@ interface Org {
   maxActiveCampaigns: number;
 }
 
+interface EmailContact {
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  tags?: string[];
+  subscribedAt: string;
+  unsubscribed: boolean;
+}
+
 interface EmailList {
   _id: string;
   name: string;
   description?: string;
   contactCount: number;
+  contacts?: EmailContact[];
 }
 
 interface Campaign {
@@ -178,19 +190,19 @@ function OnboardingWizard({ onComplete }: { onComplete: (org: Org) => void }) {
   const [loading, setLoading] = useState(false);
   const [org, setOrg] = useState<Org | null>(null);
 
-  // Step 1 — org form
+  // Step 1, org form
   const [orgName, setOrgName]     = useState("");
   const [orgDomain, setOrgDomain] = useState("");
 
-  // Step 2 — tier
+  // Step 2, tier
   const [selectedTier, setSelectedTier] = useState<Tier>("starter");
 
-  // Step 3 — list
+  // Step 3, list
   const [listName, setListName]     = useState("");
   const [listDesc, setListDesc]     = useState("");
   const [lists, setLists]           = useState<EmailList[]>([]);
 
-  // Step 4 — campaign
+  // Step 4, campaign
   const [campaignSubject, setCampaignSubject] = useState("");
   const [campaignFrom,    setCampaignFrom]    = useState("");
   const [campaignEmail,   setCampaignEmail]   = useState("");
@@ -346,7 +358,7 @@ function OnboardingWizard({ onComplete }: { onComplete: (org: Org) => void }) {
                 You're about to set up your very own <span className="text-neon-cyan font-semibold">email marketing account</span>. It takes less than 2 minutes and no technical knowledge is required.
               </p>
               <p className="text-gray-500 text-sm mb-8 max-w-lg mx-auto">
-                Manage your contacts, design campaigns, schedule sends, and track who opens your emails — all in one place.
+                Manage your contacts, design campaigns, schedule sends, and track who opens your emails, all in one place.
               </p>
               <div className="flex flex-wrap gap-3 justify-center mb-8">
                 {["Grow Your Audience","Send Bulk Emails","Track Opens & Clicks","AI Writing Help","Schedule Campaigns"].map(tag => (
@@ -366,7 +378,7 @@ function OnboardingWizard({ onComplete }: { onComplete: (org: Org) => void }) {
                 <Building2 className="w-8 h-8 text-galactic-orange" />
                 <div>
                   <h2 className="font-orbitron font-bold text-2xl gradient-text">Name Your Email Account</h2>
-                  <p className="text-gray-400 text-sm">This is just for you — so you can find your account easily.</p>
+                  <p className="text-gray-400 text-sm">This is just for you, so you can find your account easily.</p>
                 </div>
               </div>
               <div className="space-y-4 mb-8">
@@ -514,7 +526,7 @@ function OnboardingWizard({ onComplete }: { onComplete: (org: Org) => void }) {
               </div>
               {lists.length === 0 && (
                 <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-3 mb-5 text-yellow-400 text-sm font-orbitron">
-                  You skipped list creation — you'll need to add a list before sending.
+                  You skipped list creation, you'll need to add a list before sending.
                 </div>
               )}
               <div className="space-y-4 mb-8">
@@ -523,7 +535,7 @@ function OnboardingWizard({ onComplete }: { onComplete: (org: Org) => void }) {
                   <input
                     value={campaignSubject}
                     onChange={e => setCampaignSubject(e.target.value)}
-                    placeholder="e.g. 🎉 Our Big Summer Sale — Don't Miss It!"
+                    placeholder="e.g. 🎉 Our Big Summer Sale, Don't Miss It!"
                     className="w-full bg-space-dark border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-neon-purple/60 font-orbitron text-sm"
                   />
                 </div>
@@ -571,7 +583,7 @@ function OnboardingWizard({ onComplete }: { onComplete: (org: Org) => void }) {
                 Your EmailOS account is ready. Head to your dashboard to add contacts, create beautiful campaigns, and start sending!
               </p>
               <p className="text-gray-500 text-sm mb-8 max-w-md mx-auto">
-                Everything is private and secure — only you have access to your account.
+                Everything is private and secure, only you have access to your account.
               </p>
               <div className="flex flex-wrap gap-3 justify-center mb-8">
                 {["Contacts Ready","Campaigns Ready","Tracking Active","Sending Enabled"].map(tag => (
@@ -615,6 +627,10 @@ function EmailOSDashboard({ org: initialOrg }: { org: Org }) {
   const [aggKeywords, setAggKeywords]               = useState("");
   const [aggCount, setAggCount]                     = useState(50);
   const [aggregating, setAggregating]               = useState(false);
+
+  // ── View Leads modal state ──
+  const [viewingList, setViewingList]       = useState<EmailList | null>(null);
+  const [loadingLeads, setLoadingLeads]     = useState(false);
 
   // ── Create Campaign modal state ──
   const [showCreateCampaign, setShowCreateCampaign] = useState(false);
@@ -744,6 +760,18 @@ function EmailOSDashboard({ org: initialOrg }: { org: Org }) {
       toast({ title: "Aggregation failed", description: err.message, variant: "destructive" });
     } finally {
       setAggregating(false);
+    }
+  }
+
+  async function handleViewLeads(listId: string) {
+    setLoadingLeads(true);
+    try {
+      const data = await apiFetch(`/api/emailos/lists/${listId}`);
+      setViewingList(data);
+    } catch (err: any) {
+      toast({ title: "Failed to load leads", description: err.message, variant: "destructive" });
+    } finally {
+      setLoadingLeads(false);
     }
   }
 
@@ -932,7 +960,7 @@ function EmailOSDashboard({ org: initialOrg }: { org: Org }) {
                             onChange={e => setCampListId(e.target.value)}
                             className="w-full bg-space-dark border border-white/10 rounded-xl px-3 py-2 text-white font-orbitron text-sm focus:outline-none focus:border-neon-cyan/60"
                           >
-                            <option value="">— Select a list —</option>
+                            <option value=""> Select a list </option>
                             {lists.map(l => (
                               <option key={l._id} value={l._id}>{l.name} ({l.contactCount.toLocaleString()} contacts)</option>
                             ))}
@@ -957,7 +985,7 @@ function EmailOSDashboard({ org: initialOrg }: { org: Org }) {
                           <textarea value={campHtmlBody} onChange={e => setCampHtmlBody(e.target.value)} rows={4} placeholder="<p>Hello {{firstName}}, welcome to our campaign!</p>" className="w-full bg-space-dark border border-white/10 rounded-xl px-3 py-2 text-white placeholder-gray-600 font-orbitron text-sm focus:outline-none focus:border-neon-cyan/60 resize-y" />
                         </div>
                         <div>
-                          <label className="block text-xs font-orbitron text-gray-400 mb-1">Schedule (optional — leave blank to save as draft)</label>
+                          <label className="block text-xs font-orbitron text-gray-400 mb-1">Schedule (optional, leave blank to save as draft)</label>
                           <input type="datetime-local" value={campScheduledAt} onChange={e => setCampScheduledAt(e.target.value)} className="w-full bg-space-dark border border-white/10 rounded-xl px-3 py-2 text-white font-orbitron text-sm focus:outline-none focus:border-neon-cyan/60" />
                         </div>
                       </div>
@@ -1061,7 +1089,7 @@ function EmailOSDashboard({ org: initialOrg }: { org: Org }) {
                     <div className="glass-effect w-full max-w-md rounded-2xl border border-neon-cyan/30 p-6">
                       <h3 className="font-orbitron font-bold text-lg text-neon-cyan mb-2">Fetch Public Leads</h3>
                       <p className="text-gray-400 text-xs font-orbitron mb-4">
-                        Aggregates prospective contacts from publicly available marketing sources — Clearbit company directory, Google News RSS, and RandomUser.me. Leads are tagged "aggregated-lead" for easy filtering.
+                        Aggregates prospective contacts from publicly available marketing sources, Clearbit company directory, Google News RSS, and RandomUser.me. Leads are tagged "aggregated-lead" for easy filtering.
                       </p>
                       <div className="space-y-3 mb-5">
                         <div>
@@ -1116,15 +1144,90 @@ function EmailOSDashboard({ org: initialOrg }: { org: Org }) {
                           {list.contactCount.toLocaleString()}
                           <span className="text-gray-500 text-xs ml-1">contacts</span>
                         </div>
-                        <Button
-                          size="sm"
-                          onClick={() => { setAggregateListId(list._id); setAggIndustry("General"); setAggKeywords(""); setAggCount(50); }}
-                          className="w-full bg-neon-cyan/10 border border-neon-cyan/30 text-neon-cyan font-orbitron text-xs hover:bg-neon-cyan/20"
-                        >
-                          <RefreshCw className="w-3 h-3 mr-1" /> Fetch Public Leads
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            onClick={() => handleViewLeads(list._id)}
+                            disabled={loadingLeads}
+                            className="flex-1 bg-galactic-green/10 border border-galactic-green/30 text-galactic-green font-orbitron text-xs hover:bg-galactic-green/20"
+                          >
+                            {loadingLeads ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <Eye className="w-3 h-3 mr-1" />}
+                            View Leads
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={() => { setAggregateListId(list._id); setAggIndustry("General"); setAggKeywords(""); setAggCount(50); }}
+                            className="flex-1 bg-neon-cyan/10 border border-neon-cyan/30 text-neon-cyan font-orbitron text-xs hover:bg-neon-cyan/20"
+                          >
+                            <RefreshCw className="w-3 h-3 mr-1" /> Fetch Leads
+                          </Button>
+                        </div>
                       </div>
                     ))}
+                  </div>
+                )}
+
+                {/* View Leads Modal */}
+                {viewingList && (
+                  <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+                    <div className="bg-[#0a0a14] w-full max-w-3xl max-h-[80vh] rounded-2xl border border-galactic-green/30 flex flex-col overflow-hidden">
+                      <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
+                        <div>
+                          <h3 className="font-orbitron font-bold text-lg text-galactic-green">{viewingList.name}</h3>
+                          <p className="text-gray-400 text-xs font-orbitron mt-0.5">{viewingList.contactCount.toLocaleString()} contact{viewingList.contactCount !== 1 ? "s" : ""}</p>
+                        </div>
+                        <button onClick={() => setViewingList(null)} className="text-gray-500 hover:text-white transition-colors">
+                          <X className="w-5 h-5" />
+                        </button>
+                      </div>
+                      <div className="overflow-auto flex-1">
+                        {(!viewingList.contacts || viewingList.contacts.length === 0) ? (
+                          <div className="flex flex-col items-center justify-center py-16 text-gray-500">
+                            <Users className="w-10 h-10 mb-3 opacity-30" />
+                            <p className="font-orbitron text-sm">No leads yet in this list.</p>
+                            <p className="text-xs text-gray-600 mt-1">Use "Fetch Leads" to add contacts.</p>
+                          </div>
+                        ) : (
+                          <table className="w-full text-xs font-orbitron">
+                            <thead className="sticky top-0 bg-[#0a0a14] border-b border-white/10">
+                              <tr>
+                                <th className="text-left px-4 py-3 text-gray-400 font-medium">Email</th>
+                                <th className="text-left px-4 py-3 text-gray-400 font-medium">First Name</th>
+                                <th className="text-left px-4 py-3 text-gray-400 font-medium">Last Name</th>
+                                <th className="text-left px-4 py-3 text-gray-400 font-medium">Tags</th>
+                                <th className="text-left px-4 py-3 text-gray-400 font-medium">Status</th>
+                                <th className="text-left px-4 py-3 text-gray-400 font-medium">Joined</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-white/5">
+                              {viewingList.contacts.map((c, i) => (
+                                <tr key={i} className="hover:bg-white/3 transition-colors">
+                                  <td className="px-4 py-2.5 text-white">{c.email}</td>
+                                  <td className="px-4 py-2.5 text-gray-300">{c.firstName || <span className="text-gray-600">—</span>}</td>
+                                  <td className="px-4 py-2.5 text-gray-300">{c.lastName || <span className="text-gray-600">—</span>}</td>
+                                  <td className="px-4 py-2.5">
+                                    <div className="flex flex-wrap gap-1">
+                                      {(c.tags ?? []).map(t => (
+                                        <span key={t} className="px-1.5 py-0.5 rounded bg-neon-cyan/10 text-neon-cyan border border-neon-cyan/20 text-[10px]">{t}</span>
+                                      ))}
+                                    </div>
+                                  </td>
+                                  <td className="px-4 py-2.5">
+                                    <span className={`px-1.5 py-0.5 rounded border text-[10px] ${c.unsubscribed ? "border-red-500/30 text-red-400 bg-red-500/10" : "border-galactic-green/30 text-galactic-green bg-galactic-green/10"}`}>
+                                      {c.unsubscribed ? "Unsub" : "Active"}
+                                    </span>
+                                  </td>
+                                  <td className="px-4 py-2.5 text-gray-500">{new Date(c.subscribedAt).toLocaleDateString()}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        )}
+                      </div>
+                      <div className="px-6 py-3 border-t border-white/10 flex justify-end">
+                        <Button variant="outline" onClick={() => setViewingList(null)} className="border-white/10 text-gray-400 font-orbitron text-sm">Close</Button>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
@@ -1221,7 +1324,7 @@ export default function EmailOSPage() {
     );
   }
 
-  // Not logged in — prompt to create an account
+  // Not logged in, prompt to create an account
   if (!user) {
     return (
       <div className="min-h-screen bg-space-black text-white">
@@ -1243,7 +1346,7 @@ export default function EmailOSPage() {
               </div>
 
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-neon-cyan/20 text-neon-cyan text-xs font-orbitron mb-4">
-                <Zap className="w-3 h-3" /> EmailOS — Email Marketing
+                <Zap className="w-3 h-3" /> EmailOS, Email Marketing
               </div>
 
               <h1 className="font-orbitron font-black text-3xl md:text-4xl gradient-text mb-3">
@@ -1251,7 +1354,7 @@ export default function EmailOSPage() {
               </h1>
               <p className="text-gray-300 max-w-lg mx-auto mb-2 leading-relaxed">
                 EmailOS is your personal email marketing tool, available exclusively on TOBSEYTECH.
-                Grow your audience, design stunning campaigns, and track every open and click — no technical skills needed.
+                Grow your audience, design stunning campaigns, and track every open and click, no technical skills needed.
               </p>
               <p className="text-gray-500 text-sm max-w-md mx-auto mb-8">
                 Create a free account in under 30 seconds. No credit card required. Your Starter plan is free forever.

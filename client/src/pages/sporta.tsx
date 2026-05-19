@@ -45,7 +45,7 @@ export default function SportaPage() {
             <Globe2 className="w-8 h-8 text-galactic-orange" />
             <h1 className="text-3xl font-orbitron font-bold gradient-text">SPORTA</h1>
           </div>
-          <p className="text-gray-400">AI-powered social media aggregator &amp; publisher — your personal content engine</p>
+          <p className="text-gray-400">AI-powered social media aggregator &amp; publisher, your personal content engine</p>
         </div>
         <SportaTab />
       </div>

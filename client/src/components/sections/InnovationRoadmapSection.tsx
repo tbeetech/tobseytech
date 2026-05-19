@@ -130,7 +130,7 @@ export default function InnovationRoadmapSection() {
             Innovation Roadmap
           </h2>
           <p className="text-gray-300 max-w-2xl mx-auto">
-            From startup to scale-up — every milestone mapped, every stage funded by results.
+            From startup to scale-up, every milestone mapped, every stage funded by results.
           </p>
         </div>
 

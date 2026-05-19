@@ -46,7 +46,7 @@ export default function Home() {
               Join Our Discord Server
             </h2>
             <p className="text-gray-300 max-w-xl mx-auto text-sm sm:text-base mb-8">
-              Connect with the Kingdom Enhancement community — builders, church leaders, and innovators who are using
+              Connect with the Kingdom Enhancement community, builders, church leaders, and innovators who are using
               God-inclined technology to transform their organizations. Get support, share ideas, and grow together.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
@@ -57,7 +57,7 @@ export default function Home() {
                 className="inline-flex items-center gap-3 px-8 py-4 bg-[#5865F2] text-white rounded-xl font-orbitron font-bold text-base hover:bg-[#4752C4] transition-all hover:shadow-[0_0_30px_rgba(88,101,242,0.5)] active:scale-95"
               >
                 <DiscordIcon className="w-6 h-6" />
-                Join the Server — It's Free
+                Join the Server, It's Free
               </a>
             </div>
             <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-400">
@@ -75,7 +75,7 @@ export default function Home() {
               Explore All 12 Real-Time Features
             </h2>
             <p className="text-gray-300 max-w-xl mx-auto mb-6 text-sm">
-              View our complete interactive feature showcase — built to demonstrate platform value to investors, partners, and users.
+              View our complete interactive feature showcase, built to demonstrate platform value to investors, partners, and users.
             </p>
             <Link href="/features">
               <Button size="lg" className="bg-gradient-to-r from-galactic-orange to-galactic-gold text-space-black font-orbitron font-bold">

@@ -55,7 +55,7 @@ function getEmbedSrc(embedUrl: string, platform: string): string | null {
       return `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(embedUrl)}&show_text=0&width=560`;
     }
   } catch { /* ignore */ }
-  // Twitter, LinkedIn, Instagram — no reliable iframe embed; return null to show external link
+  // Twitter, LinkedIn, Instagram, no reliable iframe embed; return null to show external link
   return null;
 }
 

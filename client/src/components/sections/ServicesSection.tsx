@@ -66,7 +66,7 @@ export default function ServicesSection() {
             Services
           </h2>
           <p className="text-gray-300 max-w-2xl mx-auto text-sm sm:text-base">
-            Strategy, design, and engineering under one roof — practical solutions that move your business forward.
+            Strategy, design, and engineering under one roof, practical solutions that move your business forward.
           </p>
         </div>
         <div className="grid gap-5 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">

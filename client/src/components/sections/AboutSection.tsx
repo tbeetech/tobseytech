@@ -24,14 +24,14 @@ const values = [
 ];
 
 const pillars = [
-  { label: "Accessibility", desc: "Solutions that any business can use — from solo founders to large teams." },
-  { label: "Reliability", desc: "On-time delivery ≥ 95% — milestone-based contracts with QA gates." },
+  { label: "Accessibility", desc: "Solutions that any business can use, from solo founders to large teams." },
+  { label: "Reliability", desc: "On-time delivery ≥ 95%, milestone-based contracts with QA gates." },
   { label: "Measurable Impact", desc: "Every engagement tied to a KPI: leads, time saved, revenue, or NPS." },
 ];
 
 const kecPhases = [
   { phase: "Phase 1 (Now)", name: "TOBSEYTECH", desc: "Digital agency: automation, web/app dev, AI, content, marketing, and Church Digital Technology." },
-  { phase: "Phase 2", name: "KEC Labs", desc: "Product R&D — SaaS tools, church platforms, ministry automation templates, and reusable accelerators." },
+  { phase: "Phase 2", name: "KEC Labs", desc: "Product R&D, SaaS tools, church platforms, ministry automation templates, and reusable accelerators." },
   { phase: "Phase 3", name: "Kingdom Fund", desc: "Reinvest profits into Kingdom-aligned technology, church infrastructure, and social impact across Africa." },
 ];
 
@@ -131,7 +131,7 @@ export default function AboutSection() {
               Who We Are
             </h2>
             <p className="text-gray-300 mb-4 leading-relaxed">
-              TOBSEYTECH is the engineering arm of <span className="text-galactic-gold font-semibold">Kingdom Enhancement Corp (KEC)</span> —
+              TOBSEYTECH is the engineering arm of <span className="text-galactic-gold font-semibold">Kingdom Enhancement Corp (KEC)</span> 
               a digital agency built to deliver automation-first solutions to media houses, SMEs, startups, and social-impact
               organisations across Africa and globally.
             </p>
@@ -170,7 +170,7 @@ export default function AboutSection() {
         {/* KEC Roadmap */}
         <div className="mb-16 sm:mb-20">
           <h3 className="font-orbitron font-bold text-2xl text-center mb-8 gradient-text">
-            Kingdom Enhancement Corp — Roadmap
+            Kingdom Enhancement Corp, Roadmap
           </h3>
           <div className="grid sm:grid-cols-3 gap-6">
             {kecPhases.map(({ phase, name, desc }, i) => (

@@ -69,7 +69,7 @@ export default function ContactSection() {
             Get In Touch
           </h2>
           <p className="text-gray-300 max-w-2xl mx-auto text-sm sm:text-base">
-            Let's talk about your project. Send us a message directly — we'd love to hear from you.
+            Let's talk about your project. Send us a message directly, we'd love to hear from you.
           </p>
         </div>
 

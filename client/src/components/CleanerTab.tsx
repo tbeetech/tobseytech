@@ -32,7 +32,7 @@ export default function CleanerTab() {
     onSuccess: (data) => {
       setLastResult(data);
       toast({
-        title: `Audit complete — ${data.cleaned} post${data.cleaned !== 1 ? "s" : ""} cleaned`,
+        title: `Audit complete, ${data.cleaned} post${data.cleaned !== 1 ? "s" : ""} cleaned`,
         description: `${data.total} total · ${data.unchanged} unchanged · ${data.errors} errors`,
       });
     },
@@ -71,7 +71,7 @@ export default function CleanerTab() {
               <CheckCircle2 className="w-4 h-4 text-green-400" />
             </div>
             <div>
-              <p className="text-white text-sm font-semibold mb-0.5">Synchronous Filter — The Gate</p>
+              <p className="text-white text-sm font-semibold mb-0.5">Synchronous Filter, The Gate</p>
               <p className="text-gray-400 text-xs leading-relaxed">
                 Runs automatically on every "Fetch Now" action and scheduled bot cycle.
                 Intercepts raw RSS data, strips stray HTML tags from title &amp; excerpt,
@@ -86,11 +86,11 @@ export default function CleanerTab() {
               <DatabaseZap className="w-4 h-4 text-blue-400" />
             </div>
             <div>
-              <p className="text-white text-sm font-semibold mb-0.5">Manual Audit — The Scanner</p>
+              <p className="text-white text-sm font-semibold mb-0.5">Manual Audit, The Scanner</p>
               <p className="text-gray-400 text-xs leading-relaxed">
                 Admin-triggered deep scan of every post already in the database.
                 Retroactively fixes double-encoded entities, leftover HTML snippets,
-                and typographic artifacts — updating only records that actually changed.
+                and typographic artifacts, updating only records that actually changed.
               </p>
             </div>
           </div>
@@ -103,10 +103,10 @@ export default function CleanerTab() {
           </p>
           <ul className="text-gray-400 text-xs space-y-1 list-disc list-inside">
             <li>Strip raw HTML tags from <strong className="text-gray-300">title</strong> and <strong className="text-gray-300">excerpt</strong> fields</li>
-            <li>Decode named entities: <code className="text-galactic-orange/80">&amp;amp;</code> → &amp;, <code className="text-galactic-orange/80">&amp;mdash;</code> → —, <code className="text-galactic-orange/80">&amp;hellip;</code> → …</li>
+            <li>Decode named entities: <code className="text-galactic-orange/80">&amp;amp;</code> → &amp;, <code className="text-galactic-orange/80">&amp;mdash;</code> → , <code className="text-galactic-orange/80">&amp;hellip;</code> → …</li>
             <li>Decode numeric entities: <code className="text-galactic-orange/80">&amp;#160;</code> and <code className="text-galactic-orange/80">&amp;#x2019;</code></li>
             <li>Fix double-encoded entities in <strong className="text-gray-300">content</strong> HTML (<code className="text-galactic-orange/80">&amp;amp;amp;</code> → <code className="text-galactic-orange/80">&amp;amp;</code>)</li>
-            <li>Replace typographic entities with real Unicode glyphs (—, –, …, ', ', ", ")</li>
+            <li>Replace typographic entities with real Unicode glyphs (, –, …, ', ', ", ")</li>
             <li>Collapse excessive blank lines between block elements in content</li>
             <li>Normalise whitespace: trim leading/trailing spaces &amp; collapse runs</li>
           </ul>
@@ -127,7 +127,7 @@ export default function CleanerTab() {
           </Button>
           {auditMutation.isPending && (
             <span className="text-gray-400 text-xs animate-pulse">
-              Scanning all posts — this may take a moment…
+              Scanning all posts, this may take a moment…
             </span>
           )}
         </div>

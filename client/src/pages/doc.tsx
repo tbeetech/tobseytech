@@ -136,7 +136,7 @@ export default function DocPage() {
 
   return (
     <div className="min-h-screen bg-space-black text-white">
-      <title>Contributor Docs — TOBSEYTECH</title>
+      <title>Contributor Docs, TOBSEYTECH</title>
       <Navigation />
 
       <main className="pt-24 pb-20 px-6">

@@ -4,7 +4,7 @@ const godInclinedPrinciples = [
   {
     icon: Cross,
     title: "Purpose-Driven Design",
-    body: "Every solution we build starts with a God-given purpose. Technology is a tool for transformation — not just productivity.",
+    body: "Every solution we build starts with a God-given purpose. Technology is a tool for transformation, not just productivity.",
     color: "text-galactic-gold",
     bg: "bg-galactic-gold/10",
     border: "border-galactic-gold/30",
@@ -12,7 +12,7 @@ const godInclinedPrinciples = [
   {
     icon: BookOpen,
     title: "Wisdom-Led Engineering",
-    body: "We apply biblical wisdom principles — integrity, stewardship, excellence — to every line of code and every client engagement.",
+    body: "We apply biblical wisdom principles, integrity, stewardship, excellence, to every line of code and every client engagement.",
     color: "text-neon-yellow",
     bg: "bg-neon-yellow/10",
     border: "border-neon-yellow/30",
@@ -67,7 +67,7 @@ const realtimePillars = [
   },
   {
     label: "Event-Driven Updates",
-    desc: "Server-sent events and reactive state management mean your data is always current — for services, blogs, and dashboards alike.",
+    desc: "Server-sent events and reactive state management mean your data is always current, for services, blogs, and dashboards alike.",
     badge: "REALTIME",
     color: "text-galactic-orange",
     badgeColor: "bg-galactic-orange/20 text-galactic-orange border-galactic-orange/40",
@@ -88,7 +88,7 @@ export default function KingdomPrinciplesSection() {
             God-Inclined Project Methodology
           </h2>
           <p className="text-gray-300 max-w-2xl mx-auto text-sm sm:text-base">
-            Our work is grounded in faith-first thinking. Every project, feature, and partnership is measured against Kingdom values —
+            Our work is grounded in faith-first thinking. Every project, feature, and partnership is measured against Kingdom values 
             excellence, integrity, and purpose-driven impact.
           </p>
         </div>
@@ -144,8 +144,8 @@ export default function KingdomPrinciplesSection() {
               Always On. Never Blocking.
             </h3>
             <p className="text-gray-400 text-sm max-w-xl mx-auto">
-              TOBSEYTECH's platform is built on an asynchronous, event-driven foundation — delivering real-time
-              experiences for chat, notifications, dashboards, and content — with zero downtime for your users.
+              TOBSEYTECH's platform is built on an asynchronous, event-driven foundation, delivering real-time
+              experiences for chat, notifications, dashboards, and content, with zero downtime for your users.
             </p>
           </div>
           <div className="grid sm:grid-cols-3 gap-6 max-w-4xl mx-auto">

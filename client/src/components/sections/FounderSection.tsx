@@ -24,7 +24,7 @@ export default function FounderSection() {
             Meet the Team
           </h2>
           <p className="text-gray-300 max-w-2xl mx-auto text-sm sm:text-base">
-            Strategy, design and engineering under one roof — founder-level attention on every project.
+            Strategy, design and engineering under one roof, founder-level attention on every project.
           </p>
         </div>
 
@@ -48,7 +48,7 @@ export default function FounderSection() {
               building practical technology solutions for African businesses and beyond.
             </p>
             <p className="text-gray-300 mb-6 leading-relaxed text-sm sm:text-base">
-              Oyebade leads TOBSEYTECH as Phase 1 of Kingdom Enhancement Corp — a long-term mission to
+              Oyebade leads TOBSEYTECH as Phase 1 of Kingdom Enhancement Corp, a long-term mission to
               build resilient, profitable tech ventures that fund Kingdom-aligned innovation across Africa.
             </p>
 

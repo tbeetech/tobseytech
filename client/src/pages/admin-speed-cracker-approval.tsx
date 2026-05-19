@@ -87,7 +87,7 @@ export default function AdminSpeedCrackerApprovalPage() {
   const toVlogMutation = useMutation({
     mutationFn: (id: string) => apiRequest("POST", `/api/speed-cracker/vlogs/from-content/${id}`, { category: "General" }),
     onSuccess: () => {
-      toast({ title: "Vlog entry created — edit in Vlog Manager" });
+      toast({ title: "Vlog entry created, edit in Vlog Manager" });
     },
     onError: () => toast({ title: "Failed to create vlog entry", variant: "destructive" }),
   });
@@ -95,7 +95,7 @@ export default function AdminSpeedCrackerApprovalPage() {
   const toBlogMutation = useMutation({
     mutationFn: (id: string) => apiRequest("POST", `/api/speed-cracker/blog/from-content/${id}`, { category: "General" }),
     onSuccess: () => {
-      toast({ title: "Blog draft created — edit in Blog Manager" });
+      toast({ title: "Blog draft created, edit in Blog Manager" });
     },
     onError: () => toast({ title: "Failed to create blog post", variant: "destructive" }),
   });

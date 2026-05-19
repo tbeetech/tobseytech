@@ -134,7 +134,7 @@ export default function ChatPage() {
   const [directChatUser, setDirectChatUser] = useState<SafeUser | null>(null);
   const [replyingTo, setReplyingTo] = useState<Message | null>(null);
   const [hoveredMessageId, setHoveredMessageId] = useState<string | null>(null);
-  // mobile: which panel is visible — "list" | "chat"
+  // mobile: which panel is visible, "list" | "chat"
   const [mobilePanel, setMobilePanel] = useState<"list" | "chat">("list");
   // typing indicators: set of userIds currently typing to us
   const [typingUserIds, setTypingUserIds] = useState<Set<string>>(new Set());
@@ -676,7 +676,7 @@ export default function ChatPage() {
                   onTouchStart={() => setHoveredMessageId(msg.id)}
                 >
                   <div className="flex items-end gap-1 max-w-[85%] lg:max-w-[65%]">
-                    {/* Reply button — received */}
+                    {/* Reply button, received */}
                     {!isMe && hoveredMessageId === msg.id && (
                       <button
                         onClick={() => setReplyingTo(msg)}
@@ -732,7 +732,7 @@ export default function ChatPage() {
                       </div>
                     </div>
 
-                    {/* Reply button — sent */}
+                    {/* Reply button, sent */}
                     {isMe && hoveredMessageId === msg.id && (
                       <button
                         onClick={() => setReplyingTo(msg)}

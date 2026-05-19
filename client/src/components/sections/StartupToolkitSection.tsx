@@ -90,8 +90,8 @@ export default function StartupToolkitSection() {
             <p className="text-xs text-gray-500 font-orbitron">
               {totalChecked}/{totalItems} items complete
               {progressPct === 100 && " 🎉 You're fully digital-ready!"}
-              {progressPct >= 50 && progressPct < 100 && " — You're halfway there, keep going!"}
-              {progressPct < 50 && " — TOBSEYTECH can help you close every gap"}
+              {progressPct >= 50 && progressPct < 100 && ", You're halfway there, keep going!"}
+              {progressPct < 50 && ", TOBSEYTECH can help you close every gap"}
             </p>
           </div>
 

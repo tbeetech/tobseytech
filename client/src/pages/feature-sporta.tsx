@@ -57,7 +57,7 @@ const coreCapabilities = [
     color: "text-galactic-gold",
     border: "border-galactic-gold",
     title: "Embedded Vlog System",
-    desc: "Auto-generates vlog entries with embedded YouTube, TikTok, Vimeo, and Facebook video players — no local video storage required.",
+    desc: "Auto-generates vlog entries with embedded YouTube, TikTok, Vimeo, and Facebook video players, no local video storage required.",
   },
   {
     icon: Shield,
@@ -148,7 +148,7 @@ export default function FeatureSportaPage() {
               transition={{ duration: 0.6 }}
             >
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-galactic-orange/30 text-galactic-orange text-sm font-orbitron mb-6">
-                <Zap className="w-4 h-4" /> Feature 18 — SPORTA
+                <Zap className="w-4 h-4" /> Feature 18, SPORTA
               </div>
               <h1 className="font-orbitron font-black text-5xl md:text-7xl gradient-text mb-4 leading-tight">
                 SPORTA
@@ -158,7 +158,7 @@ export default function FeatureSportaPage() {
               </p>
               <p className="text-gray-300 max-w-3xl mx-auto text-lg leading-relaxed mb-10">
                 An enterprise-grade automation platform that aggregates public content from 17+ platforms,
-                reshapes it with AI, and mass-publishes to all your social channels and website — on autopilot.
+                reshapes it with AI, and mass-publishes to all your social channels and website, on autopilot.
               </p>
               <div className="flex flex-wrap justify-center gap-3 mb-8">
                 {[
@@ -202,7 +202,7 @@ export default function FeatureSportaPage() {
                 Everything a Content Machine Needs
               </h2>
               <p className="text-gray-400 max-w-2xl mx-auto">
-                SPORTA is not a simple scraper — it's an AI-powered publishing ecosystem built for agencies, brands, and media companies.
+                SPORTA is not a simple scraper, it's an AI-powered publishing ecosystem built for agencies, brands, and media companies.
               </p>
             </div>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -278,7 +278,7 @@ export default function FeatureSportaPage() {
                 25 Industries Supported
               </h2>
               <p className="text-gray-400 max-w-2xl mx-auto">
-                SPORTA ships with pre-configured intelligence for 25 industries — plus a "Custom" mode for anything else.
+                SPORTA ships with pre-configured intelligence for 25 industries, plus a "Custom" mode for anything else.
               </p>
             </div>
             <div className="flex flex-wrap justify-center gap-3">

@@ -182,7 +182,7 @@ export default function VidAggregatorTab() {
           <a href="/vlog" target="_blank" rel="noopener noreferrer" className="ml-2 text-neon-cyan hover:underline inline-flex items-center gap-1">
             View Vlog <ExternalLink className="w-3 h-3" />
           </a>
-          <Link href="/admin/speed-cracker/vlog">
+          <Link href="/admin/speed-cracker/post-video">
             <span className="ml-4 text-yellow-400 hover:text-yellow-300 hover:underline inline-flex items-center gap-1 cursor-pointer">
               <PlusCircle className="w-3 h-3" /> Create Manually
             </span>

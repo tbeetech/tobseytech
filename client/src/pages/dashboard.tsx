@@ -597,7 +597,7 @@ export default function DashboardPage() {
                                 </Link>
                               </td>
                               <td className="py-3 pr-4 hidden md:table-cell text-gray-400">
-                                {u.displayName || "—"}
+                                {u.displayName || ""}
                               </td>
                               <td className="py-3 pr-4 hidden sm:table-cell text-gray-500 text-xs">
                                 {format(new Date(u.createdAt), "MMM d, yyyy")}

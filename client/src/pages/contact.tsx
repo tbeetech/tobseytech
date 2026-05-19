@@ -55,7 +55,7 @@ export default function ContactPage() {
         <div className="container mx-auto px-6 text-center mb-12">
           <h1 className="font-orbitron font-bold text-4xl gradient-text mb-4">Get In Touch</h1>
           <p className="text-gray-300 max-w-xl mx-auto">
-            Ready to transform your business? Send us a message — we respond within 24 hours.
+            Ready to transform your business? Send us a message, we respond within 24 hours.
           </p>
         </div>
 

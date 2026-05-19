@@ -16,7 +16,7 @@ export default function AuthPage() {
   const { toast } = useToast();
 
   // Honour a ?redirect= param so deep-linked pages (e.g. /emailos) work after auth.
-  // Security: only allow relative paths — must start with "/" and must not contain
+  // Security: only allow relative paths, must start with "/" and must not contain
   // backslashes, protocol separators ("//"), or other characters that could be used
   // to craft an open-redirect (e.g. "/\example.com", "/%2F...").
   const redirectTo = (() => {

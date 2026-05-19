@@ -223,7 +223,7 @@ export default function AdminDevTipsPage() {
     },
     {
       label: "Post Interval",
-      value: status ? msToHuman(status.postIntervalMs) : "—",
+      value: status ? msToHuman(status.postIntervalMs) : "",
       icon: Zap,
       color: "text-purple-400",
       bg: "bg-purple-500/10 border-purple-500/20",

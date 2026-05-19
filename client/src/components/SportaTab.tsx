@@ -168,7 +168,7 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 function ScoreBar({ value, color }: { value?: number; color: string }) {
-  if (value === undefined) return <span className="text-gray-500 text-xs">—</span>;
+  if (value === undefined) return <span className="text-gray-500 text-xs"></span>;
   return (
     <div className="flex items-center gap-2">
       <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
@@ -522,7 +522,7 @@ function CampaignWizard({ onComplete, onCancel }: { onComplete: () => void; onCa
                     <p className="text-gray-500 text-xs mt-0.5">
                       {value === "manual" && "Every post requires your manual approval before publishing."}
                       {value === "semi_automatic" && "High-quality posts (AI score ≥ 80) are auto-approved; others queued for review."}
-                      {value === "fully_automatic" && "All posts are published automatically. Fastest option — use with care."}
+                      {value === "fully_automatic" && "All posts are published automatically. Fastest option, use with care."}
                     </p>
                   </div>
                 </label>
@@ -538,13 +538,13 @@ function CampaignWizard({ onComplete, onCancel }: { onComplete: () => void; onCa
               {[
                 { label: "Name", value: data.name || `SPORTA – ${data.industry}` },
                 { label: "Industry", value: data.industry },
-                { label: "Content Types", value: data.contentTypes.join(", ") || "—" },
-                { label: "Source Platforms", value: data.sourcePlatforms.slice(0, 4).join(", ") + (data.sourcePlatforms.length > 4 ? "..." : "") || "—" },
-                { label: "Publishing To", value: data.publishingDestinations.slice(0, 4).join(", ") + (data.publishingDestinations.length > 4 ? "..." : "") || "—" },
-                { label: "AI Mode", value: data.aiMode || "—" },
+                { label: "Content Types", value: data.contentTypes.join(", ") || "" },
+                { label: "Source Platforms", value: data.sourcePlatforms.slice(0, 4).join(", ") + (data.sourcePlatforms.length > 4 ? "..." : "") || "" },
+                { label: "Publishing To", value: data.publishingDestinations.slice(0, 4).join(", ") + (data.publishingDestinations.length > 4 ? "..." : "") || "" },
+                { label: "AI Mode", value: data.aiMode || "" },
                 { label: "Timeline", value: data.timelinePreference },
                 { label: "Frequency", value: data.postingFrequency },
-                { label: "Approval", value: APPROVAL_MODES.find((m) => m.value === data.approvalMode)?.label ?? "—" },
+                { label: "Approval", value: APPROVAL_MODES.find((m) => m.value === data.approvalMode)?.label ?? "" },
               ].map(({ label, value }) => (
                 <div key={label} className="flex items-start gap-3">
                   <span className="text-gray-500 font-orbitron text-xs w-32 flex-shrink-0">{label}:</span>
@@ -618,49 +618,83 @@ function CampaignWizard({ onComplete, onCancel }: { onComplete: () => void; onCa
 
 // ─── Share Popover ────────────────────────────────────────────────────────────
 
-function SharePopover({ item }: { item: SportaContent }) {
+function SharePopover({ item, publishingDestinations = [] }: { item: SportaContent; publishingDestinations?: SportaPublishingDestination[] }) {
   const [open, setOpen] = useState(false);
   const { toast } = useToast();
 
   const title = encodeURIComponent(item.aiRewrittenTitle ?? item.originalTitle ?? "Check this out");
   const caption = item.aiRewrittenContent ?? item.originalContent ?? "";
   const hashtags = item.aiGeneratedHashtags.map((t) => t.replace(/^#/, "")).join(",");
+  const tagStr = item.aiGeneratedHashtags.map((t) => (t.startsWith("#") ? t : `#${t}`)).join(" ");
   const sourceNote = `via ${item.sourcePlatform}`;
-  const shareText = encodeURIComponent(`${caption ? caption.slice(0, 200) + "… " : ""}${sourceNote}`);
+  const shareText = encodeURIComponent(`${caption ? caption.slice(0, 200) + "... " : ""}${sourceNote}${tagStr ? " " + tagStr : ""}`);
   const url = encodeURIComponent(item.sourceUrl);
 
-  const platforms = [
+  // All supported sharing destinations with their web share URLs
+  const ALL_PLATFORMS: Array<{ key: string; name: string; color: string; href: string }> = [
     {
+      key: "X",
       name: "X / Twitter",
       color: "text-sky-400",
-      href: `https://twitter.com/intent/tweet?text=${shareText}&url=${url}&hashtags=${hashtags}`,
+      href: `https://twitter.com/intent/tweet?text=${shareText}&url=${url}${hashtags ? `&hashtags=${hashtags}` : ""}`,
     },
     {
+      key: "Facebook",
       name: "Facebook",
       color: "text-blue-500",
       href: `https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${shareText}`,
     },
     {
+      key: "LinkedIn",
       name: "LinkedIn",
       color: "text-blue-400",
       href: `https://www.linkedin.com/shareArticle?mini=true&url=${url}&title=${title}&summary=${shareText}`,
     },
     {
+      key: "WhatsApp",
       name: "WhatsApp",
       color: "text-green-400",
       href: `https://wa.me/?text=${shareText}%20${url}`,
     },
     {
+      key: "Telegram",
       name: "Telegram",
       color: "text-sky-300",
       href: `https://t.me/share/url?url=${url}&text=${shareText}`,
     },
     {
+      key: "Pinterest",
       name: "Pinterest",
       color: "text-red-400",
       href: `https://pinterest.com/pin/create/button/?url=${url}&description=${shareText}${item.originalThumbnail ? `&media=${encodeURIComponent(item.originalThumbnail)}` : ""}`,
     },
+    {
+      key: "TikTok",
+      name: "TikTok",
+      color: "text-pink-400",
+      href: `https://www.tiktok.com/upload?description=${shareText}`,
+    },
+    {
+      key: "Instagram",
+      name: "Instagram (copy caption)",
+      color: "text-rose-400",
+      href: "#",
+    },
+    {
+      key: "Threads",
+      name: "Threads",
+      color: "text-white",
+      href: `https://www.threads.net/intent/post?text=${shareText}%20${url}`,
+    },
   ];
+
+  // If campaign has publishingDestinations, show those first (highlighted), then others
+  const preferredKeys = new Set(
+    publishingDestinations.map((d) => d.replace(" Community", "").replace("Website Blog", "").replace("Website Vlog", "")),
+  );
+  const preferred = ALL_PLATFORMS.filter((p) => preferredKeys.has(p.key));
+  const rest = ALL_PLATFORMS.filter((p) => !preferredKeys.has(p.key));
+  const platforms = preferred.length > 0 ? [...preferred, ...rest] : ALL_PLATFORMS;
 
   const copyCaption = () => {
     const text = [
@@ -668,15 +702,26 @@ function SharePopover({ item }: { item: SportaContent }) {
       "",
       item.aiRewrittenContent ?? item.originalContent ?? "",
       "",
-      item.aiGeneratedHashtags.map((t) => (t.startsWith("#") ? t : `#${t}`)).join(" "),
+      tagStr,
       "",
-      `Source: ${item.sourcePlatform} — ${item.sourceUrl}`,
+      `Source: ${item.sourcePlatform}, ${item.sourceUrl}`,
     ]
       .filter((l) => l !== undefined)
       .join("\n")
       .trim();
     navigator.clipboard.writeText(text).then(() => toast({ title: "Caption copied to clipboard!" }));
     setOpen(false);
+  };
+
+  const handlePlatformClick = (p: { key: string; href: string; name: string }) => {
+    setOpen(false);
+    if (p.key === "Instagram") {
+      // Instagram doesn't support direct web share; copy caption for manual posting
+      copyCaption();
+      toast({ title: "Caption copied!", description: "Open Instagram and paste your caption." });
+      return;
+    }
+    window.open(p.href, "_blank", "noopener,noreferrer");
   };
 
   return (
@@ -689,20 +734,32 @@ function SharePopover({ item }: { item: SportaContent }) {
         <Share2 className="w-3 h-3 mr-1" /> Share
       </Button>
       {open && (
-        <div className="absolute right-0 top-9 z-50 w-52 bg-space-dark border border-white/10 rounded-xl shadow-xl p-2">
-          <p className="text-[10px] text-gray-500 px-2 mb-1.5 font-orbitron">Share to…</p>
-          {platforms.map((p) => (
-            <a
+        <div className="absolute right-0 top-9 z-50 w-56 bg-[#0c0c18] border border-white/10 rounded-xl shadow-xl p-2">
+          {preferred.length > 0 && (
+            <p className="text-[10px] text-galactic-orange px-2 mb-1.5 font-orbitron">Your target platforms</p>
+          )}
+          {preferred.length > 0 && preferred.map((p) => (
+            <button
               key={p.name}
-              href={p.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-white/5 text-xs ${p.color} transition-colors`}
-              onClick={() => setOpen(false)}
+              onClick={() => handlePlatformClick(p)}
+              className={`flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-white/5 text-xs ${p.color} transition-colors w-full text-left font-semibold`}
             >
               <Share2 className="w-3 h-3 opacity-70" />
               {p.name}
-            </a>
+            </button>
+          ))}
+          {preferred.length > 0 && rest.length > 0 && (
+            <div className="border-t border-white/5 my-1.5" />
+          )}
+          {(preferred.length > 0 ? rest : ALL_PLATFORMS).map((p) => (
+            <button
+              key={p.name}
+              onClick={() => handlePlatformClick(p)}
+              className={`flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-white/5 text-xs ${p.color} transition-colors w-full text-left`}
+            >
+              <Share2 className="w-3 h-3 opacity-70" />
+              {p.name}
+            </button>
           ))}
           <div className="border-t border-white/5 mt-1.5 pt-1.5">
             <button
@@ -721,7 +778,7 @@ function SharePopover({ item }: { item: SportaContent }) {
 
 // ─── Content Queue Panel ──────────────────────────────────────────────────────
 
-function ContentQueuePanel({ campaignId, campaignName }: { campaignId: string; campaignName: string }) {
+function ContentQueuePanel({ campaignId, campaignName, publishingDestinations = [] }: { campaignId: string; campaignName: string; publishingDestinations?: SportaPublishingDestination[] }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -913,10 +970,8 @@ function ContentQueuePanel({ campaignId, campaignName }: { campaignId: string; c
                         </Button>
                       </>
                     )}
-                    {/* Share button — available for approved / published items */}
-                    {(item.status === "approved" || item.status === "published") && (
-                      <SharePopover item={item} />
-                    )}
+                    {/* Share button, available for all content items */}
+                    <SharePopover item={item} publishingDestinations={publishingDestinations} />
                     {!item.aiRewrittenContent && (
                       <Button
                         size="sm"
@@ -1091,7 +1146,7 @@ export default function SportaTab() {
           <h3 className="text-sm font-orbitron font-bold text-galactic-orange flex items-center gap-2 mb-4">
             <Filter className="w-4 h-4" /> Content Queue
           </h3>
-          <ContentQueuePanel campaignId={selectedCampaign.id} campaignName={selectedCampaign.name} />
+          <ContentQueuePanel campaignId={selectedCampaign.id} campaignName={selectedCampaign.name} publishingDestinations={selectedCampaign.publishingDestinations} />
         </div>
       </div>
     );

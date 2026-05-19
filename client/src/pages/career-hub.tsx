@@ -39,35 +39,35 @@ const ROLE_OPTIONS = [
 const COURSES_BY_ROLE: Record<string, { title: string; platform: string; url: string; level: string; free: boolean; description: string }[]> = {
   "software-engineer": [
     { title: "The Odin Project", platform: "The Odin Project", url: "https://www.theodinproject.com", level: "Beginner–Intermediate", free: true, description: "Full-stack web dev curriculum used by thousands." },
-    { title: "CS50: Introduction to Computer Science", platform: "edX / Harvard", url: "https://cs50.harvard.edu/x", level: "Beginner", free: true, description: "The legendary Harvard intro to CS — still the best foundation." },
+    { title: "CS50: Introduction to Computer Science", platform: "edX / Harvard", url: "https://cs50.harvard.edu/x", level: "Beginner", free: true, description: "The legendary Harvard intro to CS, still the best foundation." },
     { title: "Full-Stack Open", platform: "University of Helsinki", url: "https://fullstackopen.com", level: "Intermediate", free: true, description: "Deep-dive React, Node, GraphQL, TypeScript, testing." },
     { title: "Clean Code (Course)", platform: "Udemy", url: "https://www.udemy.com/course/writing-clean-code", level: "Intermediate", free: false, description: "Write maintainable, production-ready code." },
     { title: "System Design Interview", platform: "YouTube / Alex Xu", url: "https://www.youtube.com/@ByteByteGo", level: "Advanced", free: true, description: "Scale systems, pass FAANG interviews." },
   ],
   "data-scientist": [
-    { title: "fast.ai — Practical Deep Learning", platform: "fast.ai", url: "https://course.fast.ai", level: "Intermediate", free: true, description: "Top-down, practical AI/ML. Used by Kaggle grandmasters." },
-    { title: "Machine Learning Specialization", platform: "Coursera / DeepLearning.AI", url: "https://www.coursera.org/specializations/machine-learning-introduction", level: "Beginner–Intermediate", free: false, description: "Andrew Ng's revamped ML course — essential." },
+    { title: "fast.ai, Practical Deep Learning", platform: "fast.ai", url: "https://course.fast.ai", level: "Intermediate", free: true, description: "Top-down, practical AI/ML. Used by Kaggle grandmasters." },
+    { title: "Machine Learning Specialization", platform: "Coursera / DeepLearning.AI", url: "https://www.coursera.org/specializations/machine-learning-introduction", level: "Beginner–Intermediate", free: false, description: "Andrew Ng's revamped ML course, essential." },
     { title: "Kaggle Learn", platform: "Kaggle", url: "https://www.kaggle.com/learn", level: "Beginner", free: true, description: "Bite-sized ML tracks with real notebooks." },
     { title: "SQL for Data Analysis", platform: "Mode Analytics", url: "https://mode.com/sql-tutorial", level: "Beginner", free: true, description: "SQL is your data superpower." },
     { title: "Statistics for ML", platform: "StatQuest / YouTube", url: "https://www.youtube.com/@statquest", level: "Beginner–Intermediate", free: true, description: "Josh Starmer makes stats actually make sense." },
   ],
   "product-manager": [
-    { title: "Product School — Free Resources", platform: "Product School", url: "https://productschool.com/resources", level: "All levels", free: true, description: "Frameworks, templates, and case studies used by top PMs." },
-    { title: "Reforge — Product Strategy", platform: "Reforge", url: "https://www.reforge.com/programs/product-strategy", level: "Advanced", free: false, description: "The MBA for product people. Expensive but worth it." },
+    { title: "Product School, Free Resources", platform: "Product School", url: "https://productschool.com/resources", level: "All levels", free: true, description: "Frameworks, templates, and case studies used by top PMs." },
+    { title: "Reforge, Product Strategy", platform: "Reforge", url: "https://www.reforge.com/programs/product-strategy", level: "Advanced", free: false, description: "The MBA for product people. Expensive but worth it." },
     { title: "Pragmatic Institute", platform: "Pragmatic Institute", url: "https://www.pragmaticinstitute.com", level: "Intermediate", free: false, description: "Industry-standard PM certification." },
     { title: "Lenny's Newsletter", platform: "Substack", url: "https://www.lennysnewsletter.com", level: "All levels", free: false, description: "The most-read PM newsletter on the internet." },
     { title: "Shape Up (by Basecamp)", platform: "Basecamp / Basecamp", url: "https://basecamp.com/shapeup", level: "Intermediate", free: true, description: "A radical rethinking of how teams ship product." },
   ],
   "devops-engineer": [
-    { title: "KodeKloud — DevOps Bootcamp", platform: "KodeKloud", url: "https://kodekloud.com", level: "Beginner–Advanced", free: false, description: "Hands-on labs for Kubernetes, Docker, Terraform, CI/CD." },
+    { title: "KodeKloud, DevOps Bootcamp", platform: "KodeKloud", url: "https://kodekloud.com", level: "Beginner–Advanced", free: false, description: "Hands-on labs for Kubernetes, Docker, Terraform, CI/CD." },
     { title: "Linux Foundation Courses", platform: "edX", url: "https://www.edx.org/school/linuxfoundationx", level: "All levels", free: true, description: "Official Linux & CNCF certified paths." },
-    { title: "AWS Cloud Practitioner Prep", platform: "freeCodeCamp", url: "https://www.youtube.com/watch?v=3hLmDS179YE", level: "Beginner", free: true, description: "13-hour prep for AWS CCP — most popular cloud cert entry point." },
+    { title: "AWS Cloud Practitioner Prep", platform: "freeCodeCamp", url: "https://www.youtube.com/watch?v=3hLmDS179YE", level: "Beginner", free: true, description: "13-hour prep for AWS CCP, most popular cloud cert entry point." },
     { title: "DevOps Roadmap", platform: "roadmap.sh", url: "https://roadmap.sh/devops", level: "All levels", free: true, description: "The definitive community-curated DevOps learning path." },
     { title: "Terraform in Production", platform: "HashiCorp", url: "https://developer.hashicorp.com/terraform/tutorials", level: "Intermediate", free: true, description: "Official Terraform tutorials from HashiCorp." },
   ],
   "ux-designer": [
     { title: "Google UX Design Certificate", platform: "Coursera", url: "https://www.coursera.org/professional-certificates/google-ux-design", level: "Beginner", free: false, description: "6-course career certificate from Google. Highly regarded." },
-    { title: "Nielsen Norman Group — UX Resources", platform: "NN/g", url: "https://www.nngroup.com/articles", level: "All levels", free: true, description: "The gold standard of UX research and best practices." },
+    { title: "Nielsen Norman Group, UX Resources", platform: "NN/g", url: "https://www.nngroup.com/articles", level: "All levels", free: true, description: "The gold standard of UX research and best practices." },
     { title: "Figma Design Course", platform: "Figma", url: "https://www.figma.com/resources/learn-design", level: "Beginner", free: true, description: "Learn the most used design tool from Figma itself." },
     { title: "Laws of UX", platform: "lawsofux.com", url: "https://lawsofux.com", level: "Beginner", free: true, description: "The cheat-sheet every UX designer must know." },
     { title: "The Design of Everyday Things", platform: "Book / Amazon", url: "https://www.amazon.com/dp/0465050654", level: "Beginner", free: false, description: "Required reading. Don Norman wrote the bible of UX." },
@@ -81,7 +81,7 @@ const COURSES_BY_ROLE: Record<string, { title: string; platform: string; url: st
   ],
   "blockchain-dev": [
     { title: "CryptoZombies", platform: "CryptoZombies", url: "https://cryptozombies.io", level: "Beginner", free: true, description: "Learn Solidity by building a zombie game. Addictive." },
-    { title: "Alchemy University", platform: "Alchemy", url: "https://university.alchemy.com", level: "Beginner–Intermediate", free: true, description: "Best free Web3 developer course — backed by Alchemy." },
+    { title: "Alchemy University", platform: "Alchemy", url: "https://university.alchemy.com", level: "Beginner–Intermediate", free: true, description: "Best free Web3 developer course, backed by Alchemy." },
     { title: "Ethereum.org Developer Docs", platform: "Ethereum Foundation", url: "https://ethereum.org/en/developers", level: "Intermediate", free: true, description: "Official docs and tutorials from the Ethereum team." },
     { title: "Web3.js / Ethers.js", platform: "LearnWeb3", url: "https://learnweb3.io", level: "Intermediate", free: true, description: "Structured Web3 track from wallet to dApp." },
     { title: "Solidity by Example", platform: "solidity-by-example.org", url: "https://solidity-by-example.org", level: "Intermediate", free: true, description: "Real Solidity code patterns with explanations." },
@@ -101,11 +101,11 @@ const COURSES_BY_ROLE: Record<string, { title: string; platform: string; url: st
     { title: "OpenAI Cookbook", platform: "GitHub / OpenAI", url: "https://cookbook.openai.com", level: "Intermediate–Advanced", free: true, description: "Real production patterns for OpenAI APIs." },
   ],
   "data-analyst": [
-    { title: "Google Data Analytics Certificate", platform: "Coursera", url: "https://www.coursera.org/professional-certificates/google-data-analytics", level: "Beginner", free: false, description: "Most popular entry-level DA cert — 750k+ enrolled." },
+    { title: "Google Data Analytics Certificate", platform: "Coursera", url: "https://www.coursera.org/professional-certificates/google-data-analytics", level: "Beginner", free: false, description: "Most popular entry-level DA cert, 750k+ enrolled." },
     { title: "Mode SQL Tutorial", platform: "Mode Analytics", url: "https://mode.com/sql-tutorial", level: "Beginner", free: true, description: "SQL is 80% of your day as an analyst." },
     { title: "Tableau Public Training", platform: "Tableau", url: "https://www.tableau.com/learn/training", level: "Beginner", free: true, description: "Official free Tableau training videos." },
     { title: "Power BI Course", platform: "Microsoft Learn", url: "https://learn.microsoft.com/en-us/training/powerplatform/power-bi", level: "Beginner", free: true, description: "Free PL-300 prep from Microsoft itself." },
-    { title: "Python for Data Analysis", platform: "Wes McKinney / O'Reilly", url: "https://wesmckinney.com/book", level: "Intermediate", free: true, description: "The pandas book — free online from the creator of pandas." },
+    { title: "Python for Data Analysis", platform: "Wes McKinney / O'Reilly", url: "https://wesmckinney.com/book", level: "Intermediate", free: true, description: "The pandas book, free online from the creator of pandas." },
   ],
 };
 
@@ -167,7 +167,7 @@ const EXPERTS_BY_ROLE: Record<string, { name: string; handle: string; platform: 
     { name: "Web Dev Simplified", handle: "@WebDevSimplified", platform: "YouTube", url: "https://www.youtube.com/@WebDevSimplified", niche: "JS/React/CSS projects, simplified explanations", why: "Every concept explained with a buildable project." },
   ],
   "ai-engineer": [
-    { name: "Andrej Karpathy", handle: "@karpathy", platform: "Twitter/YouTube", url: "https://karpathy.ai", niche: "Neural networks, LLMs, first-principles AI", why: "nanoGPT, makemore — teaches you to build from scratch." },
+    { name: "Andrej Karpathy", handle: "@karpathy", platform: "Twitter/YouTube", url: "https://karpathy.ai", niche: "Neural networks, LLMs, first-principles AI", why: "nanoGPT, makemore, teaches you to build from scratch." },
     { name: "Swyx (shawn wang)", handle: "@swyx", platform: "Twitter/Blog", url: "https://www.swyx.io", niche: "AI engineering career, LLM apps, AI UX", why: "Popularized 'AI Engineer' as a role. Must-follow." },
     { name: "Simon Willison", handle: "@simonw", platform: "Twitter/Blog", url: "https://simonwillison.net", niche: "LLM tools, datasette, practical AI tooling", why: "Obsessively documents real AI engineering patterns." },
     { name: "AI Explained", handle: "@AI_Explained_", platform: "YouTube", url: "https://www.youtube.com/@aiexplained-official", niche: "Frontier AI research explained clearly", why: "Breaks down new papers without the hype." },
@@ -183,7 +183,7 @@ const EXPERTS_BY_ROLE: Record<string, { name: string; handle: string; platform: 
 };
 
 const JOB_SITES = [
-  { name: "Remotive", url: "https://remotive.com", category: "Remote Tech", description: "Curated remote jobs — no noise, just real tech roles.", badge: "Remote-only", color: "text-neon-cyan" },
+  { name: "Remotive", url: "https://remotive.com", category: "Remote Tech", description: "Curated remote jobs, no noise, just real tech roles.", badge: "Remote-only", color: "text-neon-cyan" },
   { name: "We Work Remotely", url: "https://weworkremotely.com", category: "Remote Tech", description: "Largest remote work community. High-quality postings from established companies.", badge: "Remote-only", color: "text-neon-cyan" },
   { name: "LinkedIn Jobs", url: "https://www.linkedin.com/jobs", category: "General / Networking", description: "Volume + recruiter access. Apply AND get inbound. Profile matters here.", badge: "All types", color: "text-galactic-orange" },
   { name: "Levels.fyi Jobs", url: "https://www.levels.fyi/jobs", category: "Big Tech / Comp", description: "High-compensation tech roles with verified salary data.", badge: "Senior / FAANG", color: "text-neon-yellow" },
@@ -191,7 +191,7 @@ const JOB_SITES = [
   { name: "AngelList / Wellfound", url: "https://wellfound.com/jobs", category: "Startups", description: "Equity-forward startup jobs. Great for early-stage roles.", badge: "Equity / Startups", color: "text-galactic-gold" },
   { name: "Toptal", url: "https://www.toptal.com", category: "Freelance / Elite", description: "Top 3% acceptance. Hardest to get in, highest freelance rates.", badge: "Elite Freelance", color: "text-neon-purple" },
   { name: "Upwork", url: "https://www.upwork.com", category: "Freelance", description: "Volume freelance marketplace. Great for portfolio-building early on.", badge: "Freelance", color: "text-neon-purple" },
-  { name: "HackerNews — Who's Hiring", url: "https://news.ycombinator.com/jobs", category: "Tech / Direct Hire", description: "Monthly 'Who is hiring?' threads. Founders post directly — no recruiters.", badge: "Direct / No recruiter", color: "text-neon-cyan" },
+  { name: "HackerNews, Who's Hiring", url: "https://news.ycombinator.com/jobs", category: "Tech / Direct Hire", description: "Monthly 'Who is hiring?' threads. Founders post directly, no recruiters.", badge: "Direct / No recruiter", color: "text-neon-cyan" },
   { name: "Glassdoor", url: "https://www.glassdoor.com/Job", category: "Research + Apply", description: "Apply + research salary, culture, and interview questions before you click send.", badge: "Research + Apply", color: "text-galactic-orange" },
   { name: "GitHub Jobs / Explore", url: "https://github.com/explore", category: "Open Source → Hired", description: "Contribute to open source repos of companies you want to work for. Best signal.", badge: "Open Source", color: "text-neon-cyan" },
   { name: "Dice", url: "https://www.dice.com", category: "IT / Contracts", description: "Contract and permanent tech roles in the US. Strong for IT/DevOps.", badge: "IT / Contract", color: "text-galactic-orange" },
@@ -201,18 +201,18 @@ const CHEAT_CODES: { icon: string; title: string; insight: string; action: strin
   { icon: "🎯", title: "The 1-Job-Board Secret", insight: "Most job seekers apply to 10 sites and get ghosted on all. The real play: pick 1–2 boards, optimize your profile deeply on each, and activate recruiter inbound.", action: "Go all-in on LinkedIn + one niche board for your role." },
   { icon: "🔑", title: "ATS is the real gatekeeper", insight: "75% of resumes are rejected before a human sees them. The system is an Applicant Tracking System. Beat it by mirroring the job description's exact keywords.", action: "Paste the JD into jobscan.co and compare your resume score." },
   { icon: "🧠", title: "Cold outreach > applications", insight: "Response rate on job applications: ~2%. Response rate on a personalised LinkedIn DM to the hiring manager: ~20–40%. The math is clear.", action: "Send 5 genuine DMs/week to hiring managers at target companies." },
-  { icon: "💼", title: "Your portfolio IS your resume", insight: "For engineers, designers, and data folks — GitHub/portfolio > resume. Recruiters at top companies actively search GitHub and Dribbble.", action: "Pin your 3 best projects on GitHub. Make README look like a product page." },
+  { icon: "💼", title: "Your portfolio IS your resume", insight: "For engineers, designers, and data folks, GitHub/portfolio > resume. Recruiters at top companies actively search GitHub and Dribbble.", action: "Pin your 3 best projects on GitHub. Make README look like a product page." },
   { icon: "📊", title: "Know your number before the call", insight: "Negotiating salary without knowing the market is the #1 way candidates leave 10–30% on the table.", action: "Check levels.fyi, Glassdoor, and LinkedIn Salary before every interview." },
   { icon: "🤝", title: "Referrals fill 70% of senior roles", insight: "Most senior roles are filled before they're posted. The only way in is a referral or networking. LinkedIn + HN + Discord communities are your pipeline.", action: "Warm up 2 contacts at target companies this week. Ask for a coffee chat, not a job." },
   { icon: "🚀", title: "Ship publicly, get hired quietly", insight: "Build side projects that solve real problems and write about them publicly. Recruiters find you. This is how top engineers never have to apply.", action: "Write a blog post about a problem you solved. Share on HN, Dev.to, LinkedIn." },
-  { icon: "⚡", title: "Interview is a two-way evaluation", insight: "Candidates who ask sharp questions about architecture, team processes, and challenges signal senior thinking — and get better offers.", action: "Prepare 5 smart questions per company. It is not a quiz, it is a conversation." },
+  { icon: "⚡", title: "Interview is a two-way evaluation", insight: "Candidates who ask sharp questions about architecture, team processes, and challenges signal senior thinking, and get better offers.", action: "Prepare 5 smart questions per company. It is not a quiz, it is a conversation." },
 ];
 
 const CAREER_ROADMAP: { phase: string; title: string; actions: string[]; textColor: string; borderColor: string }[] = [
   { phase: "PHASE 1", title: "Clarity (Week 1–2)", actions: ["Define your target role and dream companies", "Benchmark your skills against job descriptions", "Identify 3–5 skill gaps to close"], textColor: "text-galactic-orange", borderColor: "border-galactic-orange" },
   { phase: "PHASE 2", title: "Build & Document (Week 3–8)", actions: ["Complete 1–2 courses from the curated list above", "Ship a portfolio project solving a real problem", "Write a case study or blog post about what you built", "Set up a polished GitHub and LinkedIn"], textColor: "text-neon-cyan", borderColor: "border-neon-cyan" },
   { phase: "PHASE 3", title: "Network & Apply (Week 6–10)", actions: ["Connect with 10 people in your target role", "Apply to 3–5 carefully selected roles per week", "Attend 1 online meetup or conference per month", "Engage with industry experts on Twitter/LinkedIn daily"], textColor: "text-neon-yellow", borderColor: "border-neon-yellow" },
-  { phase: "PHASE 4", title: "Interview & Negotiate (Ongoing)", actions: ["Practice LeetCode / system design 3x per week (engineers)", "Record and review your answers. Brutal self-assessment.", "Negotiate every offer — even the 'final' one", "Always have a BATNA (Best Alternative To Negotiated Agreement)"], textColor: "text-neon-purple", borderColor: "border-neon-purple" },
+  { phase: "PHASE 4", title: "Interview & Negotiate (Ongoing)", actions: ["Practice LeetCode / system design 3x per week (engineers)", "Record and review your answers. Brutal self-assessment.", "Negotiate every offer, even the 'final' one", "Always have a BATNA (Best Alternative To Negotiated Agreement)"], textColor: "text-neon-purple", borderColor: "border-neon-purple" },
 ];
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -372,7 +372,7 @@ export default function CareerHubPage() {
     staleTime: 5 * 60 * 1000,
   });
 
-  // NG Match query — only fires when ngSubmitted is true
+  // NG Match query, only fires when ngSubmitted is true
   const {
     data: ngMatchData,
     isFetching: ngFetching,
@@ -446,7 +446,7 @@ export default function CareerHubPage() {
             </h1>
             <p className="text-gray-300 max-w-2xl mx-auto text-lg leading-relaxed mb-8">
               The one place where <span className="text-galactic-orange font-semibold">academia meets remote tech realities</span>.
-              Real job listings, curated courses, verified experts, insider career strategy — all personalised to your target role.
+              Real job listings, curated courses, verified experts, insider career strategy, all personalised to your target role.
             </p>
 
             {/* Role selector */}
@@ -473,7 +473,7 @@ export default function CareerHubPage() {
           {/* Stats bar */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-2xl mx-auto mb-2">
             {[
-              { label: "Live Jobs", value: jobsData?.jobs?.length ?? "—", icon: Briefcase },
+              { label: "Live Jobs", value: jobsData?.jobs?.length ?? "", icon: Briefcase },
               { label: "Courses", value: courses.length, icon: BookOpen },
               { label: "Experts", value: experts.length, icon: Users },
               { label: "Job Sites", value: JOB_SITES.length, icon: Globe },
@@ -523,7 +523,7 @@ export default function CareerHubPage() {
               </div>
               <p className="text-gray-400 text-sm max-w-2xl">
                 Paste your job description or list your skills below. We'll scan live remote jobs and score each one
-                for Nigeria-friendliness — surfacing roles at companies that hire globally and across Africa.
+                for Nigeria-friendliness, surfacing roles at companies that hire globally and across Africa.
               </p>
             </div>
 
@@ -696,16 +696,16 @@ export default function CareerHubPage() {
                 <Network className="w-4 h-4" /> LinkedIn Fast-Track for Nigerian Engineers
               </h3>
               <p className="text-gray-400 text-xs mb-4">
-                Use these pre-built LinkedIn job search URLs — filtered for companies with a history of hiring Nigerian/Africa-based talent remotely.
+                Use these pre-built LinkedIn job search URLs, filtered for companies with a history of hiring Nigerian/Africa-based talent remotely.
               </p>
               <div className="grid sm:grid-cols-2 gap-3">
                 {[
-                  { label: "Remote SWE — Nigeria open", url: "https://www.linkedin.com/jobs/search/?keywords=software%20engineer&location=Nigeria&f_WT=2", desc: "Remote software engineer roles open to Nigeria" },
-                  { label: "Remote Backend — Africa", url: "https://www.linkedin.com/jobs/search/?keywords=backend%20engineer&location=Africa&f_WT=2", desc: "Backend roles open to Africa-based engineers" },
-                  { label: "Andela Network Jobs", url: "https://www.linkedin.com/company/andela/jobs/", desc: "Roles via Andela — Nigeria's largest talent network" },
-                  { label: "Remote Tech Lead — Worldwide", url: "https://www.linkedin.com/jobs/search/?keywords=tech%20lead&f_WT=2&f_TPR=r604800", desc: "Tech lead roles worldwide, posted last 7 days" },
-                  { label: "Systems Architect — Remote", url: "https://www.linkedin.com/jobs/search/?keywords=systems%20architect&f_WT=2", desc: "Remote systems architect openings" },
-                  { label: "Startup Founder roles — Africa", url: "https://www.linkedin.com/jobs/search/?keywords=CTO%20OR%20co-founder&location=Africa&f_WT=2", desc: "CTO / co-founder roles at Africa-focused startups" },
+                  { label: "Remote SWE, Nigeria open", url: "https://www.linkedin.com/jobs/search/?keywords=software%20engineer&location=Nigeria&f_WT=2", desc: "Remote software engineer roles open to Nigeria" },
+                  { label: "Remote Backend, Africa", url: "https://www.linkedin.com/jobs/search/?keywords=backend%20engineer&location=Africa&f_WT=2", desc: "Backend roles open to Africa-based engineers" },
+                  { label: "Andela Network Jobs", url: "https://www.linkedin.com/company/andela/jobs/", desc: "Roles via Andela, Nigeria's largest talent network" },
+                  { label: "Remote Tech Lead, Worldwide", url: "https://www.linkedin.com/jobs/search/?keywords=tech%20lead&f_WT=2&f_TPR=r604800", desc: "Tech lead roles worldwide, posted last 7 days" },
+                  { label: "Systems Architect, Remote", url: "https://www.linkedin.com/jobs/search/?keywords=systems%20architect&f_WT=2", desc: "Remote systems architect openings" },
+                  { label: "Startup Founder roles, Africa", url: "https://www.linkedin.com/jobs/search/?keywords=CTO%20OR%20co-founder&location=Africa&f_WT=2", desc: "CTO / co-founder roles at Africa-focused startups" },
                 ].map((link, i) => (
                   <a
                     key={i}
@@ -770,7 +770,7 @@ export default function CareerHubPage() {
           <div>
             <div className="mb-6">
               <h2 className="font-orbitron font-bold text-2xl text-neon-cyan mb-2">Live Remote Jobs</h2>
-              <p className="text-gray-400 text-sm">Fetched in real time from <a href="https://remotive.com" target="_blank" rel="noopener noreferrer" className="text-neon-cyan hover:underline">Remotive.com</a> — updated every few minutes.</p>
+              <p className="text-gray-400 text-sm">Fetched in real time from <a href="https://remotive.com" target="_blank" rel="noopener noreferrer" className="text-neon-cyan hover:underline">Remotive.com</a>, updated every few minutes.</p>
             </div>
 
             {/* Search */}
@@ -918,7 +918,7 @@ export default function CareerHubPage() {
             <div className="mb-6">
               <h2 className="font-orbitron font-bold text-2xl text-galactic-orange mb-2">Articles & Resources</h2>
               <p className="text-gray-400 text-sm">
-                Live articles from <a href="https://dev.to" target="_blank" rel="noopener noreferrer" className="text-galactic-orange hover:underline">Dev.to</a> and discussions from Hacker News — curated to your role in real time.
+                Live articles from <a href="https://dev.to" target="_blank" rel="noopener noreferrer" className="text-galactic-orange hover:underline">Dev.to</a> and discussions from Hacker News, curated to your role in real time.
               </p>
             </div>
 
@@ -1038,7 +1038,7 @@ export default function CareerHubPage() {
           <div>
             <div className="mb-8">
               <h2 className="font-orbitron font-bold text-2xl text-neon-purple mb-2">Job Site Recommender</h2>
-              <p className="text-gray-400 text-sm">Not all job boards are equal. Here's where to spend your time — and why.</p>
+              <p className="text-gray-400 text-sm">Not all job boards are equal. Here's where to spend your time, and why.</p>
             </div>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {JOB_SITES.map((site, i) => (
@@ -1101,7 +1101,7 @@ export default function CareerHubPage() {
               <h2 className="font-orbitron font-bold text-2xl text-galactic-orange mb-2">Your Career Roadmap</h2>
               <p className="text-gray-400 text-sm">
                 A systematic 10-week game plan to go from where you are to where you want to be.
-                Not theory — execution steps.
+                Not theory, execution steps.
               </p>
             </div>
 

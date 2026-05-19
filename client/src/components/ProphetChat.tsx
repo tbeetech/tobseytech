@@ -132,7 +132,7 @@ function formatProphetMessage(content: string): ReactNode {
 }
 
 const OPENING_LINES = [
-  "PROPHET ONLINE. I'm your AI assistant — ask me anything.",
+  "PROPHET ONLINE. I'm your AI assistant, ask me anything.",
   "I can help with coding, research, analysis, creative writing, and much more.",
 ];
 
