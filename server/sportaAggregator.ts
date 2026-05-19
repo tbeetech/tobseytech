@@ -134,7 +134,41 @@ function containsBannedKeyword(text: string, banned: string[]): boolean {
   return banned.some((k) => lower.includes(k.toLowerCase()));
 }
 
-// ─── Feed URL builders ────────────────────────────────────────────────────────
+// ─── Video URL helpers ────────────────────────────────────────────────────────
+
+function extractYouTubeId(url: string): string | null {
+  const m = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+  return m?.[1] ?? null;
+}
+
+function extractVimeoId(url: string): string | null {
+  const m = url.match(/vimeo\.com\/(\d+)/);
+  return m?.[1] ?? null;
+}
+
+function buildEmbedCode(url: string): string | undefined {
+  const ytId = extractYouTubeId(url);
+  if (ytId) return `https://www.youtube.com/embed/${ytId}`;
+  const vimeoId = extractVimeoId(url);
+  if (vimeoId) return `https://player.vimeo.com/video/${vimeoId}`;
+  return undefined;
+}
+
+function detectVideoUrl(text: string): string | null {
+  const patterns = [
+    /https?:\/\/(?:www\.)?youtube\.com\/watch\?v=[A-Za-z0-9_-]{11}/,
+    /https?:\/\/youtu\.be\/[A-Za-z0-9_-]{11}/,
+    /https?:\/\/(?:www\.)?youtube\.com\/shorts\/[A-Za-z0-9_-]{11}/,
+    /https?:\/\/(?:www\.)?tiktok\.com\/@[^/]+\/video\/\d+/,
+    /https?:\/\/vimeo\.com\/\d+/,
+    /https?:\/\/(?:www\.)?dailymotion\.com\/video\/[A-Za-z0-9]+/,
+  ];
+  for (const p of patterns) {
+    const m = text.match(p);
+    if (m) return m[0];
+  }
+  return null;
+}
 
 function googleNewsFeedUrl(query: string): string {
   return `https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=en-US&gl=US&ceid=US:en`;
@@ -214,9 +248,11 @@ function buildFeedList(campaign: SportaCampaign): FeedDescriptor[] {
         break;
 
       case "YouTube":
-        // For YouTube we only pull news links, not actual video files
-        if (contentTypes.some((t) => ["Videos", "Shorts"].includes(t))) {
-          feeds.push({ type: "rss", url: googleNewsFeedUrl(`${searchQuery} youtube`), platform: "YouTube", defaultMediaType: "Videos" });
+        // Pull YouTube search via Google News; also try YouTube's own RSS if possible
+        if (contentTypes.some((t) => ["Videos", "Shorts", "Reels"].includes(t))) {
+          feeds.push({ type: "rss", url: googleNewsFeedUrl(`${searchQuery} site:youtube.com`), platform: "YouTube", defaultMediaType: "Videos" });
+          // Also pull generic YouTube video links via news search
+          feeds.push({ type: "rss", url: googleNewsFeedUrl(`${searchQuery} youtube video`), platform: "YouTube", defaultMediaType: "Videos" });
         }
         break;
 
@@ -238,11 +274,11 @@ function buildFeedList(campaign: SportaCampaign): FeedDescriptor[] {
         break;
 
       case "TikTok":
-        feeds.push({ type: "rss", url: googleNewsFeedUrl(`${searchQuery} tiktok`), platform: "TikTok", defaultMediaType: "Reels" });
+        feeds.push({ type: "rss", url: googleNewsFeedUrl(`${searchQuery} tiktok reel`), platform: "TikTok", defaultMediaType: "Reels" });
         break;
 
       case "Instagram":
-        feeds.push({ type: "rss", url: googleNewsFeedUrl(`${searchQuery} instagram`), platform: "Instagram", defaultMediaType: "Images" });
+        feeds.push({ type: "rss", url: googleNewsFeedUrl(`${searchQuery} instagram reel`), platform: "Instagram", defaultMediaType: "Reels" });
         break;
 
       case "Threads":
@@ -394,7 +430,32 @@ export async function aggregateCampaignContent(
 
         const image = extractImageFromRssItem(item);
         const excerpt = buildExcerpt(item);
-        const mediaType: SportaContentType = feed.defaultMediaType as SportaContentType;
+        let mediaType: SportaContentType = feed.defaultMediaType as SportaContentType;
+
+        // Detect actual video URLs embedded in content or the link itself
+        const rawHtml = item["content:encoded"] || item.content || "";
+        const detectedVideoUrl = detectVideoUrl(item.link) ?? detectVideoUrl(rawHtml);
+        const embedUrl = detectedVideoUrl ? buildEmbedCode(detectedVideoUrl) : undefined;
+
+        // If a video URL is detected, treat this as a video item regardless of feed type
+        if (detectedVideoUrl && wantsVideos) {
+          const videoSourceUrl = detectedVideoUrl;
+          if (!existingSourceUrls.has(videoSourceUrl)) {
+            items.push({
+              campaignId: campaign.id,
+              sourceUrl: videoSourceUrl,
+              sourcePlatform: feed.platform,
+              originalTitle: item.title ?? undefined,
+              originalContent: excerpt || undefined,
+              originalAuthor: item.creator ?? undefined,
+              originalThumbnail: image ?? null,
+              mediaType: preferredVideoType,
+              embedCode: embedUrl,
+              aiGeneratedHashtags: [],
+            });
+          }
+          continue;
+        }
 
         if (isVideoType(mediaType)) {
           // Video: only store link — no content body or thumbnail
@@ -404,8 +465,11 @@ export async function aggregateCampaignContent(
             sourceUrl: item.link,
             sourcePlatform: feed.platform,
             originalTitle: item.title ?? undefined,
+            originalContent: excerpt || undefined,
             originalAuthor: item.creator ?? undefined,
+            originalThumbnail: image ?? null,
             mediaType: preferredVideoType,
+            embedCode: embedUrl,
             aiGeneratedHashtags: [],
           });
           continue;

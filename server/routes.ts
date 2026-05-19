@@ -2768,11 +2768,24 @@ Only return valid JSON, no markdown fences.`;
         raw = completion.choices[0]?.message?.content ?? "{}";
       }
 
+      // Strip markdown code fences (```json ... ``` or ``` ... ```) and any wrapping HTML tags
+      const cleanRaw = raw
+        .replace(/^```(?:json)?\s*/i, "")
+        .replace(/\s*```\s*$/, "")
+        .replace(/<\/?(?:html|body|head|code|pre|div|span)[^>]*>/gi, "")
+        .trim();
+
       let parsed: { title?: string; content?: string; hashtags?: string[] };
       try {
-        parsed = JSON.parse(raw);
+        parsed = JSON.parse(cleanRaw);
       } catch {
-        parsed = { title: item.originalTitle, content: raw, hashtags: [] };
+        // If still not valid JSON, use cleaned text as content directly
+        parsed = { title: item.originalTitle, content: cleanRaw, hashtags: [] };
+      }
+
+      // Strip any residual HTML tags from the content field
+      if (parsed.content) {
+        parsed.content = parsed.content.replace(/<[^>]+>/g, " ").replace(/\s{2,}/g, " ").trim();
       }
 
       // Placeholder scores — in production these would come from a dedicated
