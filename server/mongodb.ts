@@ -16,12 +16,20 @@ const CONNECTION_TIMEOUT_MS = isVercel ? 5_000 : isProduction ? 10_000 : 30_000;
 
 const MAX_RETRIES = isVercel ? 1 : isProduction ? 3 : 5;
 const RETRY_BASE_DELAY_MS = 1_000;
-const SOCKET_TIMEOUT_MS = isVercel ? 20_000 : 45_000;
+// Vercel Hobby plan enforces a 10-second function execution limit.
+// Keep the socket timeout well below that limit so a slow/hung MongoDB
+// operation fails fast and Express can still send a proper error response
+// before Vercel kills the invocation with FUNCTION_INVOCATION_FAILED.
+const SOCKET_TIMEOUT_MS = isVercel ? 7_000 : 45_000;
 // Smaller pool for serverless: each concurrent function instance creates its
 // own pool; 5 per instance is plenty and avoids exhausting Atlas free-tier
 // connection limits (M0 cap: 500 connections).
 const MAX_POOL_SIZE = isVercel ? 5 : 10;
-const MAX_IDLE_TIME_MS = 30_000;
+// Keep idle connections alive for the duration of a typical Vercel warm
+// instance.  Setting this too low causes the driver to close idle sockets,
+// forcing a new TCP handshake on every cold request and risking a timeout on
+// the Hobby plan's 10-second limit.
+const MAX_IDLE_TIME_MS = isVercel ? 60_000 : 30_000;
 
 let isConnected = false;
 let listenersRegistered = false;
@@ -48,16 +56,22 @@ function registerConnectionListeners() {
   mongoose.connection.on("error", (err) => {
     console.error("MongoDB connection error:", err);
     isConnected = false;
+    // Reset the client promise so the next call to getClientPromise() will
+    // obtain a fresh client from the reconnected driver.
+    _clientPromise = null;
   });
 
   mongoose.connection.on("disconnected", () => {
     console.warn("MongoDB disconnected; waiting for automatic reconnect...");
     isConnected = false;
+    _clientPromise = null;
   });
 
   mongoose.connection.on("reconnected", () => {
     console.log("MongoDB reconnected");
     isConnected = true;
+    // Refresh the client promise so subsequent calls get the live client.
+    _clientPromise = null;
   });
 }
 

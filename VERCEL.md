@@ -66,12 +66,42 @@ These variables are entirely optional. If set, the server automatically creates 
 1. Log in to [MongoDB Atlas](https://cloud.mongodb.com)
 2. Create a free cluster (M0)
 3. Create a database user with read/write permissions
-4. Whitelist all IPs (`0.0.0.0/0`) — Vercel functions use dynamic IPs
+4. **⚠️ Critical: Whitelist ALL IPs** — in Atlas go to **Network Access → Add IP Address → Allow Access from Anywhere (`0.0.0.0/0`)**.  
+   Vercel functions run from dynamic IP addresses that change on every cold start; without this the function will fail with `FUNCTION_INVOCATION_FAILED`.
 5. Click **Connect** → **Connect your application** → copy the connection string
-6. Replace `<password>` with your database user's password
-7. Paste the full URI as the `MONGODB_URI` environment variable in Vercel
+6. Replace `<password>` with your database user's password in the URI
+7. Include the database name in the URI for cleaner Atlas monitoring:  
+   `mongodb+srv://user:pass@cluster0.xxx.mongodb.net/tobseytech?retryWrites=true&w=majority`
+8. Paste the full URI as the `MONGODB_URI` environment variable in Vercel
 
-### 6. Deploy
+### 6. Verify Deployment
+
+After setting environment variables and deploying, visit this URL in your browser to confirm everything is wired up correctly:
+
+```
+https://<your-vercel-domain>/api/debug/connectivity
+```
+
+Expected successful response:
+```json
+{
+  "db": "connected",
+  "dbError": null,
+  "envVarsSet": {
+    "MONGODB_URI": true,
+    "SESSION_SECRET": true,
+    "ADMIN_DASHBOARD_PASSWORD": true
+  }
+}
+```
+
+If `db` is `"error"` or `"disconnected"`, check:
+- `MONGODB_URI` is set correctly in Vercel → Settings → Environment Variables
+- MongoDB Atlas **Network Access** allows `0.0.0.0/0`
+- The MongoDB user password in the URI matches the Atlas database user
+- The Atlas cluster is not paused (free M0 clusters auto-pause after 60 days of inactivity)
+
+### 7. Deploy
 After setting environment variables, trigger a deployment:
 ```
 git push origin main
@@ -91,7 +121,7 @@ Vercel will build the frontend (`vite build`) and deploy `api/index.ts` as a ser
 
 Requests for `/api/*` are routed to the serverless Express function; all other paths are served from the static CDN build with a SPA fallback to `index.html`.
 
-### 7. Debugging Gemini on Vercel
+### 8. Debugging Gemini on Vercel
 
 After deploying, open:
 

@@ -167,6 +167,19 @@ const ready = (async () => {
 // awaits `ready` and catches the rejection to return a proper 503.
 ready.catch(() => {});
 
+// Catch any unhandled promise rejections that escape route handlers
+// (Express 4 does not automatically forward rejected async handler promises).
+// Without this, Node.js 15+ terminates the process, causing Vercel to return
+// FUNCTION_INVOCATION_FAILED instead of our JSON error responses.
+process.on("unhandledRejection", (reason) => {
+  console.error("[unhandledRejection] Unhandled promise rejection:", reason);
+});
+
+// Vercel Hobby plan enforces a 10-second execution limit per invocation.
+// This safety timeout fires just before that limit and returns a proper JSON
+// 503 so Vercel never has to terminate the function with FUNCTION_INVOCATION_FAILED.
+const VERCEL_SAFETY_TIMEOUT_MS = process.env.VERCEL ? 9_000 : 0;
+
 // Export a handler that waits for initialization then delegates to the Express app.
 // If initialization failed (e.g. missing required env vars), return a clear 503
 // instead of leaking an unhandled rejection that Vercel turns into a generic 500.
@@ -176,7 +189,10 @@ export default async function handler(req: Request, res: Response) {
   } catch (err) {
     const message = err instanceof Error ? err.message : "Server initialization failed";
     console.error("[handler] Initialization error:", message);
-    return res.status(503).json({ message: "Service unavailable: server failed to initialize. Check environment variable configuration." });
+    if (!res.headersSent) {
+      res.status(503).json({ message: "Service unavailable: server failed to initialize. Check environment variable configuration." });
+    }
+    return;
   }
   const rewrittenPath = req.query?.path;
   if (typeof rewrittenPath === "string" && rewrittenPath.length > 0) {
@@ -192,8 +208,28 @@ export default async function handler(req: Request, res: Response) {
   // and Vercel can close the invocation before Express finishes its async
   // middleware chain, causing FUNCTION_INVOCATION_FAILED.
   return new Promise<void>((resolve) => {
-    res.on("finish", resolve);
-    res.on("close", resolve);
+    let safetyTimer: ReturnType<typeof setTimeout> | undefined;
+
+    const done = () => {
+      if (safetyTimer) clearTimeout(safetyTimer);
+      resolve();
+    };
+
+    res.on("finish", done);
+    res.on("close", done);
+
+    // Safety net: if Express doesn't send a response before the Vercel timeout
+    // fires, send a 503 so the invocation ends cleanly instead of being killed.
+    if (VERCEL_SAFETY_TIMEOUT_MS > 0) {
+      safetyTimer = setTimeout(() => {
+        console.error("[handler] Safety timeout reached; sending 503 to avoid FUNCTION_INVOCATION_FAILED");
+        if (!res.headersSent) {
+          res.status(503).json({ message: "Request timed out — the database may be temporarily unavailable. Please try again." });
+        }
+        resolve();
+      }, VERCEL_SAFETY_TIMEOUT_MS);
+    }
+
     app(req, res);
   });
 }
