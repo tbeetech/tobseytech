@@ -299,7 +299,6 @@
     border-color: rgba(34, 197, 94, 0.3);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
   }
-  }
 
   /* Neon input */
   .neon-input {
@@ -860,4 +859,3 @@
 .light .dark-section .text-gray-400 { color: #9ca3af; }
 .dark-section .text-gray-500,
 .light .dark-section .text-gray-500 { color: #6b7280; }
-
