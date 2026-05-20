@@ -1,17 +1,17 @@
 import { useState } from "react";
-import { Mail, MessageCircle, Linkedin, Send } from "lucide-react";
+import { Mail, MessageCircle, Send, CalendarDays } from "lucide-react";
 
 const CONTACT_EMAIL = "tobseytech@gmail.com";
+const CALENDLY_URL = "https://calendly.com/tobseytech";
 
 const INQUIRY_TYPES = [
   "AI Automation Systems",
   "Web & App Development",
-  "AI Marketing Systems",
-  "Training & Upskilling",
+  "AI Integrations",
+  "Branding & Identity",
+  "Strategic Consulting",
   "Book a Demo / Consultation",
   "Partnership Inquiry",
-  "Investor Inquiry",
-  "Career / Jobs",
   "General Question",
   "Custom Inquiry",
 ];
@@ -48,9 +48,7 @@ export default function ContactSection() {
         body: JSON.stringify({ name, email, message, service }),
       });
 
-      if (!response.ok) {
-        throw new Error("Request failed");
-      }
+      if (!response.ok) throw new Error("Request failed");
 
       form.reset();
       setSubmitState("success");
@@ -69,17 +67,15 @@ export default function ContactSection() {
             Get In Touch
           </h2>
           <p className="text-gray-300 max-w-2xl mx-auto text-sm sm:text-base">
-            Let's talk about your project. Send us a message directly, we'd love to hear from you.
+            Send us a message or book a slot directly on our calendar — we'd love to hear from you.
           </p>
         </div>
 
         <div className="grid md:grid-cols-2 gap-8 sm:gap-12 max-w-5xl mx-auto">
           {/* Contact form */}
           <div className="glass-effect p-6 sm:p-8 rounded-2xl">
-            <form
-              onSubmit={handleSubmit}
-              className="space-y-5"
-            >
+            <h3 className="font-orbitron font-bold text-base text-neon-yellow mb-5">Send a Message</h3>
+            <form onSubmit={handleSubmit} className="space-y-5">
               <div>
                 <label htmlFor="contact-name" className="block mb-2 text-neon-yellow font-orbitron text-sm">
                   Your Name
@@ -154,7 +150,7 @@ export default function ContactSection() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full flex items-center justify-center gap-2 py-3 bg-neon-yellow text-black font-semibold rounded-lg hover:bg-yellow-400 active:scale-95 transition-all font-orbitron text-sm disabled:opacity-60"
+                className="w-full flex items-center justify-center gap-2 py-3 bg-galactic-orange text-white font-semibold rounded-lg hover:opacity-90 active:scale-95 transition-all font-orbitron text-sm disabled:opacity-60"
               >
                 <Send className="w-4 h-4" />
                 {isSubmitting ? "Sending..." : "Send Message"}
@@ -168,15 +164,37 @@ export default function ContactSection() {
             </form>
           </div>
 
-          {/* Contact details */}
-          <div className="flex flex-col justify-center space-y-6 sm:space-y-8">
+          {/* Contact details + Calendly */}
+          <div className="flex flex-col justify-start space-y-6 sm:space-y-8">
+            {/* Calendly booking */}
+            <div className="glass-effect p-6 rounded-2xl border border-galactic-green/30">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-full bg-galactic-green/20 flex items-center justify-center shrink-0">
+                  <CalendarDays className="w-5 h-5 text-galactic-green" />
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 font-orbitron uppercase tracking-widest">Book a Call</p>
+                  <p className="text-white text-sm font-semibold">Schedule via Calendly</p>
+                </div>
+              </div>
+              <p className="text-gray-400 text-xs mb-4 leading-relaxed">
+                Pick a time that works for you. We offer 30-minute discovery calls to understand your project and see how we can help.
+              </p>
+              <a
+                href={CALENDLY_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-galactic-green/20 border border-galactic-green/40 rounded-lg text-galactic-green hover:bg-galactic-green/30 transition-colors font-orbitron text-sm"
+              >
+                <CalendarDays className="w-4 h-4" />
+                Open Calendly
+              </a>
+            </div>
+
             <div>
-              <h3 className="font-orbitron font-bold text-lg text-neon-yellow mb-4">Contact Details</h3>
+              <h3 className="font-orbitron font-bold text-base text-neon-yellow mb-4">Contact Details</h3>
               <div className="space-y-4">
-                <a
-                  href={`mailto:${CONTACT_EMAIL}`}
-                  className="flex items-center gap-4 group"
-                >
+                <a href={`mailto:${CONTACT_EMAIL}`} className="flex items-center gap-4 group">
                   <div className="w-10 h-10 rounded-full bg-galactic-orange/20 flex items-center justify-center shrink-0 group-hover:bg-galactic-orange/40 transition-colors">
                     <Mail className="w-5 h-5 text-neon-yellow" />
                   </div>
@@ -204,23 +222,6 @@ export default function ContactSection() {
                     </p>
                   </div>
                 </a>
-
-                <a
-                  href="https://www.linkedin.com/in/oyebade-tobi/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-4 group"
-                >
-                  <div className="w-10 h-10 rounded-full bg-galactic-orange/20 flex items-center justify-center shrink-0 group-hover:bg-galactic-orange/40 transition-colors">
-                    <Linkedin className="w-5 h-5 text-neon-yellow" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500 font-orbitron uppercase tracking-widest">LinkedIn</p>
-                    <p className="text-gray-200 text-sm group-hover:text-neon-yellow transition-colors">
-                      Connect on LinkedIn
-                    </p>
-                  </div>
-                </a>
               </div>
             </div>
 
@@ -236,4 +237,3 @@ export default function ContactSection() {
     </section>
   );
 }
-

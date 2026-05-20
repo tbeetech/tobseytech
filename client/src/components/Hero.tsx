@@ -143,12 +143,12 @@ export default function Hero() {
       <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-6">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-galactic-orange/30 text-galactic-orange text-xs font-orbitron backdrop-blur-sm">
-            <span className="w-1.5 h-1.5 rounded-full bg-galactic-orange animate-pulse" />
-            God-Inclined Digital Platform
+            <span className="w-1.5 h-1.5 rounded-full bg-galactic-orange" />
+            Client First · AI-Powered
           </div>
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-galactic-green/40 text-galactic-green text-xs font-orbitron backdrop-blur-sm">
-            <span className="w-1.5 h-1.5 rounded-full bg-galactic-green animate-ping" />
-            Live · Real-Time · Async
+            <span className="w-1.5 h-1.5 rounded-full bg-galactic-green" />
+            Digital Agency · Nigeria & Beyond
           </div>
         </div>
 
@@ -156,18 +156,15 @@ export default function Hero() {
           Automate.<br className="sm:hidden" /> Scale. Transform.
         </h1>
 
-        <p className="text-gray-300 text-base sm:text-lg md:text-xl max-w-2xl mx-auto mb-3 leading-relaxed">
-          Empowering businesses with AI-powered automation, 12 real-time features, and intelligent systems that scale with you.
-        </p>
-        <p className="text-galactic-gold text-sm sm:text-base max-w-xl mx-auto mb-10 font-orbitron leading-relaxed">
-          Kingdom Enhancement Technology, Serving Churches & Organisations in Real Time
+        <p className="text-gray-300 text-base sm:text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
+          Empowering Businesses with AI-Speed-Up IT Solutions.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
           <Link href="/contact">
             <Button
               size="lg"
-              className="bg-gradient-to-r from-galactic-orange to-galactic-gold text-space-black font-orbitron font-bold px-8 hover:shadow-[0_0_30px_rgba(34,197,94,0.5)] transition-all"
+              className="bg-gradient-to-r from-galactic-orange to-galactic-gold text-white font-orbitron font-bold px-8 transition-all hover:opacity-90"
             >
               Book a Consultation
             </Button>
@@ -178,12 +175,12 @@ export default function Hero() {
               variant="outline"
               className="border-galactic-orange/40 text-galactic-orange hover:bg-galactic-orange/10 font-orbitron px-8"
             >
-              Explore 12 Real-Time Features
+              Central Hub
             </Button>
           </Link>
         </div>
 
-        <div className="mt-16 animate-bounce">
+        <div className="mt-16">
           <ChevronDown className="w-6 h-6 text-galactic-orange/50 mx-auto" />
         </div>
       </div>

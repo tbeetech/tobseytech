@@ -18,19 +18,11 @@ export default function Navigation() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const scrollToSection = (sectionId: string) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
-      setIsOpen(false);
-    }
-  };
-
   const navLinks = [
-    { id: "services", label: "Services" },
-    { id: "case-studies", label: "Case Studies" },
-    { id: "about", label: "About" },
-    { id: "contact", label: "Contact" },
+    { href: "/services", label: "Services" },
+    { href: "/case-studies", label: "Case Studies" },
+    { href: "/about", label: "About" },
+    { href: "/contact", label: "Contact" },
   ];
 
 
@@ -59,14 +51,14 @@ export default function Navigation() {
           {/* Desktop nav links */}
           <div className="hidden md:flex items-center gap-6 flex-1">
             {navLinks.map((link) => (
-              <button
-                key={link.id}
-                onClick={() => scrollToSection(link.id)}
-                className="nav-link text-galactic-orange/90 hover:text-galactic-gold font-orbitron text-xs tracking-wide transition-colors"
-                data-testid={`nav-link-${link.id}`}
-              >
-                {link.label}
-              </button>
+              <Link key={link.href} href={link.href}>
+                <button
+                  className="nav-link text-galactic-orange/90 hover:text-galactic-gold font-orbitron text-xs tracking-wide transition-colors"
+                  data-testid={`nav-link-${link.label.toLowerCase().replace(/\s+/g, "-")}`}
+                >
+                  {link.label}
+                </button>
+              </Link>
             ))}
             <Link href="/blog">
               <button className="nav-link text-galactic-orange/90 hover:text-galactic-gold font-orbitron text-xs tracking-wide transition-colors">
@@ -194,14 +186,14 @@ export default function Navigation() {
           <div className="md:hidden mt-3 glass-effect-strong rounded-xl p-5 animate-slide-up">
             <div className="flex flex-col gap-4">
               {navLinks.map((link) => (
-                <button
-                  key={link.id}
-                  onClick={() => scrollToSection(link.id)}
-                  className="text-left nav-link text-galactic-orange/90 hover:text-galactic-gold font-orbitron text-sm transition-colors"
-                  data-testid={`mobile-nav-link-${link.id}`}
-                >
-                  {link.label}
-                </button>
+                <Link key={link.href} href={link.href} onClick={() => setIsOpen(false)}>
+                  <button
+                    className="text-left nav-link text-galactic-orange/90 hover:text-galactic-gold font-orbitron text-sm transition-colors"
+                    data-testid={`mobile-nav-link-${link.label.toLowerCase().replace(/\s+/g, "-")}`}
+                  >
+                    {link.label}
+                  </button>
+                </Link>
               ))}
               <Link href="/blog" onClick={() => setIsOpen(false)}>
                 <button className="text-left nav-link text-galactic-orange/90 hover:text-galactic-gold font-orbitron text-sm transition-colors">

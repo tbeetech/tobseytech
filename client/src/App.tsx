@@ -11,6 +11,8 @@ import Home from "@/pages/home";
 import PricingPage from "@/pages/pricing";
 import ContactPage from "@/pages/contact";
 import CaseStudiesPage from "@/pages/case-studies";
+import ServicesPage from "@/pages/services";
+import AboutPage from "@/pages/about";
 import AuthPage from "@/pages/auth";
 import ForgotPasswordPage from "@/pages/forgot-password";
 import ResetPasswordPage from "@/pages/reset-password";
@@ -58,6 +60,8 @@ function Router() {
       <Route path="/contact" component={ContactPage} />
       {/* Book-demo redirects to contact */}
       <Route path="/book-demo"><Redirect to="/contact" /></Route>
+      <Route path="/services" component={ServicesPage} />
+      <Route path="/about" component={AboutPage} />
       <Route path="/case-studies" component={CaseStudiesPage} />
       <Route path="/auth" component={AuthPage} />
       <Route path="/forgot-password" component={ForgotPasswordPage} />
