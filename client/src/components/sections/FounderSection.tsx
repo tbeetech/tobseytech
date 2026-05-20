@@ -21,7 +21,7 @@ export default function FounderSection() {
                 <span className="font-orbitron font-black text-white text-xl sm:text-2xl">OT</span>
               </div>
               <div>
-                <h3 className="font-orbitron font-bold text-lg sm:text-xl gradient-text">Oyebade Tobi</h3>
+                <h3 className="font-orbitron font-bold text-lg sm:text-xl gradient-text">Tobi Oyebade</h3>
                 <p className="text-galactic-orange text-sm font-orbitron">Founder & Lead Engineer</p>
               </div>
             </div>
@@ -29,7 +29,7 @@ export default function FounderSection() {
             <p className="text-gray-300 leading-relaxed text-sm sm:text-base flex-1">
               Tech entrepreneur and digital engineer with deep experience in AI, automation, and building
               web and mobile products. Tobi leads the team and takes founder-level ownership on
-              every project TOBSEYTECH handles — from the first call to the final delivery.
+              every project TOBSEYTECH handles, from the first call to the final delivery.
             </p>
 
             <a
@@ -60,7 +60,7 @@ export default function FounderSection() {
 
             <p className="text-gray-300 leading-relaxed text-sm sm:text-base flex-1">
               Motion graphics expert and visual storyteller with a sharp eye for brand identity.
-              Seyi drives the creative side of TOBSEYTECH — turning ideas into powerful visuals,
+              Seyi drives the creative side of TOBSEYTECH, turning ideas into powerful visuals,
               videos, and brand experiences that stick with audiences.
             </p>
 

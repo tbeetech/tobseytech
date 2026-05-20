@@ -2,27 +2,27 @@ import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const pillars = [
-  { label: "Accessibility", desc: "Our solutions are built for every business size — from solo founders to growing teams — without needing a technical background." },
+  { label: "Accessibility", desc: "Our solutions are built for every business size, from solo founders to growing teams, without needing a technical background." },
   { label: "Reliability", desc: "We work with clear timelines, quality checkpoints, and milestone-based contracts so you always know where your project stands." },
-  { label: "Measurable Impact", desc: "Every engagement is tied to a real outcome — whether that's more leads, time saved, revenue grown, or a better customer experience." },
+  { label: "Measurable Impact", desc: "Every engagement is tied to a real outcome: more leads, time saved, revenue grown, or a better customer experience." },
 ];
 
 const carouselSlides = [
   {
     heading: "What We Do",
-    body: "TOBSEYTECH is a digital agency that helps businesses automate their operations, build professional websites and apps, and leverage AI to work smarter. We handle the technical heavy lifting so you can focus on growing your business.",
+    body: "TOBSEYTECH is a digital agency that helps companies, businesses, and individuals automate their operations, build professional websites and apps, and leverage AI to work smarter. We handle the technical heavy lifting so you can focus on growing.",
   },
   {
     heading: "How We Work",
-    body: "We start every project by understanding your goals, then design a practical solution that fits your timeline and budget. Clear milestones, transparent pricing, and a single point of contact — no surprises.",
+    body: "We start every project by understanding your goals, then design a practical solution that fits your timeline and budget. Clear milestones, transparent pricing, and a single point of contact. No surprises.",
   },
   {
     heading: "Who We Serve",
-    body: "We work with startups, media companies, SMEs, and service businesses across Africa and beyond. Whether you are a first-time founder or an established brand, we bring the same focused attention to every project.",
+    body: "We work with startups, SMEs, service businesses, and individuals across the globe. Whether you are a first-time founder or an established brand, we bring the same focused attention to every project.",
   },
   {
     heading: "Why Choose Us",
-    body: "Founder-level attention on every project. We don't hand your work off to juniors. Tobi and the team stay hands-on from kickoff to delivery, and we measure success by the results you see — not just the work we ship.",
+    body: "Founder-level attention on every project. We don't hand your work off to juniors. Tobi and the team stay hands-on from kickoff to delivery, and we measure success by the results you see, not just the work we ship.",
   },
 ];
 
@@ -51,14 +51,14 @@ export default function AboutSection() {
               Who We Are
             </h2>
             <p className="text-gray-300 mb-4 leading-relaxed">
-              TOBSEYTECH is a digital agency built to deliver automation-first solutions to media houses, SMEs, startups,
-              and social-impact organisations across Africa and globally.
+              TOBSEYTECH is a digital agency built to deliver automation-first solutions to companies,
+              businesses, individuals, and social-impact organisations worldwide.
             </p>
             <p className="text-gray-300 mb-6 leading-relaxed">
-              Founded by <span className="text-galactic-orange font-semibold">Oyebade Tobi</span> and co-founded by{" "}
+              Founded by <span className="text-galactic-orange font-semibold">Tobi Oyebade</span> and co-founded by{" "}
               <span className="text-galactic-orange font-semibold">Seyi Olatunde</span>, the team combines strategy,
-              design, engineering, and operations under one roof. We close the trust gap in Africa's digital economy with
-              clear scopes, reliable timelines, and quality delivery.
+              design, engineering, and operations under one roof. We turn bold ideas into market-ready digital
+              products with clear scopes, reliable timelines, and quality delivery you can count on.
             </p>
             <ul className="space-y-3">
               {pillars.map(({ label, desc }) => (

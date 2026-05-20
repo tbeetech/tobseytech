@@ -67,7 +67,7 @@ export default function ContactSection() {
             Get In Touch
           </h2>
           <p className="text-gray-300 max-w-2xl mx-auto text-sm sm:text-base">
-            Send us a message or book a slot directly on our calendar — we'd love to hear from you.
+            Send us a message or book a slot directly on our calendar. We'd love to hear from you.
           </p>
         </div>
 
@@ -227,7 +227,7 @@ export default function ContactSection() {
 
             <div className="glass-effect p-5 rounded-xl border border-galactic-gold/20">
               <p className="text-gray-300 text-sm leading-relaxed">
-                📍 Based in Nigeria · Available for remote projects worldwide<br />
+                📍 Available for remote projects worldwide<br />
                 ⏱ Typical response within <span className="text-neon-yellow font-semibold">24 hours</span>
               </p>
             </div>

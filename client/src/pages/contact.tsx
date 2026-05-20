@@ -207,7 +207,7 @@ export default function ContactPage() {
             </div>
             <div className="glass-effect p-5 rounded-xl border border-galactic-gold/20">
               <p className="text-gray-300 text-sm leading-relaxed">
-                📍 Based in Nigeria · Available for remote projects worldwide<br />
+                📍 Available for remote projects worldwide<br />
                 ⏱ Typical response within <span className="text-neon-yellow font-semibold">24 hours</span>
               </p>
             </div>
