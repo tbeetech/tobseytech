@@ -416,42 +416,6 @@ async function _registerRouteHandlers(app: Express): Promise<void> {
     }
   });
 
-  // ─── Connectivity debug (no auth required) ───────────────────────────────
-  // Helps diagnose Vercel deployment issues by surfacing which env vars are
-  // set (never their values) and the current MongoDB connection state.
-  // Visit /api/debug/connectivity after deploying to verify configuration.
-
-  app.get("/api/debug/connectivity", async (_req, res) => {
-    const envCheck = {
-      MONGODB_URI:               !!process.env.MONGODB_URI,
-      SESSION_SECRET:            !!process.env.SESSION_SECRET,
-      ADMIN_DASHBOARD_PASSWORD:  !!process.env.ADMIN_DASHBOARD_PASSWORD,
-      ADMIN_SEED_EMAIL:          !!process.env.ADMIN_SEED_EMAIL,
-      ADMIN_SEED_PASSWORD:       !!process.env.ADMIN_SEED_PASSWORD,
-      NODE_ENV:                  process.env.NODE_ENV ?? "(not set)",
-      VERCEL:                    process.env.VERCEL ?? "(not set)",
-    };
-
-    let dbStatus: "connected" | "disconnected" | "error" = "disconnected";
-    let dbError: string | null = null;
-    try {
-      await mongoose.connection.db?.command({ ping: 1 });
-      dbStatus = "connected";
-    } catch (err) {
-      dbStatus = "error";
-      dbError = err instanceof Error ? err.message : String(err);
-    }
-
-    const status = dbStatus === "connected" ? 200 : 503;
-    res.status(status).json({
-      db: dbStatus,
-      dbError,
-      envVarsSet: envCheck,
-      mongooseState: mongoose.connection.readyState,
-      // readyState: 0=disconnected 1=connected 2=connecting 3=disconnecting
-    });
-  });
-
   // ─── Sitemap ─────────────────────────────────────────────────────────────
 
   app.get("/sitemap.xml", async (req, res) => {
