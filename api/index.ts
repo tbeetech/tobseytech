@@ -187,5 +187,13 @@ export default async function handler(req: Request, res: Response) {
     req.url = `/api/${rewrittenPath}${suffix ? `?${suffix}` : ""}`;
   }
 
-  return app(req, res);
+  // Await the response being fully sent before resolving the handler Promise.
+  // Without this, the async handler resolves immediately (app returns undefined),
+  // and Vercel can close the invocation before Express finishes its async
+  // middleware chain, causing FUNCTION_INVOCATION_FAILED.
+  return new Promise<void>((resolve) => {
+    res.on("finish", resolve);
+    res.on("close", resolve);
+    app(req, res);
+  });
 }

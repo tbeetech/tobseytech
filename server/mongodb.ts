@@ -131,14 +131,19 @@ async function disconnectGracefully() {
   }
 }
 
-process.on("SIGINT", async () => {
-  await disconnectGracefully();
-  process.exit(0);
-});
+// Only register shutdown handlers in long-running server environments.
+// In Vercel serverless (and other FaaS), calling process.exit() during a
+// request causes FUNCTION_INVOCATION_FAILED for any in-flight invocation.
+if (!process.env.VERCEL) {
+  process.on("SIGINT", async () => {
+    await disconnectGracefully();
+    process.exit(0);
+  });
 
-process.on("SIGTERM", async () => {
-  await disconnectGracefully();
-  process.exit(0);
-});
+  process.on("SIGTERM", async () => {
+    await disconnectGracefully();
+    process.exit(0);
+  });
+}
 
 export default mongoose;
