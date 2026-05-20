@@ -1,21 +1,21 @@
 import { useState } from "react";
 import Navigation from "@/components/Navigation";
-import { Send, Mail, MessageCircle, Linkedin } from "lucide-react";
+import { Send, Mail, MessageCircle, CalendarDays } from "lucide-react";
 
 const INQUIRY_TYPES = [
   "AI Automation Systems",
   "Web & App Development",
-  "AI Marketing Systems",
-  "Training & Upskilling",
+  "AI Integrations",
+  "Branding & Identity",
+  "Strategic Consulting",
   "Book a Demo / Consultation",
   "Partnership Inquiry",
-  "Investor Inquiry",
-  "Career / Jobs",
   "General Question",
   "Custom Inquiry",
 ];
 
 const CONTACT_EMAIL = "tobseytech@gmail.com";
+const CALENDLY_URL = "https://calendly.com/tobseytech";
 
 export default function ContactPage() {
   const [status, setStatus] = useState<"idle" | "sent" | "error">("idle");
@@ -55,13 +55,14 @@ export default function ContactPage() {
         <div className="container mx-auto px-6 text-center mb-12">
           <h1 className="font-orbitron font-bold text-4xl gradient-text mb-4">Get In Touch</h1>
           <p className="text-gray-300 max-w-xl mx-auto">
-            Ready to transform your business? Send us a message, we respond within 24 hours.
+            Send us a message or book a call on our calendar. We respond within 24 hours.
           </p>
         </div>
 
         <div className="container mx-auto px-6 grid md:grid-cols-2 gap-10 max-w-5xl">
           {/* Form */}
           <div className="glass-effect p-8 rounded-2xl">
+            <h3 className="font-orbitron font-bold text-base text-neon-yellow mb-5">Send a Message</h3>
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
                 <label className="block text-neon-yellow font-orbitron text-xs mb-2 uppercase tracking-wide">
@@ -140,7 +141,7 @@ export default function ContactPage() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full flex items-center justify-center gap-2 py-3 bg-neon-yellow text-black font-semibold rounded-lg hover:bg-yellow-400 active:scale-95 transition-all font-orbitron text-sm disabled:opacity-60"
+                className="w-full flex items-center justify-center gap-2 py-3 bg-galactic-orange text-white font-semibold rounded-lg hover:opacity-90 active:scale-95 transition-all font-orbitron text-sm disabled:opacity-60"
               >
                 <Send className="w-4 h-4" />
                 {isSubmitting ? "Sending..." : "Send Message"}
@@ -154,8 +155,33 @@ export default function ContactPage() {
             </form>
           </div>
 
-          {/* Contact Info */}
-          <div className="flex flex-col justify-center space-y-8">
+          {/* Contact Info + Calendly */}
+          <div className="flex flex-col justify-start space-y-8">
+            {/* Calendly */}
+            <div className="glass-effect p-6 rounded-2xl border border-galactic-green/30">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-full bg-galactic-green/20 flex items-center justify-center shrink-0">
+                  <CalendarDays className="w-5 h-5 text-galactic-green" />
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 font-orbitron uppercase tracking-widest">Book a Call</p>
+                  <p className="text-white text-sm font-semibold">Schedule via Calendly</p>
+                </div>
+              </div>
+              <p className="text-gray-400 text-xs mb-4 leading-relaxed">
+                Pick a time that works for you. 30-minute discovery calls to understand your project.
+              </p>
+              <a
+                href={CALENDLY_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-galactic-green/20 border border-galactic-green/40 rounded-lg text-galactic-green hover:bg-galactic-green/30 transition-colors font-orbitron text-sm"
+              >
+                <CalendarDays className="w-4 h-4" />
+                Open Calendly
+              </a>
+            </div>
+
             <div>
               <h3 className="font-orbitron font-bold text-lg text-neon-yellow mb-4">Contact Details</h3>
               <div className="space-y-4">
@@ -175,15 +201,6 @@ export default function ContactPage() {
                   <div>
                     <p className="text-xs text-gray-500 font-orbitron uppercase tracking-widest">WhatsApp</p>
                     <p className="text-gray-200 text-sm group-hover:text-neon-yellow transition-colors">Chat with us on WhatsApp</p>
-                  </div>
-                </a>
-                <a href="https://www.linkedin.com/in/oyebade-tobi/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 group">
-                  <div className="w-10 h-10 rounded-full bg-galactic-orange/20 flex items-center justify-center shrink-0 group-hover:bg-galactic-orange/40 transition-colors">
-                    <Linkedin className="w-5 h-5 text-neon-yellow" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500 font-orbitron uppercase tracking-widest">LinkedIn</p>
-                    <p className="text-gray-200 text-sm group-hover:text-neon-yellow transition-colors">Connect on LinkedIn</p>
                   </div>
                 </a>
               </div>

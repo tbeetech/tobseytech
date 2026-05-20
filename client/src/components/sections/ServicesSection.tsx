@@ -1,58 +1,34 @@
-import { Brain, Code, Bot, GraduationCap, Palette, Video, BarChart3, Megaphone, Church } from "lucide-react";
+import { Brain, Code, Bot, Palette, BarChart3 } from "lucide-react";
 
 const services = [
   {
     icon: Bot,
     title: "Automation Systems",
-    description: "Custom pipelines, lead sorters, and chatbots that cut repetitive tasks and scale your content output.",
+    description: "We set up smart systems that handle repetitive tasks for you — from responding to leads and sorting emails to running workflows while you sleep.",
     tag: "Most Popular",
   },
   {
     icon: Code,
     title: "Web & App Development",
-    description: "Responsive websites, customer portals, and cross-platform mobile apps with analytics and conversion-first UX.",
+    description: "We build fast, professional websites and mobile apps that look great, work on any device, and are designed to turn visitors into customers.",
     tag: null,
   },
   {
     icon: Brain,
     title: "AI Integrations",
-    description: "Chat assistants, RAG knowledge bases, smart routing, and recommendation engines that make your data work for you.",
-    tag: null,
-  },
-  {
-    icon: Church,
-    title: "Church Digital Technology",
-    description: "Live-streaming, church management systems, ministry automation bots, giving portals, and Kingdom-aligned digital platforms.",
-    tag: "Kingdom",
-  },
-  {
-    icon: Megaphone,
-    title: "Digital Marketing",
-    description: "Paid ads, email/WhatsApp funnels, CRM hooks, and reporting dashboards focused on measurable outcomes.",
+    description: "We connect AI tools to your existing systems — chatbots that answer customer questions, smart search, and recommendations that save your team hours every day.",
     tag: null,
   },
   {
     icon: Palette,
     title: "Branding & Identity",
-    description: "Logo systems, brand guidelines, storytelling, social and print toolkits, and launch kits for campaigns.",
-    tag: null,
-  },
-  {
-    icon: Video,
-    title: "Content Creation",
-    description: "Video editing, scripts, reels, copywriting, photography direction, and long/short-form storytelling.",
+    description: "Logo design, brand guidelines, and visual kits that give your business a consistent and professional look across every platform.",
     tag: null,
   },
   {
     icon: BarChart3,
     title: "Strategic Consulting",
-    description: "Product strategy, roadmaps, data and process audits, risk management, and go-to-market planning.",
-    tag: null,
-  },
-  {
-    icon: GraduationCap,
-    title: "Corporate Training",
-    description: "Cohort programs, live workshops, on-demand modules, and curriculum design to upskill your team in AI and digital tools.",
+    description: "Clear product planning, process reviews, and go-to-market strategies to help you grow with less guesswork and more direction.",
     tag: null,
   },
 ];
@@ -66,22 +42,18 @@ export default function ServicesSection() {
             Services
           </h2>
           <p className="text-gray-300 max-w-2xl mx-auto text-sm sm:text-base">
-            Strategy, design, and engineering under one roof, practical solutions that move your business forward.
+            Strategy, design, and engineering under one roof — practical solutions that move your business forward.
           </p>
         </div>
-        <div className="grid gap-5 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-5 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {services.map(({ icon: Icon, title, description, tag }) => (
             <div key={title} className="card text-center relative hover:border-galactic-orange/50 transition-colors">
               {tag && (
-                <span className={`absolute top-3 right-3 px-2 py-0.5 rounded-full text-xs font-orbitron ${
-                  tag === "Kingdom"
-                    ? "bg-galactic-gold/20 text-galactic-gold"
-                    : "bg-galactic-orange/20 text-galactic-orange"
-                }`}>
+                <span className="absolute top-3 right-3 px-2 py-0.5 rounded-full text-xs font-orbitron bg-galactic-orange/20 text-galactic-orange">
                   {tag}
                 </span>
               )}
-              <div className="mx-auto mb-4 w-12 h-12 flex items-center justify-center rounded-full bg-neon-yellow text-black">
+              <div className="mx-auto mb-4 w-12 h-12 flex items-center justify-center rounded-full bg-galactic-orange/20 text-galactic-orange">
                 <Icon className="w-6 h-6" />
               </div>
               <h3 className="font-orbitron text-lg mb-2 text-neon-yellow">{title}</h3>
