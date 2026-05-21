@@ -19,8 +19,8 @@ export default function UseCaseSpotlight() {
         <div className="relative rounded-2xl overflow-hidden border-l-4 border-galactic-orange"
           style={{
             background:
-              "linear-gradient(135deg, rgba(180,25,25,0.08) 0%, rgba(180,25,25,0.04) 50%, rgba(0,0,0,0) 100%)",
-            boxShadow: "0 0 40px rgba(180,25,25,0.1)",
+              "linear-gradient(135deg, rgba(34,130,70,0.08) 0%, rgba(34,130,70,0.04) 50%, rgba(0,0,0,0) 100%)",
+            boxShadow: "0 0 40px rgba(34,130,70,0.1)",
           }}
         >
           {/* Top accent band */}

@@ -62,7 +62,7 @@ export default function TechTrendsSection() {
           <div className={`transition-all duration-1000 ${visible ? "opacity-100 scale-100" : "opacity-0 scale-90"}`}>
             <ResponsiveContainer width="100%" height={350}>
               <RadarChart cx="50%" cy="50%" outerRadius="75%" data={trendData}>
-                <PolarGrid stroke="rgba(255,140,0,0.15)" />
+                <PolarGrid stroke="rgba(34,197,94,0.15)" />
                 <PolarAngleAxis
                   dataKey="subject"
                   tick={{ fill: "#aaa", fontSize: 11, fontFamily: "Orbitron" }}
