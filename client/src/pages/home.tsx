@@ -6,6 +6,8 @@ import CTASection from "@/components/CTASection";
 import FounderSection from "@/components/sections/FounderSection";
 import AboutSection from "@/components/sections/AboutSection";
 import ContactSection from "@/components/sections/ContactSection";
+import UseCaseSpotlight from "@/components/UseCaseSpotlight";
+import BackToTop from "@/components/BackToTop";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Layers } from "lucide-react";
@@ -20,6 +22,7 @@ export default function Home() {
       <main>
         <Hero />
         <ServicesSection />
+        <UseCaseSpotlight />
         <CTASection />
         <CaseStudiesSection />
         <FounderSection />
@@ -44,6 +47,8 @@ export default function Home() {
         </section>
       </main>
       
+      <BackToTop />
+
       <footer className="bg-deep-space border-t border-galactic-orange/30 py-12">
         <div className="container mx-auto px-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
