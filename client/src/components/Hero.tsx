@@ -148,7 +148,7 @@ export default function Hero() {
           </div>
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-galactic-green/40 text-galactic-green text-xs font-orbitron backdrop-blur-sm">
             <span className="w-1.5 h-1.5 rounded-full bg-galactic-green" />
-            Digital Agency · Nigeria & Beyond
+            Digital Agency
           </div>
         </div>
 
