@@ -103,8 +103,8 @@ export default function Navigation() {
               <div
                 className="absolute top-full left-0 mt-3 w-80 rounded-xl border border-galactic-orange/20 overflow-hidden"
                 style={{
-                  background: "linear-gradient(135deg, rgba(20,16,8,0.98) 0%, rgba(34,27,15,0.97) 100%)",
-                  boxShadow: "0 8px 32px rgba(0,0,0,0.5), 0 0 24px rgba(180,25,25,0.1)",
+                  background: "linear-gradient(135deg, rgba(15,30,20,0.98) 0%, rgba(10,22,15,0.97) 100%)",
+                  boxShadow: "0 8px 32px rgba(0,0,0,0.5), 0 0 24px rgba(34,130,70,0.1)",
                   opacity: servicesOpen ? 1 : 0,
                   pointerEvents: servicesOpen ? "auto" : "none",
                   transform: servicesOpen ? "translateY(0)" : "translateY(-8px)",

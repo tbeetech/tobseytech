@@ -44,7 +44,7 @@ export default function Hero() {
         ctx.beginPath();
         ctx.ellipse(cx, y2d, r2d, r2d * 0.28, 0, 0, Math.PI * 2);
         const alpha = 0.15 + 0.25 * Math.sin(phi);
-        ctx.strokeStyle = `rgba(255, 140, 0, ${alpha})`;
+        ctx.strokeStyle = `rgba(34, 197, 94, ${alpha})`;
         ctx.stroke();
       }
 
@@ -58,15 +58,15 @@ export default function Hero() {
         ctx.beginPath();
         ctx.arc(0, 0, R, 0, Math.PI * 2);
         const alpha = 0.12 + 0.15 * Math.abs(Math.cos(angle));
-        ctx.strokeStyle = `rgba(255, 200, 0, ${alpha})`;
+        ctx.strokeStyle = `rgba(52, 211, 153, ${alpha})`;
         ctx.stroke();
         ctx.restore();
       }
 
       // Globe glow
       const grd = ctx.createRadialGradient(cx, cy, R * 0.1, cx, cy, R * 1.1);
-      grd.addColorStop(0, "rgba(255,140,0,0.06)");
-      grd.addColorStop(0.5, "rgba(255,200,0,0.04)");
+      grd.addColorStop(0, "rgba(34,197,94,0.06)");
+      grd.addColorStop(0.5, "rgba(52,211,153,0.04)");
       grd.addColorStop(1, "rgba(0,0,0,0)");
       ctx.beginPath();
       ctx.arc(cx, cy, R * 1.1, 0, Math.PI * 2);
@@ -76,7 +76,7 @@ export default function Hero() {
       // Globe outer ring
       ctx.beginPath();
       ctx.arc(cx, cy, R, 0, Math.PI * 2);
-      ctx.strokeStyle = "rgba(255, 140, 0, 0.35)";
+      ctx.strokeStyle = "rgba(34, 197, 94, 0.35)";
       ctx.lineWidth = 1.5;
       ctx.stroke();
 
@@ -112,7 +112,7 @@ export default function Hero() {
         const pulse = 0.4 + 0.6 * Math.sin(t * 2.5 + d);
         ctx.beginPath();
         ctx.arc(x, y, 1.2, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(255, 200, 60, ${pulse * 0.7})`;
+        ctx.fillStyle = `rgba(74, 222, 128, ${pulse * 0.7})`;
         ctx.fill();
       }
 

@@ -22,7 +22,7 @@ export default function BackToTop() {
         bottom: "32px",
         right: "32px",
         background: "linear-gradient(135deg, var(--galactic-orange), var(--galactic-gold))",
-        boxShadow: "0 4px 20px rgba(180,25,25,0.4)",
+        boxShadow: "0 4px 20px rgba(34,130,70,0.4)",
         opacity: visible ? 1 : 0,
         pointerEvents: visible ? "auto" : "none",
         transform: visible ? "translateY(0)" : "translateY(12px)",
