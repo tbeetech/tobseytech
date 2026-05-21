@@ -12,26 +12,36 @@ const services = [
     icon: Bot,
     title: "Automation Systems",
     description: "We set up smart systems that handle repetitive tasks for you, from responding to leads and sorting emails to running workflows while you sleep.",
+    image: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&q=80",
+    imageAlt: "Automation and robotics technology",
   },
   {
     icon: Code,
     title: "Web & App Development",
     description: "We build fast, professional websites and mobile apps that look great, work on any device, and are designed to turn visitors into customers.",
+    image: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=600&q=80",
+    imageAlt: "Web and app development on laptop",
   },
   {
     icon: Brain,
     title: "AI Integrations",
     description: "We connect AI tools to your existing systems: chatbots that answer customer questions, smart search, and recommendations that save your team hours every day.",
+    image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=600&q=80",
+    imageAlt: "Artificial intelligence and machine learning",
   },
   {
     icon: Palette,
     title: "Branding & Identity",
     description: "Logo design, brand guidelines, and visual kits that give your business a consistent and professional look across every platform.",
+    image: "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=600&q=80",
+    imageAlt: "Brand identity and design",
   },
   {
     icon: BarChart3,
     title: "Strategic Consulting",
     description: "Clear product planning, process reviews, and go-to-market strategies to help you grow with less guesswork and more direction.",
+    image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&q=80",
+    imageAlt: "Strategic business consulting and analytics",
   },
 ];
 
@@ -50,14 +60,26 @@ export default function ServicesSection() {
         <div className="relative px-10">
           <Carousel opts={{ align: "start", loop: true }}>
             <CarouselContent>
-              {services.map(({ icon: Icon, title, description }) => (
+              {services.map(({ icon: Icon, title, description, image, imageAlt }) => (
                 <CarouselItem key={title} className="sm:basis-1/2 lg:basis-1/3">
-                  <div className="card text-center hover:border-galactic-orange/50 transition-colors h-full">
-                    <div className="mx-auto mb-4 w-12 h-12 flex items-center justify-center rounded-full bg-galactic-orange/20 text-galactic-orange">
-                      <Icon className="w-6 h-6" />
+                  <div className="card hover:border-galactic-orange/50 transition-colors h-full overflow-hidden p-0">
+                    <div className="relative w-full overflow-hidden" style={{ aspectRatio: "4/3" }}>
+                      <img
+                        src={image}
+                        alt={imageAlt}
+                        loading="lazy"
+                        className="w-full h-full object-cover"
+                        style={{ maxHeight: "180px" }}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-space-dark/90 to-transparent" />
+                      <div className="absolute bottom-3 left-3 w-9 h-9 flex items-center justify-center rounded-full bg-galactic-orange/20 text-galactic-orange border border-galactic-orange/30">
+                        <Icon className="w-4 h-4" />
+                      </div>
                     </div>
-                    <h3 className="font-orbitron text-lg mb-2 text-neon-yellow">{title}</h3>
-                    <p className="text-gray-300 text-sm leading-relaxed">{description}</p>
+                    <div className="p-5">
+                      <h3 className="font-orbitron text-base mb-2 text-neon-yellow">{title}</h3>
+                      <p className="text-gray-300 text-sm leading-relaxed">{description}</p>
+                    </div>
                   </div>
                 </CarouselItem>
               ))}
