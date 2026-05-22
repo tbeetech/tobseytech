@@ -14,7 +14,7 @@ export function injectBlogMetaTags(
   const postUrl = `${baseUrl}/blog/${post.slug}`;
   const title = escapeHtml(post.title);
   const description = escapeHtml(post.excerpt);
-  const image = post.coverImage ?? `${baseUrl}/og-image.svg`;
+  const image = resolveSocialImageUrl(post.coverImage, baseUrl);
 
   return injectMetaTags(html, { title, description, image, url: postUrl, type: "article" });
 }
@@ -32,7 +32,7 @@ export function injectVlogMetaTags(
   const vlogUrl = `${baseUrl}/vlog/${vlog.slug}`;
   const title = escapeHtml(vlog.seoTitle ?? vlog.title ?? "Untitled Vlog");
   const description = escapeHtml(vlog.seoDescription ?? vlog.description ?? "");
-  const image = vlog.thumbnail ?? `${baseUrl}/og-image.svg`;
+  const image = resolveSocialImageUrl(vlog.thumbnail, baseUrl);
 
   return injectMetaTags(html, { title, description, image, url: vlogUrl, type: "video.other" });
 }
@@ -85,11 +85,17 @@ function injectMetaTags(
     `<meta property="og:image" content="${image}" />`,
   );
 
+  // Replace og:image:secure_url
+  html = html.replace(
+    /<meta\s+property="og:image:secure_url"\s+content="[^"]*"\s*\/?>/,
+    `<meta property="og:image:secure_url" content="${image}" />`,
+  );
+
   // Replace og:image:type — detect from the image URL extension
-  const imageType = image.match(/\.svg(\?|$)/i)
-    ? "image/svg+xml"
-    : image.match(/\.png(\?|$)/i)
+  const imageType = image.match(/\.png(\?|$)/i)
       ? "image/png"
+      : image.match(/\.webp(\?|$)/i)
+        ? "image/webp"
       : "image/jpeg";
   html = html.replace(
     /<meta\s+property="og:image:type"\s+content="[^"]*"\s*\/?>/,
@@ -137,4 +143,26 @@ function escapeHtml(str: string): string {
     .replace(/'/g, "&#x27;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;");
+}
+
+function resolveSocialImageUrl(rawImage: string | null | undefined, baseUrl: string): string {
+  const fallback = `${baseUrl}/og-image.png`;
+  if (!rawImage) return fallback;
+
+  const image = rawImage.trim();
+  if (!image || image.startsWith("data:")) return fallback;
+
+  if (image.startsWith("http://") || image.startsWith("https://")) {
+    return image;
+  }
+
+  if (image.startsWith("//")) {
+    return `https:${image}`;
+  }
+
+  if (image.startsWith("/")) {
+    return `${baseUrl}${image}`;
+  }
+
+  return `${baseUrl}/${image}`;
 }
