@@ -1,6 +1,40 @@
 import type { BlogPost, VlogPost } from "../shared/schema.js";
 
 /**
+ * Replace the hardcoded domain in root OG / Twitter meta tags with the
+ * actual request base URL.  This ensures the correct domain appears in
+ * social-share previews when the site is served from a different domain
+ * (e.g. tobseytech.biz vs the domain baked into the static index.html).
+ */
+export function injectRootMetaTags(html: string, baseUrl: string): string {
+  // og:image
+  html = html.replace(
+    /<meta\s+property="og:image"\s+content="[^"]*"\s*\/?>/,
+    `<meta property="og:image" content="${baseUrl}/og-image.png" />`,
+  );
+
+  // og:image:secure_url
+  html = html.replace(
+    /<meta\s+property="og:image:secure_url"\s+content="[^"]*"\s*\/?>/,
+    `<meta property="og:image:secure_url" content="${baseUrl}/og-image.png" />`,
+  );
+
+  // twitter:image
+  html = html.replace(
+    /<meta\s+name="twitter:image"\s+content="[^"]*"\s*\/?>/,
+    `<meta name="twitter:image" content="${baseUrl}/og-image.png" />`,
+  );
+
+  // og:url
+  html = html.replace(
+    /<meta\s+property="og:url"\s+content="[^"]*"\s*\/?>/,
+    `<meta property="og:url" content="${baseUrl}" />`,
+  );
+
+  return html;
+}
+
+/**
  * Replace the default Open Graph and Twitter Card meta tags in the HTML
  * template with blog-post-specific values so that social-media crawlers
  * (which do NOT execute JavaScript) see the correct title, description,

@@ -6,7 +6,7 @@ import { type Server } from "http";
 import viteConfig from "../vite.config.js";
 import { nanoid } from "nanoid";
 import { storage } from "./storage.js";
-import { injectBlogMetaTags, injectVlogMetaTags } from "./ogTags.js";
+import { injectBlogMetaTags, injectVlogMetaTags, injectRootMetaTags } from "./ogTags.js";
 
 const viteLogger = createLogger();
 
@@ -89,6 +89,13 @@ export async function setupVite(app: Express, server: Server) {
         }
       }
 
+      // For all other routes (including root), fix the hardcoded domain in
+      // OG/Twitter image tags so they resolve correctly on any hostname.
+      if (!blogSlug && !vlogSlug) {
+        const baseUrl = `${req.protocol}://${req.get("host")}`;
+        template = injectRootMetaTags(template, baseUrl);
+      }
+
       const page = await vite.transformIndexHtml(url, template);
       res.status(200).set({ "Content-Type": "text/html" }).end(page);
     } catch (e) {
@@ -109,6 +116,17 @@ export function serveStatic(app: Express) {
 
   app.use(express.static(distPath));
 
+  // Pre-read and cache the index.html so all per-request OG-injection reads
+  // go to memory instead of disk, avoiding repeated file-system access in the
+  // catch-all handler below.
+  let indexHtmlCache: string | null = null;
+  async function getIndexHtml(htmlPath: string): Promise<string> {
+    if (!indexHtmlCache) {
+      indexHtmlCache = await fs.promises.readFile(htmlPath, "utf-8");
+    }
+    return indexHtmlCache;
+  }
+
   // fall through to index.html if the file doesn't exist
   app.use("*", async (req, res) => {
     const htmlPath = path.resolve(distPath, "index.html");
@@ -119,7 +137,7 @@ export function serveStatic(app: Express) {
       try {
         const post = await storage.getBlogPostBySlug(blogSlug);
         if (post && post.published) {
-          let html = await fs.promises.readFile(htmlPath, "utf-8");
+          let html = await getIndexHtml(htmlPath);
           const baseUrl = `${req.protocol}://${req.get("host")}`;
           html = injectBlogMetaTags(html, post, baseUrl);
           return res.status(200).set({ "Content-Type": "text/html" }).end(html);
@@ -135,7 +153,7 @@ export function serveStatic(app: Express) {
       try {
         const vlog = await (storage as any).getVlogPostBySlug(vlogSlug);
         if (vlog && vlog.published) {
-          let html = await fs.promises.readFile(htmlPath, "utf-8");
+          let html = await getIndexHtml(htmlPath);
           const baseUrl = `${req.protocol}://${req.get("host")}`;
           html = injectVlogMetaTags(html, vlog, baseUrl);
           return res.status(200).set({ "Content-Type": "text/html" }).end(html);
@@ -145,7 +163,13 @@ export function serveStatic(app: Express) {
       }
     }
 
-    res.sendFile(htmlPath);
+    // For all other routes (including root), fix the hardcoded domain in
+    // OG/Twitter image tags so they resolve correctly on any hostname.
+    {
+      const baseUrl = `${req.protocol}://${req.get("host")}`;
+      const html = injectRootMetaTags(await getIndexHtml(htmlPath), baseUrl);
+      return res.status(200).set({ "Content-Type": "text/html" }).end(html);
+    }
   });
 }
 
