@@ -12,7 +12,7 @@ const services = [
     icon: Bot,
     title: "Automation Systems",
     description: "We set up smart systems that handle repetitive tasks for you, from responding to leads and sorting emails to running workflows while you sleep.",
-    image: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&q=80",
+    image: "https://zd-brightspot.s3.us-east-1.amazonaws.com/wp-content/uploads/2024/02/26091442/Shutterstock_1133982038.jpg",
     imageAlt: "Automation and robotics technology",
   },
   {
