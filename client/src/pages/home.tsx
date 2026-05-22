@@ -6,7 +6,6 @@ import CTASection from "@/components/CTASection";
 import FounderSection from "@/components/sections/FounderSection";
 import AboutSection from "@/components/sections/AboutSection";
 import ContactSection from "@/components/sections/ContactSection";
-import UseCaseSpotlight from "@/components/UseCaseSpotlight";
 import BackToTop from "@/components/BackToTop";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -22,7 +21,6 @@ export default function Home() {
       <main>
         <Hero />
         <ServicesSection />
-        <UseCaseSpotlight />
         <CTASection />
         <CaseStudiesSection />
         <FounderSection />
