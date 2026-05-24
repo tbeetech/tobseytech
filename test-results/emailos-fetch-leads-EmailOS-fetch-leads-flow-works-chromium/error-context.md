@@ -7,12 +7,12 @@
 # Test info
 
 - Name: emailos-fetch-leads.spec.ts >> EmailOS fetch leads flow works
-- Location: tests/e2e/emailos-fetch-leads.spec.ts:3:1
+- Location: tests\e2e\emailos-fetch-leads.spec.ts:3:1
 
 # Error details
 
 ```
-Error: browserType.launch: Executable doesn't exist at /home/runner/.cache/ms-playwright/chromium_headless_shell-1223/chrome-headless-shell-linux64/chrome-headless-shell
+Error: browserType.launch: Executable doesn't exist at C:\Users\Administrator\AppData\Local\ms-playwright\chromium_headless_shell-1223\chrome-headless-shell-win64\chrome-headless-shell.exe
 ╔════════════════════════════════════════════════════════════╗
 ║ Looks like Playwright was just installed or updated.       ║
 ║ Please run the following command to download new browsers: ║
