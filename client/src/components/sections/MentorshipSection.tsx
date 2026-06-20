@@ -136,7 +136,7 @@ export default function MentorshipSection() {
                 }`}
               >
                 {requested.includes(mentor.id)
-                  ? "âœ“ Request Sent!"
+                  ? "✓ Request Sent!"
                   : mentor.available
                   ? <><ArrowRight className="w-3.5 h-3.5 mr-1" /> Request Session</>
                   : "Currently Unavailable"

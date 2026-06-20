@@ -54,7 +54,7 @@ export default function VlogPage() {
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search vlogsâ€¦"
+              placeholder="Search vlogs…"
               className="pl-9 bg-gray-900 border-gray-700 text-white"
             />
           </div>

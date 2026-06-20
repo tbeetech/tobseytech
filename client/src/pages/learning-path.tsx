@@ -195,7 +195,7 @@ export default function LearningPathPage() {
                       </div>
                       <div className="flex-1">
                         <p className="font-orbitron text-sm text-white">{course.name}</p>
-                        <p className="text-gray-500 text-xs">{course.duration} â€¢ {course.level}</p>
+                        <p className="text-gray-500 text-xs">{course.duration} • {course.level}</p>
                       </div>
                       <span className="text-xs font-orbitron text-galactic-green border border-galactic-green/30 px-2 py-0.5 rounded-full">Free</span>
                     </div>

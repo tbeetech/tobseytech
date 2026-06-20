@@ -132,7 +132,7 @@ export default function ChallengesSection() {
                     : `bg-gradient-to-r from-galactic-orange/20 to-galactic-gold/20 text-white hover:from-galactic-orange/40 hover:to-galactic-gold/40 border ${challenge.border}/30`
                 }`}
               >
-                {joined.includes(challenge.id) ? "âœ“ Joined!" : "Join Challenge"} {!joined.includes(challenge.id) && <ArrowRight className="w-3.5 h-3.5 ml-1" />}
+                {joined.includes(challenge.id) ? "✓ Joined!" : "Join Challenge"} {!joined.includes(challenge.id) && <ArrowRight className="w-3.5 h-3.5 ml-1" />}
               </Button>
             </div>
           ))}

@@ -162,8 +162,8 @@ export default function FeaturesPage() {
             {[
               { label: "Interactive Features", value: "13" },
               { label: "Live Today", value: "13/13" },
-              { label: "User-Facing", value: "âœ“" },
-              { label: "Investor-Ready", value: "âœ“" },
+              { label: "User-Facing", value: "✓" },
+              { label: "Investor-Ready", value: "✓" },
             ].map(({ label, value }) => (
               <div key={label} className="px-5 py-3 glass-effect rounded-xl border border-galactic-orange/20">
                 <div className="font-orbitron font-bold text-galactic-orange text-xl">{value}</div>

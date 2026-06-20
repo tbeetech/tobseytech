@@ -71,7 +71,7 @@ const coreCapabilities = [
     color: "text-neon-cyan",
     border: "border-neon-cyan",
     title: "AI Agentic Workflow Builder",
-    desc: "10-step guided wizard: choose industry â†’ content type â†’ sources â†’ timeline â†’ destinations â†’ AI mode â†’ frequency â†’ approval mode â†’ review â†’ launch.",
+    desc: "10-step guided wizard: choose industry → content type → sources → timeline → destinations → AI mode → frequency → approval mode → review → launch.",
   },
   {
     icon: Filter,

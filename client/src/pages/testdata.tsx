@@ -123,7 +123,7 @@ export default function TestDataPage() {
               }`}
             >
               {status === "loading"
-                ? "Running connectivity testâ€¦"
+                ? "Running connectivity test…"
                 : isConnected
                 ? "Database is CONNECTED"
                 : "Database is UNREACHABLE"}

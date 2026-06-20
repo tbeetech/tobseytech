@@ -36,7 +36,7 @@ export default function HeroSection() {
             ARCOLYTE TECHNOLOGIES
           </h1>
           <p className="text-lg md:text-xl lg:text-2xl mb-4 text-galactic-gold max-w-3xl mx-auto font-orbitron">
-            Future-Forward Digital Solutions â€¢ AI-Powered Innovation â€¢ Kingdom Enhancement Technology
+            Future-Forward Digital Solutions • AI-Powered Innovation • Kingdom Enhancement Technology
           </p>
           <p className="text-sm md:text-base mb-8 text-galactic-green max-w-2xl mx-auto font-orbitron animate-pulse-slow">
             God-Inclined Methodology Â· Church Digital Technology Â· Asynchronous & Real-Time

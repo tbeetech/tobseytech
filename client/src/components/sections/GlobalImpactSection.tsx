@@ -1,21 +1,21 @@
-﻿import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState } from "react";
 import { Globe2, MapPin } from "lucide-react";
 
 const regions = [
-  { name: "Nigeria", flag: "ðŸ‡³ðŸ‡¬", clients: 45, color: "#22c55e", x: 50, y: 52 },
-  { name: "Ghana", flag: "ðŸ‡¬ðŸ‡­", clients: 18, color: "#22c55e", x: 46, y: 53 },
-  { name: "Kenya", flag: "ðŸ‡°ðŸ‡ª", clients: 22, color: "#00E5FF", x: 57, y: 56 },
-  { name: "South Africa", flag: "ðŸ‡¿ðŸ‡¦", clients: 15, color: "#9C27B0", x: 53, y: 67 },
-  { name: "UK", flag: "ðŸ‡¬ðŸ‡§", clients: 12, color: "#4CAF50", x: 47, y: 30 },
-  { name: "USA", flag: "ðŸ‡ºðŸ‡¸", clients: 8, color: "#2196F3", x: 22, y: 38 },
-  { name: "Canada", flag: "ðŸ‡¨ðŸ‡¦", clients: 5, color: "#FF5722", x: 20, y: 28 },
-  { name: "UAE", flag: "ðŸ‡¦ðŸ‡ª", clients: 9, color: "#4DB6AC", x: 62, y: 43 },
-  { name: "Rwanda", flag: "ðŸ‡·ðŸ‡¼", clients: 7, color: "#AB47BC", x: 56, y: 57 },
-  { name: "Ethiopia", flag: "ðŸ‡ªðŸ‡¹", clients: 6, color: "#FF7043", x: 58, y: 52 },
-  { name: "Senegal", flag: "ðŸ‡¸ðŸ‡³", clients: 4, color: "#26A69A", x: 43, y: 50 },
-  { name: "Cameroon", flag: "ðŸ‡¨ðŸ‡²", clients: 5, color: "#FFCA28", x: 51, y: 55 },
-  { name: "Tanzania", flag: "ðŸ‡¹ðŸ‡¿", clients: 8, color: "#EF5350", x: 56, y: 61 },
-  { name: "Australia", flag: "ðŸ‡¦ðŸ‡º", clients: 3, color: "#42A5F5", x: 82, y: 70 },
+  { name: "Nigeria", flag: "🇳🇬", clients: 45, color: "#22c55e", x: 50, y: 52 },
+  { name: "Ghana", flag: "🇬🇭", clients: 18, color: "#22c55e", x: 46, y: 53 },
+  { name: "Kenya", flag: "🇰🇪", clients: 22, color: "#00E5FF", x: 57, y: 56 },
+  { name: "South Africa", flag: "🇿🇦", clients: 15, color: "#9C27B0", x: 53, y: 67 },
+  { name: "UK", flag: "🇬🇧", clients: 12, color: "#4CAF50", x: 47, y: 30 },
+  { name: "USA", flag: "🇺🇸", clients: 8, color: "#2196F3", x: 22, y: 38 },
+  { name: "Canada", flag: "🇨🇦", clients: 5, color: "#FF5722", x: 20, y: 28 },
+  { name: "UAE", flag: "🇦🇪", clients: 9, color: "#4DB6AC", x: 62, y: 43 },
+  { name: "Rwanda", flag: "🇷🇼", clients: 7, color: "#AB47BC", x: 56, y: 57 },
+  { name: "Ethiopia", flag: "🇪🇹", clients: 6, color: "#FF7043", x: 58, y: 52 },
+  { name: "Senegal", flag: "🇸🇳", clients: 4, color: "#26A69A", x: 43, y: 50 },
+  { name: "Cameroon", flag: "🇨🇲", clients: 5, color: "#FFCA28", x: 51, y: 55 },
+  { name: "Tanzania", flag: "🇹🇿", clients: 8, color: "#EF5350", x: 56, y: 61 },
+  { name: "Australia", flag: "🇦🇺", clients: 3, color: "#42A5F5", x: 82, y: 70 },
 ];
 
 export default function GlobalImpactSection() {

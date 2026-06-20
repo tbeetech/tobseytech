@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { Play, Monitor, MessageSquare, BarChart3, Zap, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -13,18 +13,18 @@ const demoSteps = [
       <div className="space-y-3 p-4">
         <div className="flex items-center gap-3 p-3 bg-galactic-orange/10 border border-galactic-orange/20 rounded-lg animate-pulse">
           <div className="w-2 h-2 rounded-full bg-galactic-green" />
-          <span className="text-xs font-orbitron text-gray-300">New lead captured â†’ CRM updated â†’ Welcome email sent</span>
+          <span className="text-xs font-orbitron text-gray-300">New lead captured → CRM updated → Welcome email sent</span>
         </div>
         <div className="flex items-center gap-3 p-3 bg-neon-cyan/10 border border-neon-cyan/20 rounded-lg" style={{ animationDelay: "0.5s" }}>
           <div className="w-2 h-2 rounded-full bg-neon-cyan" />
-          <span className="text-xs font-orbitron text-gray-300">WhatsApp message received â†’ AI replies in {'<'}2s</span>
+          <span className="text-xs font-orbitron text-gray-300">WhatsApp message received → AI replies in {'<'}2s</span>
         </div>
         <div className="flex items-center gap-3 p-3 bg-neon-yellow/10 border border-neon-yellow/20 rounded-lg">
           <div className="w-2 h-2 rounded-full bg-neon-yellow" />
-          <span className="text-xs font-orbitron text-gray-300">Social post scheduled â†’ 10 platform variants created</span>
+          <span className="text-xs font-orbitron text-gray-300">Social post scheduled → 10 platform variants created</span>
         </div>
         <div className="text-center mt-2">
-          <span className="text-galactic-green text-xs font-orbitron">âœ“ 3 workflows running â€¢ 0 manual steps needed</span>
+          <span className="text-galactic-green text-xs font-orbitron">✓ 3 workflows running • 0 manual steps needed</span>
         </div>
       </div>
     ),
@@ -95,12 +95,12 @@ const demoSteps = [
     preview: (
       <div className="p-4 space-y-2">
         {[
-          { icon: "ðŸ¤", label: "Community Chat", users: "1.2K online" },
-          { icon: "ðŸ“š", label: "Learning Hub", courses: "24 courses" },
-          { icon: "ðŸ†", label: "Challenges", active: "4 active" },
-          { icon: "ðŸ‘¥", label: "Mentorship", sessions: "320 completed" },
-          { icon: "ðŸ“°", label: "Tech Blog", posts: "85 articles" },
-          { icon: "ðŸ”—", label: "Network", connections: "4.8K links" },
+          { icon: "🤝", label: "Community Chat", users: "1.2K online" },
+          { icon: "📚", label: "Learning Hub", courses: "24 courses" },
+          { icon: "🏆", label: "Challenges", active: "4 active" },
+          { icon: "👥", label: "Mentorship", sessions: "320 completed" },
+          { icon: "📰", label: "Tech Blog", posts: "85 articles" },
+          { icon: "🔗", label: "Network", connections: "4.8K links" },
         ].map(({ icon, label, ...rest }) => {
           const sub = Object.values(rest)[0];
           return (

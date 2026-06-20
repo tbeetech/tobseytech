@@ -222,7 +222,7 @@ export default function FeatureEmailOSPage() {
                 {[
                   { label: "Free Contacts", value: "500" },
                   { label: "Pro Contacts", value: "10K" },
-                  { label: "Smart Scheduling", value: "âœ“" },
+                  { label: "Smart Scheduling", value: "✓" },
                   { label: "Open Tracking", value: "Live" },
                   { label: "A/B Testing", value: "Pro+" },
                   { label: "Exclusive to", value: "ARCOLYTE TECHNOLOGIES" },

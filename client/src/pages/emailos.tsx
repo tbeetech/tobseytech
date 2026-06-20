@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import Navigation from "@/components/Navigation";
@@ -353,7 +353,7 @@ function OnboardingWizard({ onComplete }: { onComplete: (org: Org) => void }) {
               <div className="w-20 h-20 rounded-full bg-neon-cyan/10 border border-neon-cyan/40 flex items-center justify-center mx-auto mb-6">
                 <Mail className="w-10 h-10 text-neon-cyan" />
               </div>
-              <h1 className="font-orbitron font-black text-3xl gradient-text mb-3">Welcome to EmailOS ðŸ‘‹</h1>
+              <h1 className="font-orbitron font-black text-3xl gradient-text mb-3">Welcome to EmailOS 👋</h1>
               <p className="text-gray-300 mb-2 max-w-lg mx-auto">
                 You're about to set up your very own <span className="text-neon-cyan font-semibold">email marketing account</span>. It takes less than 2 minutes and no technical knowledge is required.
               </p>
@@ -535,7 +535,7 @@ function OnboardingWizard({ onComplete }: { onComplete: (org: Org) => void }) {
                   <input
                     value={campaignSubject}
                     onChange={e => setCampaignSubject(e.target.value)}
-                    placeholder="e.g. ðŸŽ‰ Our Big Summer Sale, Don't Miss It!"
+                    placeholder="e.g. 🎉 Our Big Summer Sale, Don't Miss It!"
                     className="w-full bg-space-dark border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-neon-purple/60 font-orbitron text-sm"
                   />
                 </div>
@@ -578,7 +578,7 @@ function OnboardingWizard({ onComplete }: { onComplete: (org: Org) => void }) {
               <div className="w-24 h-24 rounded-full bg-galactic-orange/15 border border-galactic-orange/40 flex items-center justify-center mx-auto mb-6">
                 <Zap className="w-12 h-12 text-galactic-orange" />
               </div>
-              <h2 className="font-orbitron font-black text-3xl gradient-text mb-3">You're All Set! ðŸŽ‰</h2>
+              <h2 className="font-orbitron font-black text-3xl gradient-text mb-3">You're All Set! 🎉</h2>
               <p className="text-gray-300 mb-2 max-w-md mx-auto">
                 Your EmailOS account is ready. Head to your dashboard to add contacts, create beautiful campaigns, and start sending!
               </p>
@@ -701,7 +701,7 @@ function EmailOSDashboard({ org: initialOrg }: { org: Org }) {
     try {
       const data = await apiFetch(`/api/emailos/campaigns/${id}/send`, { method: "POST" });
       setCampaigns(prev => prev.map(c => c._id === id ? { ...c, status: "sending" } : c));
-      toast({ title: "Campaign dispatched!", description: `Sending to ${data.queued} contactsâ€¦` });
+      toast({ title: "Campaign dispatched!", description: `Sending to ${data.queued} contacts…` });
     } catch (err: any) {
       toast({ title: "Send failed", description: err.message, variant: "destructive" });
     } finally {
@@ -1111,7 +1111,7 @@ function EmailOSDashboard({ org: initialOrg }: { org: Org }) {
                         <Button variant="outline" onClick={() => setAggregateListId(null)} className="border-white/10 text-gray-400 font-orbitron text-sm">Cancel</Button>
                         <Button onClick={handleAggregateLeads} disabled={aggregating} className="flex-1 bg-neon-cyan text-space-black font-orbitron font-bold text-sm">
                           {aggregating ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <RefreshCw className="w-4 h-4 mr-2" />}
-                          {aggregating ? "Fetching Leadsâ€¦" : "Fetch Leads"}
+                          {aggregating ? "Fetching Leads…" : "Fetch Leads"}
                         </Button>
                       </div>
                     </div>
@@ -1203,8 +1203,8 @@ function EmailOSDashboard({ org: initialOrg }: { org: Org }) {
                               {viewingList.contacts.map((c, i) => (
                                 <tr key={i} className="hover:bg-white/3 transition-colors">
                                   <td className="px-4 py-2.5 text-white">{c.email}</td>
-                                  <td className="px-4 py-2.5 text-gray-300">{c.firstName || <span className="text-gray-600">â€”</span>}</td>
-                                  <td className="px-4 py-2.5 text-gray-300">{c.lastName || <span className="text-gray-600">â€”</span>}</td>
+                                  <td className="px-4 py-2.5 text-gray-300">{c.firstName || <span className="text-gray-600">—</span>}</td>
+                                  <td className="px-4 py-2.5 text-gray-300">{c.lastName || <span className="text-gray-600">—</span>}</td>
                                   <td className="px-4 py-2.5">
                                     <div className="flex flex-wrap gap-1">
                                       {(c.tags ?? []).map(t => (
@@ -1401,7 +1401,7 @@ export default function EmailOSPage() {
           <div className="mt-6 text-center">
             <Link href="/feature/emailos">
               <span className="text-gray-500 text-xs font-orbitron hover:text-neon-cyan transition-colors underline underline-offset-2 cursor-pointer">
-                Learn more about EmailOS â†’
+                Learn more about EmailOS →
               </span>
             </Link>
           </div>

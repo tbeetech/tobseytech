@@ -219,7 +219,7 @@ export default function AuthPage() {
                         required
                         className="h-10 border-galactic-orange/20 text-white text-sm pr-10"
                         style={{ background: "rgba(0,0,0,0.6)" }}
-                        placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+                        placeholder="••••••••"
                       />
                       <button
                         type="button"
@@ -236,7 +236,7 @@ export default function AuthPage() {
                     disabled={loading}
                     className="w-full h-10 bg-gradient-to-r from-galactic-orange to-galactic-gold text-space-black font-orbitron font-bold text-sm transition-all mt-2 hover:shadow-[0_0_25px_rgba(34,197,94,0.4)]"
                   >
-                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Sign In â†’"}
+                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Sign In →"}
                   </Button>
                   <div className="text-center">
                     <a
@@ -336,7 +336,7 @@ export default function AuthPage() {
                         minLength={6}
                         className={`h-10 border-galactic-orange/20 text-white text-sm pr-10 ${passwordMismatch ? "border-red-500" : ""}`}
                         style={{ background: "rgba(0,0,0,0.6)" }}
-                        placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+                        placeholder="••••••••"
                       />
                       <button
                         type="button"
@@ -356,7 +356,7 @@ export default function AuthPage() {
                     disabled={loading}
                     className="w-full h-10 bg-gradient-to-r from-galactic-orange to-galactic-gold text-space-black font-orbitron font-bold text-sm transition-all mt-2 hover:shadow-[0_0_25px_rgba(34,197,94,0.4)]"
                   >
-                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Create Account â†’"}
+                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Create Account →"}
                   </Button>
                 </form>
               </TabsContent>
