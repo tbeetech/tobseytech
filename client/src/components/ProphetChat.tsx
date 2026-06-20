@@ -137,14 +137,14 @@ const OPENING_LINES = [
 ];
 
 const ALL_STARTER_QUESTIONS = [
-  "What services does TOBSEYTECH offer?",
+  "What services does ARCOLYTE TECHNOLOGIES offer?",
   "How can AI automation help my business?",
   "What is SPORTA and how does it work?",
-  "How do I get started with TOBSEYTECH?",
-  "What makes TOBSEYTECH different from other agencies?",
+  "How do I get started with ARCOLYTE TECHNOLOGIES?",
+  "What makes ARCOLYTE TECHNOLOGIES different from other agencies?",
   "Can you explain the Digital Maturity Assessment?",
   "How long does a typical project take?",
-  "What industries does TOBSEYTECH work with?",
+  "What industries does ARCOLYTE TECHNOLOGIES work with?",
   "How much does web development cost?",
   "What AI tools do you use for clients?",
   "Tell me about Kingdom Enhancement Corp.",
@@ -405,7 +405,7 @@ export default function ProphetChat() {
                 className="shrink-0 text-center font-orbitron text-[9px] tracking-[0.25em] py-1 opacity-40"
                 style={{ color: "var(--galactic-gold)", borderBottom: "1px solid rgba(34,197,94,0.1)" }}
               >
-                ▌ AGENTIC AI · POWERED BY GEMINI · TOBSEYTECH ▐
+                ▌ AGENTIC AI · POWERED BY GEMINI · ARCOLYTE TECHNOLOGIES ▐
               </div>
             )}
 

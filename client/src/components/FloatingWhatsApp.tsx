@@ -2,7 +2,7 @@ import React from "react";
 
 export default function FloatingWhatsApp() {
   const message = encodeURIComponent(
-    "Hi TOBSEYTECH, I'd like to learn more"
+    "Hi ARCOLYTE TECHNOLOGIES, I'd like to learn more"
   );
   const href = `https://wa.me/2348122536647?text=${message}`;
   return (

@@ -1,4 +1,4 @@
-import type { BlogPost, VlogPost } from "../shared/schema.js";
+﻿import type { BlogPost, VlogPost } from "../shared/schema.js";
 
 /**
  * Replace the default Open Graph and Twitter Card meta tags in the HTML
@@ -37,7 +37,7 @@ export function injectVlogMetaTags(
   return injectMetaTags(html, { title, description, image, url: vlogUrl, type: "video.other" });
 }
 
-/** Core helper — replaces all OG/Twitter meta tags in the template. */
+/** Core helper â€” replaces all OG/Twitter meta tags in the template. */
 function injectMetaTags(
   html: string,
   { title, description, image, url, type }: {
@@ -52,7 +52,7 @@ function injectMetaTags(
   // Replace <title>
   html = html.replace(
     /<title>[^<]*<\/title>/,
-    `<title>${title} — TOBSEYTECH</title>`,
+    `<title>${title} â€” ARCOLYTE TECHNOLOGIES</title>`,
   );
 
   // Replace og:title
@@ -91,7 +91,7 @@ function injectMetaTags(
     `<meta property="og:image:secure_url" content="${image}" />`,
   );
 
-  // Replace og:image:type — detect from the image URL extension
+  // Replace og:image:type â€” detect from the image URL extension
   const imageType = image.match(/\.png(\?|$)/i)
       ? "image/png"
       : image.match(/\.webp(\?|$)/i)

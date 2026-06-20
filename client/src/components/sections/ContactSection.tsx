@@ -1,8 +1,8 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Mail, MessageCircle, Send, CalendarDays } from "lucide-react";
 
-const CONTACT_EMAIL = "tobseytech@gmail.com";
-const CALENDLY_URL = "https://calendly.com/tobseytech";
+const CONTACT_EMAIL = "arcolytetech@gmail.com";
+const CALENDLY_URL = "https://calendly.com/ARCOLYTE TECHNOLOGIES";
 
 const INQUIRY_TYPES = [
   "AI Automation Systems",
@@ -227,8 +227,8 @@ export default function ContactSection() {
 
             <div className="glass-effect p-5 rounded-xl border border-galactic-gold/20">
               <p className="text-gray-300 text-sm leading-relaxed">
-                📍 Available for remote projects worldwide<br />
-                ⏱ Typical response within <span className="text-neon-yellow font-semibold">24 hours</span>
+                ðŸ“ Available for remote projects worldwide<br />
+                â± Typical response within <span className="text-neon-yellow font-semibold">24 hours</span>
               </p>
             </div>
           </div>

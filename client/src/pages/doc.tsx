@@ -1,4 +1,4 @@
-import { Link } from "wouter";
+﻿import { Link } from "wouter";
 import Navigation from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -136,7 +136,7 @@ export default function DocPage() {
 
   return (
     <div className="min-h-screen bg-space-black text-white">
-      <title>Contributor Docs, TOBSEYTECH</title>
+      <title>Contributor Docs, ARCOLYTE TECHNOLOGIES</title>
       <Navigation />
 
       <main className="pt-24 pb-20 px-6">
@@ -148,7 +148,7 @@ export default function DocPage() {
                   <BookOpen className="w-4 h-4" /> Open Source Contributor Doc
                 </div>
                 <h1 className="font-orbitron font-black text-4xl md:text-6xl gradient-text mb-4 leading-tight">
-                  Build On TOBSEYTECH Without Guesswork
+                  Build On ARCOLYTE TECHNOLOGIES Without Guesswork
                 </h1>
                 <p className="text-gray-300 text-base md:text-lg leading-relaxed">
                   This route is the fast onboarding surface for external contributors. It explains what the project is,

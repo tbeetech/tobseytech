@@ -1,22 +1,22 @@
-/**
+﻿/**
  * sportaAggregator.ts
  *
  * Aggregates up to 100 postable content items for a SPORTA campaign.
  * Sources: Google News RSS, Medium RSS, Dev.to RSS, Reddit public JSON.
  *
  * Rules per content type:
- *  - Blog articles / tutorials / reviews → only included when they carry an image.
- *  - Social images / memes / quotes      → image + caption; no video links.
- *  - Videos / Shorts / Reels             → source link stored only (no embed / no actual video).
- *  - Podcasts / Threads                  → text + optional image.
+ *  - Blog articles / tutorials / reviews â†’ only included when they carry an image.
+ *  - Social images / memes / quotes      â†’ image + caption; no video links.
+ *  - Videos / Shorts / Reels             â†’ source link stored only (no embed / no actual video).
+ *  - Podcasts / Threads                  â†’ text + optional image.
  *
- * No external API keys required — all sources are freely accessible.
+ * No external API keys required â€” all sources are freely accessible.
  */
 
 import Parser from "rss-parser";
 import type { SportaCampaign, InsertSportaContent, SportaPlatform, SportaContentType } from "../shared/schema.js";
 
-// ─── RSS parser (shared instance) ────────────────────────────────────────────
+// â”€â”€â”€ RSS parser (shared instance) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 interface RssItem extends Parser.Item {
   "media:content"?: { $: { url: string } } | Array<{ $: { url: string } }>;
@@ -34,12 +34,12 @@ const rssParser = new Parser<Record<string, unknown>, RssItem>({
   },
   timeout: 12_000,
   headers: {
-    "User-Agent": "TobseyTechSPORTA/1.0",
+    "User-Agent": "ARCOLYTE TECHNOLOGIESSPORTA/1.0",
     Accept: "application/rss+xml, application/xml, text/xml, */*",
   },
 });
 
-// ─── Industry → search keyword mapping ───────────────────────────────────────
+// â”€â”€â”€ Industry â†’ search keyword mapping â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const INDUSTRY_KEYWORDS: Record<string, string> = {
   Fashion: "fashion style trends",
@@ -69,7 +69,7 @@ const INDUSTRY_KEYWORDS: Record<string, string> = {
   Custom: "trending news",
 };
 
-// ─── Industry → Reddit subreddit mapping ─────────────────────────────────────
+// â”€â”€â”€ Industry â†’ Reddit subreddit mapping â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const INDUSTRY_SUBREDDITS: Record<string, string[]> = {
   Fashion: ["fashion", "femalefashionadvice"],
@@ -99,7 +99,7 @@ const INDUSTRY_SUBREDDITS: Record<string, string[]> = {
   Custom: ["all"],
 };
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function stripHtml(html: string): string {
   return html.replace(/<[^>]+>/g, " ").replace(/\s{2,}/g, " ").trim();
@@ -125,7 +125,7 @@ function extractImageFromRssItem(item: RssItem): string | null {
 function buildExcerpt(item: RssItem, maxLen = 400): string {
   const raw = item["content:encoded"] || item.content || item.contentSnippet || item.summary || "";
   const text = stripHtml(raw);
-  return text.length > maxLen ? text.slice(0, maxLen).trimEnd() + "…" : text;
+  return text.length > maxLen ? text.slice(0, maxLen).trimEnd() + "â€¦" : text;
 }
 
 function containsBannedKeyword(text: string, banned: string[]): boolean {
@@ -134,7 +134,7 @@ function containsBannedKeyword(text: string, banned: string[]): boolean {
   return banned.some((k) => lower.includes(k.toLowerCase()));
 }
 
-// ─── Video URL helpers ────────────────────────────────────────────────────────
+// â”€â”€â”€ Video URL helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function extractYouTubeId(url: string): string | null {
   const m = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
@@ -182,7 +182,7 @@ function devtoTagFeedUrl(tag: string): string {
   return `https://dev.to/feed/tag/${encodeURIComponent(tag.toLowerCase().replace(/\s+/g, ""))}`;
 }
 
-// ─── Reddit JSON fetcher ──────────────────────────────────────────────────────
+// â”€â”€â”€ Reddit JSON fetcher â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 interface RedditPost {
   title: string;
@@ -199,7 +199,7 @@ interface RedditPost {
 async function fetchRedditPosts(subreddit: string, limit = 25): Promise<RedditPost[]> {
   const url = `https://www.reddit.com/r/${subreddit}/hot.json?limit=${limit}`;
   const resp = await fetch(url, {
-    headers: { "User-Agent": "TobseyTechSPORTA/1.0" },
+    headers: { "User-Agent": "ARCOLYTE TECHNOLOGIESSPORTA/1.0" },
     signal: AbortSignal.timeout(12_000),
   });
   if (!resp.ok) return [];
@@ -207,7 +207,7 @@ async function fetchRedditPosts(subreddit: string, limit = 25): Promise<RedditPo
   return (json?.data?.children ?? []).map((c: any) => c.data as RedditPost);
 }
 
-// ─── Platform → feed list builder ────────────────────────────────────────────
+// â”€â”€â”€ Platform â†’ feed list builder â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 interface FeedDescriptor {
   type: "rss" | "reddit";
@@ -227,7 +227,7 @@ function buildFeedList(campaign: SportaCampaign): FeedDescriptor[] {
   for (const platform of sourcePlatforms) {
     switch (platform) {
       case "Medium":
-        // Medium tag feed — good for articles
+        // Medium tag feed â€” good for articles
         if (contentTypes.some((t) => ["Articles", "Tutorials", "Reviews"].includes(t))) {
           const tag = (keywords[0] ?? industry).toLowerCase().replace(/\s+/g, "-");
           feeds.push({ type: "rss", url: mediumTagFeedUrl(tag), platform: "Medium", defaultMediaType: "Articles" });
@@ -318,7 +318,7 @@ function buildFeedList(campaign: SportaCampaign): FeedDescriptor[] {
   return feeds;
 }
 
-// ─── Main aggregation function ────────────────────────────────────────────────
+// â”€â”€â”€ Main aggregation function â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export interface AggregationResult {
   saved: number;
@@ -329,7 +329,7 @@ export interface AggregationResult {
 /**
  * Aggregate up to `maxItems` (default 100) postable content items for the
  * given campaign.  Returns the list of InsertSportaContent objects ready to be
- * persisted — the caller is responsible for deduplication and saving.
+ * persisted â€” the caller is responsible for deduplication and saving.
  */
 export async function aggregateCampaignContent(
   campaign: SportaCampaign,
@@ -357,7 +357,7 @@ export async function aggregateCampaignContent(
   const wantsThreads = contentTypes.includes("Threads");
   const wantsPodcasts = contentTypes.includes("Podcasts");
 
-  // ── Process each feed concurrently ──
+  // â”€â”€ Process each feed concurrently â”€â”€
   const feedResults = await Promise.allSettled(
     feeds.map(async (feed) => {
       if (feed.type === "reddit") {
@@ -377,7 +377,7 @@ export async function aggregateCampaignContent(
           if (post.is_video && !wantsVideos) { skipped++; continue; }
 
           if (post.is_video && wantsVideos) {
-            // Video: store link only — no content body, no thumbnail
+            // Video: store link only â€” no content body, no thumbnail
             items.push({
               campaignId: campaign.id,
               sourceUrl: postUrl,
@@ -415,7 +415,7 @@ export async function aggregateCampaignContent(
         return items;
       }
 
-      // ── RSS feed ──
+      // â”€â”€ RSS feed â”€â”€
       const feed_data = await rssParser.parseURL(feed.url);
       const items: InsertSportaContent[] = [];
 
@@ -458,7 +458,7 @@ export async function aggregateCampaignContent(
         }
 
         if (isVideoType(mediaType)) {
-          // Video: only store link — no content body or thumbnail
+          // Video: only store link â€” no content body or thumbnail
           if (!wantsVideos) { skipped++; continue; }
           items.push({
             campaignId: campaign.id,

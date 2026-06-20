@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Link } from "wouter";
 import Navigation from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
@@ -108,7 +108,7 @@ export default function LearningPathPage() {
 
   return (
     <div className="min-h-screen bg-space-black text-white">
-      <title>Learning Path Recommender – TOBSEYTECH</title>
+      <title>Learning Path Recommender â€“ ARCOLYTE TECHNOLOGIES</title>
       <Navigation />
       <main className="pt-24 pb-20 container mx-auto px-6">
         <div className="text-center mb-10">
@@ -170,7 +170,7 @@ export default function LearningPathPage() {
                   onClick={() => setStep(s => s - 1)}
                   className="mt-4 text-gray-500 hover:text-gray-300 font-orbitron text-xs transition-colors"
                 >
-                  ← Back
+                  â† Back
                 </button>
               )}
             </div>
@@ -195,7 +195,7 @@ export default function LearningPathPage() {
                       </div>
                       <div className="flex-1">
                         <p className="font-orbitron text-sm text-white">{course.name}</p>
-                        <p className="text-gray-500 text-xs">{course.duration} • {course.level}</p>
+                        <p className="text-gray-500 text-xs">{course.duration} â€¢ {course.level}</p>
                       </div>
                       <span className="text-xs font-orbitron text-galactic-green border border-galactic-green/30 px-2 py-0.5 rounded-full">Free</span>
                     </div>

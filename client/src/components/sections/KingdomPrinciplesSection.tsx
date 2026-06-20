@@ -1,4 +1,4 @@
-import { Cross, Wifi, Zap, Church, BookOpen, Radio } from "lucide-react";
+﻿import { Cross, Wifi, Zap, Church, BookOpen, Radio } from "lucide-react";
 
 const godInclinedPrinciples = [
   {
@@ -144,7 +144,7 @@ export default function KingdomPrinciplesSection() {
               Always On. Never Blocking.
             </h3>
             <p className="text-gray-400 text-sm max-w-xl mx-auto">
-              TOBSEYTECH's platform is built on an asynchronous, event-driven foundation, delivering real-time
+              ARCOLYTE TECHNOLOGIES's platform is built on an asynchronous, event-driven foundation, delivering real-time
               experiences for chat, notifications, dashboards, and content, with zero downtime for your users.
             </p>
           </div>

@@ -70,11 +70,11 @@ export default function Navigation() {
           <Link href="/">
             <div className="flex items-center gap-3 cursor-pointer" data-testid="nav-logo">
               <img
-                src="https://i.pinimg.com/1200x/58/b9/9e/58b99ee7bfbbf7c0043a1950be716265.jpg"
-                alt="TOBSEYTECH Logo"
+                src="/arcolytelogo.png"
+                alt="Arcolyte Technologies Logo"
                 className="w-10 h-10 rounded-xl object-cover shadow-[0_0_16px_rgba(34,197,94,0.35)]"
               />
-              <span className="font-orbitron font-bold text-lg gradient-text">TOBSEYTECH</span>
+              <span className="font-orbitron font-bold text-lg gradient-text">ARCOLYTE TECHNOLOGIES</span>
             </div>
           </Link>
 

@@ -1,4 +1,4 @@
-import Navigation from "@/components/Navigation";
+﻿import Navigation from "@/components/Navigation";
 import AboutSection from "@/components/sections/AboutSection";
 import FounderSection from "@/components/sections/FounderSection";
 import { Link } from "wouter";
@@ -10,7 +10,7 @@ export default function AboutPage() {
       <Navigation />
       <main className="pt-24">
         <div className="container mx-auto px-6 text-center mb-4 pt-4">
-          <h1 className="font-orbitron font-bold text-4xl gradient-text mb-4">About TOBSEYTECH</h1>
+          <h1 className="font-orbitron font-bold text-4xl gradient-text mb-4">About ARCOLYTE TECHNOLOGIES</h1>
           <p className="text-gray-300 max-w-2xl mx-auto">
             A digital agency built on clarity, delivery, and founder-level attention. Here's who we are and how we work.
           </p>

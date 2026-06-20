@@ -1,4 +1,4 @@
-import bcrypt from "bcryptjs";
+﻿import bcrypt from "bcryptjs";
 import { storage } from "./storage.js";
 import { ADMIN_SEED_EMAIL, ADMIN_SEED_PASSWORD } from "./env.js";
 
@@ -7,8 +7,8 @@ import { ADMIN_SEED_EMAIL, ADMIN_SEED_PASSWORD } from "./env.js";
  * role="admin".  Called once at server startup after initStorage().
  *
  * Environment variables used:
- *   ADMIN_SEED_EMAIL     – email address for the seeded account (required)
- *   ADMIN_SEED_PASSWORD  – initial password used only when creating the account
+ *   ADMIN_SEED_EMAIL     â€“ email address for the seeded account (required)
+ *   ADMIN_SEED_PASSWORD  â€“ initial password used only when creating the account
  *                          for the very first time (required)
  *
  * If the user already exists only the role is promoted to "admin" when needed.
@@ -36,7 +36,7 @@ export async function ensureAdminUser(): Promise<void> {
         await storage.updateUserRole(existing.id, "admin");
         console.log(`[seed] Promoted existing user "${username}" to admin.`);
       } else {
-        console.log(`[seed] Admin user "${username}" is up-to-date – nothing to do.`);
+        console.log(`[seed] Admin user "${username}" is up-to-date â€“ nothing to do.`);
       }
       return;
     }
@@ -57,7 +57,7 @@ export async function ensureAdminUser(): Promise<void> {
 /**
  * Promotes an existing user identified by email to role="admin".
  * Called once at server startup after initStorage().
- * If no user with that email exists yet, the function is a no-op – the
+ * If no user with that email exists yet, the function is a no-op â€“ the
  * promotion will happen automatically the next time the server starts
  * after the user has registered.
  */
@@ -65,11 +65,11 @@ export async function promoteAdminByEmail(email: string): Promise<void> {
   try {
     const user = await storage.getUserByEmail(email);
     if (!user) {
-      console.log(`[seed] No user found with email "${email}" – skipping promotion.`);
+      console.log(`[seed] No user found with email "${email}" â€“ skipping promotion.`);
       return;
     }
     if (user.role === "admin") {
-      console.log(`[seed] User "${email}" is already an admin – nothing to do.`);
+      console.log(`[seed] User "${email}" is already an admin â€“ nothing to do.`);
       return;
     }
     await storage.updateUserRole(user.id, "admin");
@@ -81,7 +81,7 @@ export async function promoteAdminByEmail(email: string): Promise<void> {
 
 /**
  * Seeds 3 default published VlogPosts (the 3 starter YouTube videos) the first
- * time the server starts against an empty vlogs collection.  Idempotent — if
+ * time the server starts against an empty vlogs collection.  Idempotent â€” if
  * any vlog posts already exist the function returns immediately.
  */
 export async function seedDefaultVlogs(): Promise<void> {
@@ -90,9 +90,9 @@ export async function seedDefaultVlogs(): Promise<void> {
     if (existing && existing.length > 0) return;
 
     const adminUser = await storage.getUserByUsername("admin").catch(() => null)
-      || await storage.getUserByEmail(process.env.ADMIN_EMAIL || "admin@tobseytech.com").catch(() => null);
+      || await storage.getUserByEmail(process.env.ADMIN_EMAIL || "admin@arcolytetech.com").catch(() => null);
     const authorId = adminUser?.id || "system";
-    const authorName = adminUser?.username || "TobseyTech";
+    const authorName = adminUser?.username || "ARCOLYTE TECHNOLOGIES";
 
     const { insertVlogPostSchema } = await import("../shared/schema.js");
 
@@ -106,7 +106,7 @@ export async function seedDefaultVlogs(): Promise<void> {
         thumbnail: "https://img.youtube.com/vi/8h9j2rskP14/mqdefault.jpg",
         category: "AI & Development",
         tags: ["AI", "software development", "future tech"],
-        seoTitle: "The Future of AI in Software Development | TobseyTech Vlog",
+        seoTitle: "The Future of AI in Software Development | ARCOLYTE TECHNOLOGIES Vlog",
         seoDescription: "Explore how AI is transforming software development with intelligent coding tools.",
         published: true,
         authorId,
@@ -121,7 +121,7 @@ export async function seedDefaultVlogs(): Promise<void> {
         thumbnail: "https://img.youtube.com/vi/dXCCleAddEA/mqdefault.jpg",
         category: "Dev Tools",
         tags: ["productivity", "dev tools", "2024", "coding tips"],
-        seoTitle: "Top Dev Tools & Productivity Hacks 2024 | TobseyTech Vlog",
+        seoTitle: "Top Dev Tools & Productivity Hacks 2024 | ARCOLYTE TECHNOLOGIES Vlog",
         seoDescription: "Essential developer tools and productivity hacks used by top engineers in 2024.",
         published: true,
         authorId,
@@ -136,7 +136,7 @@ export async function seedDefaultVlogs(): Promise<void> {
         thumbnail: "https://img.youtube.com/vi/D_FCYsshMI4/mqdefault.jpg",
         category: "Tech Gadgets",
         tags: ["gadgets", "hardware", "IoT", "tech"],
-        seoTitle: "Tech Gadgets & Hardware Innovations | TobseyTech Vlog",
+        seoTitle: "Tech Gadgets & Hardware Innovations | ARCOLYTE TECHNOLOGIES Vlog",
         seoDescription: "Latest tech gadgets and hardware innovations shaping the developer ecosystem.",
         published: true,
         authorId,

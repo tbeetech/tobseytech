@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import Navigation from "@/components/Navigation";
 import { Send, Mail, MessageCircle, CalendarDays } from "lucide-react";
 
@@ -14,8 +14,8 @@ const INQUIRY_TYPES = [
   "Custom Inquiry",
 ];
 
-const CONTACT_EMAIL = "tobseytech@gmail.com";
-const CALENDLY_URL = "https://calendly.com/tobseytech";
+const CONTACT_EMAIL = "arcolytetech@gmail.com";
+const CALENDLY_URL = "https://calendly.com/ARCOLYTE TECHNOLOGIES";
 
 export default function ContactPage() {
   const [status, setStatus] = useState<"idle" | "sent" | "error">("idle");
@@ -147,7 +147,7 @@ export default function ContactPage() {
                 {isSubmitting ? "Sending..." : "Send Message"}
               </button>
               {status === "sent" && (
-                <p className="text-green-400 text-sm text-center">✓ Message received! We'll get back to you within 24 hours.</p>
+                <p className="text-green-400 text-sm text-center">âœ“ Message received! We'll get back to you within 24 hours.</p>
               )}
               {status === "error" && (
                 <p className="text-red-400 text-sm text-center">Something went wrong. Please try again or email us directly.</p>
@@ -207,8 +207,8 @@ export default function ContactPage() {
             </div>
             <div className="glass-effect p-5 rounded-xl border border-galactic-gold/20">
               <p className="text-gray-300 text-sm leading-relaxed">
-                📍 Available for remote projects worldwide<br />
-                ⏱ Typical response within <span className="text-neon-yellow font-semibold">24 hours</span>
+                ðŸ“ Available for remote projects worldwide<br />
+                â± Typical response within <span className="text-neon-yellow font-semibold">24 hours</span>
               </p>
             </div>
           </div>

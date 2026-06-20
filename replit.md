@@ -1,8 +1,8 @@
-# TOBSEYTECH - Future Digital Solutions
+# ARCOLYTE TECHNOLOGIES - Future Digital Solutions
 
 ## Overview
 
-TOBSEYTECH is a modern full-stack web application representing Phase 1 of Kingdom Enhancement Corp (KEC). It's a professional digital agency platform that showcases services in AI integration, web development, digital marketing, and cybersecurity solutions. The application features a futuristic cyberpunk aesthetic with interactive animations and serves as both a portfolio and business management platform for digital transformation services targeting SMEs, startups, and social-impact organizations across Africa and beyond.
+ARCOLYTE TECHNOLOGIES is a modern full-stack web application representing Phase 1 of Kingdom Enhancement Corp (KEC). It's a professional digital agency platform that showcases services in AI integration, web development, digital marketing, and cybersecurity solutions. The application features a futuristic cyberpunk aesthetic with interactive animations and serves as both a portfolio and business management platform for digital transformation services targeting SMEs, startups, and social-impact organizations across Africa and beyond.
 
 ## User Preferences
 

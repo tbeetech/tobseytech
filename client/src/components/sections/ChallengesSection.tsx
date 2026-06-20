@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Trophy, Calendar, Users, ArrowRight, Flame } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
@@ -12,7 +12,7 @@ const challenges = [
     difficulty: "Beginner",
     participants: 128,
     daysLeft: 12,
-    prize: "TOBSEYTECH Mentorship Session",
+    prize: "ARCOLYTE TECHNOLOGIES Mentorship Session",
     color: "text-galactic-orange",
     border: "border-galactic-orange",
     bg: "bg-galactic-orange/10",
@@ -40,7 +40,7 @@ const challenges = [
     difficulty: "Beginner",
     participants: 203,
     daysLeft: 20,
-    prize: "Featured on TOBSEYTECH Showcase",
+    prize: "Featured on ARCOLYTE TECHNOLOGIES Showcase",
     color: "text-neon-yellow",
     border: "border-neon-yellow",
     bg: "bg-neon-yellow/10",
@@ -86,7 +86,7 @@ export default function ChallengesSection() {
             Community Challenges
           </h2>
           <p className="text-gray-300 max-w-2xl mx-auto">
-            Build real skills, compete for prizes, and get noticed by the TOBSEYTECH network. New challenges every month.
+            Build real skills, compete for prizes, and get noticed by the ARCOLYTE TECHNOLOGIES network. New challenges every month.
           </p>
         </div>
 
@@ -132,7 +132,7 @@ export default function ChallengesSection() {
                     : `bg-gradient-to-r from-galactic-orange/20 to-galactic-gold/20 text-white hover:from-galactic-orange/40 hover:to-galactic-gold/40 border ${challenge.border}/30`
                 }`}
               >
-                {joined.includes(challenge.id) ? "✓ Joined!" : "Join Challenge"} {!joined.includes(challenge.id) && <ArrowRight className="w-3.5 h-3.5 ml-1" />}
+                {joined.includes(challenge.id) ? "âœ“ Joined!" : "Join Challenge"} {!joined.includes(challenge.id) && <ArrowRight className="w-3.5 h-3.5 ml-1" />}
               </Button>
             </div>
           ))}

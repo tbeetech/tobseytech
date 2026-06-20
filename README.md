@@ -1,4 +1,4 @@
-# TOBSEYTECH — Future Digital Solutions
+# ARCOLYTE TECHNOLOGIES — Future Digital Solutions
 
 > **Kingdom Enhancement Corp (KEC) — Phase 1**  
 > AI-powered digital agency platform for SMEs, startups, and social-impact organisations across Africa and beyond.
@@ -20,7 +20,7 @@
 
 ## Overview
 
-TOBSEYTECH is a full-stack SaaS platform that combines:
+ARCOLYTE TECHNOLOGIES is a full-stack SaaS platform that combines:
 
 - **Public website** — services, blog, vlog, case studies, pricing
 - **User platform** — auth, profiles, social graph, real-time chat
@@ -48,7 +48,7 @@ TOBSEYTECH is a full-stack SaaS platform that combines:
 ## Project Structure
 
 ```
-tobseytech/
+arcolytetech/
 ├── client/                  # React frontend (Vite root)
 │   ├── public/              # Static assets (favicon, PDFs, robots.txt)
 │   ├── src/
@@ -97,8 +97,8 @@ tobseytech/
 ### 1. Clone & install
 
 ```bash
-git clone https://github.com/tbeetech/tobseytech.git
-cd tobseytech
+git clone https://github.com/tbeetech/arcolytetech.git
+cd arcolytetech
 npm install
 ```
 

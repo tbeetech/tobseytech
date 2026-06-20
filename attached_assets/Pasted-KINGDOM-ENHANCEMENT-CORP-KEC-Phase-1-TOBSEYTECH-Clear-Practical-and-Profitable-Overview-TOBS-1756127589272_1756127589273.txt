@@ -1,8 +1,8 @@
-KINGDOM ENHANCEMENT CORP. (KEC)
-Phase 1: TOBSEYTECH — Clear, Practical, and Profitable
+﻿KINGDOM ENHANCEMENT CORP. (KEC)
+Phase 1: ARCOLYTE TECHNOLOGIES â€” Clear, Practical, and Profitable
 Overview
-TOBSEYTECH is the first and current project of KEC. We provide modern digital
-solutions to every kind of business—SMEs, startups, and social-impact organizations.
+ARCOLYTE TECHNOLOGIES is the first and current project of KEC. We provide modern digital
+solutions to every kind of businessâ€”SMEs, startups, and social-impact organizations.
 Our plan is simple: win clients with quality and speed, deliver reliably, document results,
 and reinvest profits to support long-term, Kingdomnaligned technology.
 Purpose
@@ -11,91 +11,91 @@ use. Be forwardnthinking but always practical. Deliver real value first, then re
 improve.
 Endgame
 Grow a resilient, profitable enterprise that funds Kingdomnaligned technology over
-time, including support for spiritual organizations to grow digitally—without limiting who
+time, including support for spiritual organizations to grow digitallyâ€”without limiting who
 we serve today.
 Why Now? Why Nigeria/Africa?
-• Africa’s digital economy is expanding fast; businesses need websites, apps, AI, and
+â€¢ Africaâ€™s digital economy is expanding fast; businesses need websites, apps, AI, and
 content that work.
-• Using AI early helps clients move faster and save costs while improving
+â€¢ Using AI early helps clients move faster and save costs while improving
 personalization and insight.
-• Trust is a gap: many buyers need teams with clear scopes, timelines, and quality
+â€¢ Trust is a gap: many buyers need teams with clear scopes, timelines, and quality
 checks.
-• Our blend of strategy, design, engineering, and operations closes this gap.
-TOBSEYTECH Services
+â€¢ Our blend of strategy, design, engineering, and operations closes this gap.
+ARCOLYTE TECHNOLOGIES Services
 Branding & Identity
-• Logo systems, brand guidelines, and storytelling.
-• Social and print toolkits for consistent rollout.
-• Launch kits for campaigns and events.
+â€¢ Logo systems, brand guidelines, and storytelling.
+â€¢ Social and print toolkits for consistent rollout.
+â€¢ Launch kits for campaigns and events.
 Web/App Development
-• Responsive websites and customer portals.
-• Crossnplatform mobile apps with clean APIs.
-• Analytics, SEO, and conversionnfirst UX.
+â€¢ Responsive websites and customer portals.
+â€¢ Crossnplatform mobile apps with clean APIs.
+â€¢ Analytics, SEO, and conversionnfirst UX.
 AI Integration
-• Chat assistants and knowledge bases (RAG).
-• Workflow automation and smart routing.
-• Analytics pipelines and recommendations.
+â€¢ Chat assistants and knowledge bases (RAG).
+â€¢ Workflow automation and smart routing.
+â€¢ Analytics pipelines and recommendations.
 Digital Marketing & Promotion
-• Paid ads, email/WhatsApp funnels, and CRM hooks.
-• Content calendars and reporting dashboards.
-• Campaigns focused on measurable outcomes.
+â€¢ Paid ads, email/WhatsApp funnels, and CRM hooks.
+â€¢ Content calendars and reporting dashboards.
+â€¢ Campaigns focused on measurable outcomes.
 Content Creation
-• Video editing, scripts, reels, and copywriting.
-• Photography direction and asset libraries.
-• Longnform and shortnform storytelling.
+â€¢ Video editing, scripts, reels, and copywriting.
+â€¢ Photography direction and asset libraries.
+â€¢ Longnform and shortnform storytelling.
 Motion Graphics & Animation
-• Explainers, intros, kinetic typography.
-• Lower thirds, transitions, and brand stingers.
-• Tutorials and event visuals.
+â€¢ Explainers, intros, kinetic typography.
+â€¢ Lower thirds, transitions, and brand stingers.
+â€¢ Tutorials and event visuals.
 Digital Skills Training
-• Cohort programs for teams and founders.
-• Curriculum design and live workshops.
-• Onndemand modules and assessments.
+â€¢ Cohort programs for teams and founders.
+â€¢ Curriculum design and live workshops.
+â€¢ Onndemand modules and assessments.
 Strategic Innovation & Consulting
-• Product strategy, roadmaps, and vendor selection.
-• Data and process audits; risk management.
-• Gontonmarket planning and experimentation frameworks.
-TOBSEYTECH Operating Model — Tagging System (TTS)
-TSP — Showcase Projects
+â€¢ Product strategy, roadmaps, and vendor selection.
+â€¢ Data and process audits; risk management.
+â€¢ Gontonmarket planning and experimentation frameworks.
+ARCOLYTE TECHNOLOGIES Operating Model â€” Tagging System (TTS)
+TSP â€” Showcase Projects
 <b>Goal</b> Grow our portfolio with public demos and prototypes that attract clients.
 <b>Key Activities</b> Templates, sample apps, brand kits, feature trials, writenups.
 <b>Outputs</b> Case studies, GitHub/Notion pages, landing pages, SEO posts.
 <b>Cadence</b> Ship weekly; summarize learning; share on social and email.
 <b>Owner</b> Creatives, Engineers, and PM share responsibility.
-TSR — Sales & Revenue Operations
+TSR â€” Sales & Revenue Operations
 <b>Goal</b> Create steady cash flow and a healthy pipeline.
 <b>Key Activities</b> Outreach, partnerships, proposals, pricing, follownups, testimonials.
 <b>Outputs</b> Lead magnets, funnels, offer ladders, signed SOWs.
 <b>Cadence</b> Daily activity; weekly review; monthly offer refresh.
 <b>Owner</b> Sales/Marketing Lead with support from project owners.
-TCD — Client Deliverables
+TCD â€” Client Deliverables
 <b>Goal</b> Deliver paid work on time, on budget, and to spec.
-<b>Key Activities</b> Discovery → scope → milestones → QA → launch → postnlaunch support.
+<b>Key Activities</b> Discovery â†’ scope â†’ milestones â†’ QA â†’ launch â†’ postnlaunch support.
 <b>Outputs</b> Websites, apps, AI systems, media packs, dashboards.
 <b>Cadence</b> Milestonenbased; weekly status; QA gates at each handover.
 <b>Owner</b> Project Manager, Tech/Design Leads, QA.
-TLD — Learning & Development
+TLD â€” Learning & Development
 <b>Goal</b> Increase team skill and turn knowledge into courses.
 <b>Key Activities</b> Internal workshops, certifications, lab days, course design.
 <b>Outputs</b> Curriculum, slide decks, recordings, assignments.
 <b>Cadence</b> Binweekly internal sessions; quarterly public cohort.
 <b>Owner</b> L&D Lead with support from senior staff.
 Quartern1 Targets (KPIs)
-Pipeline 30 qualified leads · 10 proposals · 5 wins
+Pipeline 30 qualified leads Â· 10 proposals Â· 5 wins
 Revenue Sustainable project/retainer mix with strong margins
-TSP Cadence 1+ shipped asset/week · 2 case studies/month
-Satisfaction NPS ≥ 50 · Onntime delivery ≥ 95%
+TSP Cadence 1+ shipped asset/week Â· 2 case studies/month
+Satisfaction NPS â‰¥ 50 Â· Onntime delivery â‰¥ 95%
 Operating Principles
-• Be practical — ship value fast, then iterate.
-• AInfirst and automationndriven — let data guide decisions.
-• Design for clarity — clean UX and measurable outcomes.
-• Honor — ethical conduct, transparent pricing, reliable delivery.
+â€¢ Be practical â€” ship value fast, then iterate.
+â€¢ AInfirst and automationndriven â€” let data guide decisions.
+â€¢ Design for clarity â€” clean UX and measurable outcomes.
+â€¢ Honor â€” ethical conduct, transparent pricing, reliable delivery.
 What Makes Us Different
-• Strategy, design, and engineering under one roof.
-• Outcomenled contracts with clear milestones.
-• Reusable accelerators: templates, components, and playbooks.
-• Foundernlevel attention on missionncritical work.
+â€¢ Strategy, design, and engineering under one roof.
+â€¢ Outcomenled contracts with clear milestones.
+â€¢ Reusable accelerators: templates, components, and playbooks.
+â€¢ Foundernlevel attention on missionncritical work.
 Contact & Next Steps
-Website/Portfolio: coming soon · Email: hello@tobseytech.example · WhatsApp: +234
-XXX XXX XXXX · Location: Nigeria (Remote/Global)
+Website/Portfolio: coming soon Â· Email: hello@arcolytetech.example Â· WhatsApp: +234
+XXX XXX XXXX Â· Location: Nigeria (Remote/Global)
 Request: Share your need, budget range, and timeline. We will prepare a clear scope,
 timeline, and quote.

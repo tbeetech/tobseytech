@@ -1,5 +1,5 @@
-# robots.txt — TOBSEYTECH
-# https://tobseytech.com/robots.txt
+﻿# robots.txt â€” ARCOLYTE TECHNOLOGIES
+# https://arcolytetech.com/robots.txt
 
 User-agent: *
 Allow: /
@@ -13,4 +13,4 @@ Disallow: /testdata
 # Crawl-delay for well-behaved bots (seconds)
 Crawl-delay: 10
 
-Sitemap: https://tobseytech.com/sitemap.xml
+Sitemap: https://arcolytetech.com/sitemap.xml

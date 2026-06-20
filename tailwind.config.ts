@@ -1,4 +1,4 @@
-import type { Config } from "tailwindcss";
+﻿import type { Config } from "tailwindcss";
 
 export default {
   darkMode: ["class"],
@@ -69,7 +69,7 @@ export default {
         "space-black": "var(--space-black)",
         "deep-space": "var(--deep-space)",
         "carbon": "var(--carbon)",
-        "neon-green": "#22c55e",
+        "neon-green": "#D4AF37",
         "galactic-orange": "var(--galactic-orange)",
         "galactic-gold": "var(--galactic-gold)",
         "galactic-green": "var(--galactic-green)",
@@ -138,3 +138,4 @@ export default {
   },
   plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography")],
 } satisfies Config;
+

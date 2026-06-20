@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+﻿import { useState, useRef } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
@@ -54,13 +54,13 @@ export default function ProfilePage() {
   const [showCurrentPw, setShowCurrentPw] = useState(false);
   const [showNewPw, setShowNewPw] = useState(false);
   const [profilePublic, setProfilePublic] = useState(() => {
-    try { return localStorage.getItem("tobseytech_profilePublic") !== "false"; } catch { return true; }
+    try { return localStorage.getItem("ARCOLYTE TECHNOLOGIES_profilePublic") !== "false"; } catch { return true; }
   });
   const [activityVisible, setActivityVisible] = useState(() => {
-    try { return localStorage.getItem("tobseytech_activityVisible") !== "false"; } catch { return true; }
+    try { return localStorage.getItem("ARCOLYTE TECHNOLOGIES_activityVisible") !== "false"; } catch { return true; }
   });
   const [emailNotifications, setEmailNotifications] = useState(() => {
-    try { return localStorage.getItem("tobseytech_emailNotifications") !== "false"; } catch { return true; }
+    try { return localStorage.getItem("ARCOLYTE TECHNOLOGIES_emailNotifications") !== "false"; } catch { return true; }
   });
   const [signOutConfirm, setSignOutConfirm] = useState(false);
 
@@ -161,7 +161,7 @@ export default function ProfilePage() {
   };
 
   const handlePrivacyToggle = (key: string, value: boolean) => {
-    try { localStorage.setItem(`tobseytech_${key}`, String(value)); } catch { /* ignore */ }
+    try { localStorage.setItem(`ARCOLYTE TECHNOLOGIES_${key}`, String(value)); } catch { /* ignore */ }
     if (key === "profilePublic") setProfilePublic(value);
     if (key === "activityVisible") setActivityVisible(value);
     if (key === "emailNotifications") setEmailNotifications(value);
@@ -382,7 +382,7 @@ export default function ProfilePage() {
           </div>
         )}
 
-        {/* ──────────── Privacy & Security (own profile only) ──────────── */}
+        {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Privacy & Security (own profile only) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         {isOwnProfile && (
           <div id="privacy-security" className="glass-effect rounded-xl mb-8 overflow-hidden">
             {/* Section header, acts as collapsible toggle */}
@@ -420,7 +420,7 @@ export default function ProfilePage() {
                   ))}
                 </div>
 
-                {/* ── Security tab ── */}
+                {/* â”€â”€ Security tab â”€â”€ */}
                 {activePrivacyTab === "security" && (
                   <div className="space-y-6">
                     {/* Change Password */}
@@ -532,7 +532,7 @@ export default function ProfilePage() {
                   </div>
                 )}
 
-                {/* ── Privacy tab ── */}
+                {/* â”€â”€ Privacy tab â”€â”€ */}
                 {activePrivacyTab === "privacy" && (
                   <div className="space-y-4">
                     {/* Profile Visibility */}
@@ -593,7 +593,7 @@ export default function ProfilePage() {
                   </div>
                 )}
 
-                {/* ── Data tab ── */}
+                {/* â”€â”€ Data tab â”€â”€ */}
                 {activePrivacyTab === "data" && (
                   <div className="space-y-4">
                     <div className="bg-space-dark rounded-xl p-5 border border-galactic-orange/10">
@@ -626,7 +626,7 @@ export default function ProfilePage() {
                           "Passwords are hashed with bcrypt, we never store them in plain text",
                         ].map((item) => (
                           <li key={item} className="flex items-start gap-2">
-                            <span className="text-galactic-orange shrink-0 mt-0.5">✕</span>
+                            <span className="text-galactic-orange shrink-0 mt-0.5">âœ•</span>
                             <span>{item}</span>
                           </li>
                         ))}

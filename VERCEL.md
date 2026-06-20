@@ -1,4 +1,4 @@
-# Deploying TOBSEYTECH to Vercel
+# Deploying ARCOLYTE TECHNOLOGIES to Vercel
 
 ## Prerequisites
 - A [Vercel](https://vercel.com) account
@@ -8,7 +8,7 @@
 
 ### 1. Import the project on Vercel
 - Go to https://vercel.com/new
-- Import the GitHub repository `tbeetech/tobseytech`
+- Import the GitHub repository `tbeetech/arcolytetech`
 - Vercel will automatically detect the `vercel.json` configuration
 
 ### 2. Environment Variables (required)
@@ -43,8 +43,8 @@ Set the following environment variables in your Vercel project's **Settings → 
 | `SMTP_USER` | SMTP username / email |
 | `SMTP_PASS` | SMTP password or app password |
 | `EMAIL_FROM` | Sender email address |
-| `EMAIL_TO` | Recipient for contact form submissions (defaults to `CEO@TOBSEYTECH.BIZ`) |
-| `APP_URL` | Public URL of your Vercel deployment (e.g. `https://tobseytech.vercel.app`) |
+| `EMAIL_TO` | Recipient for contact form submissions (defaults to `arcolytetech@gmail.com`) |
+| `APP_URL` | Public URL of your Vercel deployment (e.g. `https://arcolytetech.vercel.app`) |
 | `GEMINI_FLASH_API_KEY` | Preferred Gemini key for Prophet AI chat widget and Gemini-backed Cosmo fallback |
 | `GEMINI_API_KEY` | Accepted alias for the same Gemini key |
 | `GOOGLE_API_KEY` | Accepted alias for the same Gemini key |

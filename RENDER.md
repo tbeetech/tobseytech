@@ -1,4 +1,4 @@
-# Deploying TOBSEYTECH to Render.com
+# Deploying ARCOLYTE TECHNOLOGIES to Render.com
 
 ## Prerequisites
 - A [Render.com](https://render.com) account
@@ -7,7 +7,7 @@
 ## Steps
 
 ### 1. Create a new Web Service on Render
-- Connect your GitHub repository (`tbeetech/tobseytech`)
+- Connect your GitHub repository (`tbeetech/arcolytetech`)
 - **Build Command:** `npm install && npm run build`
 - **Start Command:** `node dist/index.js`
 - **Environment:** Node
@@ -46,7 +46,7 @@ Set the following environment variables in your Render service's **Environment**
 | `SMTP_USER` | SMTP username / email |
 | `SMTP_PASS` | SMTP password or app password |
 | `EMAIL_FROM` | Sender email address |
-| `EMAIL_TO` | Recipient for contact form submissions (defaults to `CEO@TOBSEYTECH.BIZ`) |
+| `EMAIL_TO` | Recipient for contact form submissions (defaults to `arcolytetech@gmail.com`) |
 
 ### 4. MongoDB Atlas Setup
 1. Log in to [MongoDB Atlas](https://cloud.mongodb.com)

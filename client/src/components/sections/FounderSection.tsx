@@ -1,4 +1,4 @@
-import { Twitter } from "lucide-react";
+﻿import { Twitter } from "lucide-react";
 
 export default function FounderSection() {
   return (
@@ -6,7 +6,7 @@ export default function FounderSection() {
       <div className="container mx-auto px-4 sm:px-6">
         <div className="text-center mb-12 sm:mb-16">
           <h2 className="font-orbitron font-bold text-2xl sm:text-3xl md:text-4xl mb-4 gradient-text">
-            TOBSEYTECH VISIONARIES
+            ARCOLYTE TECHNOLOGIES VISIONARIES
           </h2>
           <p className="text-gray-300 max-w-2xl mx-auto text-sm sm:text-base">
             The people building the products and driving every client's success.
@@ -29,7 +29,7 @@ export default function FounderSection() {
             <p className="text-gray-300 leading-relaxed text-sm sm:text-base flex-1">
               Tech entrepreneur and digital engineer with deep experience in AI, automation, and building
               web and mobile products. Tobi leads the team and takes founder-level ownership on
-              every project TOBSEYTECH handles, from the first call to the final delivery.
+              every project ARCOLYTE TECHNOLOGIES handles, from the first call to the final delivery.
             </p>
 
             <a
@@ -60,7 +60,7 @@ export default function FounderSection() {
 
             <p className="text-gray-300 leading-relaxed text-sm sm:text-base flex-1">
               Motion graphics expert and visual storyteller with a sharp eye for brand identity.
-              Seyi drives the creative side of TOBSEYTECH, turning ideas into powerful visuals,
+              Seyi drives the creative side of ARCOLYTE TECHNOLOGIES, turning ideas into powerful visuals,
               videos, and brand experiences that stick with audiences.
             </p>
 

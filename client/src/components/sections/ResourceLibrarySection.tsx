@@ -72,15 +72,15 @@ const resources = [
   {
     id: 6,
     icon: BookOpen,
-    title: "TOBSEYTECH Platform Onboarding Guide",
+    title: "ARCOLYTE TECHNOLOGIES Platform Onboarding Guide",
     description: "Step-by-step guide to getting the maximum value from every feature on the platform.",
     category: "Guide",
     downloads: "760",
     color: "text-galactic-gold",
     border: "border-galactic-gold",
     tag: null,
-    pdfUrl: "/tobseytech-platform-onboarding-guide.pdf",
-    pdfName: "tobseytech-platform-onboarding-guide.pdf",
+    pdfUrl: "/arcolytetech-platform-onboarding-guide.pdf",
+    pdfName: "arcolytetech-platform-onboarding-guide.pdf",
   },
 ];
 

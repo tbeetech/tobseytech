@@ -47,10 +47,10 @@ const questions = [
 ];
 
 const levels = [
-  { min: 4, max: 6, title: "Digital Beginner", color: "text-galactic-red", bg: "bg-galactic-red/10", desc: "You're at the starting line, great news! There's enormous untapped potential in your business. TOBSEYTECH can automate your core workflows and rapidly modernize your operations.", recommendation: "Start with Automation Systems" },
+  { min: 4, max: 6, title: "Digital Beginner", color: "text-galactic-red", bg: "bg-galactic-red/10", desc: "You're at the starting line, great news! There's enormous untapped potential in your business. ARCOLYTE TECHNOLOGIES can automate your core workflows and rapidly modernize your operations.", recommendation: "Start with Automation Systems" },
   { min: 7, max: 10, title: "Growing Digital", color: "text-galactic-orange", bg: "bg-galactic-orange/10", desc: "You've started your digital journey but there are clear gaps. With the right AI integrations and smarter tooling, you could 3x your output without adding headcount.", recommendation: "Explore AI Integrations + Digital Marketing" },
   { min: 11, max: 13, title: "Tech-Forward", color: "text-neon-yellow", bg: "bg-neon-yellow/10", desc: "You're ahead of most businesses! Now it's about optimizing, scaling, and turning your digital capabilities into a competitive moat.", recommendation: "Level up with Strategic Consulting" },
-  { min: 14, max: 16, title: "Digital Leader", color: "text-galactic-green", bg: "bg-galactic-green/10", desc: "You're operating at an elite level. TOBSEYTECH can partner with you on advanced AI systems, corporate training programs, and expansion consulting.", recommendation: "Partner with us on Enterprise Solutions" },
+  { min: 14, max: 16, title: "Digital Leader", color: "text-galactic-green", bg: "bg-galactic-green/10", desc: "You're operating at an elite level. ARCOLYTE TECHNOLOGIES can partner with you on advanced AI systems, corporate training programs, and expansion consulting.", recommendation: "Partner with us on Enterprise Solutions" },
 ];
 
 export default function SkillsQuizSection() {

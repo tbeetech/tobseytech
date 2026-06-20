@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { UserCheck, ArrowRight, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -15,7 +15,7 @@ const mentors = [
     color: "text-galactic-orange",
     border: "border-galactic-orange",
     bg: "bg-galactic-orange",
-    bio: "Built TOBSEYTECH from zero to multi-service digital agency. Expert in automation-led growth for African SMEs.",
+    bio: "Built ARCOLYTE TECHNOLOGIES from zero to multi-service digital agency. Expert in automation-led growth for African SMEs.",
   },
   {
     id: 2,
@@ -136,7 +136,7 @@ export default function MentorshipSection() {
                 }`}
               >
                 {requested.includes(mentor.id)
-                  ? "✓ Request Sent!"
+                  ? "âœ“ Request Sent!"
                   : mentor.available
                   ? <><ArrowRight className="w-3.5 h-3.5 mr-1" /> Request Session</>
                   : "Currently Unavailable"

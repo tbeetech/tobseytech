@@ -1,4 +1,4 @@
-import Navigation from "@/components/Navigation";
+﻿import Navigation from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import StartupToolkitSection from "@/components/sections/StartupToolkitSection";
@@ -7,7 +7,7 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 export default function FeatureStartupToolkitPage() {
   return (
     <div className="min-h-screen bg-space-black text-white">
-      <title>Startup Digital Toolkit – TOBSEYTECH</title>
+      <title>Startup Digital Toolkit â€“ ARCOLYTE TECHNOLOGIES</title>
       <Navigation />
       <main className="pt-20">
         <StartupToolkitSection />

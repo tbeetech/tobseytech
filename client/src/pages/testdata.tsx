@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+﻿import { useEffect, useState, useCallback } from "react";
 import Navigation from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -77,7 +77,7 @@ export default function TestDataPage() {
 
   return (
     <div className="min-h-screen bg-space-black text-white">
-      <title>Database Connectivity Test – TOBSEYTECH</title>
+      <title>Database Connectivity Test â€“ ARCOLYTE TECHNOLOGIES</title>
       <Navigation />
 
       <main className="pt-24 pb-16 container mx-auto px-4 max-w-2xl">
@@ -91,7 +91,7 @@ export default function TestDataPage() {
           </h1>
           <p className="text-white/50 text-sm">
             Live diagnostic for the MongoDB connection at{" "}
-            <span className="text-galactic-orange/80 font-mono">tobseytech.biz/testdata</span>
+            <span className="text-galactic-orange/80 font-mono">ARCOLYTE TECHNOLOGIES.biz/testdata</span>
           </p>
         </div>
 
@@ -123,14 +123,14 @@ export default function TestDataPage() {
               }`}
             >
               {status === "loading"
-                ? "Running connectivity test…"
+                ? "Running connectivity testâ€¦"
                 : isConnected
                 ? "Database is CONNECTED"
                 : "Database is UNREACHABLE"}
             </p>
             {lastChecked && (
               <p className="text-white/40 text-xs mt-0.5">
-                Last checked: {lastChecked.toLocaleTimeString()} · automatically refreshes every 30s
+                Last checked: {lastChecked.toLocaleTimeString()} Â· automatically refreshes every 30s
               </p>
             )}
           </div>
@@ -281,7 +281,7 @@ export default function TestDataPage() {
 
         {/* Footer hint */}
         <p className="text-white/25 text-xs text-center mt-8">
-          This page is for diagnostic use only · No credentials are exposed
+          This page is for diagnostic use only Â· No credentials are exposed
         </p>
       </main>
     </div>

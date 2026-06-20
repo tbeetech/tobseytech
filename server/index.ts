@@ -1,4 +1,4 @@
-import "dotenv/config.js";
+﻿import "dotenv/config.js";
 import * as dotenv from "dotenv";
 import { resolve } from "path";
 
@@ -32,9 +32,9 @@ const app = express();
 
 // Trust the first proxy hop (required on Render and other PaaS platforms that
 // sit behind a reverse-proxy).  Without this:
-//  • req.secure is always false → express-session never sends the `secure` cookie
+//  â€¢ req.secure is always false â†’ express-session never sends the `secure` cookie
 //    in production, so sessions are lost after every request.
-//  • req.ip is undefined → express-rate-limit throws / rate-limits all users
+//  â€¢ req.ip is undefined â†’ express-rate-limit throws / rate-limits all users
 //    under the same "undefined" key, breaking per-IP limiting.
 app.set("trust proxy", 1);
 
@@ -63,7 +63,7 @@ function buildSessionStore() {
       ttl: 7 * 24 * 60 * 60, // 7 days (in seconds)
       autoRemove: "native", // rely on MongoDB TTL index for clean-up
     });
-    // Log connection errors without crashing – the store will automatically
+    // Log connection errors without crashing â€“ the store will automatically
     // retry; sessions already in-flight will fail gracefully.
     store.on("error", (err: Error) => {
       console.error("[session] MongoStore error:", err.message);
@@ -72,14 +72,14 @@ function buildSessionStore() {
   } catch (err) {
     console.error("[session] Failed to create MongoStore, falling back to MemoryStore:", (err as Error).message ?? err);
   }
-  // Fallback – prune expired entries every 24 h.
+  // Fallback â€“ prune expired entries every 24 h.
   return new MemoryStore({ checkPeriod: 86400000 });
 }
 
 function getSessionMiddleware() {
   if (!sessionMiddleware) {
     sessionMiddleware = session({
-      name: "tobseytech.sid",
+      name: "ARCOLYTE TECHNOLOGIES.sid",
       secret: getSessionSecret(),
       proxy: true,
       resave: false,
@@ -173,7 +173,7 @@ app.use((req, res, next) => {
       }
 
       if (logLine.length > 80) {
-        logLine = logLine.slice(0, 79) + "…";
+        logLine = logLine.slice(0, 79) + "â€¦";
       }
 
       log(logLine);

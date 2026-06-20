@@ -3,7 +3,7 @@ import TestimonialCard from "./TestimonialCard";
 
 const testimonials = [
   {
-    quote: "TOBSEYTECH transformed our processes and saved us countless hours.",
+    quote: "ARCOLYTE TECHNOLOGIES transformed our processes and saved us countless hours.",
     author: "Client A",
   },
   {

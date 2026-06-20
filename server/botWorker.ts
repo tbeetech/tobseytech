@@ -1,11 +1,11 @@
-/**
+﻿/**
  * botWorker.ts
  *
  * Background worker bot that automatically fetches articles from trusted tech
- * publishers via their public RSS feeds and posts them to the TobseyTech blog
+ * publishers via their public RSS feeds and posts them to the ARCOLYTE TECHNOLOGIES blog
  * in real-time.
  *
- * Sources: TechCrunch · The Verge · Wired · Ars Technica · Engadget · Android Police
+ * Sources: TechCrunch Â· The Verge Â· Wired Â· Ars Technica Â· Engadget Â· Android Police
  *
  * Methodology and full documentation: File and Management center/botworker.md
  */
@@ -14,7 +14,7 @@ import Parser from "rss-parser";
 import { storage } from "./storage.js";
 import { cleanPost, decodeHtmlEntities, normalizeTitle } from "./cleaner.js";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 interface BotFeed {
   name: string;
@@ -38,11 +38,11 @@ export interface BotWorkerStatus {
 export interface BotConfig {
   pollIntervalMs?: number;
   maxArticlesPerFeed?: number;
-  /** Map of feed name → enabled. Only provided keys are updated. */
+  /** Map of feed name â†’ enabled. Only provided keys are updated. */
   feedEnabled?: Record<string, boolean>;
 }
 
-// ─── Feed configuration ───────────────────────────────────────────────────────
+// â”€â”€â”€ Feed configuration â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const TECH_FEEDS: BotFeed[] = [
   {
@@ -86,7 +86,7 @@ const TECH_FEEDS: BotFeed[] = [
 // Fallback logo URL used when an article has no cover image
 const FALLBACK_LOGO_URL = "/og-image.svg";
 
-// How often (ms) the worker polls all feeds — minimum 30 s, default 5 min
+// How often (ms) the worker polls all feeds â€” minimum 30 s, default 5 min
 const MIN_POLL_INTERVAL_MS = 30_000;
 const DEFAULT_POLL_INTERVAL_MS = 300_000;
 const _rawPollInterval = parseInt(process.env.BOT_POLL_INTERVAL_MS || String(DEFAULT_POLL_INTERVAL_MS), 10);
@@ -94,13 +94,13 @@ const INITIAL_POLL_INTERVAL_MS = Number.isFinite(_rawPollInterval) && _rawPollIn
   ? _rawPollInterval
   : DEFAULT_POLL_INTERVAL_MS;
 
-// Maximum articles to process per feed per cycle (1–100, default 5)
+// Maximum articles to process per feed per cycle (1â€“100, default 5)
 const _rawMaxArticles = parseInt(process.env.BOT_MAX_ARTICLES_PER_FEED || "5", 10);
 const INITIAL_MAX_ARTICLES = Number.isFinite(_rawMaxArticles) && _rawMaxArticles >= 1
   ? Math.min(_rawMaxArticles, 100)
   : 5;
 
-// ─── Runtime configuration (mutable by admin) ────────────────────────────────
+// â”€â”€â”€ Runtime configuration (mutable by admin) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 let _pollIntervalMs = INITIAL_POLL_INTERVAL_MS;
 let _maxArticlesPerFeed = INITIAL_MAX_ARTICLES;
@@ -110,7 +110,7 @@ const _feedEnabled: Record<string, boolean> = Object.fromEntries(
   TECH_FEEDS.map((f) => [f.name, true])
 );
 
-// ─── State ────────────────────────────────────────────────────────────────────
+// â”€â”€â”€ State â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const status: BotWorkerStatus = {
   running: false,
@@ -127,7 +127,7 @@ const status: BotWorkerStatus = {
 // Set of article GUIDs / links already posted this session (+ persisted slugs from DB)
 const seenGuids = new Set<string>();
 
-// ─── Title-based duplicate-detection indices ──────────────────────────────────
+// â”€â”€â”€ Title-based duplicate-detection indices â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 /**
  * Stop-words excluded from Jaccard token sets so common English filler words
@@ -151,7 +151,7 @@ function titleTokens(title: string): Set<string> {
 }
 
 /**
- * Jaccard similarity coefficient between two token sets (0.0 – 1.0).
+ * Jaccard similarity coefficient between two token sets (0.0 â€“ 1.0).
  * Returns 1.0 when both sets are empty (both are "nothing"), 0.0 when one is
  * empty and the other is not.
  */
@@ -169,7 +169,7 @@ function jaccardSimilarity(a: Set<string>, b: Set<string>): number {
 /**
  * Minimum Jaccard similarity at which two titles are treated as the same story.
  * 0.65 means 65% of significant words must overlap.  Tune with
- * `BOT_TITLE_SIMILARITY_THRESHOLD` env var (0.0 – 1.0).
+ * `BOT_TITLE_SIMILARITY_THRESHOLD` env var (0.0 â€“ 1.0).
  */
 const _rawSimilarityThreshold = parseFloat(
   process.env.BOT_TITLE_SIMILARITY_THRESHOLD || "0.65"
@@ -197,9 +197,9 @@ const seenTokenIndex = new Map<string, Set<string>>();
 
 let _pollTimer: ReturnType<typeof setTimeout> | null = null;
 let _botAdminId: string | null = null;
-let _botAdminName = "TobseyTech Bot";
+let _botAdminName = "ARCOLYTE TECHNOLOGIES Bot";
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 /** Convert an article title to a URL-safe slug, ensuring uniqueness with a suffix. */
 function toSlug(title: string, suffix: string): string {
@@ -218,10 +218,10 @@ function stripHtml(html: string): string {
   return html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
 }
 
-/** Build an article excerpt (≤ 300 chars). */
+/** Build an article excerpt (â‰¤ 300 chars). */
 function buildExcerpt(raw: string): string {
   const plain = stripHtml(raw);
-  return plain.length > 300 ? plain.slice(0, 297) + "…" : plain || "Read the full article at the source link.";
+  return plain.length > 300 ? plain.slice(0, 297) + "â€¦" : plain || "Read the full article at the source link.";
 }
 
 /** Count words in a text string */
@@ -248,7 +248,7 @@ function hasValidCoverImage(coverImage: string): boolean {
 
 /**
  * Extract the best available cover image URL from an RSS item.
- * Checks: media:content → enclosure → first <img> in content.
+ * Checks: media:content â†’ enclosure â†’ first <img> in content.
  */
 function extractImage(item: RssItem): string {
   // rss-parser exposes media:content as item["media:content"]
@@ -295,7 +295,7 @@ function buildContent(item: RssItem): string {
   return body;
 }
 
-// ─── Core fetch logic ─────────────────────────────────────────────────────────
+// â”€â”€â”€ Core fetch logic â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const parser = new Parser({
   customFields: {
@@ -306,7 +306,7 @@ const parser = new Parser({
   },
   timeout: 15000,
   headers: {
-    "User-Agent": "TobseyTechBot/1.0 (https://tobseytech.biz; bot@tobseytech.biz)",
+    "User-Agent": "ARCOLYTE TECHNOLOGIESBot/1.0 (https://ARCOLYTE TECHNOLOGIES.biz; bot@arcolytetech.biz)",
     Accept: "application/rss+xml, application/xml, text/xml, */*",
   },
 });
@@ -332,20 +332,20 @@ async function fetchAndPostFeed(feed: BotFeed, feedIndex: number): Promise<void>
       const guid = item.guid || item.link || item.title || "";
       if (!guid) continue;
 
-      // ── Gate 1: exact GUID match (fast, in-memory) ───────────────────────
+      // â”€â”€ Gate 1: exact GUID match (fast, in-memory) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
       if (seenGuids.has(guid)) continue;
 
       const title = (item.title || "Untitled").trim();
 
-      // ── Gate 2: exact normalised-title match (survives restarts) ─────────
+      // â”€â”€ Gate 2: exact normalised-title match (survives restarts) â”€â”€â”€â”€â”€â”€â”€â”€â”€
       const normTitle = normalizeTitle(title);
       if (seenNormalizedTitles.has(normTitle)) {
         seenGuids.add(guid);
-        console.log(`[botWorker] ⏭ Skipping exact-title duplicate: "${title}"`);
+        console.log(`[botWorker] â­ Skipping exact-title duplicate: "${title}"`);
         continue;
       }
 
-      // ── Gate 3: Jaccard similarity — same story from different sources ────
+      // â”€â”€ Gate 3: Jaccard similarity â€” same story from different sources â”€â”€â”€â”€
       const newTokens = titleTokens(title);
       let isSimilar = false;
       const tokenEntries = Array.from(seenTokenIndex.entries());
@@ -353,7 +353,7 @@ async function fetchAndPostFeed(feed: BotFeed, feedIndex: number): Promise<void>
         if (jaccardSimilarity(newTokens, existingTokens) >= TITLE_SIMILARITY_THRESHOLD) {
           isSimilar = true;
           console.log(
-            `[botWorker] ⏭ Skipping near-duplicate: "${title}" ≈ "${existingNorm}" (Jaccard ≥ ${TITLE_SIMILARITY_THRESHOLD})`
+            `[botWorker] â­ Skipping near-duplicate: "${title}" â‰ˆ "${existingNorm}" (Jaccard â‰¥ ${TITLE_SIMILARITY_THRESHOLD})`
           );
           break;
         }
@@ -376,7 +376,7 @@ async function fetchAndPostFeed(feed: BotFeed, feedIndex: number): Promise<void>
         ),
       ].filter(Boolean);
 
-      // ── Synchronous Gate: clean all text fields using every scraped candidate ──
+      // â”€â”€ Synchronous Gate: clean all text fields using every scraped candidate â”€â”€
       const cleaned = cleanPost(
         { title, excerpt: rawExcerpt, content: rawContent },
         {
@@ -401,7 +401,7 @@ async function fetchAndPostFeed(feed: BotFeed, feedIndex: number): Promise<void>
       // Skip malformed/too-short items that are likely feed stubs or broken snippets.
       if (!hasMinimumContent(cleaned.content)) {
         seenGuids.add(guid);
-        console.log(`[botWorker] ⏭ Skipping short-content item: "${title}"`);
+        console.log(`[botWorker] â­ Skipping short-content item: "${title}"`);
         continue;
       }
 
@@ -415,50 +415,50 @@ async function fetchAndPostFeed(feed: BotFeed, feedIndex: number): Promise<void>
         category: feed.category,
         published: true, // auto-publish curated content
         authorId: adminId,
-        authorName: `${_botAdminName} · ${feed.name}`,
+        authorName: `${_botAdminName} Â· ${feed.name}`,
       });
 
-      // ── Update all dedup indices so subsequent items in this cycle are checked ──
+      // â”€â”€ Update all dedup indices so subsequent items in this cycle are checked â”€â”€
       seenGuids.add(guid);
       seenNormalizedTitles.add(normTitle);
       seenTokenIndex.set(normTitle, newTokens);
 
       status.postsCreated++;
       processed++;
-      console.log(`[botWorker] ✅ Posted: "${title}" (${feed.name})`);
+      console.log(`[botWorker] âœ… Posted: "${title}" (${feed.name})`);
     }
   } catch (err) {
     status.errors++;
     const msg = err instanceof Error ? err.message : String(err);
-    console.error(`[botWorker] ❌ Failed to fetch ${feed.name}: ${msg}`);
+    console.error(`[botWorker] âŒ Failed to fetch ${feed.name}: ${msg}`);
   }
 }
 
 async function runCycle(): Promise<void> {
   if (!_botAdminId) {
-    console.warn("[botWorker] No admin user found — skipping cycle.");
+    console.warn("[botWorker] No admin user found â€” skipping cycle.");
     return;
   }
 
   // Prevent overlapping cycles: skip if a cycle is already in progress
   if (status.cycleRunning) {
-    console.log("[botWorker] Previous cycle still running — skipping this tick.");
+    console.log("[botWorker] Previous cycle still running â€” skipping this tick.");
     return;
   }
 
   status.cycleRunning = true;
   status.lastRun = new Date();
-  console.log(`[botWorker] 🔄 Starting fetch cycle (${new Date().toISOString()})`);
+  console.log(`[botWorker] ðŸ”„ Starting fetch cycle (${new Date().toISOString()})`);
 
   try {
     await Promise.allSettled(TECH_FEEDS.map((feed, i) => fetchAndPostFeed(feed, i)));
-    console.log(`[botWorker] ✔ Cycle complete. Total posts created: ${status.postsCreated}`);
+    console.log(`[botWorker] âœ” Cycle complete. Total posts created: ${status.postsCreated}`);
   } finally {
     status.cycleRunning = false;
   }
 }
 
-// ─── Public API ───────────────────────────────────────────────────────────────
+// â”€â”€â”€ Public API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 /** Resolve the admin user to use as the bot author. */
 async function resolveBotAdmin(): Promise<void> {
@@ -482,7 +482,7 @@ async function resolveBotAdmin(): Promise<void> {
       return;
     }
 
-    console.warn("[botWorker] No admin user found in storage — bot will not post.");
+    console.warn("[botWorker] No admin user found in storage â€” bot will not post.");
   } catch (err) {
     console.error("[botWorker] Failed to resolve admin user:", err);
   }
@@ -505,7 +505,7 @@ async function seedSeenPostsFromDb(): Promise<void> {
       seenTokenIndex.set(norm, titleTokens(post.title));
       count++;
     }
-    console.log(`[botWorker] 📚 Seeded duplicate filter with ${count} existing posts from DB`);
+    console.log(`[botWorker] ðŸ“š Seeded duplicate filter with ${count} existing posts from DB`);
   } catch (err) {
     console.error("[botWorker] Failed to seed duplicate filter from DB:", err);
   }
@@ -513,7 +513,7 @@ async function seedSeenPostsFromDb(): Promise<void> {
 
 /**
  * Schedule the next cycle tick, clamping the interval to a safe server-controlled
- * range (MIN_POLL_INTERVAL_MS … 24 hours) so that admin-supplied values cannot
+ * range (MIN_POLL_INTERVAL_MS â€¦ 24 hours) so that admin-supplied values cannot
  * cause resource-exhaustion via a zero or excessively large timer.
  */
 function scheduleNextCycle(fn: () => Promise<void>): void {
@@ -525,7 +525,7 @@ function scheduleNextCycle(fn: () => Promise<void>): void {
 /** Start the background polling loop. */
 export async function startBotWorker(): Promise<void> {
   if (status.running && !status.paused) {
-    console.log("[botWorker] Already running — skipping start.");
+    console.log("[botWorker] Already running â€” skipping start.");
     return;
   }
 
@@ -535,7 +535,7 @@ export async function startBotWorker(): Promise<void> {
   status.paused = false;
 
   console.log(
-    `[botWorker] 🤖 Bot worker started. Poll interval: ${_pollIntervalMs / 1000}s`
+    `[botWorker] ðŸ¤– Bot worker started. Poll interval: ${_pollIntervalMs / 1000}s`
   );
 
   // Use recursive setTimeout so a slow cycle never overlaps with the next tick.
@@ -562,13 +562,13 @@ export function stopBotWorker(): void {
     clearTimeout(_pollTimer);
     _pollTimer = null;
   }
-  console.log("[botWorker] 🛑 Bot worker stopped.");
+  console.log("[botWorker] ðŸ›‘ Bot worker stopped.");
 }
 
 /** Pause the polling loop (keeps `running` true, stops scheduling new cycles). */
 export function pauseBotWorker(): void {
   if (!status.running) {
-    console.log("[botWorker] Cannot pause — worker is not running.");
+    console.log("[botWorker] Cannot pause â€” worker is not running.");
     return;
   }
   status.paused = true;
@@ -576,17 +576,17 @@ export function pauseBotWorker(): void {
     clearTimeout(_pollTimer);
     _pollTimer = null;
   }
-  console.log("[botWorker] ⏸ Bot worker paused.");
+  console.log("[botWorker] â¸ Bot worker paused.");
 }
 
 /** Resume a paused polling loop. */
 export async function resumeBotWorker(): Promise<void> {
   if (!status.paused) {
-    console.log("[botWorker] Not paused — nothing to resume.");
+    console.log("[botWorker] Not paused â€” nothing to resume.");
     return;
   }
   status.paused = false;
-  console.log("[botWorker] ▶ Bot worker resumed.");
+  console.log("[botWorker] â–¶ Bot worker resumed.");
 
   async function scheduledCycle(): Promise<void> {
     if (!status.running || status.paused) return;
@@ -606,11 +606,11 @@ export async function resumeBotWorker(): Promise<void> {
 export function updateBotConfig(config: BotConfig): void {
   if (config.pollIntervalMs !== undefined) {
     const raw = Number(config.pollIntervalMs);
-    // Clamp to [MIN_POLL_INTERVAL_MS, 24 h] — same bounds used in scheduleNextCycle
+    // Clamp to [MIN_POLL_INTERVAL_MS, 24 h] â€” same bounds used in scheduleNextCycle
     if (Number.isFinite(raw) && raw >= MIN_POLL_INTERVAL_MS && raw <= 86_400_000) {
       _pollIntervalMs = raw;
       status.pollIntervalMs = _pollIntervalMs;
-      console.log(`[botWorker] ⚙ Poll interval updated to ${_pollIntervalMs / 1000}s`);
+      console.log(`[botWorker] âš™ Poll interval updated to ${_pollIntervalMs / 1000}s`);
     }
   }
 
@@ -619,7 +619,7 @@ export function updateBotConfig(config: BotConfig): void {
     if (Number.isFinite(raw)) {
       _maxArticlesPerFeed = Math.max(1, Math.min(100, Math.floor(raw)));
       status.maxArticlesPerFeed = _maxArticlesPerFeed;
-      console.log(`[botWorker] ⚙ Max articles per feed updated to ${_maxArticlesPerFeed}`);
+      console.log(`[botWorker] âš™ Max articles per feed updated to ${_maxArticlesPerFeed}`);
     }
   }
 
@@ -630,7 +630,7 @@ export function updateBotConfig(config: BotConfig): void {
         // Sync the status.feeds enabled field too
         const feedEntry = status.feeds.find((f) => f.name === name);
         if (feedEntry) feedEntry.enabled = Boolean(enabled);
-        console.log(`[botWorker] ⚙ Feed "${name}" ${enabled ? "enabled" : "disabled"}`);
+        console.log(`[botWorker] âš™ Feed "${name}" ${enabled ? "enabled" : "disabled"}`);
       }
     }
   }

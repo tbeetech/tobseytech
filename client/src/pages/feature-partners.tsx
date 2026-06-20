@@ -1,4 +1,4 @@
-import Navigation from "@/components/Navigation";
+﻿import Navigation from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import PartnerShowcaseSection from "@/components/sections/PartnerShowcaseSection";
@@ -7,7 +7,7 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 export default function FeaturePartnersPage() {
   return (
     <div className="min-h-screen bg-space-black text-white">
-      <title>Partner Network – TOBSEYTECH</title>
+      <title>Partner Network â€“ ARCOLYTE TECHNOLOGIES</title>
       <Navigation />
       <main className="pt-20">
         <PartnerShowcaseSection />

@@ -1,4 +1,4 @@
-# TobseyTech Bot Worker — Methodology & Integration Guide
+# Arcolyte Technologies Bot Worker — Methodology & Integration Guide
 
 **File:** `server/botWorker.ts`  
 **Route folder:** `File and Management center/`  
@@ -8,7 +8,7 @@
 
 ## Purpose
 
-The Bot Worker is a background service integrated into the TobseyTech server backbone. It automatically fetches the latest tech articles from trusted publishers and publishes them directly to the TobseyTech blog in real-time, keeping site visitors and registered users up to date with industry news without any manual effort.
+The Bot Worker is a background service integrated into the Arcolyte Technologies server backbone. It automatically fetches the latest tech articles from trusted publishers and publishes them directly to the Arcolyte Technologies blog in real-time, keeping site visitors and registered users up to date with industry news without any manual effort.
 
 ---
 
@@ -51,7 +51,7 @@ For every article, the worker extracts the best available image in this priority
 1. `media:content` RSS field (e.g. TechCrunch, Ars Technica)
 2. `enclosure` attachment (RSS standard image field)
 3. First `<img>` tag found in the article's HTML content
-4. **Fallback: TobseyTech logo** (`/og-image.svg`) — used when no image is attached
+4. **Fallback: Arcolyte Technologies logo** (`/og-image.svg`) — used when no image is attached
 
 The original article link is **always embedded** in the post body HTML with proper attribution (source name, date, and a "Read the original article →" link).
 
@@ -60,7 +60,7 @@ The original article link is **always embedded** in the post body HTML with prop
 Each auto-generated blog post contains:
 
 ```
-[Cover image or TobseyTech logo]
+[Cover image or Arcolyte Technologies logo]
 [Attribution line: "Originally published by <Publisher> on <Date>. Read the original article →"]
 [Full article body from RSS feed]
 [Footer: "This article was automatically curated from <Publisher>...  View source →"]
@@ -68,7 +68,7 @@ Each auto-generated blog post contains:
 
 ### 6. Author Attribution
 
-Posts are created under the **`tbeetech` admin account** (seeded at startup). The `authorName` field includes the source publisher name (e.g. `TobseyTech Bot · TechCrunch`) so editors can identify the origin at a glance.
+Posts are created under the **`tbeetech` admin account** (seeded at startup). The `authorName` field includes the source publisher name (e.g. `Arcolyte Technologies Bot · TechCrunch`) so editors can identify the origin at a glance.
 
 ### 7. Article Volume Control
 
@@ -158,4 +158,4 @@ Set `BOT_WORKER_ENABLED=false` in your environment variables and restart the ser
 
 ---
 
-*Maintained by TobseyTech Engineering | tobseytech.biz*
+*Maintained by Arcolyte Technologies Engineering | arcolytetech.com*

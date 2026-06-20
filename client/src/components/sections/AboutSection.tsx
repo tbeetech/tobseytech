@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const pillars = [
@@ -10,7 +10,7 @@ const pillars = [
 const carouselSlides = [
   {
     heading: "What We Do",
-    body: "TOBSEYTECH is a digital agency that helps companies, businesses, and individuals automate their operations, build professional websites and apps, and leverage AI to work smarter. We handle the technical heavy lifting so you can focus on growing.",
+    body: "ARCOLYTE TECHNOLOGIES is a digital agency that helps companies, businesses, and individuals automate their operations, build professional websites and apps, and leverage AI to work smarter. We handle the technical heavy lifting so you can focus on growing.",
   },
   {
     heading: "How We Work",
@@ -51,7 +51,7 @@ export default function AboutSection() {
               Who We Are
             </h2>
             <p className="text-gray-300 mb-4 leading-relaxed">
-              TOBSEYTECH is a digital agency built to deliver automation-first solutions to companies,
+              ARCOLYTE TECHNOLOGIES is a digital agency built to deliver automation-first solutions to companies,
               businesses, individuals, and social-impact organisations worldwide.
             </p>
             <p className="text-gray-300 mb-6 leading-relaxed">

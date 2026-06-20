@@ -5,7 +5,7 @@ export const BADGE_DEFINITIONS = [
     id: "first_login",
     icon: Star,
     title: "Pioneer",
-    description: "Joined the TOBSEYTECH community",
+    description: "Joined the ARCOLYTE TECHNOLOGIES community",
     color: "text-neon-yellow",
     bg: "bg-neon-yellow/10",
     border: "border-neon-yellow/30",

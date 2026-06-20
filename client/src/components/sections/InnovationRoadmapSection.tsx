@@ -1,11 +1,11 @@
-import { useRef, useEffect, useState } from "react";
+﻿import { useRef, useEffect, useState } from "react";
 import { CheckCircle, Zap, Globe, Users, Award, Rocket } from "lucide-react";
 
 const milestones = [
   {
     year: "2022",
     title: "Foundation",
-    description: "TOBSEYTECH launched with a vision to democratize digital transformation for African businesses.",
+    description: "ARCOLYTE TECHNOLOGIES launched with a vision to democratize digital transformation for African businesses.",
     icon: Rocket,
     color: "text-galactic-orange",
     border: "border-galactic-orange",

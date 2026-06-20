@@ -31,7 +31,7 @@ export default function DevTipsLayout({ children, title, subtitle }: Props) {
         <div className="text-center space-y-4">
           <ShieldAlert className="w-16 h-16 text-red-500 mx-auto" />
           <h1 className="text-2xl font-bold text-white">Access Denied</h1>
-          <p className="text-gray-400">This area is restricted to TobseyTech administrators only.</p>
+          <p className="text-gray-400">This area is restricted to Arcolyte Technologies administrators only.</p>
           <Link href="/dashboard">
             <span className="text-neon-cyan underline cursor-pointer">Go to Dashboard</span>
           </Link>

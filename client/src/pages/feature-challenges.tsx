@@ -1,4 +1,4 @@
-import Navigation from "@/components/Navigation";
+﻿import Navigation from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import ChallengesSection from "@/components/sections/ChallengesSection";
@@ -7,7 +7,7 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 export default function FeatureChallengesPage() {
   return (
     <div className="min-h-screen bg-space-black text-white">
-      <title>Community Challenges – TOBSEYTECH</title>
+      <title>Community Challenges â€“ ARCOLYTE TECHNOLOGIES</title>
       <Navigation />
       <main className="pt-20">
         <ChallengesSection />

@@ -1,4 +1,4 @@
-import { Link } from "wouter";
+﻿import { Link } from "wouter";
 import Navigation from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,7 +12,7 @@ const features = [
     number: "01",
     icon: Calculator,
     title: "ROI Calculator",
-    description: "Interactive financial model that calculates your exact business ROI from TOBSEYTECH services in real time.",
+    description: "Interactive financial model that calculates your exact business ROI from ARCOLYTE TECHNOLOGIES services in real time.",
     tags: ["Interactive", "Finance", "Analytics"],
     color: "text-galactic-orange",
     border: "border-galactic-orange",
@@ -22,7 +22,7 @@ const features = [
     number: "02",
     icon: Rocket,
     title: "Innovation Roadmap",
-    description: "Animated milestone timeline showing TOBSEYTECH's journey from startup to Series A and beyond.",
+    description: "Animated milestone timeline showing ARCOLYTE TECHNOLOGIES's journey from startup to Series A and beyond.",
     tags: ["Visual", "Strategy"],
     color: "text-neon-cyan",
     border: "border-neon-cyan",
@@ -143,7 +143,7 @@ const features = [
 export default function FeaturesPage() {
   return (
     <div className="min-h-screen bg-space-black text-white">
-      <title>13 Interactive Features – TOBSEYTECH</title>
+      <title>13 Interactive Features â€“ ARCOLYTE TECHNOLOGIES</title>
       <Navigation />
 
       <main className="pt-24 pb-20">
@@ -156,14 +156,14 @@ export default function FeaturesPage() {
             13 Investor-Ready Features
           </h1>
           <p className="text-gray-300 max-w-3xl mx-auto text-lg leading-relaxed mb-8">
-            TOBSEYTECH isn't just a service agency, it's an interactive digital ecosystem. Every feature below is live, built, and designed to attract users, retain community, and demonstrate platform value to investors.
+            ARCOLYTE TECHNOLOGIES isn't just a service agency, it's an interactive digital ecosystem. Every feature below is live, built, and designed to attract users, retain community, and demonstrate platform value to investors.
           </p>
           <div className="flex flex-wrap justify-center gap-4 mb-6">
             {[
               { label: "Interactive Features", value: "13" },
               { label: "Live Today", value: "13/13" },
-              { label: "User-Facing", value: "✓" },
-              { label: "Investor-Ready", value: "✓" },
+              { label: "User-Facing", value: "âœ“" },
+              { label: "Investor-Ready", value: "âœ“" },
             ].map(({ label, value }) => (
               <div key={label} className="px-5 py-3 glass-effect rounded-xl border border-galactic-orange/20">
                 <div className="font-orbitron font-bold text-galactic-orange text-xl">{value}</div>
@@ -222,7 +222,7 @@ export default function FeaturesPage() {
               Ready to Invest or Partner?
             </h2>
             <p className="text-gray-300 mb-6 max-w-xl mx-auto">
-              TOBSEYTECH is raising investment to scale these features globally. Book a call with the founder or request the full investor deck.
+              ARCOLYTE TECHNOLOGIES is raising investment to scale these features globally. Book a call with the founder or request the full investor deck.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Link href="/contact">

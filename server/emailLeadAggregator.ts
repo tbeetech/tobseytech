@@ -1,4 +1,4 @@
-/**
+﻿/**
  * emailLeadAggregator.ts
  *
  * Aggregates prospective email leads using JavaScript-only public sources.
@@ -93,7 +93,7 @@ async function fetchWithTimeout(url: string): Promise<Response> {
     return await fetch(url, {
       signal: controller.signal,
       headers: {
-        "User-Agent": "tobseytech-emailos-lead-aggregator/1.0",
+        "User-Agent": "ARCOLYTE TECHNOLOGIES-emailos-lead-aggregator/1.0",
         Accept: "application/json, text/xml, application/xml, text/plain;q=0.8,*/*;q=0.5",
       },
     });
@@ -282,7 +282,7 @@ function buildOfflineLeads(industry: string, keywords: string[], maxLeads: numbe
  *
  * @param industry  Industry/niche label (e.g. "Technology", "Marketing")
  * @param keywords  Additional keyword refinements (e.g. ["email", "B2B"])
- * @param count     Maximum number of leads to return (1 – 500)
+ * @param count     Maximum number of leads to return (1 â€“ 500)
  */
 export async function aggregateEmailLeads(
   industry: string,

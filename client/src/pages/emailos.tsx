@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import Navigation from "@/components/Navigation";
@@ -33,7 +33,7 @@ import {
   X,
 } from "lucide-react";
 
-// ─── Types ───────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 type Tier = "starter" | "pro" | "enterprise";
 type OnboardingStatus =
@@ -89,7 +89,7 @@ interface Campaign {
   createdAt: string;
 }
 
-// ─── Tier definitions ────────────────────────────────────────────────────────
+// â”€â”€â”€ Tier definitions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const TIER_DEFS = [
   {
@@ -129,7 +129,7 @@ const TIER_DEFS = [
   },
 ];
 
-// ─── Onboarding steps ────────────────────────────────────────────────────────
+// â”€â”€â”€ Onboarding steps â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const ONBOARDING_STEPS = [
   { id: "welcome",   label: "Welcome",      icon: Mail },
@@ -140,7 +140,7 @@ const ONBOARDING_STEPS = [
   { id: "launch",    label: "Launch",       icon: Zap },
 ];
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 async function apiFetch(path: string, opts: RequestInit = {}) {
   const res = await fetch(path, { credentials: "include", ...opts });
@@ -149,7 +149,7 @@ async function apiFetch(path: string, opts: RequestInit = {}) {
   return data;
 }
 
-// ─── Sub-components ──────────────────────────────────────────────────────────
+// â”€â”€â”€ Sub-components â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function StepIndicator({ current }: { current: number }) {
   return (
@@ -182,7 +182,7 @@ function StepIndicator({ current }: { current: number }) {
   );
 }
 
-// ─── Onboarding Wizard ───────────────────────────────────────────────────────
+// â”€â”€â”€ Onboarding Wizard â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function OnboardingWizard({ onComplete }: { onComplete: (org: Org) => void }) {
   const { toast } = useToast();
@@ -207,7 +207,7 @@ function OnboardingWizard({ onComplete }: { onComplete: (org: Org) => void }) {
   const [campaignFrom,    setCampaignFrom]    = useState("");
   const [campaignEmail,   setCampaignEmail]   = useState("");
 
-  // ── step handlers ──
+  // â”€â”€ step handlers â”€â”€
 
   async function handleOrgSubmit() {
     if (!orgName.trim() || !orgDomain.trim()) {
@@ -347,13 +347,13 @@ function OnboardingWizard({ onComplete }: { onComplete: (org: Org) => void }) {
 
         <AnimatePresence mode="wait">
 
-          {/* ── Step 0: Welcome ── */}
+          {/* â”€â”€ Step 0: Welcome â”€â”€ */}
           {step === 0 && (
             <motion.div key="welcome" initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -40 }} className="glass-effect p-10 rounded-3xl border border-neon-cyan/30 text-center">
               <div className="w-20 h-20 rounded-full bg-neon-cyan/10 border border-neon-cyan/40 flex items-center justify-center mx-auto mb-6">
                 <Mail className="w-10 h-10 text-neon-cyan" />
               </div>
-              <h1 className="font-orbitron font-black text-3xl gradient-text mb-3">Welcome to EmailOS 👋</h1>
+              <h1 className="font-orbitron font-black text-3xl gradient-text mb-3">Welcome to EmailOS ðŸ‘‹</h1>
               <p className="text-gray-300 mb-2 max-w-lg mx-auto">
                 You're about to set up your very own <span className="text-neon-cyan font-semibold">email marketing account</span>. It takes less than 2 minutes and no technical knowledge is required.
               </p>
@@ -371,7 +371,7 @@ function OnboardingWizard({ onComplete }: { onComplete: (org: Org) => void }) {
             </motion.div>
           )}
 
-          {/* ── Step 1: Org Setup ── */}
+          {/* â”€â”€ Step 1: Org Setup â”€â”€ */}
           {step === 1 && (
             <motion.div key="org" initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -40 }} className="glass-effect p-10 rounded-3xl border border-galactic-orange/30">
               <div className="flex items-center gap-3 mb-6">
@@ -414,7 +414,7 @@ function OnboardingWizard({ onComplete }: { onComplete: (org: Org) => void }) {
             </motion.div>
           )}
 
-          {/* ── Step 2: Choose Plan ── */}
+          {/* â”€â”€ Step 2: Choose Plan â”€â”€ */}
           {step === 2 && (
             <motion.div key="tier" initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -40 }}>
               <div className="flex items-center gap-3 mb-6">
@@ -472,7 +472,7 @@ function OnboardingWizard({ onComplete }: { onComplete: (org: Org) => void }) {
             </motion.div>
           )}
 
-          {/* ── Step 3: Create First List ── */}
+          {/* â”€â”€ Step 3: Create First List â”€â”€ */}
           {step === 3 && (
             <motion.div key="list" initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -40 }} className="glass-effect p-10 rounded-3xl border border-galactic-green/30">
               <div className="flex items-center gap-3 mb-6">
@@ -514,7 +514,7 @@ function OnboardingWizard({ onComplete }: { onComplete: (org: Org) => void }) {
             </motion.div>
           )}
 
-          {/* ── Step 4: Create First Campaign ── */}
+          {/* â”€â”€ Step 4: Create First Campaign â”€â”€ */}
           {step === 4 && (
             <motion.div key="campaign" initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -40 }} className="glass-effect p-10 rounded-3xl border border-neon-purple/30">
               <div className="flex items-center gap-3 mb-6">
@@ -535,7 +535,7 @@ function OnboardingWizard({ onComplete }: { onComplete: (org: Org) => void }) {
                   <input
                     value={campaignSubject}
                     onChange={e => setCampaignSubject(e.target.value)}
-                    placeholder="e.g. 🎉 Our Big Summer Sale, Don't Miss It!"
+                    placeholder="e.g. ðŸŽ‰ Our Big Summer Sale, Don't Miss It!"
                     className="w-full bg-space-dark border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-neon-purple/60 font-orbitron text-sm"
                   />
                 </div>
@@ -545,7 +545,7 @@ function OnboardingWizard({ onComplete }: { onComplete: (org: Org) => void }) {
                     <input
                       value={campaignFrom}
                       onChange={e => setCampaignFrom(e.target.value)}
-                      placeholder="e.g. The TOBSEYTECH Team"
+                      placeholder="e.g. The ARCOLYTE TECHNOLOGIES Team"
                       className="w-full bg-space-dark border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-neon-purple/60 font-orbitron text-sm"
                     />
                   </div>
@@ -572,13 +572,13 @@ function OnboardingWizard({ onComplete }: { onComplete: (org: Org) => void }) {
             </motion.div>
           )}
 
-          {/* ── Step 5: Launch ── */}
+          {/* â”€â”€ Step 5: Launch â”€â”€ */}
           {step === 5 && (
             <motion.div key="launch" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="glass-effect p-10 rounded-3xl border border-galactic-orange/40 text-center">
               <div className="w-24 h-24 rounded-full bg-galactic-orange/15 border border-galactic-orange/40 flex items-center justify-center mx-auto mb-6">
                 <Zap className="w-12 h-12 text-galactic-orange" />
               </div>
-              <h2 className="font-orbitron font-black text-3xl gradient-text mb-3">You're All Set! 🎉</h2>
+              <h2 className="font-orbitron font-black text-3xl gradient-text mb-3">You're All Set! ðŸŽ‰</h2>
               <p className="text-gray-300 mb-2 max-w-md mx-auto">
                 Your EmailOS account is ready. Head to your dashboard to add contacts, create beautiful campaigns, and start sending!
               </p>
@@ -605,7 +605,7 @@ function OnboardingWizard({ onComplete }: { onComplete: (org: Org) => void }) {
   );
 }
 
-// ─── Dashboard ───────────────────────────────────────────────────────────────
+// â”€â”€â”€ Dashboard â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function EmailOSDashboard({ org: initialOrg }: { org: Org }) {
   const { toast } = useToast();
@@ -615,24 +615,24 @@ function EmailOSDashboard({ org: initialOrg }: { org: Org }) {
   const [loadingData, setLoadingData] = useState(true);
   const [activeTab, setActiveTab]     = useState<"overview" | "campaigns" | "lists" | "settings">("overview");
 
-  // ── Create List modal state ──
+  // â”€â”€ Create List modal state â”€â”€
   const [showCreateList, setShowCreateList]   = useState(false);
   const [newListName, setNewListName]         = useState("");
   const [newListDesc, setNewListDesc]         = useState("");
   const [creatingList, setCreatingList]       = useState(false);
 
-  // ── Aggregate Leads modal state ──
+  // â”€â”€ Aggregate Leads modal state â”€â”€
   const [aggregateListId, setAggregateListId]       = useState<string | null>(null);
   const [aggIndustry, setAggIndustry]               = useState("General");
   const [aggKeywords, setAggKeywords]               = useState("");
   const [aggCount, setAggCount]                     = useState(50);
   const [aggregating, setAggregating]               = useState(false);
 
-  // ── View Leads modal state ──
+  // â”€â”€ View Leads modal state â”€â”€
   const [viewingList, setViewingList]       = useState<EmailList | null>(null);
   const [loadingLeads, setLoadingLeads]     = useState(false);
 
-  // ── Create Campaign modal state ──
+  // â”€â”€ Create Campaign modal state â”€â”€
   const [showCreateCampaign, setShowCreateCampaign] = useState(false);
   const [campSubject, setCampSubject]               = useState("");
   const [campFromName, setCampFromName]             = useState("");
@@ -642,7 +642,7 @@ function EmailOSDashboard({ org: initialOrg }: { org: Org }) {
   const [campScheduledAt, setCampScheduledAt]       = useState("");
   const [creatingCampaign, setCreatingCampaign]     = useState(false);
 
-  // ── Campaign send state ──
+  // â”€â”€ Campaign send state â”€â”€
   const [sendingCampaignId, setSendingCampaignId]   = useState<string | null>(null);
 
   useEffect(() => {
@@ -701,7 +701,7 @@ function EmailOSDashboard({ org: initialOrg }: { org: Org }) {
     try {
       const data = await apiFetch(`/api/emailos/campaigns/${id}/send`, { method: "POST" });
       setCampaigns(prev => prev.map(c => c._id === id ? { ...c, status: "sending" } : c));
-      toast({ title: "Campaign dispatched!", description: `Sending to ${data.queued} contacts…` });
+      toast({ title: "Campaign dispatched!", description: `Sending to ${data.queued} contactsâ€¦` });
     } catch (err: any) {
       toast({ title: "Send failed", description: err.message, variant: "destructive" });
     } finally {
@@ -859,7 +859,7 @@ function EmailOSDashboard({ org: initialOrg }: { org: Org }) {
           </div>
         ) : (
           <>
-            {/* ── Overview ── */}
+            {/* â”€â”€ Overview â”€â”€ */}
             {activeTab === "overview" && (
               <div className="space-y-6">
                 <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -913,19 +913,19 @@ function EmailOSDashboard({ org: initialOrg }: { org: Org }) {
                   <div className="grid grid-cols-3 gap-4">
                     <div className="text-center">
                       <div className={`font-orbitron font-black text-lg ${tierDef.color}`}>
-                        {org.maxContacts >= 999_999_999 ? "∞" : org.maxContacts.toLocaleString()}
+                        {org.maxContacts >= 999_999_999 ? "âˆž" : org.maxContacts.toLocaleString()}
                       </div>
                       <div className="text-gray-500 text-xs font-orbitron">Max Contacts</div>
                     </div>
                     <div className="text-center">
                       <div className={`font-orbitron font-black text-lg ${tierDef.color}`}>
-                        {org.maxEmailsPerMonth >= 999_999_999 ? "∞" : org.maxEmailsPerMonth.toLocaleString()}
+                        {org.maxEmailsPerMonth >= 999_999_999 ? "âˆž" : org.maxEmailsPerMonth.toLocaleString()}
                       </div>
                       <div className="text-gray-500 text-xs font-orbitron">Emails / Month</div>
                     </div>
                     <div className="text-center">
                       <div className={`font-orbitron font-black text-lg ${tierDef.color}`}>
-                        {org.maxActiveCampaigns >= 999 ? "∞" : org.maxActiveCampaigns}
+                        {org.maxActiveCampaigns >= 999 ? "âˆž" : org.maxActiveCampaigns}
                       </div>
                       <div className="text-gray-500 text-xs font-orbitron">Active Campaigns</div>
                     </div>
@@ -934,7 +934,7 @@ function EmailOSDashboard({ org: initialOrg }: { org: Org }) {
               </div>
             )}
 
-            {/* ── Campaigns ── */}
+            {/* â”€â”€ Campaigns â”€â”€ */}
             {activeTab === "campaigns" && (
               <div>
                 <div className="flex items-center justify-between mb-5">
@@ -1047,7 +1047,7 @@ function EmailOSDashboard({ org: initialOrg }: { org: Org }) {
               </div>
             )}
 
-            {/* ── Lists ── */}
+            {/* â”€â”€ Lists â”€â”€ */}
             {activeTab === "lists" && (
               <div>
                 <div className="flex items-center justify-between mb-5">
@@ -1111,7 +1111,7 @@ function EmailOSDashboard({ org: initialOrg }: { org: Org }) {
                         <Button variant="outline" onClick={() => setAggregateListId(null)} className="border-white/10 text-gray-400 font-orbitron text-sm">Cancel</Button>
                         <Button onClick={handleAggregateLeads} disabled={aggregating} className="flex-1 bg-neon-cyan text-space-black font-orbitron font-bold text-sm">
                           {aggregating ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <RefreshCw className="w-4 h-4 mr-2" />}
-                          {aggregating ? "Fetching Leads…" : "Fetch Leads"}
+                          {aggregating ? "Fetching Leadsâ€¦" : "Fetch Leads"}
                         </Button>
                       </div>
                     </div>
@@ -1203,8 +1203,8 @@ function EmailOSDashboard({ org: initialOrg }: { org: Org }) {
                               {viewingList.contacts.map((c, i) => (
                                 <tr key={i} className="hover:bg-white/3 transition-colors">
                                   <td className="px-4 py-2.5 text-white">{c.email}</td>
-                                  <td className="px-4 py-2.5 text-gray-300">{c.firstName || <span className="text-gray-600">—</span>}</td>
-                                  <td className="px-4 py-2.5 text-gray-300">{c.lastName || <span className="text-gray-600">—</span>}</td>
+                                  <td className="px-4 py-2.5 text-gray-300">{c.firstName || <span className="text-gray-600">â€”</span>}</td>
+                                  <td className="px-4 py-2.5 text-gray-300">{c.lastName || <span className="text-gray-600">â€”</span>}</td>
                                   <td className="px-4 py-2.5">
                                     <div className="flex flex-wrap gap-1">
                                       {(c.tags ?? []).map(t => (
@@ -1233,7 +1233,7 @@ function EmailOSDashboard({ org: initialOrg }: { org: Org }) {
               </div>
             )}
 
-            {/* ── Settings / Upgrade ── */}
+            {/* â”€â”€ Settings / Upgrade â”€â”€ */}
             {activeTab === "settings" && (
               <div className="space-y-6">
                 <div className="glass-effect p-6 rounded-2xl border border-white/10">
@@ -1299,7 +1299,7 @@ function EmailOSDashboard({ org: initialOrg }: { org: Org }) {
   );
 }
 
-// ─── Main Page ───────────────────────────────────────────────────────────────
+// â”€â”€â”€ Main Page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export default function EmailOSPage() {
   const { user, isLoading } = useAuth();
@@ -1353,7 +1353,7 @@ export default function EmailOSPage() {
                 Send Beautiful Emails to Thousands of People
               </h1>
               <p className="text-gray-300 max-w-lg mx-auto mb-2 leading-relaxed">
-                EmailOS is your personal email marketing tool, available exclusively on TOBSEYTECH.
+                EmailOS is your personal email marketing tool, available exclusively on ARCOLYTE TECHNOLOGIES.
                 Grow your audience, design stunning campaigns, and track every open and click, no technical skills needed.
               </p>
               <p className="text-gray-500 text-sm max-w-md mx-auto mb-8">
@@ -1392,7 +1392,7 @@ export default function EmailOSPage() {
               </div>
 
               <p className="text-gray-600 text-xs mt-5 font-orbitron">
-                By creating an account you agree to our Terms of Service. EmailOS is exclusively available on TOBSEYTECH and is linked to your personal account.
+                By creating an account you agree to our Terms of Service. EmailOS is exclusively available on ARCOLYTE TECHNOLOGIES and is linked to your personal account.
               </p>
             </div>
           </motion.div>
@@ -1401,7 +1401,7 @@ export default function EmailOSPage() {
           <div className="mt-6 text-center">
             <Link href="/feature/emailos">
               <span className="text-gray-500 text-xs font-orbitron hover:text-neon-cyan transition-colors underline underline-offset-2 cursor-pointer">
-                Learn more about EmailOS →
+                Learn more about EmailOS â†’
               </span>
             </Link>
           </div>

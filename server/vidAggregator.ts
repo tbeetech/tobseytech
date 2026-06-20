@@ -1,5 +1,5 @@
-/**
- * Vid Aggregator — background worker that scrapes YouTube channel RSS feeds
+﻿/**
+ * Vid Aggregator â€” background worker that scrapes YouTube channel RSS feeds
  * for tech-related video content and creates draft VlogPosts in the database.
  *
  * YouTube exposes per-channel RSS feeds without an API key:
@@ -61,7 +61,7 @@ let intervalHandle: ReturnType<typeof setTimeout> | null = null;
 
 function scheduleNext(): void {
   if (intervalHandle) clearTimeout(intervalHandle);
-  // Clamp to prevent resource exhaustion: 1 min – 24 h
+  // Clamp to prevent resource exhaustion: 1 min â€“ 24 h
   const safeInterval = Math.min(Math.max(state.pollIntervalMs, 60_000), 86_400_000);
   intervalHandle = setTimeout(() => {
     if (state.running && !state.paused) {
@@ -123,7 +123,7 @@ async function runCycle(): Promise<void> {
         try {
           const resp = await fetch(channel.url, {
             signal: controller.signal,
-            headers: { "User-Agent": "TobseyTech-VidAggregator/1.0" },
+            headers: { "User-Agent": "ARCOLYTE TECHNOLOGIES-VidAggregator/1.0" },
           });
           clearTimeout(timeout);
           if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
@@ -188,7 +188,7 @@ async function runCycle(): Promise<void> {
   }
 }
 
-// ─── Public API ───────────────────────────────────────────────────────────────
+// â”€â”€â”€ Public API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export function getVidAggregatorStatus(): VidAggregatorState {
   return { ...state, channels: state.channels.map((c) => ({ ...c })) };

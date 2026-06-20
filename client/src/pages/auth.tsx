@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { useLocation, useSearch } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
@@ -105,7 +105,7 @@ export default function AuthPage() {
       />
       <div className="absolute inset-0 starfield opacity-30 pointer-events-none" />
 
-      {/* Left panel – brand showcase */}
+      {/* Left panel â€“ brand showcase */}
       <div className="hidden lg:flex flex-1 flex-col items-center justify-center px-12 relative z-10">
         <div className="max-w-md">
           <div className="relative mb-8 flex flex-col items-center">
@@ -120,7 +120,7 @@ export default function AuthPage() {
           </div>
 
           <h1 className="text-5xl font-orbitron font-black gradient-text text-center mb-3">
-            TOBSEYTECH
+            ARCOLYTE TECHNOLOGIES
           </h1>
           <p className="text-center text-galactic-gold/80 text-lg font-medium mb-12">
             Future Digital Solutions
@@ -155,7 +155,7 @@ export default function AuthPage() {
         style={{ background: "linear-gradient(to bottom, transparent, rgba(34,197,94,0.2), transparent)" }}
       />
 
-      {/* Right panel – auth form */}
+      {/* Right panel â€“ auth form */}
       <div className="flex-1 flex items-center justify-center px-6 relative z-10">
         <div className="w-full max-w-sm">
           {/* Mobile logo */}
@@ -163,7 +163,7 @@ export default function AuthPage() {
             <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-galactic-orange to-galactic-gold flex items-center justify-center mx-auto mb-3 shadow-[0_0_30px_rgba(34,197,94,0.4)]">
               <span className="text-space-black font-orbitron font-black text-xl">TST</span>
             </div>
-            <h1 className="text-3xl font-orbitron font-black gradient-text">TOBSEYTECH</h1>
+            <h1 className="text-3xl font-orbitron font-black gradient-text">ARCOLYTE TECHNOLOGIES</h1>
           </div>
 
           <div className="glass-effect-strong rounded-2xl p-7">
@@ -219,7 +219,7 @@ export default function AuthPage() {
                         required
                         className="h-10 border-galactic-orange/20 text-white text-sm pr-10"
                         style={{ background: "rgba(0,0,0,0.6)" }}
-                        placeholder="••••••••"
+                        placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
                       />
                       <button
                         type="button"
@@ -236,7 +236,7 @@ export default function AuthPage() {
                     disabled={loading}
                     className="w-full h-10 bg-gradient-to-r from-galactic-orange to-galactic-gold text-space-black font-orbitron font-bold text-sm transition-all mt-2 hover:shadow-[0_0_25px_rgba(34,197,94,0.4)]"
                   >
-                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Sign In →"}
+                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Sign In â†’"}
                   </Button>
                   <div className="text-center">
                     <a
@@ -336,7 +336,7 @@ export default function AuthPage() {
                         minLength={6}
                         className={`h-10 border-galactic-orange/20 text-white text-sm pr-10 ${passwordMismatch ? "border-red-500" : ""}`}
                         style={{ background: "rgba(0,0,0,0.6)" }}
-                        placeholder="••••••••"
+                        placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
                       />
                       <button
                         type="button"
@@ -356,7 +356,7 @@ export default function AuthPage() {
                     disabled={loading}
                     className="w-full h-10 bg-gradient-to-r from-galactic-orange to-galactic-gold text-space-black font-orbitron font-bold text-sm transition-all mt-2 hover:shadow-[0_0_25px_rgba(34,197,94,0.4)]"
                   >
-                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Create Account →"}
+                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Create Account â†’"}
                   </Button>
                 </form>
               </TabsContent>
@@ -364,7 +364,7 @@ export default function AuthPage() {
           </div>
 
           <p className="text-center text-gray-600 text-xs mt-5">
-            TOBSEYTECH · Secure · Future · Innovative
+            ARCOLYTE TECHNOLOGIES Â· Secure Â· Future Â· Innovative
           </p>
         </div>
       </div>

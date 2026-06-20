@@ -35,7 +35,7 @@ export default function ROICalculatorSection() {
             ROI Calculator
           </h2>
           <p className="text-gray-300 max-w-2xl mx-auto">
-            See exactly how much value TOBSEYTECH services add to your business. Adjust the sliders and watch your returns grow in real time.
+            See exactly how much value ARCOLYTE TECHNOLOGIES services add to your business. Adjust the sliders and watch your returns grow in real time.
           </p>
         </div>
 

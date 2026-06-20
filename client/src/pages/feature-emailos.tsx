@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
 import Navigation from "@/components/Navigation";
@@ -25,7 +25,7 @@ import {
   MousePointerClick,
 } from "lucide-react";
 
-// ─── Data ────────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const coreCapabilities = [
   {
@@ -176,10 +176,10 @@ const whyEmailOS = [
   { label: "Your data stays private", icon: Lock },
   { label: "Scheduled sending", icon: RefreshCw },
   { label: "Track every open & click", icon: MousePointerClick },
-  { label: "Exclusive to TOBSEYTECH", icon: Shield },
+  { label: "Exclusive to ARCOLYTE TECHNOLOGIES", icon: Shield },
 ];
 
-// ─── Component ───────────────────────────────────────────────────────────────
+// â”€â”€â”€ Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export default function FeatureEmailOSPage() {
   const [activeTier, setActiveTier] = useState(1);
@@ -190,12 +190,12 @@ export default function FeatureEmailOSPage() {
 
   return (
     <div className="min-h-screen bg-space-black text-white">
-      <title>EmailOS – Email Marketing for Everyone | TOBSEYTECH</title>
+      <title>EmailOS â€“ Email Marketing for Everyone | ARCOLYTE TECHNOLOGIES</title>
       <Navigation />
 
       <main className="pt-20">
 
-        {/* ── Hero ── */}
+        {/* â”€â”€ Hero â”€â”€ */}
         <section className="relative overflow-hidden py-24 px-6">
           <div className="absolute inset-0 bg-gradient-to-br from-neon-cyan/5 via-galactic-orange/5 to-neon-purple/5 pointer-events-none" />
           <div className="container mx-auto max-w-5xl text-center relative z-10">
@@ -216,16 +216,16 @@ export default function FeatureEmailOSPage() {
               <p className="text-gray-300 max-w-3xl mx-auto text-lg leading-relaxed mb-10">
                 Send beautiful emails to thousands of people, grow your audience, and see your results in real time.
                 No technical skills needed, if you can type, you can run a campaign.
-                EmailOS is exclusively available on TOBSEYTECH.
+                EmailOS is exclusively available on ARCOLYTE TECHNOLOGIES.
               </p>
               <div className="flex flex-wrap justify-center gap-3 mb-8">
                 {[
                   { label: "Free Contacts", value: "500" },
                   { label: "Pro Contacts", value: "10K" },
-                  { label: "Smart Scheduling", value: "✓" },
+                  { label: "Smart Scheduling", value: "âœ“" },
                   { label: "Open Tracking", value: "Live" },
                   { label: "A/B Testing", value: "Pro+" },
-                  { label: "Exclusive to", value: "TOBSEYTECH" },
+                  { label: "Exclusive to", value: "ARCOLYTE TECHNOLOGIES" },
                 ].map(({ label, value }) => (
                   <div key={label} className="px-4 py-3 glass-effect rounded-xl border border-neon-cyan/20 text-center">
                     <div className="font-orbitron font-black text-neon-cyan text-2xl">{value}</div>
@@ -249,7 +249,7 @@ export default function FeatureEmailOSPage() {
           </div>
         </section>
 
-        {/* ── Core Capabilities ── */}
+        {/* â”€â”€ Core Capabilities â”€â”€ */}
         <section className="py-20 px-6">
           <div className="container mx-auto max-w-7xl">
             <div className="text-center mb-14">
@@ -287,7 +287,7 @@ export default function FeatureEmailOSPage() {
           </div>
         </section>
 
-        {/* ── Pricing Tiers ── */}
+        {/* â”€â”€ Pricing Tiers â”€â”€ */}
         <section className="py-20 px-6 bg-space-dark/40">
           <div className="container mx-auto max-w-6xl">
             <div className="text-center mb-14">
@@ -352,7 +352,7 @@ export default function FeatureEmailOSPage() {
           </div>
         </section>
 
-        {/* ── Why EmailOS ── */}
+        {/* â”€â”€ Why EmailOS â”€â”€ */}
         <section className="py-20 px-6">
           <div className="container mx-auto max-w-5xl">
             <div className="text-center mb-12">
@@ -363,7 +363,7 @@ export default function FeatureEmailOSPage() {
                 Built for Everyone, Not Just Tech People
               </h2>
               <p className="text-gray-400 max-w-2xl mx-auto">
-                EmailOS is exclusive to TOBSEYTECH. It's designed so anyone, from first-time senders to seasoned marketers, can run powerful email campaigns with confidence.
+                EmailOS is exclusive to ARCOLYTE TECHNOLOGIES. It's designed so anyone, from first-time senders to seasoned marketers, can run powerful email campaigns with confidence.
               </p>
             </div>
             <div className="flex flex-wrap justify-center gap-3">
@@ -387,7 +387,7 @@ export default function FeatureEmailOSPage() {
           </div>
         </section>
 
-        {/* ── Exclusive Platform Note ── */}
+        {/* â”€â”€ Exclusive Platform Note â”€â”€ */}
         <section className="py-16 px-6 bg-space-dark/40">
           <div className="container mx-auto max-w-3xl text-center">
             <div className="glass-effect p-10 rounded-3xl border border-neon-cyan/20">
@@ -396,14 +396,14 @@ export default function FeatureEmailOSPage() {
                 "Your Audience. Your Campaigns. Your Results."
               </blockquote>
               <p className="text-gray-400 leading-relaxed">
-                EmailOS lives exclusively inside TOBSEYTECH. Your contacts, campaigns, and analytics are private to your account and protected at all times.
+                EmailOS lives exclusively inside ARCOLYTE TECHNOLOGIES. Your contacts, campaigns, and analytics are private to your account and protected at all times.
                 Whether you're sending your first newsletter or your ten-thousandth, EmailOS keeps it simple.
               </p>
             </div>
           </div>
         </section>
 
-        {/* ── CTA ── */}
+        {/* â”€â”€ CTA â”€â”€ */}
         <section className="py-20 px-6">
           <div className="container mx-auto max-w-3xl text-center">
             <div className="glass-effect p-10 rounded-3xl border border-galactic-orange/30">

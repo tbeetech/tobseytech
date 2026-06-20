@@ -7,9 +7,9 @@ const toolkitCategories = [
     color: "text-galactic-orange",
     icon: "🌐",
     items: [
-      { id: "d1", text: "Professional website with mobile-first design", tip: "First impressions happen in 3 seconds. TOBSEYTECH builds conversion-optimised sites." },
+      { id: "d1", text: "Professional website with mobile-first design", tip: "First impressions happen in 3 seconds. ARCOLYTE TECHNOLOGIES builds conversion-optimised sites." },
       { id: "d2", text: "Google Business Profile verified & optimised", tip: "70% of customers check Google before visiting a business. Don't miss this free traffic." },
-      { id: "d3", text: "Consistent branding across all touchpoints", tip: "Consistent branding increases revenue by 23%. Get a brand kit from TOBSEYTECH." },
+      { id: "d3", text: "Consistent branding across all touchpoints", tip: "Consistent branding increases revenue by 23%. Get a brand kit from ARCOLYTE TECHNOLOGIES." },
       { id: "d4", text: "SSL certificate & fast hosting (<2s load)", tip: "1-second delay in load time = 7% drop in conversions." },
     ],
   },
@@ -19,7 +19,7 @@ const toolkitCategories = [
     icon: "🤖",
     items: [
       { id: "a1", text: "Lead capture form with automated follow-up", tip: "Speed-to-lead within 5 minutes increases conversion by 9x." },
-      { id: "a2", text: "WhatsApp/email auto-responder active", tip: "80% of customer queries can be automated with TOBSEYTECH's AI responder." },
+      { id: "a2", text: "WhatsApp/email auto-responder active", tip: "80% of customer queries can be automated with ARCOLYTE TECHNOLOGIES's AI responder." },
       { id: "a3", text: "CRM connected to all lead sources", tip: "Businesses using CRM see 29% increase in sales." },
       { id: "a4", text: "Weekly automated analytics report", tip: "What gets measured gets managed. Automate your KPI tracking." },
     ],
@@ -91,7 +91,7 @@ export default function StartupToolkitSection() {
               {totalChecked}/{totalItems} items complete
               {progressPct === 100 && " 🎉 You're fully digital-ready!"}
               {progressPct >= 50 && progressPct < 100 && ", You're halfway there, keep going!"}
-              {progressPct < 50 && ", TOBSEYTECH can help you close every gap"}
+              {progressPct < 50 && ", ARCOLYTE TECHNOLOGIES can help you close every gap"}
             </p>
           </div>
 

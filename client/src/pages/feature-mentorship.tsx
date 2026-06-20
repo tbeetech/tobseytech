@@ -1,4 +1,4 @@
-import Navigation from "@/components/Navigation";
+﻿import Navigation from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import MentorshipSection from "@/components/sections/MentorshipSection";
@@ -7,7 +7,7 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 export default function FeatureMentorshipPage() {
   return (
     <div className="min-h-screen bg-space-black text-white">
-      <title>Mentorship Network – TOBSEYTECH</title>
+      <title>Mentorship Network â€“ ARCOLYTE TECHNOLOGIES</title>
       <Navigation />
       <main className="pt-20">
         <MentorshipSection />

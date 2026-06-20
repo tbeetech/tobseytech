@@ -1,4 +1,4 @@
-import Navigation from "@/components/Navigation";
+﻿import Navigation from "@/components/Navigation";
 import Hero from "@/components/Hero";
 import ServicesSection from "@/components/sections/ServicesSection";
 import CaseStudiesSection from "@/components/sections/CaseStudiesSection";
@@ -14,7 +14,7 @@ import { Layers } from "lucide-react";
 export default function Home() {
   return (
     <div className="min-h-screen bg-space-black text-white overflow-x-hidden">
-      <title>TOBSEYTECH - AI-Speed-Up IT Solutions</title>
+      <title>ARCOLYTE TECHNOLOGIES - AI-Speed-Up IT Solutions</title>
       
       <Navigation />
 
@@ -55,10 +55,10 @@ export default function Home() {
                 <div className="w-12 h-12 border-2 border-galactic-orange rounded-full flex items-center justify-center bg-gradient-to-br from-galactic-orange to-galactic-gold">
                   <span className="text-white font-orbitron font-bold text-xl">TST</span>
                 </div>
-                <span className="font-orbitron font-bold text-xl gradient-text">TOBSEYTECH</span>
+                <span className="font-orbitron font-bold text-xl gradient-text">ARCOLYTE TECHNOLOGIES</span>
               </div>
               <p className="text-gray-400 text-sm">Automate. Scale. Transform.</p>
-              <p className="text-gray-500 text-xs mt-1 font-orbitron">Client First · AI-Powered IT Solutions</p>
+              <p className="text-gray-500 text-xs mt-1 font-orbitron">Client First Â· AI-Powered IT Solutions</p>
             </div>
             <div>
               <h4 className="font-orbitron font-bold text-neon-yellow mb-4">Quick Links</h4>
@@ -90,8 +90,8 @@ export default function Home() {
           </div>
           
           <div className="border-t border-galactic-orange/30 mt-8 pt-8 text-center text-gray-400">
-            <p className="gradient-text font-orbitron font-bold">TOBSEYTECH</p>
-            <p className="text-xs mt-1 text-gray-500 font-orbitron">Automate. Scale. Transform. · AI-Speed-Up IT Solutions</p>
+            <p className="gradient-text font-orbitron font-bold">ARCOLYTE TECHNOLOGIES</p>
+            <p className="text-xs mt-1 text-gray-500 font-orbitron">Automate. Scale. Transform. Â· AI-Speed-Up IT Solutions</p>
           </div>
         </div>
       </footer>

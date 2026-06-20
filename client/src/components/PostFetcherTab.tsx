@@ -210,7 +210,7 @@ export default function PostFetcherTab() {
             Post Fetcher &amp; Re-poster
           </h2>
           <p className="text-gray-400 text-xs mt-0.5">
-            Fetch the latest tech articles from Dev.to and publish them to TobseyTech
+            Fetch the latest tech articles from Dev.to and publish them to Arcolyte Technologies
           </p>
         </div>
       </div>

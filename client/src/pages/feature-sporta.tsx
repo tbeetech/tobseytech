@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import Navigation from "@/components/Navigation";
@@ -28,7 +28,7 @@ import {
   Bot,
 } from "lucide-react";
 
-// ─── Feature highlights data ─────────────────────────────────────────────────
+// â”€â”€â”€ Feature highlights data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const coreCapabilities = [
   {
@@ -71,7 +71,7 @@ const coreCapabilities = [
     color: "text-neon-cyan",
     border: "border-neon-cyan",
     title: "AI Agentic Workflow Builder",
-    desc: "10-step guided wizard: choose industry → content type → sources → timeline → destinations → AI mode → frequency → approval mode → review → launch.",
+    desc: "10-step guided wizard: choose industry â†’ content type â†’ sources â†’ timeline â†’ destinations â†’ AI mode â†’ frequency â†’ approval mode â†’ review â†’ launch.",
   },
   {
     icon: Filter,
@@ -127,18 +127,18 @@ const useCases = [
   { label: "Affiliate Marketers", icon: BarChart3 },
 ];
 
-// ─── Component ────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export default function FeatureSportaPage() {
   const [activeIndustry, setActiveIndustry] = useState(0);
 
   return (
     <div className="min-h-screen bg-space-black text-white">
-      <title>SPORTA – AI Social Media Aggregator & Publisher | TOBSEYTECH</title>
+      <title>SPORTA â€“ AI Social Media Aggregator & Publisher | ARCOLYTE TECHNOLOGIES</title>
       <Navigation />
 
       <main className="pt-20">
-        {/* ── Hero ── */}
+        {/* â”€â”€ Hero â”€â”€ */}
         <section className="relative overflow-hidden py-24 px-6">
           <div className="absolute inset-0 bg-gradient-to-br from-galactic-orange/5 via-neon-purple/5 to-neon-cyan/5 pointer-events-none" />
           <div className="container mx-auto max-w-5xl text-center relative z-10">
@@ -191,7 +191,7 @@ export default function FeatureSportaPage() {
           </div>
         </section>
 
-        {/* ── Core Capabilities ── */}
+        {/* â”€â”€ Core Capabilities â”€â”€ */}
         <section className="py-20 px-6">
           <div className="container mx-auto max-w-7xl">
             <div className="text-center mb-14">
@@ -229,7 +229,7 @@ export default function FeatureSportaPage() {
           </div>
         </section>
 
-        {/* ── 10-Step Workflow ── */}
+        {/* â”€â”€ 10-Step Workflow â”€â”€ */}
         <section className="py-20 px-6 bg-space-dark/40">
           <div className="container mx-auto max-w-6xl">
             <div className="text-center mb-14">
@@ -267,7 +267,7 @@ export default function FeatureSportaPage() {
           </div>
         </section>
 
-        {/* ── Industries ── */}
+        {/* â”€â”€ Industries â”€â”€ */}
         <section className="py-20 px-6">
           <div className="container mx-auto max-w-6xl">
             <div className="text-center mb-12">
@@ -306,7 +306,7 @@ export default function FeatureSportaPage() {
           </div>
         </section>
 
-        {/* ── Who It's For ── */}
+        {/* â”€â”€ Who It's For â”€â”€ */}
         <section className="py-20 px-6 bg-space-dark/40">
           <div className="container mx-auto max-w-6xl">
             <div className="text-center mb-12">
@@ -338,7 +338,7 @@ export default function FeatureSportaPage() {
           </div>
         </section>
 
-        {/* ── Performance & Security ── */}
+        {/* â”€â”€ Performance & Security â”€â”€ */}
         <section className="py-20 px-6">
           <div className="container mx-auto max-w-6xl">
             <div className="grid md:grid-cols-2 gap-10">
@@ -394,7 +394,7 @@ export default function FeatureSportaPage() {
           </div>
         </section>
 
-        {/* ── CTA ── */}
+        {/* â”€â”€ CTA â”€â”€ */}
         <section className="py-20 px-6 bg-gradient-to-b from-transparent to-space-dark/60">
           <div className="container mx-auto max-w-2xl text-center">
             <div className="w-20 h-20 rounded-full bg-gradient-to-br from-galactic-orange to-galactic-gold flex items-center justify-center mx-auto mb-6 shadow-[0_0_40px_rgba(34,197,94,0.5)]">
@@ -421,7 +421,7 @@ export default function FeatureSportaPage() {
           </div>
         </section>
 
-        {/* ── Back nav ── */}
+        {/* â”€â”€ Back nav â”€â”€ */}
         <div className="container mx-auto px-6 py-10 text-center border-t border-galactic-orange/10">
           <Link href="/features">
             <Button variant="outline" className="border-galactic-orange/40 text-galactic-orange font-orbitron text-xs hover:bg-galactic-orange/10">

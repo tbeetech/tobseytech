@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Vercel Serverless Function entry point.
  *
  * This file adapts the Express application for Vercel's serverless runtime.
@@ -65,7 +65,7 @@ function buildSessionStore() {
 function getSessionMiddleware() {
   if (!sessionMiddleware) {
     sessionMiddleware = session({
-      name: "tobseytech.sid",
+      name: "ARCOLYTE TECHNOLOGIES.sid",
       secret: getSessionSecret(),
       proxy: true,
       resave: false,

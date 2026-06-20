@@ -1,7 +1,7 @@
-/**
+﻿/**
  * devTipsBot.ts
  *
- * Daily Dev Tips Bot — admin-only background worker that:
+ * Daily Dev Tips Bot â€” admin-only background worker that:
  *  1. Rotates through content pillars to avoid feed repetition
  *  2. Uses Gemini AI to generate tip content (caption, thread, hashtags)
  *  3. Generates an SVG code/infographic card (free, zero external deps)
@@ -24,7 +24,7 @@ import {
   type DevTipsBotConfig,
 } from "../shared/schema.js";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export interface DevTipsBotStatus {
   running: boolean;
@@ -39,14 +39,14 @@ export interface DevTipsBotStatus {
   currentPillarIndex: number;
 }
 
-// ─── Runtime state ────────────────────────────────────────────────────────────
+// â”€â”€â”€ Runtime state â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 let _timer: NodeJS.Timeout | null = null;
 let _cycleRunning = false;
 let _lastRun: Date | null = null;
 let _nextRun: Date | null = null;
 
-// ─── Gemini helper ────────────────────────────────────────────────────────────
+// â”€â”€â”€ Gemini helper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function getGemini(): { client: GoogleGenerativeAI; key: string } | null {
   const envVars = ["GEMINI_FLASH_API_KEY", "GEMINI_API_KEY", "GOOGLE_API_KEY"] as const;
@@ -82,7 +82,7 @@ async function generateWithGemini(prompt: string, systemInstruction: string): Pr
   throw lastError ?? new Error("All Gemini models exhausted");
 }
 
-// ─── Content prompts by pillar ────────────────────────────────────────────────
+// â”€â”€â”€ Content prompts by pillar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const PILLAR_PROMPTS: Record<DevTipsPillar, string> = {
   "code-snippet":
@@ -105,7 +105,7 @@ const PILLAR_PROMPTS: Record<DevTipsPillar, string> = {
     "Share an API design tip. Cover REST conventions, versioning, error shapes, rate limiting, GraphQL, or gRPC. Keep it practical.",
 };
 
-// ─── SVG card generator ───────────────────────────────────────────────────────
+// â”€â”€â”€ SVG card generator â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const PILLAR_COLORS: Record<DevTipsPillar, { bg: string; accent: string; text: string }> = {
   "code-snippet":   { bg: "#0f172a", accent: "#22d3ee", text: "#e2e8f0" },
@@ -120,15 +120,15 @@ const PILLAR_COLORS: Record<DevTipsPillar, { bg: string; accent: string; text: s
 };
 
 const PILLAR_ICONS: Record<DevTipsPillar, string> = {
-  "code-snippet":   "⚡",
-  "architecture":   "🏗️",
-  "devops":         "🔧",
-  "performance":    "🚀",
-  "security":       "🔒",
-  "tool-discovery": "🛠️",
-  "career-mindset": "🧠",
-  "frontend":       "🎨",
-  "api-design":     "🔌",
+  "code-snippet":   "âš¡",
+  "architecture":   "ðŸ—ï¸",
+  "devops":         "ðŸ”§",
+  "performance":    "ðŸš€",
+  "security":       "ðŸ”’",
+  "tool-discovery": "ðŸ› ï¸",
+  "career-mindset": "ðŸ§ ",
+  "frontend":       "ðŸŽ¨",
+  "api-design":     "ðŸ”Œ",
 };
 
 /** Wrap SVG text at ~charWidth chars per line, returns array of lines. */
@@ -252,12 +252,12 @@ export function generateSvgCard(params: {
   <text x="${PAD}" y="${hashtagsY}" font-family="'Segoe UI',system-ui,sans-serif" font-size="20" fill="${colors.accent}" opacity="0.75">${svgText(hashtagStr)}</text>
 
   <!-- Bottom branding -->
-  <text x="${W - PAD}" y="${H - 36}" font-family="'Segoe UI',system-ui,sans-serif" font-size="20" fill="${colors.text}" opacity="0.4" text-anchor="end">TobseyTech Dev Tips</text>
-  <text x="${W - PAD}" y="${H - 16}" font-family="'Segoe UI',system-ui,sans-serif" font-size="16" fill="${colors.accent}" opacity="0.5" text-anchor="end">tobseytech.com</text>
+  <text x="${W - PAD}" y="${H - 36}" font-family="'Segoe UI',system-ui,sans-serif" font-size="20" fill="${colors.text}" opacity="0.4" text-anchor="end">ARCOLYTE TECHNOLOGIES Dev Tips</text>
+  <text x="${W - PAD}" y="${H - 16}" font-family="'Segoe UI',system-ui,sans-serif" font-size="16" fill="${colors.accent}" opacity="0.5" text-anchor="end">arcolytetech.com</text>
 </svg>`;
 }
 
-// ─── HTML infographic card ────────────────────────────────────────────────────
+// â”€â”€â”€ HTML infographic card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export function generateHtmlCard(params: {
   pillar: DevTipsPillar;
@@ -282,7 +282,7 @@ export function generateHtmlCard(params: {
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>${title.replace(/</g, "&lt;")} | TobseyTech Dev Tips</title>
+<title>${title.replace(/</g, "&lt;")} | ARCOLYTE TECHNOLOGIES Dev Tips</title>
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   body{background:${colors.bg};font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
@@ -302,15 +302,15 @@ export function generateHtmlCard(params: {
   ${contentBlock}
   <div class="hashtags">${hashtagStr}</div>
   <div class="footer">
-    <span>TobseyTech Dev Tips</span>
-    <a href="https://tobseytech.com" target="_blank">tobseytech.com</a>
+    <span>ARCOLYTE TECHNOLOGIES Dev Tips</span>
+    <a href="https://arcolytetech.com" target="_blank">arcolytetech.com</a>
   </div>
 </div>
 </body>
 </html>`;
 }
 
-// ─── Social media publishers ──────────────────────────────────────────────────
+// â”€â”€â”€ Social media publishers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 /** Post to X (Twitter) via API v2 */
 async function publishToTwitter(
@@ -401,7 +401,7 @@ async function publishToInstagram(
   // caption-only reel/story placeholder. This posts to the Threads-style
   // caption if using Instagram Creator Studio mode.
   // As a fallback: post to a connected Facebook page that mirrors to IG.
-  // Full IG feed posts require a hosted image URL — post caption to IG Threads instead.
+  // Full IG feed posts require a hosted image URL â€” post caption to IG Threads instead.
   const createRes = await fetch(
     `https://graph.instagram.com/v21.0/${accountId}/media`,
     {
@@ -434,7 +434,7 @@ async function publishToInstagram(
   }
 }
 
-// ─── Config helpers ───────────────────────────────────────────────────────────
+// â”€â”€â”€ Config helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export async function getOrCreateConfig(): Promise<typeof DevTipsBotConfigModel.prototype> {
   let config = await DevTipsBotConfigModel.findOne();
@@ -445,7 +445,7 @@ export async function getOrCreateConfig(): Promise<typeof DevTipsBotConfigModel.
   return config;
 }
 
-// ─── Pillar selection ─────────────────────────────────────────────────────────
+// â”€â”€â”€ Pillar selection â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function selectNextPillar(
   lastIndex: number,
@@ -467,14 +467,14 @@ function selectNextPillar(
   return { pillar: pool[nextIndex], nextIndex };
 }
 
-// ─── Format selection ─────────────────────────────────────────────────────────
+// â”€â”€â”€ Format selection â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function pickFormat(allowed: DevTipsFormat[]): DevTipsFormat {
   if (!allowed.length) return "plain-text";
   return allowed[Math.floor(Math.random() * allowed.length)];
 }
 
-// ─── Core generation cycle ────────────────────────────────────────────────────
+// â”€â”€â”€ Core generation cycle â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export async function runGenerationCycle(): Promise<{ generated: boolean; postId?: string; error?: string }> {
   if (_cycleRunning) return { generated: false, error: "Cycle already running" };
@@ -497,10 +497,10 @@ export async function runGenerationCycle(): Promise<{ generated: boolean; postId
 
     // Build prompt
     const pillarContext = PILLAR_PROMPTS[pillar];
-    const systemInstruction = `You are DevTipsBot, an expert developer content creator for TobseyTech.
+    const systemInstruction = `You are DevTipsBot, an expert developer content creator for ARCOLYTE TECHNOLOGIES.
 You write for ${config.audience} with a ${config.tone} tone.
 Keep content precise, technically accurate, and immediately actionable.
-Return ONLY valid JSON — no markdown fences, no explanation outside the JSON.`;
+Return ONLY valid JSON â€” no markdown fences, no explanation outside the JSON.`;
 
     const userPrompt = `Create a daily dev tip post for the "${pillarLabel}" content pillar.
 Pillar context: ${pillarContext}
@@ -509,13 +509,13 @@ Format: ${format}
 Return JSON with exactly these keys:
 - "title": string (max 120 chars, punchy headline)
 - "caption": string (main post text, 200-400 chars for social, include code snippet if ${format === "code-card" || format === "plain-text"})
-- "thread": string[] (2-4 follow-up tweets/thread parts, each ≤ 280 chars; empty array if not a thread format)
+- "thread": string[] (2-4 follow-up tweets/thread parts, each â‰¤ 280 chars; empty array if not a thread format)
 - "hashtags": string[] (6-10 relevant hashtags WITHOUT the # prefix)
-- "codeSnippet": string (only if format is "code-card", otherwise empty string — the actual code to display on the card)`;
+- "codeSnippet": string (only if format is "code-card", otherwise empty string â€” the actual code to display on the card)`;
 
     const raw = await generateWithGemini(userPrompt, systemInstruction);
 
-    // Parse JSON — strip potential markdown fences
+    // Parse JSON â€” strip potential markdown fences
     const jsonStr = raw.replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "").trim();
     let parsed: {
       title: string;
@@ -608,7 +608,7 @@ Return JSON with exactly these keys:
   }
 }
 
-// ─── Publishing ───────────────────────────────────────────────────────────────
+// â”€â”€â”€ Publishing â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export async function publishPost(postId: string): Promise<{ published: DevTipsPlatform[]; errors: Partial<Record<DevTipsPlatform, string>> }> {
   const post = await DevTipsPostModel.findById(postId);
@@ -679,7 +679,7 @@ export async function publishPost(postId: string): Promise<{ published: DevTipsP
   return { published, errors };
 }
 
-// ─── Scheduler ────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Scheduler â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function scheduleNext(intervalMs: number) {
   if (_timer) clearTimeout(_timer);
@@ -698,7 +698,7 @@ export async function startDevTipsBot(): Promise<void> {
   config.paused = false;
   await config.save();
   scheduleNext(config.postIntervalMs);
-  console.log(`[devtips-bot] Started — interval ${config.postIntervalMs}ms`);
+  console.log(`[devtips-bot] Started â€” interval ${config.postIntervalMs}ms`);
 }
 
 export function pauseDevTipsBot(): void {

@@ -1,4 +1,4 @@
-# Contributing to TOBSEYTECH
+# Contributing to ARCOLYTE TECHNOLOGIES
 
 Thank you for your interest in contributing! This guide will help you get up and running quickly — whether you're a seasoned engineer or a first-time open-source contributor.
 
@@ -28,8 +28,8 @@ Be respectful, inclusive, and constructive. We're building Kingdom-enhancement t
 Follow the **Quick Start** section in [README.md](README.md) to get a local dev environment running.
 
 ```bash
-git clone https://github.com/tbeetech/tobseytech.git
-cd tobseytech
+git clone https://github.com/tbeetech/arcolytetech.git
+cd arcolytetech
 npm install
 cp .env.example .env   # fill in at least MONGODB_URI
 npm run dev            # http://localhost:5000
@@ -94,7 +94,7 @@ npm run dev            # http://localhost:5000
 export default function MyPage() {
   return (
     <div className="min-h-screen bg-space-black text-white">
-      <title>My Page — TOBSEYTECH</title>
+      <title>My Page — ARCOLYTE TECHNOLOGIES</title>
       {/* content */}
     </div>
   );
@@ -131,7 +131,7 @@ Before opening a PR, make sure:
 
 ## Reporting Bugs
 
-Open a [GitHub Issue](https://github.com/tbeetech/tobseytech/issues) and include:
+Open a [GitHub Issue](https://github.com/tbeetech/arcolytetech/issues) and include:
 
 1. Steps to reproduce
 2. Expected behaviour

@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import Navigation from "@/components/Navigation";
@@ -41,7 +41,7 @@ export default function VlogPage() {
         <div className="mb-10">
           <div className="flex items-center gap-2 mb-2">
             <Video className="w-5 h-5 text-neon-cyan" />
-            <span className="text-xs uppercase tracking-widest text-neon-cyan font-semibold">TobseyTech Vlog</span>
+            <span className="text-xs uppercase tracking-widest text-neon-cyan font-semibold">ARCOLYTE TECHNOLOGIES Vlog</span>
           </div>
           <h1 className="text-3xl md:text-4xl font-black text-white mb-2">Video Hub</h1>
           <p className="text-gray-400 text-base">Curated videos, tutorials, and insights from across the tech world.</p>
@@ -54,7 +54,7 @@ export default function VlogPage() {
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search vlogs…"
+              placeholder="Search vlogsâ€¦"
               className="pl-9 bg-gray-900 border-gray-700 text-white"
             />
           </div>
@@ -120,7 +120,7 @@ export default function VlogPage() {
                   <div className="p-5">
                     <div className="flex items-center gap-2 mb-2 flex-wrap">
                       <span className="text-xs text-neon-cyan font-medium">{featured.category}</span>
-                      <span className="text-gray-600">·</span>
+                      <span className="text-gray-600">Â·</span>
                       <span className="text-xs text-gray-400 flex items-center gap-1">
                         <Calendar className="w-3 h-3" />
                         {format(new Date(featured.createdAt), "MMMM d, yyyy")}
